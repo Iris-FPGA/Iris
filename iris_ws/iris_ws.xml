@@ -33,6 +33,7 @@
         <efx:design_file name="src/mipi/sc431hai_i2c_rom.v" version="default" library="default" />
         <efx:design_file name="src/mipi/sc431hai_init.v" version="default" library="default" />
         <efx:design_file name="src/mipi/ae_ctrl.v" version="default" library="default" />
+        <efx:design_file name="src/key_pulse.v" version="default" library="default" />
         <efx:design_file name="src/i2c/timescale.v" version="default" library="default" />
         <efx:design_file name="src/i2c/i2c_master_defines.v" version="default" library="default" />
         <efx:design_file name="src/i2c/i2c_master_bit_ctrl.v" version="default" library="default" />
@@ -62,6 +63,7 @@
         <efx:design_file name="src/video/debayer/rgb_display_2px.v" version="default" library="default" />
         <efx:design_file name="src/video/osd/video_size_meter.v" version="default" library="default" />
         <efx:design_file name="src/video/osd/osd_video_status.v" version="default" library="default" />
+        <efx:design_file name="src/ddr/fb/frame_bank_manager.v" version="default" library="default" />
         <efx:top_vhdl_arch name="" />
         <efx:msg_config name="" />
         <efx:partition_definitions name="" />

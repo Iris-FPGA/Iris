@@ -1,7 +1,9 @@
 //=====================================================================
 // osd_ae: on-screen AE status overlay, 8x16 white-on-black.
 //   Message:  E=<exp 3hex>  G=<gain 1hex>  S=<state 1hex>  W=<writes 2hex>
-//   e.g.      E=8F1 G=3 S=1 W=0A
+//              L=<luma 2hex>
+//   e.g.      E=200 G=0 S=1 W=0A L=2F
+//   E = manual exposure (half-lines), L = live mean brightness (0..255)
 //   Display domain (148.75 MHz, 1 px/clk). Inputs come from the
 //   gpio_clk_27m AE domain: 2-FF synchronised each bus (values are
 //   quasi-static, a torn frame is acceptable for a debug overlay).
@@ -28,6 +30,7 @@ module osd_ae #(
     input  wire [3:0]  i_gain,
     input  wire [1:0]  i_state,
     input  wire [7:0]  i_writes,
+    input  wire [7:0]  i_luma,      // live mean brightness 0..255
 
     output wire [23:0] o_rgb
 );
@@ -39,21 +42,24 @@ reg [11:0] exp_s;
 reg [3:0]  gain_s;
 reg [1:0]  state_s;
 reg [7:0]  writes_s;
+reg [7:0]  luma_s;
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        exp_s <= 12'd0; gain_s <= 4'd0; state_s <= 2'd0; writes_s <= 8'd0;
+        exp_s <= 12'd0; gain_s <= 4'd0; state_s <= 2'd0;
+        writes_s <= 8'd0; luma_s <= 8'd0;
     end else begin
         exp_s    <= i_exp;
         gain_s   <= i_gain;
         state_s  <= i_state;
         writes_s <= i_writes;
+        luma_s   <= i_luma;
     end
 end
 
 //---------------------------------------------------------------------
 // 5-bit glyph codes: 0-9=digit, 10-15=A-F, 16=G, 17=S, 18=W, 19='=', 20=blank
 //---------------------------------------------------------------------
-localparam SLOTS = 18;
+localparam SLOTS = 23;   // "E=xxx G=x S=x W=xx L=xx"
 
 function [4:0] hexc5;
     input [3:0] v;
@@ -81,7 +87,12 @@ function [4:0] slot_char;
             5'd14: slot_char = 5'd18;                    // 'W'
             5'd15: slot_char = 5'd19;                    // '='
             5'd16: slot_char = hexc5(writes_s[7:4]);
-            default: slot_char = hexc5(writes_s[3:0]);
+            5'd17: slot_char = hexc5(writes_s[3:0]);
+            5'd18: slot_char = 5'd20;                    // ' '
+            5'd19: slot_char = 5'd21;                    // 'L'
+            5'd20: slot_char = 5'd19;                    // '='
+            5'd21: slot_char = hexc5(luma_s[7:4]);
+            default: slot_char = hexc5(luma_s[3:0]);
         endcase
     end
 endfunction
@@ -134,6 +145,8 @@ function [127:0] glyph;
             5'd18: glyph = {8'hC3,8'hC3,8'hC3,8'hC3,8'hC3,8'hC3,8'hC3,8'hDB,
                             8'hDB,8'hDB,8'hDB,8'hDB,8'h6E,8'h6E,8'h44,8'h00}; // W
             5'd19: glyph = {128'h000000000000FFFF0000000000000000};           // '='
+            5'd21: glyph = {8'hFF,8'hFF,8'hC0,8'hC0,8'hC0,8'hC0,8'hC0,8'hC0,
+                            8'hC0,8'hC0,8'hC0,8'hC0,8'hC0,8'hC0,8'hFF,8'hFF}; // L
             default: glyph = 128'd0;                                          // blank
         endcase
     end

@@ -1,0 +1,121 @@
+
+Efinix Static Timing Analysis Report
+Version: 2026.1.132.4.5
+Date: Sat Oct  3 00:24:21 2026
+
+Copyright (C) 2013 - 2026 Efinix, Inc. All rights reserved.
+
+Top-level Entity Name: iris_ws
+
+SDC Filename: iris_ws.pt.sdc
+
+Timing Model: I3
+	process : typical
+	temperature : -40C to 100C
+	voltage : 0.95 +/-30mV
+	speedgrade : 3
+	technology : t16ff
+	status : final
+
+---------- Table of Contents (begin) ----------
+   1. Clock Frequency Summary
+   2. Clock Relationship Summary
+   3. Path Details for Max Critical Paths
+   4. Path Details for Min Critical Paths
+---------- Table of Contents (end) ------------
+
+---------- 1. Clock Frequency Summary (begin) ----------
+
+User target constrained clocks
+   Clock Name    Period (ns)  Frequency (MHz)    Waveform         Targets
+ddr_tdqss_clk        2.500        400.000     {0.000 1.250}  {ddr_tdqss_clk}   
+ddr_core_clk         5.000        200.000     {0.000 2.500}  {ddr_core_clk}    
+ddr_tac_clk          2.500        400.000     {0.000 1.250}  {ddr_tac_clk}     
+ddr_twd_clk          2.500        400.000     {0.625 1.875}  {ddr_twd_clk}     
+ddr_pll_fb          10.000        100.000     {0.000 5.000}  {ddr_pll_fb}      
+core_clk            10.000        100.000     {0.000 5.000}  {core_clk}        
+hdmi_tx_slow_clk     6.723        148.743     {0.000 3.361}  {hdmi_tx_slow_clk}
+hdmi_tx_fast_clk     1.345        743.494     {0.336 1.009}  {hdmi_tx_fast_clk}
+hdmi_tx_half_clk    13.445         74.377     {0.000 6.722}  {hdmi_tx_half_clk}
+mipi_clk            10.000        100.000     {0.000 5.000}  {mipi_clk}        
+mipi_pixel_clk      20.000         50.000     {0.000 10.000} {mipi_pixel_clk}  
+CLK_25M             40.000         25.000     {0.000 20.000} {CLK_25M}         
+gpio_clk_27m        37.037         27.000     {0.000 18.518} {gpio_clk_27m}    
+i_cam_ck_CLKOUT     10.000        100.000     {0.000 5.000}  {i_cam_ck_CLKOUT} 
+
+Maximum possible analyzed clocks frequency
+   Clock Name    Period (ns)  Frequency (MHz)     Edge
+ddr_tdqss_clk        2.197       455.166         (R-R)
+ddr_core_clk         4.469       223.764         (R-R)
+ddr_tac_clk          2.205       453.515         (R-R)
+ddr_twd_clk          2.235       447.427         (R-R)
+core_clk             7.636       130.959         (R-R)
+hdmi_tx_slow_clk     6.153       162.522         (R-R)
+hdmi_tx_half_clk    11.829        84.538         (R-R)
+mipi_clk             4.976       200.965         (R-R)
+mipi_pixel_clk       6.842       146.156         (R-R)
+gpio_clk_27m         5.098       196.155         (R-R)
+i_cam_ck_CLKOUT      5.347       187.021         (R-R)
+
+Geomean max period: 4.704
+
+---------- Clock Frequency Summary (end) ---------------
+
+---------- 2. Clock Relationship Summary (begin) ----------
+
+Setup (Max) Clock Relationship
+  Launch Clock    Capture Clock   Constraint (ns)     Slack (ns)          Edge
+ddr_tdqss_clk    ddr_tdqss_clk          2.500            0.303           (R-R)
+ddr_tdqss_clk    ddr_core_clk           2.500            2.089           (R-R)
+ddr_core_clk     ddr_tdqss_clk          2.500            1.390           (R-R)
+ddr_core_clk     ddr_core_clk           5.000            0.531           (R-R)
+ddr_core_clk     ddr_tac_clk            2.500            1.921           (R-R)
+ddr_core_clk     ddr_twd_clk            0.625            0.058           (R-R)
+ddr_core_clk     core_clk               5.000            3.539           (R-R)
+ddr_tac_clk      ddr_core_clk           2.500            2.105           (R-R)
+ddr_tac_clk      ddr_tac_clk            2.500            0.295           (R-R)
+ddr_tac_clk      core_clk               2.500            2.138           (R-R)
+ddr_twd_clk      ddr_core_clk           1.875            0.789           (R-R)
+ddr_twd_clk      ddr_twd_clk            2.500            0.265           (R-R)
+ddr_twd_clk      core_clk               1.875            1.383           (R-R)
+core_clk         ddr_core_clk           5.000            4.478           (R-R)
+core_clk         ddr_tac_clk            2.500            1.073           (R-R)
+core_clk         ddr_twd_clk            0.625            0.013           (R-R)
+core_clk         core_clk              10.000            2.364           (R-R)
+hdmi_tx_slow_clk hdmi_tx_slow_clk       6.723            0.570           (R-R)
+hdmi_tx_half_clk hdmi_tx_half_clk      13.445            1.616           (R-R)
+mipi_clk         mipi_clk              10.000            5.024           (R-R)
+mipi_pixel_clk   mipi_pixel_clk        20.000           13.158           (R-R)
+gpio_clk_27m     gpio_clk_27m          37.037           31.939           (R-R)
+i_cam_ck_CLKOUT  i_cam_ck_CLKOUT       10.000            4.653           (R-R)
+
+Hold (Min) Clock Relationship
+  Launch Clock    Capture Clock   Constraint (ns)     Slack (ns)          Edge
+ddr_tdqss_clk    ddr_tdqss_clk          0.000           0.095            (R-R)
+ddr_tdqss_clk    ddr_core_clk           0.000           0.068            (R-R)
+ddr_core_clk     ddr_tdqss_clk          0.000           0.163            (R-R)
+ddr_core_clk     ddr_core_clk           0.000           0.029            (R-R)
+ddr_core_clk     ddr_tac_clk            0.000           0.165            (R-R)
+ddr_core_clk     ddr_twd_clk           -1.875           2.038            (R-R)
+ddr_core_clk     core_clk               0.000           0.094            (R-R)
+ddr_tac_clk      ddr_core_clk           0.000           0.061            (R-R)
+ddr_tac_clk      ddr_tac_clk            0.000           0.026            (R-R)
+ddr_tac_clk      core_clk               0.000           0.042            (R-R)
+ddr_twd_clk      ddr_core_clk          -0.625           0.691            (R-R)
+ddr_twd_clk      ddr_twd_clk            0.000           0.052            (R-R)
+ddr_twd_clk      core_clk              -0.625           0.669            (R-R)
+core_clk         ddr_core_clk           0.000           0.132            (R-R)
+core_clk         ddr_tac_clk            0.000           0.192            (R-R)
+core_clk         ddr_twd_clk           -1.875           2.065            (R-R)
+core_clk         core_clk               0.000           0.026            (R-R)
+hdmi_tx_slow_clk hdmi_tx_slow_clk       0.000           0.091            (R-R)
+hdmi_tx_half_clk hdmi_tx_half_clk       0.000           0.034            (R-R)
+mipi_clk         mipi_clk               0.000           0.092            (R-R)
+mipi_pixel_clk   mipi_pixel_clk         0.000           0.026            (R-R)
+gpio_clk_27m     gpio_clk_27m           0.000           0.026            (R-R)
+i_cam_ck_CLKOUT  i_cam_ck_CLKOUT        0.000           0.045            (R-R)
+
+NOTE: Values are in nanoseconds.
+
+---------- Clock Relationship Summary (end) ---------------
+

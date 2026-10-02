@@ -56,6 +56,9 @@ module top
     ////////////////////////    LED       ////////////////////////
     output [3:0]                led,
 
+    ////////////////////////    KEYS      ////////////////////////
+    input  [3:0]                key_i,     // active-low, pull-up (KEY0..KEY3)
+
     ////////////////////////    HDMI TX   ////////////////////////
     input                       hdmi_tx_locked,
     input                       hdmi_tx_slow_clk,
@@ -560,6 +563,11 @@ wire [3:0]  ae_gain;
 wire [31:0] ae_sum;
 wire [7:0]  ae_writes;
 wire [7:0]  ae_touts;
+// brightness readout for OSD/UART: mean luma ~ sum3/(4*NPX) = sum3>>23
+// (NPX=1920*1080 -> 4*NPX = 8294400 ~ 2^23; sum3 < 2^31 so [30:23] fits)
+wire [7:0]  ae_luma = ae_sum[30:23];
+wire        key0_dn;          // KEY0 pressed: lower exposure
+wire        key1_up;          // KEY1 pressed: raise exposure
 
 wire [23:0] px_osd;
 wire [11:0] cam_width, cam_height, hdmi_width, hdmi_height;
@@ -611,6 +619,7 @@ osd_ae #(
     .i_gain    (ae_gain),
     .i_state   (ae_state),
     .i_writes  (ae_writes),
+    .i_luma    (ae_luma),
     .o_rgb     (px_osd_ae)
 );
 
@@ -725,6 +734,7 @@ ae_uart_log u_ae_log (
     .i_sum     (ae_sum),
     .i_writes  (ae_writes),
     .i_touts   (ae_touts),
+    .i_luma    (ae_luma),
     .tx_req    (tx_req),
     .tx_valid  (log_dv),
     .tx_data   (log_data),
@@ -785,12 +795,28 @@ ae_ctrl #(.NPX(1920 * 1080)) u_ae_ctrl (
     .ae_data    (ae_data),
     .ae_busy    (ae_busy),
     .ae_done    (ae_done),
+    .i_exp_up   (key1_up),
+    .i_exp_dn   (key0_dn),
     .dbg_state  (ae_state),
     .dbg_exp    (ae_exp),
     .dbg_gain   (ae_gain),
     .dbg_sum    (ae_sum),
     .dbg_writes (ae_writes),
     .dbg_touts  (ae_touts)
+);
+
+// KEY0 -> lower exposure, KEY1 -> raise exposure (20 ms debounce, 250 ms repeat)
+key_pulse u_key0 (
+    .clk   (gpio_clk_27m),
+    .rst_n (mipi_pll_locked),
+    .key_in(key_i[0]),
+    .pulse (key0_dn)
+);
+key_pulse u_key1 (
+    .clk   (gpio_clk_27m),
+    .rst_n (mipi_pll_locked),
+    .key_in(key_i[1]),
+    .pulse (key1_up)
 );
 
 assign io_cam_scl_OE = ~cam_scl_padoen;

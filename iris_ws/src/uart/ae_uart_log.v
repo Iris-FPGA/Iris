@@ -1,11 +1,12 @@
 //=====================================================================
 // ae_uart_log: periodic ASCII status line for the AE controller.
 //
-//   Line (43 bytes, hex fields):
+//   Line (48 bytes, hex fields):
 //     AE i=<init> E=<exp:3hex> G=<gain:1hex> S=<state:1hex>
-//        W=<writes:2hex> T=<timeouts:2hex> U=<sum3:8hex> \r\n
+//        W=<writes:2hex> T=<timeouts:2hex> L=<luma:2hex> U=<sum3:8hex> \r\n
 //
-//   Example: AE i=1 E=8F1 G=3 S=1 W=0A T=00 U=00C4A120
+//   Example: AE i=1 E=200 G=0 S=1 W=0A T=00 L=2F U=00C4A120
+//   E = manual exposure (half-lines), L = live mean brightness 0..255
 //
 //   TX handshake with uart_tx is quirky: tx_req stays high for ~2 cycles
 //   after a byte is accepted (tx_busy rises late), so presenting a byte
@@ -33,6 +34,7 @@ module ae_uart_log #(
     input  wire [31:0] i_sum,
     input  wire [7:0]  i_writes,
     input  wire [7:0]  i_touts,
+    input  wire [7:0]  i_luma,
 
     // uart_tx side
     input  wire        tx_req,      // from uart_tx (level, high = wants byte)
@@ -42,7 +44,7 @@ module ae_uart_log #(
     input  wire        fifo_act     // FIFO pop or FIFO DataVal this cycle
 );
 
-localparam LEN = 6'd43;
+localparam LEN = 6'd48;
 
 //---------------------------------------------------------------------
 // snapshot + periodic trigger
@@ -57,6 +59,7 @@ reg  [3:0]  snp_gain;
 reg  [31:0] snp_sum;
 reg  [7:0]  snp_writes;
 reg  [7:0]  snp_touts;
+reg  [7:0]  snp_luma;
 
 //---------------------------------------------------------------------
 // tx_req stability guard (see header)
@@ -129,17 +132,22 @@ always @* begin
         6'd28: ch = hexc(snp_touts[7:4]);
         6'd29: ch = hexc(snp_touts[3:0]);
         6'd30: ch = " ";
-        6'd31: ch = "U";
+        6'd31: ch = "L";
         6'd32: ch = "=";
-        6'd33: ch = hexc(snp_sum[31:28]);
-        6'd34: ch = hexc(snp_sum[27:24]);
-        6'd35: ch = hexc(snp_sum[23:20]);
-        6'd36: ch = hexc(snp_sum[19:16]);
-        6'd37: ch = hexc(snp_sum[15:12]);
-        6'd38: ch = hexc(snp_sum[11:8]);
-        6'd39: ch = hexc(snp_sum[7:4]);
-        6'd40: ch = hexc(snp_sum[3:0]);
-        6'd41: ch = 8'h0D;    // CR
+        6'd33: ch = hexc(snp_luma[7:4]);
+        6'd34: ch = hexc(snp_luma[3:0]);
+        6'd35: ch = " ";
+        6'd36: ch = "U";
+        6'd37: ch = "=";
+        6'd38: ch = hexc(snp_sum[31:28]);
+        6'd39: ch = hexc(snp_sum[27:24]);
+        6'd40: ch = hexc(snp_sum[23:20]);
+        6'd41: ch = hexc(snp_sum[19:16]);
+        6'd42: ch = hexc(snp_sum[15:12]);
+        6'd43: ch = hexc(snp_sum[11:8]);
+        6'd44: ch = hexc(snp_sum[7:4]);
+        6'd45: ch = hexc(snp_sum[3:0]);
+        6'd46: ch = 8'h0D;    // CR
         default: ch = 8'h0A;  // LF
     endcase
 end
@@ -160,6 +168,7 @@ always @(posedge clk or negedge rst_n) begin
         snp_sum   <= 32'd0;
         snp_writes<= 8'd0;
         snp_touts <= 8'd0;
+        snp_luma<= 8'd0;
     end else begin
         tx_valid <= 1'b0;                       // default: 1-cycle strobe
 
@@ -178,6 +187,7 @@ always @(posedge clk or negedge rst_n) begin
                 snp_sum    <= i_sum;
                 snp_writes <= i_writes;
                 snp_touts  <= i_touts;
+                snp_luma <= i_luma;
                 sending    <= 1'b1;             // gate FIFO pops from now
                 idx        <= 6'd0;
                 st         <= ST_SEND;

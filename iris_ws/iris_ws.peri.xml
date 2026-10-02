@@ -100,6 +100,18 @@
         <efxpt:comp_gpio name="led[3]" gpio_def="GPIOL_P_15" mode="output" bus_name="led" io_standard="1.8 V LVCMOS">
             <efxpt:output_config name="led[3]" name_ddio_lo="" register_option="none" clock_name="" is_clock_inverted="false" is_slew_rate="false" tied_option="none" ddio_type="none" delay="0" is_serial="false" drive_strength="4" fastclk_name=""/>
         </efxpt:comp_gpio>
+        <efxpt:comp_gpio name="key_i[0]" gpio_def="GPIOL_07" mode="input" bus_name="key_i" io_standard="3.3 V LVCMOS">
+            <efxpt:input_config name="key_i[0]" name_ddio_lo="" conn_type="normal" is_register="false" clock_name="" is_clock_inverted="false" pull_option="none" is_schmitt_trigger="false" ddio_type="none" is_bus_hold="false" delay="0" is_serial="false" is_dyn_delay="false" fastclk_name="" pullup_ena_name="key_i_PULL_UP_ENA[0]" dyn_delay_en_name="key_i_DLY_ENA[0]" dyn_delay_reset_name="key_i_DLY_RST[0]" dyn_delay_ctrl_name="key_i_DLY_CTRL[0]" clkmux_buf_name=""/>
+        </efxpt:comp_gpio>
+        <efxpt:comp_gpio name="key_i[1]" gpio_def="GPIOR_22" mode="input" bus_name="key_i" io_standard="3.3 V LVCMOS">
+            <efxpt:input_config name="key_i[1]" name_ddio_lo="" conn_type="normal" is_register="false" clock_name="" is_clock_inverted="false" pull_option="none" is_schmitt_trigger="false" ddio_type="none" is_bus_hold="false" delay="0" is_serial="false" is_dyn_delay="false" fastclk_name="" pullup_ena_name="key_i_PULL_UP_ENA[1]" dyn_delay_en_name="key_i_DLY_ENA[1]" dyn_delay_reset_name="key_i_DLY_RST[1]" dyn_delay_ctrl_name="key_i_DLY_CTRL[1]" clkmux_buf_name=""/>
+        </efxpt:comp_gpio>
+        <efxpt:comp_gpio name="key_i[2]" gpio_def="GPIOR_21" mode="input" bus_name="key_i" io_standard="3.3 V LVCMOS">
+            <efxpt:input_config name="key_i[2]" name_ddio_lo="" conn_type="normal" is_register="false" clock_name="" is_clock_inverted="false" pull_option="none" is_schmitt_trigger="false" ddio_type="none" is_bus_hold="false" delay="0" is_serial="false" is_dyn_delay="false" fastclk_name="" pullup_ena_name="key_i_PULL_UP_ENA[2]" dyn_delay_en_name="key_i_DLY_ENA[2]" dyn_delay_reset_name="key_i_DLY_RST[2]" dyn_delay_ctrl_name="key_i_DLY_CTRL[2]" clkmux_buf_name=""/>
+        </efxpt:comp_gpio>
+        <efxpt:comp_gpio name="key_i[3]" gpio_def="GPIOL_03" mode="input" bus_name="key_i" io_standard="3.3 V LVCMOS">
+            <efxpt:input_config name="key_i[3]" name_ddio_lo="" conn_type="normal" is_register="false" clock_name="" is_clock_inverted="false" pull_option="none" is_schmitt_trigger="false" ddio_type="none" is_bus_hold="false" delay="0" is_serial="false" is_dyn_delay="false" fastclk_name="" pullup_ena_name="key_i_PULL_UP_ENA[3]" dyn_delay_en_name="key_i_DLY_ENA[3]" dyn_delay_reset_name="key_i_DLY_RST[3]" dyn_delay_ctrl_name="key_i_DLY_CTRL[3]" clkmux_buf_name=""/>
+        </efxpt:comp_gpio>
         <efxpt:comp_gpio name="rxd" gpio_def="GPIOL_02" mode="input" bus_name="" io_standard="3.3 V LVCMOS">
             <efxpt:input_config name="rxd" name_ddio_lo="" conn_type="normal" is_register="true" clock_name="gpio_clk_27m" is_clock_inverted="false" pull_option="weak pullup" is_schmitt_trigger="false" ddio_type="none" is_bus_hold="false" delay="0" is_serial="false" is_dyn_delay="false" fastclk_name="" pullup_ena_name="rxd_PULL_UP_ENA" dyn_delay_en_name="rxd_DLY_ENA" dyn_delay_reset_name="rxd_DLY_RST" dyn_delay_ctrl_name="rxd_DLY_CTRL" clkmux_buf_name=""/>
         </efxpt:comp_gpio>

@@ -5,9 +5,8 @@
 //   0x3200-0x3207 kept at vendor defaults -- any change to them kills the
 //   DE pixel output (write path goes to 0).  Output window 1920x1080 at crop
 //   (324,5) inside the default 2568x1090 region.
-//   VTS=1150 (39 fps at default HTS).  HTS=1800 (0x320C/0x320D, UNDOCUMENTED
-//   blind-scan) shortens the line to reach ~60 fps.  Revert HTS if the image
-//   breaks.  Exposure 512 half-lines.
+//   VTS=1150, HTS=1800. These timing settings measured 30-31 fps at 1080p;
+//   native sensor 60 fps is not yet verified. Exposure 512 half-lines.
 //   Consumed by i2c_subsystem (src/i2c).
 //   Implemented as a registered case-ROM (no BRAM init dependency).
 //=====================================================================

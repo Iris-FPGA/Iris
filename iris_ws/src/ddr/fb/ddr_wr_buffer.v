@@ -249,7 +249,8 @@ begin
 	else if(sync_r2)				                            ddr_wr_addr <= start_addr_r;//start_addr;//( pos_sync )
 	else if( addr_add_en ) 				                        ddr_wr_addr <= nx_ddr_wr_addr;
 end      
-assign nx_ddr_wr_addr =  ddr_wr_addr + {(ddr_awlen+1) ,{WR_ADDR_SHIFT_BITS{1'b0}}};  
+wire [8:0] address_beats = {1'b0,ddr_awlen} + 9'd1;
+assign nx_ddr_wr_addr = ddr_wr_addr + {address_beats,{WR_ADDR_SHIFT_BITS{1'b0}}};
 always @( posedge axi_clk or negedge rst_n )
 begin
  	if( !rst_n )  							                    addr_cnt_num <= 'd0;
@@ -299,7 +300,38 @@ begin
 	else if(burst_add_en && burst_num == total_burst_num+'d2  ) burst_last <= 1'b1;
     else if(burst_add_en && burst_num == total_burst_num+'d1 )  burst_last <= 1'b0;
 end 
-assign bank_sw = burst_last;
+// burst_last is a LEVEL covering the final burst, not a completed frame.
+// Publish exactly once, after the final W transfer AND all AXI B responses.
+// Otherwise a stalled last burst rotates banks every clock and publishes
+// unfinished data. Responses are kept across frame boundaries.
+reg [15:0] writes_outstanding;
+reg frame_pending;
+reg frame_done;
+wire aw_fire = awvalid && awready;
+wire b_fire = bvalid && bready;
+wire frame_last_w = burst_last && burst_add_en;
+wire writes_drained = !aw_fire &&
+    (writes_outstanding == (b_fire ? 16'd1 : 16'd0));
+always @(posedge axi_clk or negedge rst_n) begin
+    if (!rst_n) begin
+        writes_outstanding <= 0;
+        frame_pending <= 0;
+        frame_done <= 0;
+    end else begin
+        case ({aw_fire,b_fire})
+            2'b10: writes_outstanding <= writes_outstanding + 1'b1;
+            2'b01: writes_outstanding <= writes_outstanding - 1'b1;
+            default: ;
+        endcase
+        frame_done <= 0;
+        if (pos_sync) frame_pending <= 0;
+        else if ((frame_pending || frame_last_w) && writes_drained) begin
+            frame_done <= 1;
+            frame_pending <= 0;
+        end else if (frame_last_w) frame_pending <= 1;
+    end
+end
+assign bank_sw = frame_done;
 
 
 //======================================================================================================

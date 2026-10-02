@@ -77,3 +77,9 @@ with tempfile.TemporaryDirectory(prefix='iris-video-tests-') as d:
     compile_tb('tb_display',['tests/video/tb_display.sv','iris_ws/src/video/debayer/rgb_display_2px.v'],exe);simulate(exe,[f'+IN={a}',f'+REF={b}'])
     exe=tmp/'osd'
     compile_tb('tb_osd',['tests/video/tb_osd.sv','iris_ws/src/video/osd/osd_video_status.v'],exe);simulate(exe)
+    exe=tmp/'banks'
+    compile_tb('tb_frame_banks',['tests/video/tb_frame_banks.sv','iris_ws/src/ddr/fb/frame_bank_manager.v'],exe);simulate(exe)
+    exe=tmp/'write_commit'
+    compile_tb('tb_write_commit',['tests/video/tb_write_commit.sv','iris_ws/src/ddr/fb/ddr_wr_buffer.v','iris_ws/src/ddr/fb/frame_bank_manager.v'],exe);simulate(exe)
+    exe=tmp/'ae'
+    compile_tb('tb_ae_exposure',['tests/video/tb_ae_exposure.sv','iris_ws/src/mipi/ae_ctrl.v'],exe);simulate(exe)
