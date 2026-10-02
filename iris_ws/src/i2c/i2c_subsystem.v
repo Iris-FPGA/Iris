@@ -1,11 +1,13 @@
 //=====================================================================
 // I2C subsystem (generic, device-agnostic)
 //
-//   Two requesters share one I2C master core:
+//   Three requesters share one I2C master core:
 //     - auto : ROM sequence engine + 16-bit-reg/8-bit-data byte layer
 //              (used for power-on device initialisation)
 //     - cpu  : memory-mapped register port for an external CPU / RISC-V
 //              (bus agnostic; later adapt to APB / AXI4-Lite)
+//     - ae   : auto-exposure register writes (ae_req/ae_wr_en), takes
+//              the byte layer only after boot; gates the ID check loop
 //
 //   mode = 0 -> auto (ROM), cpu port ignored
 //   mode = 1 -> cpu, auto engine held idle
@@ -51,7 +53,15 @@ module i2c_subsystem #(
     input  wire                             cpu_we,
     input  wire                             cpu_stb,
     output wire [7:0]                       cpu_rdata,
-    output wire                             cpu_ack
+    output wire                             cpu_ack,
+
+    // AE register-write requester (3rd master, post-boot; writes one
+    // register per ae_wr_en pulse while ae_req is held high)
+    input  wire                             ae_req,
+    input  wire                             ae_wr_en,
+    input  wire [I2C_REG_ADDR_WIDTH-1:0]    ae_addr,
+    input  wire [I2C_DATA_WIDTH-1:0]        ae_data,
+    output wire                             ae_done   // wr_done while ae_req
 );
 
 // ---------------------------------------------------------------- auto path
@@ -115,11 +125,22 @@ reg        sensor_id_ok_r;
 assign sensor_id_ok  = sensor_id_ok_r;
 assign sensor_dout   = {id_byte1, id_byte0};
 
-wire [I2C_REG_ADDR_WIDTH-1:0] blk_addr  = id_req ? id_addr  : addr;
+// priority mux: id check > ae > auto ROM.
+// IMPORTANT: id must win over ae. The ID loop restarts the same cycle AE
+// may assert ae_req (right after sensor_id_ok latches); if ae masked the
+// id rd_en pulse the ID FSM would wait rd_done forever while AE waits
+// !busy -> deadlock with zero AE writes. AE only pulses wr_en after
+// observing !busy (run|id_req), so id/ae requests never overlap in the
+// wr direction; run=0 after boot so ROM wr/rd_en are already low.
+wire [I2C_REG_ADDR_WIDTH-1:0] blk_addr  = id_req ? id_addr :
+                                           ae_req ? ae_addr : addr;
 wire                          blk_rd_en = id_req ? id_rd_en : rd_en;
+wire                          blk_wr_en = ae_req ? ae_wr_en : wr_en;
+wire [I2C_DATA_WIDTH-1:0]     blk_din   = ae_req ? ae_data : set_data;
 
-assign busy = run | id_req;
-assign done = done_r;
+assign busy    = run | id_req;
+assign done    = done_r;
+assign ae_done = wr_done & ae_req;
 
 always @(posedge clk or negedge rst_n)
 begin
@@ -134,7 +155,7 @@ begin
     end else begin
         case (id_state)
             ID_IDLE: begin
-                if (done_r && !mode) begin
+                if (done_r && !mode && !ae_req) begin
                     id_req   <= 1'b1;
                     id_addr  <= 16'h3107;
                     id_rd_en <= 1'b1;
@@ -199,14 +220,14 @@ i2c_16addr_8data #(
 ) u_i2c_ctrl (
     .clk             (clk),
     .rst_n           (rst_n),
-    .init_done       (init_done),
-    .rd_done         (rd_done),
-    .wr_done         (wr_done),
-    .wr_en           (wr_en),
-    .rd_en           (blk_rd_en),
-    .addr            (blk_addr),
-    .dev_addr        (dev_addr),
-    .din             (set_data),
+        .init_done       (init_done),
+        .rd_done         (rd_done),
+        .wr_done         (wr_done),
+        .wr_en           (blk_wr_en),
+        .rd_en           (blk_rd_en),
+        .addr            (blk_addr),
+        .dev_addr        (dev_addr),
+        .din             (blk_din),
     .dout            (get_data),
     .dout_valid      (get_valid),
     .i2c_address     (i2c_addr),

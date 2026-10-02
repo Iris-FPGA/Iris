@@ -3,13 +3,13 @@
         "-o",
         "csi_rx_controller",
         "--base_path",
-        "E:\\FPGA_Demo\\02_Ti60F225_DemoBoard\\FPGA_Prj\\07_Ti60F225_MIPI_C2D_Demo\\new_sensor\\Ti60f225_csi2dsi_sc431hai_v3.4\\ip",
+        "ip",
         "--vlnv",
         {
             "vendor": "efinixinc.com",
             "library": "mipi",
             "name": "efx_csi2_rx",
-            "version": "5.9"
+            "version": "5.17"
         }
     ],
     "conf": {
@@ -33,16 +33,13 @@
         "Pack_64": "1'b1",
         "FRAME_MODE": "\"GENERIC\"",
         "ENABLE_VCX": "1'b0",
-        "MIPI_CSI2_RX_DEBUG": "1'b0"
+        "MIPI_CSI2_RX_DEBUG": "1'b0",
+        "MIPI_CSI2_RX_PIXEL_SIDEBAND": "1'b0"
     },
     "output": {
-        "external_source_source": [
-            "csi_rx_controller\\csi_rx_controller_define.svh",
-            "csi_rx_controller\\csi_rx_controller.sv",
-            "csi_rx_controller\\csi_rx_controller_tmpl.vhd",
-            "csi_rx_controller\\csi_rx_controller_tmpl.sv"
-        ]
+        "external_source_source": []
     },
-    "sw_version": "2024.2.294",
-    "generated_date": "2025-10-11T11:35:18.605105+00:00"
+    "ooc_synthesis": {},
+    "sw_version": "2026.1.132.4.5",
+    "external_path_option": "RELATIVE_PATH"
 }

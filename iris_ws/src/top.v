@@ -206,7 +206,8 @@ mipi_rx u_mipi_rx
     .irq                    (mipi_irq)
 );
 
-wire [39:0] clip_hs, clip_vs, clip_de, clip_dat;
+wire clip_hs, clip_vs, clip_de;
+wire [39:0] clip_dat;
 sensor_clipper u_sensor_clipper (
     .clk    (mipi_pixel_clk),
     .i_hs   (mipi_hsync),
@@ -220,8 +221,9 @@ sensor_clipper u_sensor_clipper (
 );
 
 // 4 RAW10 pixels -> 4 x 8-bit Bayer mosaic (packed 32-bit)
-wire [31:0] fb_vin = {clip_dat[39:32], clip_dat[29:22],
-                      clip_dat[19:12], clip_dat[9:2]};
+// DDR emits the MSB first: preserve left-to-right P0,P1,P2,P3.
+wire [31:0] fb_vin = {clip_dat[9:2], clip_dat[19:12],
+                      clip_dat[29:22], clip_dat[39:32]};
 wire        fb_ide = clip_de & clip_hs;
 wire        fb_ihs = clip_hs;
 wire        fb_ivs = clip_vs;
@@ -295,8 +297,8 @@ frame_buffer #(
     .START_ADDR     (28'h0000000),
     .BURST_LEN      (8'd127),
     .FB_NUM         (3),
-    .MAX_VID_WIDTH  (1280),
-    .MAX_VID_HIGHT  (720)
+    .MAX_VID_WIDTH  (1920),
+    .MAX_VID_HIGHT  (1080)
 ) u_frame_buffer (
     .axi_clk        (core_clk),
     .rst_n          (video_rst_n),
@@ -313,14 +315,14 @@ frame_buffer #(
     .o_de           (fb_de),
     .vout           (fb_vout),
 
-    .H_FRONT_PORCH  (13'd55),
-    .H_SYNC         (13'd20),
-    .H_VALID        (13'd640),
-    .H_BACK_PORCH   (13'd110),
-    .V_FRONT_PORCH  (13'd5),
+    .H_FRONT_PORCH  (13'd44),
+    .H_SYNC         (13'd22),
+    .H_VALID        (13'd960),
+    .H_BACK_PORCH   (13'd74),
+    .V_FRONT_PORCH  (13'd4),
     .V_SYNC         (13'd5),
-    .V_VALID        (13'd720),
-    .V_BACK_PORCH   (13'd20),
+    .V_VALID        (13'd1080),
+    .V_BACK_PORCH   (13'd36),
 
     .awid           (fb_awid),
     .awaddr         (fb_awaddr),
@@ -409,6 +411,15 @@ awb_ctrl u_awb_ctrl (
     .o_b_gain (awb_b_gain)
 );
 
+// stats -> AE (27 MHz): toggle handshake across clock domains.
+// The sums only change at VS together with awb_upd, so they are
+// quasi-static by the time the toggle is re-synchronised.
+reg awb_upd_tgl;
+always @(posedge hdmi_tx_half_clk or negedge video_rst_n) begin
+    if (!video_rst_n)    awb_upd_tgl <= 1'b0;
+    else if (awb_upd)    awb_upd_tgl <= ~awb_upd_tgl;
+end
+
 debayer_top_2to1 u_debayer (
     .in_pclk     (hdmi_tx_half_clk),
     .in_rstn     (video_rst_n),
@@ -416,10 +427,8 @@ debayer_top_2to1 u_debayer (
     .raw_hs_i    (fb_hs),
     .raw_de_i    (fb_de),
     .raw_valid_i (fb_de),
-    .raw_datax4_i({fb_vout[7:0], fb_vout[15:8]}),
-    // AWB temporarily pinned to unity: tests whether the grey-world gains
-    // (applied per byte_0/byte_1 in rgb_gain) cause the 2-px vertical stripes.
-    // Revert to awb_*_gain once the stripe root cause is confirmed.
+    .raw_datax4_i(fb_vout),
+    // Linear demosaic; per-channel display gains follow the stats tap.
     .i_r_gain    (3'd4),
     .i_g_gain    (3'd4),
     .i_b_gain    (3'd4),
@@ -431,7 +440,15 @@ debayer_top_2to1 u_debayer (
 );
 
 // phase-insensitive 2->1 expansion: async FIFO 74.25MHz -> 148.5MHz
-wire [50:0] af_din = {dbg_hs_o, dbg_vs_o, dbg_de_o, dbg_rgb};
+wire display_hs, display_vs, display_de;
+wire [47:0] display_rgb;
+rgb_display_2px u_display_color (
+    .clk(hdmi_tx_half_clk), .rst_n(video_rst_n),
+    .i_hs(dbg_hs_o), .i_vs(dbg_vs_o), .i_de(dbg_de_o), .i_rgb(dbg_rgb),
+    .i_r_gain(awb_r_gain), .i_g_gain(awb_g_gain), .i_b_gain(awb_b_gain),
+    .o_hs(display_hs), .o_vs(display_vs), .o_de(display_de), .o_rgb(display_rgb)
+);
+wire [50:0] af_din = {display_hs, display_vs, display_de, display_rgb};
 wire [50:0] af_dout;
 wire        af_wfull, af_rempty;
 reg         af_rinc;
@@ -532,38 +549,69 @@ fps_counter #(
 //=====================================================================
 // HDMI TX (our TMDS encoder)
 //=====================================================================
-localparam SWAP_RB   = 1'b1;    // 1: blue<-red, red<-blue
+localparam SWAP_RB   = 1'b0;    // 1: blue<-red, red<-blue
 localparam SWAP_HSVS = 1'b0;    // 1: hsync<-vs, vsync<-hs
 
-wire [23:0] px_osd1, px_osd;
+// AE debug bus (gpio_clk_27m domain, driven by u_ae_ctrl further down;
+// declared early: consumed by the OSD overlay and the UART logger)
+wire [1:0]  ae_state;
+wire [11:0] ae_exp;
+wire [3:0]  ae_gain;
+wire [31:0] ae_sum;
+wire [7:0]  ae_writes;
+wire [7:0]  ae_touts;
 
-// left  : sensor fps (mipi_vsync)   right : write fps (wr_sw)
-osd_fps #(
-    .X_START (16)
-) u_osd_sensor (
-    .clk       (hdmi_tx_slow_clk),
-    .rst_n     (video_rst_n),
-    .i_hs      (hs_r),
-    .i_vs      (vs_r),
-    .i_de      (de_r),
-    .i_rgb     (px_r),
-    .i_fps     (sens_fps),
-    .i_fps_upd (sens_upd),
-    .o_rgb     (px_osd1)
+wire [23:0] px_osd;
+wire [11:0] cam_width, cam_height, hdmi_width, hdmi_height;
+wire cam_size_toggle, hdmi_size_toggle;
+wire [7:0] hdmi_fps;
+wire hdmi_upd;
+video_size_meter #(.PIXELS_PER_CLOCK(4), .USE_HSYNC(1)) u_camera_size (
+    .clk(mipi_pixel_clk), .rst_n(video_rst_n),
+    .i_hs(fb_ihs), .i_vs(fb_ivs), .i_de(fb_ide),
+    .o_width(cam_width), .o_height(cam_height), .o_toggle(cam_size_toggle)
+);
+video_size_meter #(.PIXELS_PER_CLOCK(1), .USE_HSYNC(0)) u_hdmi_size (
+    .clk(hdmi_tx_slow_clk), .rst_n(video_rst_n),
+    .i_hs(hs_r), .i_vs(vs_r), .i_de(de_r),
+    .o_width(hdmi_width), .o_height(hdmi_height), .o_toggle(hdmi_size_toggle)
+);
+reg [2:0] hdmi_vs_sync;
+always @(posedge core_clk or negedge video_rst_n) begin
+    if (!video_rst_n) hdmi_vs_sync<=0;
+    else hdmi_vs_sync<={hdmi_vs_sync[1:0],vs_r};
+end
+fps_counter #(.CLK_FREQ_HZ(100_000_000)) u_fps_hdmi (
+    .clk(core_clk), .rst_n(video_rst_n), .frame_pulse(hdmi_vs_sync[2]),
+    .fps(hdmi_fps), .upd_toggle(hdmi_upd)
+);
+osd_video_status u_video_status (
+    .clk(hdmi_tx_slow_clk), .rst_n(video_rst_n),
+    .i_hs(hs_r), .i_vs(vs_r), .i_de(de_r), .i_rgb(px_r),
+    .i_cam_width(cam_width), .i_cam_height(cam_height), .i_cam_toggle(cam_size_toggle),
+    .i_hdmi_width(hdmi_width), .i_hdmi_height(hdmi_height),
+    .i_cam_fps(sens_fps), .i_wr_fps(wr_fps), .i_hdmi_fps(hdmi_fps),
+    .i_cam_fps_upd(sens_upd), .i_wr_fps_upd(wr_upd), .i_hdmi_fps_upd(hdmi_upd),
+    .o_rgb(px_osd)
 );
 
-osd_fps #(
-    .X_START (56)
-) u_osd_wr (
+// AE status line below the fps digits: E=xxx G=x S=x W=xx
+wire [23:0] px_osd_ae;
+osd_ae #(
+    .X_START (16),
+    .Y_START (48)
+) u_osd_ae (
     .clk       (hdmi_tx_slow_clk),
     .rst_n     (video_rst_n),
     .i_hs      (hs_r),
     .i_vs      (vs_r),
     .i_de      (de_r),
-    .i_rgb     (px_osd1),
-    .i_fps     (wr_fps),
-    .i_fps_upd (wr_upd),
-    .o_rgb     (px_osd)
+    .i_rgb     (px_osd),
+    .i_exp     (ae_exp),
+    .i_gain    (ae_gain),
+    .i_state   (ae_state),
+    .i_writes  (ae_writes),
+    .o_rgb     (px_osd_ae)
 );
 
 wire [9:0] tmds_data0;
@@ -585,9 +633,9 @@ dvi_encoder dvi_encoder_m0
 (
     .pixelclk   (hdmi_tx_slow_clk),
     .rstin      (~video_rst_n),
-    .blue_din   (SWAP_RB   ? px_osd[23:16] : px_osd[7:0]),
-    .green_din  (px_osd[15:8]),
-    .red_din    (SWAP_RB   ? px_osd[7:0]   : px_osd[23:16]),
+    .blue_din   (SWAP_RB   ? px_osd_ae[23:16] : px_osd_ae[7:0]),
+    .green_din  (px_osd_ae[15:8]),
+    .red_din    (SWAP_RB   ? px_osd_ae[7:0]   : px_osd_ae[23:16]),
     .hsync      (SWAP_HSVS ? vs_r : hs_r),
     .vsync      (SWAP_HSVS ? hs_r : vs_r),
     .de         (de_r),
@@ -603,7 +651,8 @@ assign tmds_data1_o = ~tmds_data1;
 assign tmds_data2_o = ~tmds_data2;
 
 //=====================================================================
-// UART loopback
+// UART: RX echo + AE status log injection (ae_uart_log wins while a
+// line is in progress; the echo FIFO is gated off then and buffered)
 //=====================================================================
 wire        RdEmpty;
 wire        tx_valid;
@@ -612,6 +661,22 @@ wire        tx_req;
 wire [7:0]  tx_data;
 wire [7:0]  rx_data;
 wire [7:0]  RdDNum;
+wire        fifo_dv;
+wire [7:0]  fifo_data;
+wire        log_dv;
+wire [7:0]  log_data;
+wire        log_gate;
+wire        fifo_pop;
+wire        fifo_act;
+
+// camera bring-up status (driven by u_sc431hai_init further down)
+wire        sc431hai_done;
+wire        sensor_id_ok;
+
+assign tx_valid  = log_dv | fifo_dv;
+assign tx_data   = log_dv ? log_data : fifo_data;
+assign fifo_pop  = tx_req & (~RdEmpty) & (~log_gate);
+assign fifo_act  = fifo_pop | fifo_dv;
 
 DC_FIFO #(
     .FIFO_MODE  ("Normal"),
@@ -625,11 +690,11 @@ DC_FIFO #(
     .WrFull     (),
     .WrData     (rx_data),
     .RdClk      (gpio_clk_27m),
-    .RdEn       (tx_req & (~RdEmpty)),
+    .RdEn       (fifo_pop),
     .RdDNum     (RdDNum),
     .RdEmpty    (RdEmpty),
-    .DataVal    (tx_valid),
-    .RdData     (tx_data)
+    .DataVal    (fifo_dv),
+    .RdData     (fifo_data)
 );
 
 uart_rx_tx #(
@@ -640,7 +705,7 @@ uart_rx_tx #(
     .CHECKSUM_EN    (1'b0)
 ) uart_rx_tx_inst (
     .clk        (gpio_clk_27m),
-    .rst_n      (1'b1),
+    .rst_n      (mipi_pll_locked),
     .rxd        (rxd),
     .txd        (txd),
     .tx_valid   (tx_valid),
@@ -650,13 +715,33 @@ uart_rx_tx #(
     .rx_data    (rx_data)
 );
 
+ae_uart_log u_ae_log (
+    .clk       (gpio_clk_27m),
+    .rst_n     (mipi_pll_locked),
+    .i_init    (sc431hai_done & sensor_id_ok),
+    .i_state   (ae_state),
+    .i_exp     (ae_exp),
+    .i_gain    (ae_gain),
+    .i_sum     (ae_sum),
+    .i_writes  (ae_writes),
+    .i_touts   (ae_touts),
+    .tx_req    (tx_req),
+    .tx_valid  (log_dv),
+    .tx_data   (log_data),
+    .tx_gate   (log_gate),
+    .fifo_act  (fifo_act)
+);
+
 //=====================================================================
 // SC431HAI I2C bring-up
 //=====================================================================
-wire sc431hai_done;
-wire sensor_id_ok;
 wire cam_scl_padoen;
 wire cam_sda_padoen;
+
+// auto-exposure: drives sensor exposure/gain registers after bring-up
+wire        ae_req, ae_wr_en, ae_done, ae_busy;
+wire [15:0] ae_addr;
+wire [7:0]  ae_data;
 
 sc431hai_init u_sc431hai_init
 (
@@ -677,7 +762,35 @@ sc431hai_init u_sc431hai_init
     .cpu_we         (1'b0),
     .cpu_stb        (1'b0),
     .cpu_rdata      (),
-    .cpu_ack        ()
+    .cpu_ack        (),
+    .i2c_busy       (ae_busy),
+    .ae_req         (ae_req),
+    .ae_wr_en       (ae_wr_en),
+    .ae_addr        (ae_addr),
+    .ae_data        (ae_data),
+    .ae_done        (ae_done)
+);
+
+ae_ctrl #(.NPX(1920 * 1080)) u_ae_ctrl (
+    .clk        (gpio_clk_27m),
+    .rst_n      (mipi_pll_locked),
+    .init_done  (sc431hai_done & sensor_id_ok),
+    .stats_tgl  (awb_upd_tgl),
+    .sum_r      (awb_sum_r),
+    .sum_g      (awb_sum_g),
+    .sum_b      (awb_sum_b),
+    .ae_req     (ae_req),
+    .ae_wr_en   (ae_wr_en),
+    .ae_addr    (ae_addr),
+    .ae_data    (ae_data),
+    .ae_busy    (ae_busy),
+    .ae_done    (ae_done),
+    .dbg_state  (ae_state),
+    .dbg_exp    (ae_exp),
+    .dbg_gain   (ae_gain),
+    .dbg_sum    (ae_sum),
+    .dbg_writes (ae_writes),
+    .dbg_touts  (ae_touts)
 );
 
 assign io_cam_scl_OE = ~cam_scl_padoen;

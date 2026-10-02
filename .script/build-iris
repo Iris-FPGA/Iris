@@ -11,6 +11,10 @@ echo "==> map";              efx_run --prj iris_ws -f map
 echo "==> interface";        efx_run --prj iris_ws -f interface
 echo "==> 修复 sdc 时钟周期"
 sed -i 's|<USER_PERIOD> -name CLK_25M|40.000 -name CLK_25M|; s|<USER_PERIOD> -name gpio_clk_27m|37.037 -name gpio_clk_27m|' outflow/iris_ws.pt.sdc
+cat constraints/video_domains.sdc >> outflow/iris_ws.pt.sdc
+# iris_ws.xml references this project-root filename. Without this copy PNR
+# silently ignores the generated clocks and uses a default 1 ns constraint.
+cp outflow/iris_ws.pt.sdc iris_ws.pt.sdc
 echo "==> pnr";              efx_run --prj iris_ws -f pnr
 echo "==> pgm(生成bit/hex)"; efx_run --prj iris_ws -f pgm
 echo "完成：outflow/iris_ws.bit 与 iris_ws.hex"
