@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
-module tb_debayer #(parameter BGGR=0);
-localparam W=16, H=8, HT=12, VT=12, N=HT*VT;
+module tb_debayer #(parameter BGGR=0,HT=12);
+localparam W=16, H=8, VT=12, N=HT*VT;
 reg clk=0, rst=0;
 always #5 clk=~clk;
 reg hs=0,vs=0,de=0;

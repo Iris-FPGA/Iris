@@ -21,7 +21,8 @@
 //=====================================================================
 
 module ae_uart_log #(
-    parameter [24:0] PERIOD = 25'd33554431   // 2^25-1 cycles @27 MHz = 1.24 s
+    parameter [24:0] PERIOD = 25'd33554431,   // 2^25-1 cycles @27 MHz = 1.24 s
+    parameter VIDEO_STATUS = 0
 )(
     input  wire        clk,
     input  wire        rst_n,
@@ -40,6 +41,8 @@ module ae_uart_log #(
     input wire [255:0] i_sensor_readback,
     input wire [7:0] i_cam_fps,i_wr_fps,i_hdmi_fps,
     input wire [31:0] i_byte_hz,i_cam_period,
+    input wire i_4k,
+    input wire [11:0] i_output_width,i_output_height,
 
     // uart_tx side
     input  wire        tx_req,      // from uart_tx (level, high = wants byte)
@@ -49,7 +52,7 @@ module ae_uart_log #(
     input  wire        fifo_act     // FIFO pop or FIFO DataVal this cycle
 );
 
-localparam LEN = 8'd160;
+localparam LEN = VIDEO_STATUS ? 8'd174 : 8'd160;
 
 //---------------------------------------------------------------------
 // snapshot + periodic trigger
@@ -95,6 +98,8 @@ reg [7:0] idx;
 reg [255:0] snp_regs;
 reg [7:0] snp_cam,snp_wr,snp_hdmi;
 reg [31:0] snp_byte_hz,snp_period;
+reg snp_4k;
+reg [11:0] snp_width,snp_height;
 reg        sending;
 
 assign tx_gate = sending;
@@ -167,7 +172,13 @@ always @* begin
         8'd142:ch=" ";8'd143:ch="P";8'd144:ch="=";
         8'd153:ch=" ";8'd154:ch="T";8'd155:ch="=";
         8'd156:ch=hexc(snp_target[7:4]);8'd157:ch=hexc(snp_target[3:0]);
-        8'd158:ch=8'h0d;8'd159:ch=8'h0a;
+        8'd158:ch=VIDEO_STATUS?" ":8'h0d;8'd159:ch=VIDEO_STATUS?"M":8'h0a;
+        8'd160:ch="=";8'd161:ch=snp_4k?"1":"0";
+        8'd162:ch=" ";8'd163:ch="O";8'd164:ch="=";
+        8'd165:ch=hexc(snp_width[11:8]);8'd166:ch=hexc(snp_width[7:4]);8'd167:ch=hexc(snp_width[3:0]);
+        8'd168:ch="x";
+        8'd169:ch=hexc(snp_height[11:8]);8'd170:ch=hexc(snp_height[7:4]);8'd171:ch=hexc(snp_height[3:0]);
+        8'd172:ch=8'h0d;8'd173:ch=8'h0a;
         default:begin
          if(idx>=49 && idx<113)ch=hexc(snp_regs[255-(idx-49)*4-:4]);
          else if(idx>=134 && idx<142)ch=hexc(snp_byte_hz[31-(idx-134)*4-:4]);
@@ -195,6 +206,7 @@ always @(posedge clk or negedge rst_n) begin
         snp_touts <= 8'd0;
         snp_luma<=8'd0;snp_regs<=0;snp_cam<=0;snp_wr<=0;snp_hdmi<=0;snp_byte_hz<=0;snp_period<=0;
         snp_target<=8'd0;
+        snp_4k<=0;snp_width<=0;snp_height<=0;
     end else begin
         tx_valid <= 1'b0;                       // default: 1-cycle strobe
 
@@ -215,6 +227,7 @@ always @(posedge clk or negedge rst_n) begin
                 snp_touts  <= i_touts;
                 snp_luma <= i_luma;
                 snp_target <= i_target;
+                snp_4k<=i_4k;snp_width<=i_output_width;snp_height<=i_output_height;
                 snp_regs<=i_sensor_readback;snp_cam<=i_cam_fps;snp_wr<=i_wr_fps;
                 snp_hdmi<=i_hdmi_fps;snp_byte_hz<=i_byte_hz;snp_period<=i_cam_period;
                 sending    <= 1'b1;             // gate FIFO pops from now

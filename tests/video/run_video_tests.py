@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """RTL regression fixtures are independent scalar Bayer/RGB reference models."""
-import os, subprocess, tempfile
+import os, subprocess, tempfile, sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 IV=os.environ.get('IVERILOG','iverilog')
@@ -59,6 +59,10 @@ with tempfile.TemporaryDirectory(prefix='iris-video-tests-') as d:
     exe=tmp/'bggr'
     run([IV]+(['-B',IVLIB] if IVLIB else [])+['-g2012','-s','tb_debayer','-Ptb_debayer.BGGR=1','-o',str(exe),'tests/video/tb_debayer.sv','iris_ws/src/video/debayer/debayer_top_2to1.v'])
     for kind in ['colour','ramp','edges']:simulate(exe,fixture(kind,tmp,True))
+    HT=24
+    run([IV]+(['-B',IVLIB] if IVLIB else [])+['-g2012','-s','tb_debayer','-Ptb_debayer.BGGR=1','-Ptb_debayer.HT=24','-o',str(exe),'tests/video/tb_debayer.sv','iris_ws/src/video/debayer/debayer_top_2to1.v'])
+    for kind in ['colour','ramp','edges']:simulate(exe,fixture(kind,tmp,True))
+    HT=12
     exe=tmp/'size'
     compile_tb('tb_size_meter',['tests/video/tb_size_meter.sv','iris_ws/src/video/osd/video_size_meter.v'],exe);simulate(exe)
     exe=tmp/'display';a=tmp/'display_in.mem';b=tmp/'display_ref.mem';sv=[];rv=[]
@@ -108,3 +112,4 @@ with tempfile.TemporaryDirectory(prefix='iris-video-tests-') as d:
 
     exe=tmp/'colour_capture'
     compile_tb('tb_colour_capture',['tests/video/tb_colour_capture.sv','iris_ws/src/video/debayer/colour_capture.v','iris_ws/src/uart/uart_tx.v'],exe);simulate(exe)
+    run([sys.executable,'tests/video/test_hdmi_420.py'])

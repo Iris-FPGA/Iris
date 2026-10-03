@@ -12,6 +12,7 @@ from pathlib import Path
 p = argparse.ArgumentParser(description=__doc__)
 p.add_argument('--port', default='/dev/ttyUSB2')
 p.add_argument('--seconds', type=float, default=15)
+p.add_argument('--mode', choices=['1080','4k'], help='Select output mode through UART before measuring')
 p.add_argument('--output', required=True, help='Output prefix for .log and .json')
 a = p.parse_args()
 fd = os.open(a.port, os.O_RDWR | os.O_NOCTTY | os.O_NONBLOCK)
@@ -23,6 +24,8 @@ try:
     attr[6][termios.VMIN] = attr[6][termios.VTIME] = 0
     termios.tcsetattr(fd, termios.TCSANOW, attr)
     termios.tcflush(fd, termios.TCIFLUSH)
+    if a.mode:
+        os.write(fd,b'4' if a.mode=='4k' else b'1')
     chunks = []
     end = time.monotonic() + a.seconds
     while time.monotonic() < end:
@@ -35,7 +38,7 @@ prefix = Path(a.output)
 prefix.parent.mkdir(parents=True, exist_ok=True)
 prefix.with_suffix('.log').write_text(raw)
 samples = []
-pattern = r'R=([0-9A-F]{64}) C=([0-9A-F]{2}) W=([0-9A-F]{2}) H=([0-9A-F]{2}) BYTE=([0-9A-F]{8})(?: P=([0-9A-F]{8}))?'
+pattern = r'R=([0-9A-F]{64}) C=([0-9A-F]{2}) W=([0-9A-F]{2}) H=([0-9A-F]{2}) BYTE=([0-9A-F]{8})(?: P=([0-9A-F]{8}))?(?: T=[0-9A-F]{2})?(?: M=([01]) O=([0-9A-F]{3})x([0-9A-F]{3}))?'
 for m in re.finditer(pattern, raw):
     r = bytes.fromhex(m[1])
     period = int(m[6], 16) if m[6] else None
@@ -44,7 +47,10 @@ for m in re.finditer(pattern, raw):
                         vts=int.from_bytes(r[8:10], 'big'), register_bytes=m[1],
                         cam_fps=int(m[2], 16), wr_fps=int(m[3], 16), hdmi_fps=int(m[4], 16),
                         mipi_byte_clock_hz=int(m[5], 16), frame_period_core_cycles=period,
-                        cam_fps_from_period=100_000_000 / period if period else None))
+                        cam_fps_from_period=100_000_000 / period if period else None,
+                        output_mode=('4k420' if m[7]=='1' else '1080rgb') if m[7] else None,
+                        output_width=int(m[8],16) if m[8] else None,
+                        output_height=int(m[9],16) if m[9] else None))
 prefix.with_suffix('.json').write_text(json.dumps(samples, indent=2) + '\n')
 print(json.dumps(samples, indent=2))
 if not samples:

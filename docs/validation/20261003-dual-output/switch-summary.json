@@ -1,0 +1,95 @@
+[
+  {
+    "mode": "1080",
+    "dimensions": [
+      1920,
+      1080
+    ],
+    "total_samples": 5,
+    "stable_samples": 3,
+    "hdmi_fps": [
+      60
+    ],
+    "cam_fps": [
+      60
+    ],
+    "wr_fps": [
+      60
+    ]
+  },
+  {
+    "mode": "4k",
+    "dimensions": [
+      3840,
+      2160
+    ],
+    "total_samples": 6,
+    "stable_samples": 4,
+    "hdmi_fps": [
+      30,
+      31
+    ],
+    "cam_fps": [
+      60
+    ],
+    "wr_fps": [
+      60
+    ]
+  },
+  {
+    "mode": "1080",
+    "dimensions": [
+      1920,
+      1080
+    ],
+    "total_samples": 6,
+    "stable_samples": 4,
+    "hdmi_fps": [
+      60,
+      61
+    ],
+    "cam_fps": [
+      60,
+      61
+    ],
+    "wr_fps": [
+      60
+    ]
+  },
+  {
+    "mode": "4k",
+    "dimensions": [
+      3840,
+      2160
+    ],
+    "total_samples": 5,
+    "stable_samples": 3,
+    "hdmi_fps": [
+      30
+    ],
+    "cam_fps": [
+      60
+    ],
+    "wr_fps": [
+      60
+    ]
+  },
+  {
+    "mode": "1080",
+    "dimensions": [
+      1920,
+      1080
+    ],
+    "total_samples": 6,
+    "stable_samples": 4,
+    "hdmi_fps": [
+      60
+    ],
+    "cam_fps": [
+      60
+    ],
+    "wr_fps": [
+      60
+    ]
+  }
+]
