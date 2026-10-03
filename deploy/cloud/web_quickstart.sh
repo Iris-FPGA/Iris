@@ -5,10 +5,14 @@
 #
 # 用法（在网页终端里粘贴）：
 #   bash /root/gpufree-data/Iris/deploy/cloud/web_quickstart.sh \
-#        --dataset /root/gpufree-data/coco
+#        --dataset /root/gpufree-data/coco --with-convert
 #
 #   --dataset 给「ImageFolder 根」（如 .../coco）或「图片目录」（如 .../coco/train2014）
 #   都行，脚本会用 dataset_paths.sh 自动识别层数（这两个参数含义相反，别记错了）。
+#
+#   --with-convert 装转换栈（tensorflow-cpu + onnx + onnx2tf）。
+#   云上**必须给**：冒烟的 [2/7] 起要导出 ONNX / 量化 / 过算子门禁，
+#   镜像里默认没有这些包，不给就会在训练跑完之后死在 [2/7]。
 #
 # 会做：定位路径 → 环境自检 → 拉风格图/校准图 → 抽子集（给了 --subset 或 COCO 存在时）
 #       → 查 GPU → 跑冒烟
@@ -22,6 +26,7 @@ DATASET=""
 SUBSET_N=10000
 DO_SMOKE=1
 MIRROR=1
+WITH_CONVERT=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -31,7 +36,8 @@ while [[ $# -gt 0 ]]; do
         --no-subset) SUBSET_N=0; shift ;;
         --no-smoke)  DO_SMOKE=0; shift ;;
         --no-mirror) MIRROR=0; shift ;;
-        -h|--help)   sed -n '2,14p' "$0"; exit 0 ;;
+        --with-convert) WITH_CONVERT=1; shift ;;
+        -h|--help)   sed -n '2,16p' "$0"; exit 0 ;;
         *) echo "未知参数: $1" >&2; exit 1 ;;
     esac
 done
@@ -60,6 +66,7 @@ ARGS=(--data-dir "$DATA_DIR")
 # 只把**解析成功**的根写进 env.sh —— 否则 run_batch.sh 会 source 到一个错的 DATASET
 [[ "$DATASET_OK" == "1" ]] && ARGS+=(--dataset "$DS_ROOT")
 [[ "$MIRROR" == "0" ]] && ARGS+=(--no-mirror)
+[[ "$WITH_CONVERT" == "1" ]] && ARGS+=(--with-convert)
 "$DEPLOY/cloud/bootstrap.sh" "${ARGS[@]}" || echo "  ⚠ bootstrap 有告警，继续"
 
 hr "2/5 准备训练集"
@@ -133,6 +140,10 @@ fi
 
 hr "5/5 下一步"
 cat <<EOF
+  0) 转换栈：冒烟的 [2/7] 起要 ONNX/量化/算子门禁，镜像里没有就得先装一次：
+       bash $DEPLOY/cloud/bootstrap.sh --with-convert --dataset <数据集根>
+     或下次跑本脚本时加 --with-convert。（不给的话会在训练跑完后死在 [2/7]）
+
   先下 COCO（13 GB，全量；下完再抽子集）：
     mkdir -p $DATA_DIR/coco && cd $DATA_DIR/coco
     wget -c http://images.cocodataset.org/zips/train2014.zip

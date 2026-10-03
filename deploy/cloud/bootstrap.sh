@@ -89,6 +89,27 @@ echo "==> 3/6 空格检查（VGG16 权重 528 MB + 数据集 + checkpoint）"
 df -h "$DATA_DIR" 2>/dev/null | tail -1 | sed 's/^/  /' || warn "$DATA_DIR 不存在"
 mkdir -p "$DATA_DIR"
 
+echo "==> 3.5/6 预取 VGG16 权重（528 MB，训练时要用来算感知损失）"
+# 不预取的话，第一次 run_batch 会在训练步骤里静默下载，
+# 慢的时候（实测有过 20 KB/s）能把「冒烟」拖到几十分钟，看起来像卡死。
+export TORCH_HOME="$DATA_DIR/.torch"
+mkdir -p "$TORCH_HOME"
+VGG_CACHE="$TORCH_HOME/hub/checkpoints/vgg16-397923af.pth"
+if [[ -s "$VGG_CACHE" ]]; then
+    ok "已缓存: $(du -h "$VGG_CACHE" | cut -f1)"
+else
+    echo "    首次下载，1~10 分钟（取决于网络）..."
+    $PY - <<'PYCODE' || warn "预取失败 —— 训练时会自己再试一次下载"
+import sys
+try:
+    from torchvision import models
+except ImportError:
+    print("    torch/torchvision 不可用，跳过预取"); sys.exit(0)
+models.vgg16(weights=models.VGG16_Weights.IMAGENET1K_V1)
+print("    VGG16 权重就绪")
+PYCODE
+fi
+
 echo "==> 4/6 素材（风格图 + 校准图）来自 FinResect/examples@Iris"
 EXAMPLES="$DATA_DIR/examples"
 if [[ -d "$EXAMPLES/.git" ]]; then

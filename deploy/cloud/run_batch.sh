@@ -10,8 +10,10 @@
 #   deploy/cloud/run_batch.sh                      # 跑 configs.tsv 全部
 #   deploy/cloud/run_batch.sh --only c16b3         # 只跑名字匹配的
 #   deploy/cloud/run_batch.sh --force              # 重跑已完成的
+#   deploy/cloud/run_batch.sh --skip-preflight     # 跳过转换栈预检（只想要训练那一步时）
 #
-# 前置：先跑过 bootstrap.sh（会生成 env.sh，本脚本自动 source）
+# 前置：先跑过 bootstrap.sh（会生成 env.sh，本脚本自动 source）。
+#       云上还要 bootstrap.sh --with-convert，否则 [2/7] 起会缺依赖（本脚本会提前拦下）。
 set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -29,6 +31,7 @@ ONLY=""
 LIMIT=0
 CONTENT=""
 RES_IN_PARALLEL=16   # 资源估算用哪个 IN_PARALLEL 报进 results.csv
+SKIP_PREFLIGHT=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -43,6 +46,7 @@ while [[ $# -gt 0 ]]; do
         --no-accel) ACCEL=0; shift ;;
         --force)   FORCE=1; shift ;;
         --smoke)   SMOKE=1; shift ;;
+        --skip-preflight) SKIP_PREFLIGHT=1; shift ;;
         -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
         *) echo "未知参数: $1" >&2; exit 1 ;;
     esac
@@ -51,6 +55,45 @@ done
 # onnx2tf 是可执行文件，必须在 PATH 上（队友脚本在这一点上也踩过坑）
 export PATH="$(dirname "$("$PY" -c 'import sys;print(sys.executable)')"):$PATH"
 export TORCH_HOME="${TORCH_HOME:-${DATA_DIR:-$DEPLOY_ROOT}/.torch}"
+
+# ---- 转换栈预检 ----
+# [2/7] 之后的 ONNX 导出 / INT8 量化 / 算子门禁 / 精度对比都要转换栈。
+# 云镜像默认没装（bootstrap 不装，除非给 --with-convert）。不在这里拦住的话，
+# 每个配置都会**先把训练完整跑完**才死在 [2/7] —— 云上 GPU 按小时计费，那是纯烧钱。
+if [[ "$SKIP_PREFLIGHT" != "1" ]]; then
+    if ! "$PY" -c 'import sys' 2>/dev/null; then
+        echo "❌ 指定的 Python 跑不起来：$PY" >&2; exit 1
+    fi
+    MISSING="$("$PY" - <<'PYCODE' 2>/dev/null
+import importlib.util as u
+need = [("onnx", "onnx"), ("tensorflow", "tensorflow-cpu"),
+        ("onnx2tf", "onnx2tf"), ("ai_edge_litert", "ai-edge-litert"),
+        ("skimage", "scikit-image")]
+print(" ".join(pkg for mod, pkg in need if u.find_spec(mod) is None))
+PYCODE
+)"
+    command -v onnx2tf >/dev/null 2>&1 && true || {
+        # 模块在、但可执行文件不在 PATH 上，也是一类常见故障（队友踩过）
+        [[ "${MISSING:-}" == *"onnx2tf"* ]] || MISSING="${MISSING:+$MISSING }onnx2tf(可执行文件不在 PATH)"
+    }
+    if [[ -n "${MISSING// /}" ]]; then
+        cat >&2 <<EOF
+❌ 转换栈不全，缺：$MISSING
+   [2/7] 导出 ONNX 起就会失败，所以在这里先拦下（别等训练跑完才死）。
+
+   云上装一次就好：
+     bash $HERE/bootstrap.sh --with-convert --dataset <数据集根目录>
+   或者直接装：
+     $PY -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple \\
+         "tensorflow-cpu>=2.16" onnx onnxruntime onnx2tf tf_keras scikit-image
+   注意装 tensorflow-**cpu**：GPU 版会和镜像自带的 CUDA torch 抢 cuDNN。
+
+   只想要训练那一步（不要 ONNX/量化/门禁）：加 --skip-preflight，
+   但产物不完整，results.csv 里该配置会记成 FAILED_*。
+EOF
+        exit 1
+    fi
+fi
 
 : "${STYLE_IMAGE:?env.sh 未生成或缺少 STYLE_IMAGE，请先跑 deploy/cloud/bootstrap.sh}"
 : "${CALIB_DIR:?env.sh 缺少 CALIB_DIR}"
