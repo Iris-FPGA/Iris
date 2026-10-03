@@ -1,0 +1,20 @@
+# 大文件/生成物不入库
+.venv/
+.torch/
+.wheels/
+.pip-cache/
+data/
+__pycache__/
+*.pyc
+
+# 训练/跑批产物（out/ 下入库的文件是手工挑过的参考产物，见 out/README.md）
+out/runs/
+out/*/runs/
+out/*_saved_model/
+*.model
+
+# bootstrap.sh 生成
+cloud/env.sh
+
+# 上云用的压缩包（pack.sh 现打现用）
+cloud/deploy_code.tar.gz
