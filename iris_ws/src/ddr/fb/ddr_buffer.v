@@ -213,47 +213,22 @@ ddr_rd_buffer # (
   
 
 
-//=====================================================================================
-// Write-driven bank latching (3 banks).
-//   The reader always reads the most recently completed write bank; the writer
-//   advances to the next bank only after a full frame (wr_sw).  This removes the
-//   demo's wr_sw/rd_sw alternation, which mis-aligns when the read rate (60 fps)
-//   differs from the write rate (30 fps).
-//=====================================================================================
-localparam [31:0] BANK_STRIDE = 32'h000E2000;   // 1280*720*1 + 4 KB guard
-
-function [AXI_ADDR_WIDTH-1:0] bank_addr;
-    input [1:0] b;
-    begin
-        bank_addr = START_ADDR + (b * BANK_STRIDE);
-    end
-endfunction
-
-reg [1:0] wr_bank, rd_bank;
-reg       frame_ready;
-
-assign wr_start_addr = bank_addr(wr_bank);
-assign rd_start_addr = bank_addr(rd_bank);
-assign wr_sw_ack     = wr_sw;
-assign rd_sw_ack     = rd_sw;
-assign o_wr_sw       = wr_sw;
-
-always @(posedge axi_clk or negedge axi_clk_rst_n) begin
-    if (!axi_clk_rst_n) begin
-        wr_bank     <= 2'd0;
-        rd_bank     <= 2'd1;
-        frame_ready <= 1'b0;
-    end else if (wr_sw) begin
-        rd_bank     <= wr_bank;                        // publish finished bank
-        // read-lock: never advance onto the bank the display is reading
-        // (60 fps write vs 60.09 fps read leaves only ~50 us of margin)
-        if ((wr_bank == 2'd2 ? 2'd0 : wr_bank + 1'b1) != rd_bank)
-            wr_bank <= (wr_bank == 2'd2) ? 2'd0 : (wr_bank + 1'b1);
-        frame_ready <= 1'b1;
-    end
-end
-
-
+// Frame addresses must cover the complete RAW8 image. The old fixed 720p
+// stride overlapped banks at 1080p and produced split/flashing pictures.
+wire [1:0] wr_bank, rd_bank, latest_bank;
+wire frame_ready;
+frame_bank_manager #(
+    .ADDR_WIDTH(AXI_ADDR_WIDTH),
+    .FRAME_BYTES(MAX_VID_WIDTH * MAX_VID_HIGHT),
+    .START_ADDR(START_ADDR)
+) u_frame_banks (
+    .clk(axi_clk), .rst_n(axi_clk_rst_n), .wr_done(wr_sw), .rd_start(rd_start),
+    .wr_addr(wr_start_addr), .rd_addr(rd_start_addr),
+    .writer(wr_bank), .reader(rd_bank), .latest(latest_bank), .ready(frame_ready)
+);
+assign wr_sw_ack=wr_sw;
+assign rd_sw_ack=rd_sw;
+assign o_wr_sw=wr_sw;
 
 /*----------------------------------------------------------------------------------*\
                                  The function code

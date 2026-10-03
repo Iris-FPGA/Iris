@@ -36,7 +36,15 @@ module sc431hai_init #(
     input  wire         cpu_we,
     input  wire         cpu_stb,
     output wire [7:0]   cpu_rdata,
-    output wire         cpu_ack
+    output wire         cpu_ack,
+
+    // ---- AE register-write port (post-boot, shares the byte engine) ----
+    output wire         i2c_busy,       // ROM / ID transaction in flight
+    input  wire         ae_req,
+    input  wire         ae_wr_en,
+    input  wire [15:0]  ae_addr,
+    input  wire [7:0]   ae_data,
+    output wire         ae_done
 );
 
 // ------------------------------------------------------------------ timing
@@ -99,7 +107,7 @@ i2c_subsystem #(
 
     .start          (i2c_start),
     .mode           (cpu_mode),
-    .busy           (),
+    .busy           (i2c_busy),
     .done           (init_done),
     .sensor_id_ok   (sensor_id_ok),
     .sensor_dout    (),
@@ -112,7 +120,13 @@ i2c_subsystem #(
     .cpu_we         (cpu_we),
     .cpu_stb        (cpu_stb),
     .cpu_rdata      (cpu_rdata),
-    .cpu_ack        (cpu_ack)
+    .cpu_ack        (cpu_ack),
+
+    .ae_req         (ae_req),
+    .ae_wr_en       (ae_wr_en),
+    .ae_addr        (ae_addr),
+    .ae_data        (ae_data),
+    .ae_done        (ae_done)
 );
 
 endmodule

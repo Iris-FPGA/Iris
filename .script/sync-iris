@@ -12,7 +12,7 @@ BRIDGE_BIT="${IRIS_BRIDGE_BIT:-}"
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 source "$SCRIPT_DIR/efinity-env"
 
-PROJ_DIR="$SCRIPT_DIR/../iris_ws"
+PROJ_DIR="${IRIS_PROJ_DIR:-$SCRIPT_DIR/../iris_ws}"
 cd "$PROJ_DIR"
 
 if [[ -z "$BRIDGE_BIT" ]]; then
@@ -40,11 +40,11 @@ if ! efx_run --prj iris_ws -f program --pgm_opts "mode=$MODE"; then
     echo "   常见原因：" >&2
     echo "   1) USB 权限：设备节点非 rw → 运行 .script/setup-usb（需 sudo），再拔插一次 USB" >&2
     echo "   2) 模式选错：板载 USB 下载器请用 jtag_bridge / jtag；active(SPI 直连) 需外接下载器到 J6" >&2
-    echo "   3) jtag_bridge 失败：桥位流与板卡 SPI 引脚可能不匹配，可改用 .script/sync-iris jtag" >&2
+    echo "   3) jtag_bridge 失败：桥位流与板卡 SPI 引脚可能不匹配，请用 IRIS_BRIDGE_BIT 指定匹配的桥位流" >&2
     exit 1
 fi
 
 echo "烧录完成"
 if [[ "$MODE" == "jtag_bridge" || "$MODE" == "jtag_bridge_x8" ]]; then
-    echo "提示：断电重上电可从 flash 自启动；立即看效果可再运行 .script/sync-iris jtag"
+    echo "提示：请断电重上电，从 flash 启动刚烧入的设计"
 fi

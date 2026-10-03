@@ -190,6 +190,8 @@ ddr_buffer #(
 .RD_FIFO_DEPTH 	( RD_FIFO_DEPTH 	),
 .START_ADDR			( START_ADDR      ),
 .I_VID_WIDTH    ( I_VID_WIDTH     ),
+.MAX_VID_WIDTH  (MAX_VID_WIDTH),
+.MAX_VID_HIGHT  (MAX_VID_HIGHT),
 .FB_NUM         ( FB_NUM          ),
 .BURST_LEN      (BURST_LEN        )
 )u_ddr_buffer(
