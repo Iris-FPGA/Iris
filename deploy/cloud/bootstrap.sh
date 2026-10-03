@@ -4,11 +4,12 @@
 # 幂等，可重复跑。跑完后生成 cloud/env.sh，run_batch.sh 会 source 它。
 #
 # 用法：
-#   deploy/cloud/bootstrap.sh --dataset /root/gpufree-data/coco/train2014
+#   deploy/cloud/bootstrap.sh --dataset /root/gpufree-data/coco
 #   deploy/cloud/bootstrap.sh --dataset ... --data-dir /root/gpufree-data --with-convert
 #
 # 选项：
-#   --dataset PATH   训练集（ImageFolder 语义：再往里一层才是图片）
+#   --dataset PATH   训练集**根目录**（ImageFolder 语义：它的下一层才是图片，
+#                    例如 .../coco 而图片在 .../coco/train2014/）
 #   --data-dir PATH  持久化目录，默认 /root/gpufree-data（队友脚本 para.py 里就是这个路径）
 #   --with-convert   额外装转换栈（TF/onnx/onnx2tf）。**装 tensorflow-cpu，不装 GPU 版**，
 #                    避免和云镜像里的 CUDA torch 抢 cuDNN。

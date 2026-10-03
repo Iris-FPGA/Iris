@@ -17,7 +17,7 @@
 用法（与队友的用法保持一致）
 --------------------------
     python train.py train \
-        --dataset /root/gpufree-data/coco/train2014 \
+        --dataset /root/gpufree-data/coco \
         --style-image images/style-images/one_last_kiss.png \
         --save-model-dir /root/gpufree-data/runs/ol_kiss \
         --epochs 2 --channels 16 --blocks 3 --accel

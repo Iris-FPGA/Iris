@@ -5,7 +5,10 @@
 #
 # 用法（在网页终端里粘贴）：
 #   bash /root/gpufree-data/Iris/deploy/cloud/web_quickstart.sh \
-#        --dataset /root/gpufree-data/coco/train2014
+#        --dataset /root/gpufree-data/coco
+#
+#   --dataset 给「ImageFolder 根」（如 .../coco）或「图片目录」（如 .../coco/train2014）
+#   都行，脚本会用 dataset_paths.sh 自动识别层数（这两个参数含义相反，别记错了）。
 #
 # 会做：定位路径 → 环境自检 → 拉风格图/校准图 → 抽子集（给了 --subset 或 COCO 存在时）
 #       → 查 GPU → 跑冒烟
@@ -35,6 +38,14 @@ done
 
 hr() { printf '\n\033[1m===== %s =====\033[0m\n' "$1"; }
 
+# 先把 --dataset 解析成 (根, 图片目录) 一对（详见 dataset_paths.sh 里的说明）
+source "$HERE/dataset_paths.sh"
+DS_ROOT=""; DS_IMG_SRC=""; DS_ERR=""
+DATASET_OK=0
+if [[ -n "$DATASET" ]] && resolve_dataset "$DATASET"; then
+    DATASET_OK=1
+fi
+
 hr "0/5 定位"
 echo "  代码目录: $DEPLOY"
 echo "  数据盘  : $DATA_DIR"
@@ -46,7 +57,8 @@ df -h "$DATA_DIR" 2>/dev/null | tail -1 | sed 's/^/  /'
 
 hr "1/5 环境自检 + 拉素材"
 ARGS=(--data-dir "$DATA_DIR")
-[[ -n "$DATASET" ]] && ARGS+=(--dataset "$DATASET")
+# 只把**解析成功**的根写进 env.sh —— 否则 run_batch.sh 会 source 到一个错的 DATASET
+[[ "$DATASET_OK" == "1" ]] && ARGS+=(--dataset "$DS_ROOT")
 [[ "$MIRROR" == "0" ]] && ARGS+=(--no-mirror)
 "$DEPLOY/cloud/bootstrap.sh" "${ARGS[@]}" || echo "  ⚠ bootstrap 有告警，继续"
 
@@ -58,18 +70,24 @@ TINY_DIR="$DATA_DIR/tiny"
 SUBSET_DIR="$DATA_DIR/coco${SUBSET_N}"
 SMOKE_DATASET=""
 
-if [[ -n "$DATASET" && -d "$DATASET" ]]; then
-    echo "  真数据集: $DATASET（$(find "$DATASET" -maxdepth 2 -type f \( -name '*.jpg' -o -name '*.png' \) 2>/dev/null | wc -l) 张）"
-    SMOKE_DATASET="$DATASET"
+if [[ "$DATASET_OK" == "1" ]]; then
+    echo "  图片目录: $DS_IMG_SRC（$(count_imgs "$DS_IMG_SRC") 张）"
+    echo "  训练集根: $DS_ROOT  ← run_batch.sh 的 --dataset 用这个（ImageFolder 语义）"
+    SMOKE_DATASET="$DS_ROOT"
     if [[ "$SUBSET_N" != "0" ]]; then
         if [[ -d "$SUBSET_DIR/train2014" ]]; then
             echo "  子集已存在: $SUBSET_DIR（$(ls "$SUBSET_DIR/train2014" | wc -l) 张）"
         else
-            python3 "$DEPLOY/cloud/make_subset.py" --src "$DATASET" \
-                --dst "$SUBSET_DIR" --num "$SUBSET_N" --val-num 8
+            python3 "$DEPLOY/cloud/make_subset.py" --src "$DS_IMG_SRC" \
+                --dst "$SUBSET_DIR" --num "$SUBSET_N" --val-num 8 \
+                || echo "  ⚠ 抽子集失败，不影响冒烟"
         fi
         echo "  → 之后跑网格用： --dataset $SUBSET_DIR"
     fi
+elif [[ -n "$DATASET" ]]; then
+    echo "  ⚠ --dataset 用不了：$DS_ERR"
+    echo "    COCO 全量这样给（两种都行，会自动识别）："
+    echo "      --dataset $DATA_DIR/coco            或  --dataset $DATA_DIR/coco/train2014"
 elif [[ -d "$CALIB" ]]; then
     echo "  没给 --dataset（COCO 还没下），用校准图造一个冒烟用的小数据集"
     if [[ -d "$TINY_DIR/train2014" ]]; then
@@ -119,14 +137,16 @@ cat <<EOF
     mkdir -p $DATA_DIR/coco && cd $DATA_DIR/coco
     wget -c http://images.cocodataset.org/zips/train2014.zip
     unzip -q train2014.zip && rm train2014.zip
+  下完重跑一次本脚本，让它抽 1 万张子集并冒烟：
+    bash $DEPLOY/cloud/web_quickstart.sh --dataset $DATA_DIR/coco
 
   跑小规模网格（摸 style_weight 方向）：
     cd $DATA_DIR
     ./Iris/deploy/cloud/run_batch.sh --dataset $SUBSET_DIR \\
         --out $DATA_DIR/runs/grid
 
-  跑全量（改一下 env.sh 里的 DATASET，或直接给 --dataset）：
-    ./Iris/deploy/cloud/run_batch.sh --dataset $DATA_DIR/coco/train2014 \\
+  跑全量（注意 --dataset 是**根目录** $DATA_DIR/coco，不是 coco/train2014）：
+    ./Iris/deploy/cloud/run_batch.sh --dataset $DATA_DIR/coco \\
         --out $DATA_DIR/runs/full --only c16b3
 
   结果：

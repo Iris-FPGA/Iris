@@ -52,13 +52,13 @@ deploy/scripts/cloud-up.sh --host <IP> --port <PORT> --dataset <COCO 路径>
 
 ```bash
 bash /root/gpufree-data/Iris/deploy/cloud/web_quickstart.sh \
-     --dataset /root/gpufree-data/coco/train2014
+     --dataset /root/gpufree-data/coco
 # 环境自检 + 拉素材 + 抽子集 + 查 GPU + 跑冒烟
 ```
 
 ```bash
 # 先自检（装缺的依赖、拉风格图与校准图、检查数据集、生成 env.sh）
-deploy/cloud/bootstrap.sh --dataset /root/gpufree-data/coco/train2014
+deploy/cloud/bootstrap.sh --dataset /root/gpufree-data/coco
 
 # 再冒烟：1 个配置、1 epoch、64×64、batch 2 —— 只为验证链路通不通
 deploy/cloud/run_batch.sh --smoke
@@ -101,7 +101,11 @@ COCO 2014 train（13 GB）：<https://cocodataset.org/#download>
     ├── COCO_train2014_000000000009.jpg
     └── ...
 ```
-→ `--dataset /root/gpufree-data/coco/train2014`（bootstrap 会自动检查这层结构并在不对时告警）
+→ `--dataset /root/gpufree-data/coco`（**根目录**：`train2014` 的父目录；bootstrap 会自动检查这层结构并在不对时告警）
+
+> ⚠️ 两个参数**含义相反**，别记混：
+> `run_batch.sh --dataset` 要**根目录**（`.../coco`），`make_subset.py --src` 要**图片目录本身**（`.../coco/train2014`）。
+> `web_quickstart.sh` 两个都能收，会自动识别你给的是哪一层（见 `dataset_paths.sh`）。
 
 ---
 

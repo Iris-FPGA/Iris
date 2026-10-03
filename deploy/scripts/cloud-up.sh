@@ -10,7 +10,10 @@
 #
 # 用法：
 #   deploy/scripts/cloud-up.sh --host 183.147.142.40 --port 7777 \
-#       --dataset /root/gpufree-data/coco/train2014 [--smoke]
+#       --dataset /root/gpufree-data/coco [--smoke]
+#
+#   ⚠ --dataset 传 **ImageFolder 根目录**（.../coco，图片在它的 train2014/ 里），
+#     不是 .../coco/train2014 —— run_batch.sh 会用 ImageFolder 去读它。
 #
 # 之后（云上训练）：
 #   ssh root@<host> -p <port> 'cd /root/gpufree-data && ./deploy/cloud/run_batch.sh'
