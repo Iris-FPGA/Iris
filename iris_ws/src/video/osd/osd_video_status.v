@@ -9,8 +9,12 @@ module osd_video_status (
  input [11:0] i_hdmi_width, i_hdmi_height,
  input [7:0] i_cam_fps, i_wr_fps, i_hdmi_fps,
  input i_cam_fps_upd, i_wr_fps_upd, i_hdmi_fps_upd,
+ input i_wb_locked,
+ input [7:0] i_black_g,
  output wire [23:0] o_rgb
 );
+reg [1:0] wb_sync;
+reg wb_locked;
 reg [2:0] cam_sync, cf_sync, wf_sync, hf_sync;
 reg [11:0] cam_w, cam_h;
 reg [7:0] cam_f, wr_f, hdmi_f;
@@ -19,10 +23,13 @@ reg de_d,vs_d;
 wire vs_rise=i_vs && !vs_d;
 always @(posedge clk or negedge rst_n) begin
  if (!rst_n) begin
+  wb_sync<=0;wb_locked<=0;
   cam_sync<=0; cf_sync<=0; wf_sync<=0; hf_sync<=0;
   cam_w<=0;cam_h<=0;cam_f<=0;wr_f<=0;hdmi_f<=0;
   x<=0;y<=0;de_d<=0;vs_d<=0;
  end else begin
+  wb_sync<={wb_sync[0],i_wb_locked};
+  if(vs_rise)wb_locked<=wb_sync[1];
   cam_sync<={cam_sync[1:0],i_cam_toggle};
   cf_sync<={cf_sync[1:0],i_cam_fps_upd};
   wf_sync<={wf_sync[1:0],i_wr_fps_upd};
@@ -36,8 +43,8 @@ always @(posedge clk or negedge rst_n) begin
   if (vs_rise || !i_de) x<=0; else x<=x+1'b1;
  end
 end
-reg [11:0] values [0:6];
-reg [15:0] digits [0:6];
+reg [11:0] values [0:7];
+reg [15:0] digits [0:7];
 reg [15:0] bcd,adjusted;
 reg [11:0] binary;
 reg [3:0] bits_left;
@@ -52,11 +59,11 @@ end
 always @(posedge clk or negedge rst_n) begin
  if (!rst_n) begin
   busy<=0;field<=0;bits_left<=0;bcd<=0;binary<=0;
-  for (n=0;n<7;n=n+1) begin values[n]<=0;digits[n]<=0;end
+  for (n=0;n<8;n=n+1) begin values[n]<=0;digits[n]<=0;end
  end else if (vs_rise && !busy) begin
   values[0]<=cam_w;values[1]<=cam_h;values[2]<={4'b0,cam_f};
   values[3]<={4'b0,wr_f};values[4]<=i_hdmi_width;values[5]<=i_hdmi_height;
-  values[6]<={4'b0,hdmi_f};
+  values[6]<={4'b0,hdmi_f};values[7]<={4'b0,i_black_g};
   binary<=cam_w;bcd<=0;bits_left<=12;field<=0;busy<=1;
  end else if (busy) begin
   if (bits_left!=0) begin
@@ -64,7 +71,7 @@ always @(posedge clk or negedge rst_n) begin
    bits_left<=bits_left-1'b1;
   end else begin
    digits[field]<=bcd;
-   if (field==6) busy<=0;
+   if (field==7) busy<=0;
    else begin field<=field+1'b1;binary<=values[field+1'b1];bcd<=0;bits_left<=12;end
   end
  end
@@ -76,11 +83,12 @@ function [7:0] decchar;
 endfunction
 wire camera_row=(y>=16 && y<32);
 wire hdmi_row=(y>=80 && y<96);
-wire text_area=(camera_row || hdmi_row) && x>=16 && x<352;
+wire colour_row=(y>=112 && y<128);
+wire text_area=(camera_row || hdmi_row || colour_row) && x>=16 && x<352;
 wire [11:0] dx=x-12'd16;
 wire [4:0] slot=dx/12;
 wire [3:0] col=(dx%12)>>1;
-wire [3:0] row=(camera_row ? (y-12'd16) : (y-12'd80))>>1;
+wire [3:0] row=(camera_row ? (y-12'd16) : hdmi_row ? (y-12'd80) : (y-12'd112))>>1;
 reg [7:0] ch;
 always @(*) begin
  ch=8'd32;
@@ -96,7 +104,7 @@ always @(*) begin
    24,25:ch=decchar(digits[3],slot-22);
    default:ch=8'd32;
   endcase
- end else begin
+ end else if (hdmi_row) begin
   case(slot)
    0:ch="H";1:ch="D";2:ch="M";3:ch="I";
    5,6,7,8:ch=decchar(digits[4],slot-5);
@@ -104,6 +112,15 @@ always @(*) begin
    10,11,12,13:ch=decchar(digits[5],slot-10);
    15,16:ch=decchar(digits[6],slot-13);
    18:ch="F";19:ch="P";20:ch="S";
+   default:ch=8'd32;
+  endcase
+ end else begin
+  case(slot)
+   0:ch="W";1:ch="B";
+   3:ch=wb_locked?"L":"C";4:ch=wb_locked?"O":"A";
+   5:ch=wb_locked?"C":"L";6:ch=wb_locked?"K":" ";
+   9:ch="B";10:ch="L";
+   12,13,14:ch=decchar(digits[7],slot-11);
    default:ch=8'd32;
   endcase
  end
@@ -133,6 +150,10 @@ function [34:0] font;
    8'd83:font=35'b01111100001000001110000010000111110;
    8'd87:font=35'b10001100011000110101101011101110001;
    8'd82:font=35'b11110100011000111110101001001010001;
+   8'd66:font=35'b11110100011000111110100011000111110;
+   8'd76:font=35'b10000100001000010000100001000011111;
+   8'd79:font=35'b01110100011000110001100011000101110;
+   8'd75:font=35'b10001100101010011000101001001010001;
    8'd120:font=35'b00000000001000101010001000101010001;
    default:font=0;
   endcase

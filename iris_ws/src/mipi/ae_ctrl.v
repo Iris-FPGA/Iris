@@ -1,42 +1,52 @@
 //=====================================================================
-// ae_ctrl: MANUAL (fixed) exposure control for SC431HAI.
+// ae_ctrl: auto exposure for SC431HAI (the sensor has no on-chip AEC)
+//   with P-mode style EXPOSURE COMPENSATION on the board keys.
 //
-//   No automatic loop: exposure is a fixed register value that the
-//   user raises / lowers with two board keys (active-low, debounced
-//   pulses from key_pulse):
-//     i_exp_up -> exp_val += EXP_STEP   (clamped to EXP_MAX)
-//     i_exp_dn -> exp_val -= EXP_STEP   (clamped to EXP_MIN)
-//   Gain is written once to a known 1.0x at bring-up and never touched
-//   again (sensor gain defaults are not published).
+//   Statistics: per-frame R/G/B sums from awb_stats (74.375 MHz).
+//   A toggle in the stats clock domain marks "sums latched at VS";
+//   this module (27 MHz, same domain as the I2C core) re-synchronises
+//   the toggle (2FF) and samples the sums (quasi-static all frame).
 //
-//   Key pulses that arrive while a write sequence is in flight are
-//   latched (req_up/req_dn) and consumed on the next S_EVAL, so no
-//   press is lost. At a clamped limit the request is dropped without
-//   touching the bus (no pointless writes while holding the key).
+//   Mean luma  = sum3 / (4*NPX),  sum3 = sum_r + 2*sum_g + sum_b.
+//   Compared against thr_r = target * 4 * NPX without a divider.
+//
+//   Control law (guide 8.4: exposure first, gain only at the limit):
+//     too dark : exp += step   (until EXP_MAX, then gain index +1)
+//     too bright: exp -= step   (until EXP_MIN, then gain index -1)
+//   step = clamp(exp>>4, 8, 128)  (~6.25% of current exposure,
+//   below 2x the 5% dead-band -> no limit-cycle flicker).
+//
+//   Exposure compensation (keys, like camera P-mode EV):
+//     i_tgt_up -> target_q += 4   (brighter image target)
+//     i_tgt_dn -> target_q -= 4
+//   target_q in [16,200] (init TARGET=72); thr_r mirrors it via
+//   +/-THR_STEP so no multiplier is needed at runtime.
 //
 //   Writes go through the shared I2C byte engine as a 3rd requester
 //   (i2c_subsystem): group-hold wrapped sequences
 //     exposure: 0x3812=00 | 3e00,3e01,3e02 | 0x3812=30   (5 writes)
-//     gain    : 0x3812=00 | 3e08,3e09      | 0x3812=30   (4 writes, boot)
-//   Write results take effect frame N+2 (datasheet 2.4.2).
+//     gain    : 0x3812=00 | 3e08,3e09      | 0x3812=30   (4 writes)
+//   After boot an explicit 1.0x gain write runs once (sensor gain
+//   defaults are not published, so make them known).
 //
-//   The per-frame luma sum from awb_stats is still sampled (2FF toggle
-//   handshake from the 74.375 MHz display domain) and exported via
-//   dbg_sum purely as a brightness readout for OSD / UART logging.
+//   Write results take effect frame N+2 (datasheet 2.4.2); HOLDOFF
+//   skips that many stats events after each sequence before re-evaluating.
 //=====================================================================
 
 module ae_ctrl #(
-    parameter [31:0] NPX       = 640 * 720,  // frame size (docs only)
-    parameter [11:0] EXP_INIT  = 12'd512,    // matches ROM 0x3e00-02 = 00/20/00
-    parameter [11:0] EXP_STEP  = 12'd32,     // half-lines per key press
-    parameter [11:0] EXP_MAX   = 12'd2289,   // 2*VTS-11, VTS = 1150
+    parameter [31:0] NPX       = 640 * 720,  // DE pixels per frame
+    parameter [7:0]  TARGET    = 8'd72,       // INITIAL target mean luma (0..255);
+                                              // runtime EV-comp via i_tgt_up/dn
+    parameter [3:0]  HOLDOFF   = 4'd3,        // stats events skipped after a write
+    parameter [11:0] EXP_INIT  = 12'd512,     // matches ROM 0x3e00-02 = 00/20/00
+    parameter [11:0] EXP_MAX   = 12'd2289,    // 2*VTS-11, VTS = 1150
     parameter [11:0] EXP_MIN   = 12'd4
 )(
     input  wire        clk,          // 27 MHz (I2C / gpio_clk_27m domain)
     input  wire        rst_n,
     input  wire        init_done,    // ROM table done && sensor id ok
 
-    // statistics from awb_stats domain (74.375 MHz) -- readout only
+    // statistics from awb_stats domain (74.375 MHz)
     input  wire        stats_tgl,    // toggles once per frame at VS
     input  wire [31:0] sum_r,
     input  wire [31:0] sum_g,
@@ -50,24 +60,47 @@ module ae_ctrl #(
     input  wire        ae_busy,      // ROM / ID transaction in flight
     input  wire        ae_done,      // one write completed (pulse)
 
-    // manual exposure adjust (debounced key pulses)
-    input  wire        i_exp_up,     // 1-cycle: raise exposure by EXP_STEP
-    input  wire        i_exp_dn,     // 1-cycle: lower exposure by EXP_STEP
+    // exposure-compensation adjust (debounced key pulses)
+    input  wire        i_tgt_up,     // 1-cycle: raise target by TGT_STEP
+    input  wire        i_tgt_dn,     // 1-cycle: lower target by TGT_STEP
 
     // debug / OSD outputs (this clock domain, quasi-static)
     output wire [1:0]  dbg_state,    // S_INIT/S_EVAL/S_ISSUE/S_WAIT
     output wire [11:0] dbg_exp,      // current exposure (half-lines)
-    output wire [3:0]  dbg_gain,     // gain LUT index (fixed at 0 = 1.0x)
-    output wire [31:0] dbg_sum,      // last latched sum3 (brightness)
+    output wire [3:0]  dbg_gain,     // gain LUT index
+    output wire [31:0] dbg_sum,      // last latched sum3
     output wire [7:0]  dbg_writes,   // completed write sequences
-    output wire [7:0]  dbg_touts     // sequence timeouts
+    output wire [7:0]  dbg_touts,    // sequence timeouts
+    output wire [7:0]  dbg_target    // current exposure-comp target luma
 );
+
+//---------------------------------------------------------------------
+// thresholds: runtime-adjustable (EV comp keys), thr_r updated by
+// +/-THR_STEP so no runtime multiplier is needed
+//   THR_UNIT = 4*NPX, thr_r = target * 4 * NPX
+//   (reset value folds TARGET * THR_UNIT at elaboration time)
+//---------------------------------------------------------------------
+localparam [31:0] THR_UNIT = 32'd4 * NPX;
+localparam [31:0] THR_STEP = THR_UNIT * 32'd4;   // +/-4 target units / press
+localparam [7:0]  TGT_STEP = 8'd4;
+localparam [7:0]  TGT_MIN  = 8'd16;
+localparam [7:0]  TGT_MAX  = 8'd200;
+
+reg [7:0]  target_q;                // current target luma (EV comp value)
+reg [31:0] thr_r;                   // target * 4 * NPX
+
+assign dbg_target = target_q;
+
+reg [31:0] luma_sum;               // sum3 latched per frame
+wire [31:0] dead_r = thr_r >> 5;    // dead-band = 5% of target
+wire too_dark   = luma_sum < (thr_r - dead_r);
+wire too_bright = luma_sum > (thr_r + dead_r);
 
 //---------------------------------------------------------------------
 // sequence / FSM state
 //---------------------------------------------------------------------
 localparam [1:0] S_INIT  = 2'd0;   // wait for sensor bring-up, then gain 1.0x
-localparam [1:0] S_EVAL  = 2'd1;   // consume pending key requests
+localparam [1:0] S_EVAL  = 2'd1;   // decide next action
 localparam [1:0] S_ISSUE = 2'd2;   // wait bus idle, pulse ae_wr_en
 localparam [1:0] S_WAIT  = 2'd3;   // wait ae_done / timeout
 
@@ -77,14 +110,14 @@ reg [2:0]  seq_len;                // 5 (exposure) or 4 (gain)
 reg        seq_gain;               // 1 = gain sequence
 reg [19:0] to_cnt;                 // ~19.4 ms write timeout @27 MHz
 
-reg [31:0] luma_sum;               // sum3 latched per frame (readout)
+reg        pending;                // fresh stats available
+reg [3:0]  holdoff;
 reg [2:0]  tgl_sync;
 
 reg [11:0] exp_val;                // current exposure, half-lines
 reg [3:0]  gain_idx;               // index into the ANA gain LUT
 reg [7:0]  n_writes;               // completed sequences
 reg [7:0]  n_touts;                // timed-out sequences
-reg        req_up, req_dn;         // latched key requests
 
 wire stats_evt = tgl_sync[2] ^ tgl_sync[1];
 
@@ -95,9 +128,13 @@ assign dbg_sum    = luma_sum;
 assign dbg_writes = n_writes;
 assign dbg_touts  = n_touts;
 
+// step = clamp(exp>>4, 8, 128)  (6.25% of current exposure)
+wire [11:0] step_raw = exp_val >> 4;
+wire [11:0] step     = (step_raw < 12'd8)   ? 12'd8 :
+                       (step_raw > 12'd128) ? 12'd128 : step_raw;
+
 //---------------------------------------------------------------------
-// ANA gain LUT (datasheet table 2-7) -- only index 0 (1.0x) is ever
-// used in manual mode; the rest kept for future manual-gain support.
+// ANA gain LUT (datasheet table 2-7, ~x1.3-1.5 per step)
 //---------------------------------------------------------------------
 reg [7:0] lut_ana, lut_fine;
 always @* begin
@@ -118,6 +155,7 @@ always @* begin
         default: begin lut_ana = 8'h00; lut_fine = 8'h20; end
     endcase
 end
+localparam [3:0] GAIN_MAX = 4'd12;
 
 //---------------------------------------------------------------------
 // sequence entry decode (combinational; the inputs only change at
@@ -142,11 +180,8 @@ always @* begin
         end
     end else begin
         case (seq_pos)
-            // Sensor exposure is {3e00[3:0],3e01,3e02[7:4]} in half-lines.
-            // exp_val is 12 bits: its upper nibble belongs in 3e01,
-            // while 3e00 must be zero. The old packing multiplied it by 16.
-            3'd1: begin wr_addr_c = 16'h3e00; wr_data_c = 8'h00;              end
-            3'd2: begin wr_addr_c = 16'h3e01; wr_data_c = exp_val[11:4];       end
+            3'd1: begin wr_addr_c = 16'h3e00; wr_data_c = 8'h00; end
+            3'd2: begin wr_addr_c = 16'h3e01; wr_data_c = exp_val[11:4];          end
             3'd3: begin wr_addr_c = 16'h3e02; wr_data_c = {exp_val[3:0], 4'h0};   end
             default: begin wr_addr_c = 16'h3812; wr_data_c = 8'h30;              end
         endcase
@@ -156,7 +191,8 @@ assign ae_addr = wr_addr_c;
 assign ae_data = wr_data_c;
 
 //---------------------------------------------------------------------
-// main FSM (single block owns req_up/req_dn: no multi-driver)
+// main FSM (single block owns pending/holdoff/target_q/thr_r:
+// no multi-driver)
 //---------------------------------------------------------------------
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
@@ -172,14 +208,28 @@ always @(posedge clk or negedge rst_n) begin
         seq_gain <= 1'b1;
         to_cnt   <= 20'd0;
         luma_sum <= 32'd0;
+        pending  <= 1'b0;
+        holdoff  <= 4'd0;
         tgl_sync <= 3'b000;
-        req_up   <= 1'b0;
-        req_dn   <= 1'b0;
+        target_q <= TARGET;
+        thr_r    <= TARGET * THR_UNIT;           // constant-folded
     end else begin
-        //--- stats CDC (2FF toggle sync); readout only ---
+        //--- stats CDC (2FF toggle sync) ---
         tgl_sync <= {tgl_sync[1:0], stats_tgl};
-        if (stats_evt)
+        if (stats_evt) begin
             luma_sum <= sum_r + {sum_g, 1'b0} + sum_b;
+            pending  <= 1'b1;
+            if (holdoff != 4'd0) holdoff <= holdoff - 4'd1;
+        end
+
+        //--- exposure compensation (key pulses): thr_r mirrors target_q ---
+        if (i_tgt_up && (target_q <= TGT_MAX - TGT_STEP)) begin
+            target_q <= target_q + TGT_STEP;
+            thr_r    <= thr_r + THR_STEP;
+        end else if (i_tgt_dn && (target_q >= TGT_MIN + TGT_STEP)) begin
+            target_q <= target_q - TGT_STEP;
+            thr_r    <= thr_r - THR_STEP;
+        end
 
         ae_wr_en <= 1'b0;                          // default: 1-cycle pulse
 
@@ -199,31 +249,51 @@ always @(posedge clk or negedge rst_n) begin
 
         //---------------------------------------------------------
         S_EVAL: begin
-            // consume a pending key request (up has priority)
-            if (req_up) begin
-                req_up <= 1'b0;
-                if (exp_val < EXP_MAX) begin
-                    exp_val  <= (exp_val > EXP_MAX - EXP_STEP) ? EXP_MAX
-                                                               : exp_val + EXP_STEP;
-                    seq_gain <= 1'b0;
-                    seq_len  <= 3'd5;
-                    seq_pos  <= 3'd0;
-                    ae_req   <= 1'b1;
-                    to_cnt   <= 20'd0;
-                    st       <= S_ISSUE;
+            if (init_done && pending && holdoff == 4'd0) begin
+                if (too_dark) begin
+                    if (exp_val < EXP_MAX) begin
+                        exp_val  <= (exp_val > EXP_MAX - step) ? EXP_MAX
+                                                               : exp_val + step;
+                        seq_gain <= 1'b0;
+                        seq_len  <= 3'd5;
+                        seq_pos  <= 3'd0;
+                        ae_req   <= 1'b1;
+                        pending  <= 1'b0;
+                        to_cnt   <= 20'd0;
+                        st       <= S_ISSUE;
+                    end else if (gain_idx < GAIN_MAX) begin
+                        gain_idx <= gain_idx + 4'd1;
+                        seq_gain <= 1'b1;
+                        seq_len  <= 3'd4;
+                        seq_pos  <= 3'd0;
+                        ae_req   <= 1'b1;
+                        pending  <= 1'b0;
+                        to_cnt   <= 20'd0;
+                        st       <= S_ISSUE;
+                    end
+                end else if (too_bright) begin
+                    if (exp_val > EXP_MIN) begin
+                        exp_val  <= (exp_val < EXP_MIN + step) ? EXP_MIN
+                                                               : exp_val - step;
+                        seq_gain <= 1'b0;
+                        seq_len  <= 3'd5;
+                        seq_pos  <= 3'd0;
+                        ae_req   <= 1'b1;
+                        pending  <= 1'b0;
+                        to_cnt   <= 20'd0;
+                        st       <= S_ISSUE;
+                    end else if (gain_idx > 4'd0) begin
+                        gain_idx <= gain_idx - 4'd1;
+                        seq_gain <= 1'b1;
+                        seq_len  <= 3'd4;
+                        seq_pos  <= 3'd0;
+                        ae_req   <= 1'b1;
+                        pending  <= 1'b0;
+                        to_cnt   <= 20'd0;
+                        st       <= S_ISSUE;
+                    end
                 end
-            end else if (req_dn) begin
-                req_dn <= 1'b0;
-                if (exp_val > EXP_MIN) begin
-                    exp_val  <= (exp_val < EXP_MIN + EXP_STEP) ? EXP_MIN
-                                                               : exp_val - EXP_STEP;
-                    seq_gain <= 1'b0;
-                    seq_len  <= 3'd5;
-                    seq_pos  <= 3'd0;
-                    ae_req   <= 1'b1;
-                    to_cnt   <= 20'd0;
-                    st       <= S_ISSUE;
-                end
+                // inside the dead-band: keep pending, re-check next frame
             end
         end
 
@@ -241,9 +311,10 @@ always @(posedge clk or negedge rst_n) begin
             to_cnt <= to_cnt + 20'd1;
             if (ae_done) begin
                 if (seq_pos + 3'd1 >= seq_len) begin
-                    ae_req   <= 1'b0;
+                    ae_req  <= 1'b0;
+                    holdoff <= HOLDOFF;
                     n_writes <= n_writes + 8'd1;
-                    st       <= S_EVAL;
+                    st      <= S_EVAL;
                 end else begin
                     seq_pos <= seq_pos + 3'd1;
                     st      <= S_ISSUE;
@@ -251,6 +322,7 @@ always @(posedge clk or negedge rst_n) begin
             end else if (to_cnt == 20'hFFFFF) begin
                 // ~19.4 ms without completion: give up on this sequence
                 ae_req  <= 1'b0;
+                holdoff <= HOLDOFF;
                 n_touts <= n_touts + 8'd1;
                 st      <= S_EVAL;
             end
@@ -258,11 +330,6 @@ always @(posedge clk or negedge rst_n) begin
 
         default: st <= S_INIT;
         endcase
-
-        //--- latch key pulses (after the case: a pulse coinciding with
-        //    a consume is kept, presses are never lost) ---
-        if (i_exp_up) req_up <= 1'b1;
-        if (i_exp_dn) req_dn <= 1'b1;
     end
 end
 

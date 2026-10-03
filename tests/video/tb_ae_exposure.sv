@@ -16,7 +16,7 @@ module tb_ae_exposure;
   .clk(clk),.rst_n(rst),.init_done(1'b1),.stats_tgl(tgl),
   .sum_r(sum),.sum_g(sum),.sum_b(sum),.ae_req(req),.ae_wr_en(wr),
   .ae_addr(addr),.ae_data(data),.ae_busy(1'b0),.ae_done(ack),
-  .i_exp_up(up),.i_exp_dn(dn),.dbg_exp(exp),.dbg_gain(gain),.dbg_state(st));
+  .i_tgt_up(up),.i_tgt_dn(dn),.dbg_exp(exp),.dbg_gain(gain),.dbg_state(st));
  always @(posedge clk)begin
   ack<=wr;
   if(rst&&wr)begin
@@ -45,21 +45,14 @@ module tb_ae_exposure;
  end
  initial begin
   repeat(5)@(negedge clk);rst=1;
-  // Brightness statistics alone must not change the manual exposure.
-  for(t=0;t<1000;t=t+1)begin
+  // Automatic exposure follows changing brightness, preserving sensor units.
+  for(t=0;t<60000;t=t+1)begin
    if(t%70==0)tgl=~tgl;
-   sum=(t<500)?0:255000;
-   @(negedge clk);
-  end
-  if(exp!=512||sequences!=0)$fatal(1,"Manual exposure changed without a key request");
-  // Key requests sweep exposure to both frame-safe limits.
-  for(t=0;t<16000;t=t+1)begin
-   if(t%70==0)tgl=~tgl;
-   sum=(t<7000)?0:255000;
-   up=(t<7000 && t%70==0);dn=(t>=7000 && t%70==0);
+   sum=(t<25000)?0:1000000;
+   up=0;dn=0;
    @(negedge clk);
   end
   if(!high_seen||!low_seen||sequences<60)$fatal(1,"Exposure sweep incomplete %0d %0d %0d",high_seen,low_seen,sequences);
-  $display("PASS exposure sensor contract: I2C sequences decode to controller half-lines, 4..2289, group hold and manual key control");$finish;
+  $display("PASS exposure sensor contract: I2C sequences decode to controller half-lines, 4..2289, group hold and automatic exposure");$finish;
  end
 endmodule

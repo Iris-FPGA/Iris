@@ -1,0 +1,9 @@
+WARNING: The system libstdc++.so is more recent (version 36) than the copy shipped with the Efinity software (version 32).
+The Efinity software may not function correctly on this system.
+To avoid potential compatibility issues, please back up and remove "/home/noir/Applications/efinity/2026.1/lib/libstdc++.so.6"
+
+==> 加载 JTAG Bridge 位流：/home/noir/Applications/efinity/2026.1/pgm/fli/titanium/u10660A79.bit
+****** Python exception running: /home/noir/Applications/efinity/2026.1/scripts/efx_run.py --prj iris_ws -f program --pgm_opts mode=jtag --pgm_opts source=/home/noir/Applications/efinity/2026.1/pgm/fli/titanium/u10660A79.bit
+[91m    :	FAIL [0m
+An exception occurred: list index out of range
+❌ 加载 JTAG Bridge 位流失败

@@ -1,0 +1,39 @@
+WARNING: The system libstdc++.so is more recent (version 36) than the copy shipped with the Efinity software (version 32).
+The Efinity software may not function correctly on this system.
+To avoid potential compatibility issues, please back up and remove "/home/noir/Applications/efinity/2026.1/lib/libstdc++.so.6"
+
+setup: minimum +0.014 ns (23 relationships)
+hold: minimum +0.026 ns (23 relationships)
+==> 加载 JTAG Bridge 位流：/home/noir/Applications/efinity/2026.1/pgm/fli/titanium/u10660A79.bit
+Programming using Board Profile: Generic Board Profile Using FT4232H
+Connecting to JTAG_TAP: efx_ti
+jtag programming started!
+JTAG Programming on ftdi://0x0403:0x6011:1:c/2
+Programming '/home/noir/Applications/efinity/2026.1/pgm/fli/titanium/u10660A79.bit' via JTAG at freq 3.0 MHz
+Device ID read from JTAG: 0x10660A79
+... finished with JTAG programming
+==> 烧录 mode=jtag_bridge
+Programming using Board Profile: Generic Board Profile Using FT4232H
+Connecting to JTAG_TAP: efx_ti
+Connecting to JTAG_TAP: efx_ti
+Flash device: Winbond W25Q64 8 MiB (JEDEC ID: 0xEF6017) @ JTAG freq 3.0 MHz
+Unlock all sectors for write.
+Erasing 688 KiB from flash @ 0x00000000 (may take a while...)
+Finished erase in 4 seconds
+Writing 686 KiB to flash @ 0x00000000 ...
+Finished write in 2 seconds
+Reading 686 KiB from flash @ 0x00000000 ...
+Finished read in 1 seconds
+ERROR: Flash verify unsuccessful... mismatch found
+retry program using max clk ...
+Erasing 688 KiB from flash @ 0x00000000 (may take a while...)
+Finished erase in 4 seconds
+Writing 686 KiB to flash @ 0x00000000 ...
+Finished write in 10 seconds
+Reading 686 KiB from flash @ 0x00000000 ...
+Finished read in 1 seconds
+Flash verify successful
+Restore Write-protect status register.
+JTAG2SPI programming...done
+烧录完成
+提示：请断电重上电，从 flash 启动刚烧入的设计

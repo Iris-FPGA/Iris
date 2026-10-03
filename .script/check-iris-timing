@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+"""Fail closed before generating/programming firmware if setup/hold misses timing."""
+import re,sys
+from pathlib import Path
+if len(sys.argv)!=2:raise SystemExit('Usage: check-iris-timing <Efinity timing report>')
+s=Path(sys.argv[1]).read_text()
+try:
+ a=s.index('Setup (Max) Clock Relationship');b=s.index('NOTE:',a)
+ setup,hold=s[a:b].split('Hold (Min) Clock Relationship')
+except ValueError:raise SystemExit('Timing report has no complete setup/hold summary')
+rx=r'^\S+\s+\S+\s+[-\d.]+\s+([-\d.]+)\s+\(.*\)$'
+values=[]
+for label,section in [('setup',setup),('hold',hold)]:
+ slack=[float(v) for v in re.findall(rx,section,re.M)]
+ if not slack:raise SystemExit('Missing '+label+' timing relationships')
+ print(f'{label}: minimum {min(slack):+.3f} ns ({len(slack)} relationships)')
+ values+=slack
+if min(values)<0:raise SystemExit('Timing failed; firmware must not be programmed')

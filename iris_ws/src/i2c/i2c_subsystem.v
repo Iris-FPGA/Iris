@@ -41,6 +41,7 @@ module i2c_subsystem #(
     output wire                             busy,
     output wire                             done,
     output wire                             sensor_id_ok,  // read back 0xCD6B
+    output reg [255:0] sensor_readback, // published only after one complete 32-register scan
     output wire [15:0]                      sensor_dout,   // last two read bytes
 
     // external device ROM
@@ -109,86 +110,67 @@ end
 // sensor ID read-back check (device-agnostic: reads two 8-bit registers
 // at 0x3107/0x3108 after the write table completes and compares 0xCD6B)
 //---------------------------------------------------------------------
-localparam ID_IDLE = 3'd0;
-localparam ID_R0   = 3'd1;
-localparam ID_R1   = 3'd2;
-localparam ID_R2   = 3'd3;
-localparam ID_R3   = 3'd4;
-
-reg        id_req;
-reg [2:0]  id_state;
+localparam ID_IDLE=0, ID_ISSUE=1, ID_WAIT=2;
+reg id_req,id_rd_en;
+reg [1:0] id_state;
+reg [4:0] id_index;
 reg [15:0] id_addr;
-reg        id_rd_en;
-reg [7:0]  id_byte0, id_byte1;
-reg        sensor_id_ok_r;
-
-assign sensor_id_ok  = sensor_id_ok_r;
-assign sensor_dout   = {id_byte1, id_byte0};
-
-// priority mux: id check > ae > auto ROM.
-// IMPORTANT: id must win over ae. The ID loop restarts the same cycle AE
-// may assert ae_req (right after sensor_id_ok latches); if ae masked the
-// id rd_en pulse the ID FSM would wait rd_done forever while AE waits
-// !busy -> deadlock with zero AE writes. AE only pulses wr_en after
-// observing !busy (run|id_req), so id/ae requests never overlap in the
-// wr direction; run=0 after boot so ROM wr/rd_en are already low.
-wire [I2C_REG_ADDR_WIDTH-1:0] blk_addr  = id_req ? id_addr :
-                                           ae_req ? ae_addr : addr;
-wire                          blk_rd_en = id_req ? id_rd_en : rd_en;
-wire                          blk_wr_en = ae_req ? ae_wr_en : wr_en;
-wire [I2C_DATA_WIDTH-1:0]     blk_din   = ae_req ? ae_data : set_data;
-
-assign busy    = run | id_req;
-assign done    = done_r;
-assign ae_done = wr_done & ae_req;
-
-always @(posedge clk or negedge rst_n)
-begin
-    if (~rst_n) begin
-        id_req       <= 1'b0;
-        id_state     <= ID_IDLE;
-        id_addr      <= 16'd0;
-        id_rd_en     <= 1'b0;
-        id_byte0     <= 8'd0;
-        id_byte1     <= 8'd0;
-        sensor_id_ok_r <= 1'b0;
+reg [7:0] id_byte0,id_byte1;
+reg sensor_id_ok_r;
+reg [255:0] readback_work;
+assign sensor_id_ok=sensor_id_ok_r;
+assign sensor_dout={id_byte1,id_byte0};
+function [15:0] readback_addr;
+ input [4:0] n;
+ begin
+  case(n)
+   0:readback_addr=16'h3107;1:readback_addr=16'h3108;
+   24:readback_addr=16'h301f;25:readback_addr=16'h3018;
+   26:readback_addr=16'h3031;27:readback_addr=16'h3037;
+   28:readback_addr=16'h3e00;29:readback_addr=16'h3e01;30:readback_addr=16'h3e02;
+   31:readback_addr=16'h0100;
+   default:begin
+    if(n<10)readback_addr=16'h3208+{11'd0,n}-16'd2;
+    else if(n<14)readback_addr=16'h3210+{11'd0,n}-16'd10;
+    else if(n<19)readback_addr=16'h36e9+{11'd0,n}-16'd14;
+    else readback_addr=16'h37f9+{11'd0,n}-16'd19;
+   end
+  endcase
+ end
+endfunction
+// Diagnostic reads own the byte engine while busy. AE asserts its request
+// then waits busy=0; the scanner never starts a new pass with AE pending.
+wire [I2C_REG_ADDR_WIDTH-1:0] blk_addr=id_req?id_addr:ae_req?ae_addr:addr;
+wire blk_rd_en=id_req?id_rd_en:rd_en;
+wire blk_wr_en=ae_req?ae_wr_en:wr_en;
+wire [I2C_DATA_WIDTH-1:0] blk_din=ae_req?ae_data:set_data;
+assign busy=run|id_req;
+assign done=done_r;
+assign ae_done=wr_done & ae_req;
+always @(posedge clk or negedge rst_n)begin
+ if(!rst_n)begin
+  id_req<=0;id_rd_en<=0;id_state<=ID_IDLE;id_index<=0;id_addr<=0;
+  id_byte0<=0;id_byte1<=0;sensor_id_ok_r<=0;readback_work<=0;sensor_readback<=0;
+ end else begin
+  id_rd_en<=0;
+  case(id_state)
+   ID_IDLE:if(done_r && !mode && !ae_req)begin
+    id_req<=1;id_index<=0;id_addr<=readback_addr(0);id_rd_en<=1;id_state<=ID_ISSUE;
+   end
+   ID_ISSUE:id_state<=ID_WAIT;
+   ID_WAIT:if(rd_done)begin
+    readback_work[255-id_index*8-:8]<=get_data;
+    if(id_index==0)id_byte0<=get_data;
+    if(id_index==1)begin id_byte1<=get_data;sensor_id_ok_r<=(id_byte0==8'hcd && get_data==8'h6b);end
+    if(id_index==31)begin
+     sensor_readback<={readback_work[255:8],get_data};id_req<=0;id_state<=ID_IDLE;
     end else begin
-        case (id_state)
-            ID_IDLE: begin
-                if (done_r && !mode && !ae_req) begin
-                    id_req   <= 1'b1;
-                    id_addr  <= 16'h3107;
-                    id_rd_en <= 1'b1;
-                    id_state <= ID_R0;
-                end
-            end
-            ID_R0: begin
-                id_rd_en <= 1'b0;
-                id_state <= ID_R1;
-            end
-            ID_R1: begin
-                if (rd_done) begin
-                    id_byte0 <= get_data;
-                    id_addr  <= 16'h3108;
-                    id_rd_en <= 1'b1;
-                    id_state <= ID_R2;
-                end
-            end
-            ID_R2: begin
-                id_rd_en <= 1'b0;
-                id_state <= ID_R3;
-            end
-            ID_R3: begin
-                if (rd_done) begin
-                    id_byte1       <= get_data;
-                    sensor_id_ok_r <= (id_byte0 == 8'hCD) && (get_data == 8'h6B);
-                    id_req         <= 1'b0;
-                    id_state       <= ID_IDLE;
-                end
-            end
-            default: id_state <= ID_IDLE;
-        endcase
+     id_index<=id_index+1'b1;id_addr<=readback_addr(id_index+1'b1);id_rd_en<=1;id_state<=ID_ISSUE;
     end
+   end
+   default:id_state<=ID_IDLE;
+  endcase
+ end
 end
 
 i2c_master_reg_set #(

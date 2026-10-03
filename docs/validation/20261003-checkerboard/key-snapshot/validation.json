@@ -1,0 +1,13 @@
+{
+  "trigger": "physical KEY2",
+  "read_command": "UART C",
+  "resolution": [
+    96,
+    54
+  ],
+  "pixels_before_colour_correction": true,
+  "crc_verified_reads": 2,
+  "identical_frozen_reads": true,
+  "sha256": "3cd0736ec1f07999f98286e6cc08bb2f00c50f5b88f7e38403f39e3a1ecd97a3",
+  "checkerboard_visible": true
+}

@@ -385,34 +385,36 @@ assign fb_bid = fb_bid8[5:0];
 //=====================================================================
 wire        dbg_vs_o, dbg_hs_o, dbg_de_o, dbg_val_o;
 wire [47:0] dbg_rgb;
-wire [2:0]  awb_r_gain, awb_g_gain, awb_b_gain;
+wire [9:0] awb_r_gain, awb_g_gain, awb_b_gain;
+wire [7:0] black_r, black_g, black_b;
+wire [31:0] wb_r, wb_g, wb_b;
+wire [23:0] wb_pixels, colour_pixels;
+wire wb_locked;
 wire [31:0] awb_sum_r, awb_sum_g, awb_sum_b;
 wire        awb_upd;
 
-// Gray-world AWB: stats on debayer RGB, gains feed rgb_gain (same clock).
+// Filtered one-shot white balance. Locked gains survive exposure/scene changes.
 awb_stats u_awb_stats (
     .clk     (hdmi_tx_half_clk),
     .rst_n   (video_rst_n),
     .i_de    (dbg_de_o),
     .i_vs    (dbg_vs_o),
     .i_rgb   (dbg_rgb),
+    .i_black_r(black_r), .i_black_g(black_g), .i_black_b(black_b),
+    .o_wb_r(wb_r), .o_wb_g(wb_g), .o_wb_b(wb_b),
+    .o_wb_pixels(wb_pixels), .o_pixels(colour_pixels),
     .o_sum_r (awb_sum_r),
     .o_sum_g (awb_sum_g),
     .o_sum_b (awb_sum_b),
     .o_upd   (awb_upd)
 );
 
-awb_ctrl u_awb_ctrl (
-    .clk      (hdmi_tx_half_clk),
-    .rst_n    (video_rst_n),
-    .i_upd    (awb_upd),
-    .i_sum_r  (awb_sum_r),
-    .i_sum_g  (awb_sum_g),
-    .i_sum_b  (awb_sum_b),
-    .o_r_gain (awb_r_gain),
-    .o_g_gain (awb_g_gain),
-    .o_b_gain (awb_b_gain)
+// Fixed colour coefficients are part of the FPGA image stored in Flash.
+camera_colour_profile u_colour_profile (
+ .r_gain(awb_r_gain),.g_gain(awb_g_gain),.b_gain(awb_b_gain),
+ .black_r(black_r),.black_g(black_g),.black_b(black_b)
 );
+assign wb_locked=1'b1;
 
 // stats -> AE (27 MHz): toggle handshake across clock domains.
 // The sums only change at VS together with awb_upd, so they are
@@ -449,6 +451,7 @@ rgb_display_2px u_display_color (
     .clk(hdmi_tx_half_clk), .rst_n(video_rst_n),
     .i_hs(dbg_hs_o), .i_vs(dbg_vs_o), .i_de(dbg_de_o), .i_rgb(dbg_rgb),
     .i_r_gain(awb_r_gain), .i_g_gain(awb_g_gain), .i_b_gain(awb_b_gain),
+    .i_black_r(black_r), .i_black_g(black_g), .i_black_b(black_b),
     .o_hs(display_hs), .o_vs(display_vs), .o_de(display_de), .o_rgb(display_rgb)
 );
 wire [50:0] af_din = {display_hs, display_vs, display_de, display_rgb};
@@ -566,8 +569,9 @@ wire [7:0]  ae_touts;
 // brightness readout for OSD/UART: mean luma ~ sum3/(4*NPX) = sum3>>23
 // (NPX=1920*1080 -> 4*NPX = 8294400 ~ 2^23; sum3 < 2^31 so [30:23] fits)
 wire [7:0]  ae_luma = ae_sum[30:23];
-wire        key0_dn;          // KEY0 pressed: lower exposure
-wire        key1_up;          // KEY1 pressed: raise exposure
+wire [7:0]  ae_target;         // exposure-compensation target (set by keys)
+wire        key0_dn;          // KEY0 pressed: exposure comp down (darker)
+wire        key1_up;          // KEY1 pressed: exposure comp up (brighter)
 
 wire [23:0] px_osd;
 wire [11:0] cam_width, cam_height, hdmi_width, hdmi_height;
@@ -599,6 +603,7 @@ osd_video_status u_video_status (
     .i_cam_width(cam_width), .i_cam_height(cam_height), .i_cam_toggle(cam_size_toggle),
     .i_hdmi_width(hdmi_width), .i_hdmi_height(hdmi_height),
     .i_cam_fps(sens_fps), .i_wr_fps(wr_fps), .i_hdmi_fps(hdmi_fps),
+    .i_wb_locked(wb_locked), .i_black_g(black_g),
     .i_cam_fps_upd(sens_upd), .i_wr_fps_upd(wr_upd), .i_hdmi_fps_upd(hdmi_upd),
     .o_rgb(px_osd)
 );
@@ -620,6 +625,7 @@ osd_ae #(
     .i_state   (ae_state),
     .i_writes  (ae_writes),
     .i_luma    (ae_luma),
+    .i_target  (ae_target),
     .o_rgb     (px_osd_ae)
 );
 
@@ -659,6 +665,22 @@ assign tmds_data0_o = ~tmds_data0;
 assign tmds_data1_o = ~tmds_data1;
 assign tmds_data2_o = ~tmds_data2;
 
+// Sensor byte-clock frequency, Gray CDC with consecutive 1 s snapshots.
+reg [31:0] cam_period_count,cam_period_cycles;
+reg cam_vs_previous;
+always @(posedge core_clk or negedge video_rst_n)begin
+ if(!video_rst_n)begin cam_period_count<=0;cam_period_cycles<=0;cam_vs_previous<=0;end
+ else begin
+  cam_vs_previous<=vs_sync[2];
+  if(vs_sync[2] && !cam_vs_previous)begin cam_period_cycles<=cam_period_count+1'b1;cam_period_count<=0;end
+  else cam_period_count<=cam_period_count+1'b1;
+ end
+end
+wire [31:0] sensor_byte_hz;
+clock_frequency_meter u_sensor_byte_meter (
+ .i_clock(i_cam_ck_CLKOUT),.i_ref_clock(core_clk),.rst_n(video_rst_n),.o_hz(sensor_byte_hz)
+);
+
 //=====================================================================
 // UART: RX echo + AE status log injection (ae_uart_log wins while a
 // line is in progress; the echo FIFO is gated off then and buffered)
@@ -681,10 +703,22 @@ wire        fifo_act;
 // camera bring-up status (driven by u_sc431hai_init further down)
 wire        sc431hai_done;
 wire        sensor_id_ok;
+wire [255:0] sensor_readback;
 
-assign tx_valid  = log_dv | fifo_dv;
-assign tx_data   = log_dv ? log_data : fifo_data;
-assign fifo_pop  = tx_req & (~RdEmpty) & (~log_gate);
+wire cal_dv,cal_gate,cal_ready,capture_key;
+key_pulse #(.REP_MS(0)) u_capture_key (
+ .clk(gpio_clk_27m),.rst_n(video_rst_n),.key_in(key_i[2]),.pulse(capture_key)
+);
+wire [7:0] cal_data;
+colour_capture u_colour_capture (
+ .video_clk(hdmi_tx_half_clk),.uart_clk(gpio_clk_27m),.rst_n(video_rst_n),
+ .i_vs(dbg_vs_o),.i_de(dbg_de_o),.i_rgb(dbg_rgb),
+ .i_capture(capture_key),.rx_valid(rx_valid),.rx_data(rx_data),.log_active(log_gate),.tx_req(tx_req),
+ .tx_valid(cal_dv),.tx_data(cal_data),.tx_gate(cal_gate),.o_ready(cal_ready)
+);
+assign tx_valid  = cal_dv | log_dv | fifo_dv;
+assign tx_data   = cal_dv ? cal_data : log_dv ? log_data : fifo_data;
+assign fifo_pop  = tx_req & (~RdEmpty) & (~log_gate) & (~cal_gate);
 assign fifo_act  = fifo_pop | fifo_dv;
 
 DC_FIFO #(
@@ -694,7 +728,7 @@ DC_FIFO #(
 ) DC_FIFO_inst (
     .Reset      (1'b0),
     .WrClk      (gpio_clk_27m),
-    .WrEn       (rx_valid),
+    .WrEn       (rx_valid && rx_data!="C"),
     .WrDNum     (),
     .WrFull     (),
     .WrData     (rx_data),
@@ -725,6 +759,7 @@ uart_rx_tx #(
 );
 
 ae_uart_log u_ae_log (
+    .i_pause   (cal_gate),
     .clk       (gpio_clk_27m),
     .rst_n     (mipi_pll_locked),
     .i_init    (sc431hai_done & sensor_id_ok),
@@ -735,6 +770,10 @@ ae_uart_log u_ae_log (
     .i_writes  (ae_writes),
     .i_touts   (ae_touts),
     .i_luma    (ae_luma),
+    .i_target  (ae_target),
+    .i_sensor_readback(sensor_readback),
+    .i_cam_fps (sens_fps), .i_wr_fps(wr_fps), .i_hdmi_fps(hdmi_fps),
+    .i_byte_hz (sensor_byte_hz), .i_cam_period(cam_period_cycles),
     .tx_req    (tx_req),
     .tx_valid  (log_dv),
     .tx_data   (log_data),
@@ -766,6 +805,7 @@ sc431hai_init u_sc431hai_init
     .sda_padoen_o   (cam_sda_padoen),
     .init_done      (sc431hai_done),
     .sensor_id_ok   (sensor_id_ok),
+    .sensor_readback(sensor_readback),
     .cpu_mode       (1'b0),
     .cpu_addr       (3'd0),
     .cpu_wdata      (8'd0),
@@ -795,17 +835,19 @@ ae_ctrl #(.NPX(1920 * 1080)) u_ae_ctrl (
     .ae_data    (ae_data),
     .ae_busy    (ae_busy),
     .ae_done    (ae_done),
-    .i_exp_up   (key1_up),
-    .i_exp_dn   (key0_dn),
+    .i_tgt_up   (key1_up),
+    .i_tgt_dn   (key0_dn),
     .dbg_state  (ae_state),
     .dbg_exp    (ae_exp),
     .dbg_gain   (ae_gain),
     .dbg_sum    (ae_sum),
     .dbg_writes (ae_writes),
-    .dbg_touts  (ae_touts)
+    .dbg_touts  (ae_touts),
+    .dbg_target (ae_target)
 );
 
-// KEY0 -> lower exposure, KEY1 -> raise exposure (20 ms debounce, 250 ms repeat)
+// KEY0 -> exposure comp down, KEY1 -> exposure comp up (P-mode EV style;
+// 20 ms debounce, 250 ms repeat, target step +/-4)
 key_pulse u_key0 (
     .clk   (gpio_clk_27m),
     .rst_n (mipi_pll_locked),
@@ -818,6 +860,9 @@ key_pulse u_key1 (
     .key_in(key_i[1]),
     .pulse (key1_up)
 );
+
+// KEY2 now freezes a calibration thumbnail; KEY3 has no calibration action.
+
 
 assign io_cam_scl_OE = ~cam_scl_padoen;
 assign io_cam_sda_OE = ~cam_sda_padoen;
@@ -968,10 +1013,10 @@ end
 
 // led[0] = sensor/wr fps mismatch (on => write path dropping frames)
 // led[1] = wr_fps   >= 32        led[3] = sens_fps >= 32
-// led[2] = hdmi_tx_locked
+// led[2] = frozen calibration thumbnail ready (KEY2)
 assign led[0] = (sens_fps != wr_fps);
 assign led[1] = wr_fps[5];
-assign led[2] = hdmi_tx_locked;
+assign led[2] = cal_ready;
 assign led[3] = sens_fps[5];
 
 endmodule

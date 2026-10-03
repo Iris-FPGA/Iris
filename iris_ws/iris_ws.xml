@@ -6,6 +6,9 @@
     </efx:device_info>
     <efx:design_info def_veri_version="verilog_2k" def_vhdl_version="vhdl_2008" unified_flow="false" partition_interface_allowed_off_perimeter="true">
         <efx:top_module name="top" />
+        <efx:design_file name="src/video/debayer/camera_colour_profile.v" version="default" library="default" />
+        <efx:design_file name="src/video/debayer/colour_capture.v" version="default" library="default" />
+        <efx:design_file name="src/video/osd/clock_frequency_meter.v" version="default" library="default" />
         <efx:design_file name="src/top.v" version="default" library="default" />
         <efx:design_file name="src/hdmi/color_bar_rgb.v" version="default" library="default" />
         <efx:design_file name="src/hdmi/reset.v" version="default" library="default" />

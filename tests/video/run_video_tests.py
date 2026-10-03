@@ -64,16 +64,28 @@ with tempfile.TemporaryDirectory(prefix='iris-video-tests-') as d:
     exe=tmp/'display';a=tmp/'display_in.mem';b=tmp/'display_ref.mem';sv=[];rv=[]
     def gamma(v):
         z=v/255
-        return round(255*(12.92*z if z<=.0031308 else 1.055*z**(1/2.4)-.055))
-    for gain in range(2,8):
+        u=12.92*z if z<=.0031308 else 1.055*z**(1/2.4)-.055
+        return round(255*(u+.16*u*(1-u)*(2*u-1)))
+    gains=[128,192,255,256,257,320,448,768]
+    for gain in gains:
         for v in range(256):
             channels=[v,(v*3)%256,255-v,255-v,v,(v*7)%256]
-            codes=[gain,4,9-gain,gain,4,9-gain];rgb=0;out=0
+            # Include neutral greys at unity, black-offset boundaries and gain precision.
+            if gain==256:channels=[v]*6
+            codes=[gain,256,1024-gain]*2
+            codes=[256]*6 if gain==256 else [min(768,c) for c in codes]
+            blacks=[0,(v%5)*4,32] if gain!=256 else [0]*3
+            rgb=0;out=0;toned=[]
             sync=((v%7==0)<<2)|((v%13==0)<<1)|(v%5!=0)
-            for ch,c in zip(channels,codes):rgb=(rgb<<8)|ch;out=(out<<8)|gamma(min(255,(ch*c+2)//4))
-            packed=(sync<<57)|(rgb<<9)|(gain<<6)|(4<<3)|(9-gain)
+            for k,(ch,c) in enumerate(zip(channels,codes)):
+                rgb=(rgb<<8)|ch
+                toned.append(gamma(min(255,(max(0,ch-blacks[k%3])*c+128)//256)))
+            for pixel in [toned[:3],toned[3:]]:
+                y=(pixel[0]+2*pixel[1]+pixel[2]+2)//4
+                for ch in pixel:out=(out<<8)|max(0,min(255,(5*ch-y+2)//4))
+            packed=(sync<<102)|(rgb<<54)|(codes[0]<<44)|(codes[1]<<34)|(codes[2]<<24)|(blacks[0]<<16)|(blacks[1]<<8)|blacks[2]
             sv.append(packed);rv.append((sync<<48)|out)
-    a.write_text(''.join(f'{v:015x}\n' for v in sv));b.write_text(''.join(f'{v:013x}\n' for v in rv))
+    a.write_text(''.join(f'{v:027x}\n' for v in sv));b.write_text(''.join(f'{v:013x}\n' for v in rv))
     compile_tb('tb_display',['tests/video/tb_display.sv','iris_ws/src/video/debayer/rgb_display_2px.v'],exe);simulate(exe,[f'+IN={a}',f'+REF={b}'])
     exe=tmp/'osd'
     compile_tb('tb_osd',['tests/video/tb_osd.sv','iris_ws/src/video/osd/osd_video_status.v'],exe);simulate(exe)
@@ -83,3 +95,16 @@ with tempfile.TemporaryDirectory(prefix='iris-video-tests-') as d:
     compile_tb('tb_write_commit',['tests/video/tb_write_commit.sv','iris_ws/src/ddr/fb/ddr_wr_buffer.v','iris_ws/src/ddr/fb/frame_bank_manager.v'],exe);simulate(exe)
     exe=tmp/'ae'
     compile_tb('tb_ae_exposure',['tests/video/tb_ae_exposure.sv','iris_ws/src/mipi/ae_ctrl.v'],exe);simulate(exe)
+    exe=tmp/'white_balance'
+    compile_tb('tb_white_balance',['tests/video/tb_white_balance.sv','iris_ws/src/video/debayer/awb_ctrl.v','iris_ws/src/video/debayer/awb_stats.v'],exe);simulate(exe)
+    exe=tmp/'sensor_telemetry'
+    compile_tb('tb_sensor_telemetry',['tests/video/tb_sensor_telemetry.sv','iris_ws/src/video/osd/clock_frequency_meter.v','iris_ws/src/uart/ae_uart_log.v','iris_ws/src/uart/uart_tx.v'],exe);simulate(exe)
+    exe=tmp/'sensor_readback'
+    compile_tb('tb_sensor_readback',['tests/video/tb_sensor_readback.sv','iris_ws/src/i2c/i2c_subsystem.v'],exe);simulate(exe)
+    exe=tmp/'sensor_mode'
+    compile_tb('tb_sensor_mode',['tests/video/tb_sensor_mode.sv','iris_ws/src/mipi/sc431hai_i2c_rom.v','iris_ws/src/i2c/i2c_master_reg_set.v'],exe);simulate(exe)
+    exe=tmp/'ae_osd'
+    compile_tb('tb_ae_osd_address',['tests/video/tb_ae_osd_address.sv','iris_ws/src/video/osd/osd_ae.v'],exe);simulate(exe)
+
+    exe=tmp/'colour_capture'
+    compile_tb('tb_colour_capture',['tests/video/tb_colour_capture.sv','iris_ws/src/video/debayer/colour_capture.v','iris_ws/src/uart/uart_tx.v'],exe);simulate(exe)

@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""Capture actual camera timing telemetry from the board's UART."""
+import argparse
+import json
+import os
+import re
+import select
+import termios
+import time
+from pathlib import Path
+
+p = argparse.ArgumentParser(description=__doc__)
+p.add_argument('--port', default='/dev/ttyUSB2')
+p.add_argument('--seconds', type=float, default=15)
+p.add_argument('--output', required=True, help='Output prefix for .log and .json')
+a = p.parse_args()
+fd = os.open(a.port, os.O_RDWR | os.O_NOCTTY | os.O_NONBLOCK)
+try:
+    attr = termios.tcgetattr(fd)
+    attr[0] = attr[1] = attr[3] = 0
+    attr[2] = termios.CS8 | termios.CREAD | termios.CLOCAL
+    attr[4] = attr[5] = termios.B115200
+    attr[6][termios.VMIN] = attr[6][termios.VTIME] = 0
+    termios.tcsetattr(fd, termios.TCSANOW, attr)
+    termios.tcflush(fd, termios.TCIFLUSH)
+    chunks = []
+    end = time.monotonic() + a.seconds
+    while time.monotonic() < end:
+        if select.select([fd], [], [], max(0, end - time.monotonic()))[0]:
+            chunks.append(os.read(fd, 8192))
+finally:
+    os.close(fd)
+raw = b''.join(chunks).decode('ascii', errors='replace')
+prefix = Path(a.output)
+prefix.parent.mkdir(parents=True, exist_ok=True)
+prefix.with_suffix('.log').write_text(raw)
+samples = []
+pattern = r'R=([0-9A-F]{64}) C=([0-9A-F]{2}) W=([0-9A-F]{2}) H=([0-9A-F]{2}) BYTE=([0-9A-F]{8})(?: P=([0-9A-F]{8}))?'
+for m in re.finditer(pattern, raw):
+    r = bytes.fromhex(m[1])
+    period = int(m[6], 16) if m[6] else None
+    samples.append(dict(sensor_id=r[:2].hex().upper(), width=int.from_bytes(r[2:4], 'big'),
+                        height=int.from_bytes(r[4:6], 'big'), hts=int.from_bytes(r[6:8], 'big'),
+                        vts=int.from_bytes(r[8:10], 'big'), register_bytes=m[1],
+                        cam_fps=int(m[2], 16), wr_fps=int(m[3], 16), hdmi_fps=int(m[4], 16),
+                        mipi_byte_clock_hz=int(m[5], 16), frame_period_core_cycles=period,
+                        cam_fps_from_period=100_000_000 / period if period else None))
+prefix.with_suffix('.json').write_text(json.dumps(samples, indent=2) + '\n')
+print(json.dumps(samples, indent=2))
+if not samples:
+    raise SystemExit('No complete camera telemetry received; raw capture saved.')

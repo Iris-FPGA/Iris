@@ -1,0 +1,125 @@
+{
+  "board_squares": [
+    12,
+    9
+  ],
+  "width": 96,
+  "height": 54,
+  "accepted_frames": 5,
+  "rejected_brightness_frames": 1,
+  "frames": [
+    {
+      "black_rgb": [
+        25,
+        30,
+        22
+      ],
+      "white_rgb": [
+        117.0,
+        171.5,
+        82.0
+      ],
+      "interior_counts": [
+        535,
+        280
+      ],
+      "transitions": 128,
+      "luma_span": 100.75
+    },
+    {
+      "black_rgb": [
+        24,
+        30,
+        22
+      ],
+      "white_rgb": [
+        117.0,
+        170.0,
+        83.0
+      ],
+      "interior_counts": [
+        629,
+        310
+      ],
+      "transitions": 124,
+      "luma_span": 101.75
+    },
+    {
+      "black_rgb": [
+        24.0,
+        30.0,
+        23.0
+      ],
+      "white_rgb": [
+        119.0,
+        174.0,
+        83.0
+      ],
+      "interior_counts": [
+        630,
+        288
+      ],
+      "transitions": 128,
+      "luma_span": 104.0
+    },
+    {
+      "black_rgb": [
+        25.0,
+        30.5,
+        23.0
+      ],
+      "white_rgb": [
+        122,
+        177,
+        86
+      ],
+      "interior_counts": [
+        518,
+        327
+      ],
+      "transitions": 130,
+      "luma_span": 106.75
+    },
+    {
+      "black_rgb": [
+        25,
+        30,
+        23
+      ],
+      "white_rgb": [
+        122,
+        175,
+        86
+      ],
+      "interior_counts": [
+        507,
+        315
+      ],
+      "transitions": 139,
+      "luma_span": 105.25
+    }
+  ],
+  "white_rgb": [
+    119.0,
+    174.0,
+    83.0
+  ],
+  "black_rgb": [
+    25,
+    30.0,
+    23.0
+  ],
+  "display_black_points": [
+    21,
+    23,
+    20
+  ],
+  "gains_q8": [
+    470,
+    305,
+    731
+  ],
+  "reflective_black_linear_target": 8,
+  "diffuse_white_linear_target": 180,
+  "note": "Fixed for this illuminant. Paper black is not sensor dark level; no CCM or gamma fit from two colours."
+}
