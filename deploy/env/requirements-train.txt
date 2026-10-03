@@ -1,0 +1,14 @@
+# 训练环境（算力自由 GPU 云主机）
+#
+# 用途：训练 TinyML 友好版风格迁移网络（FlatFNS：Conv+BN+LeakyReLU+Add，无非白名单算子）
+# 注意：requirements.txt 里的 torch>=2.6 是队友仓库的值，但他的文档记录实际用的是 torch 2.5.1；
+#       两者都能用于训练/导出，按云主机镜像自带的版本走即可，不要为了对齐而重装。
+#
+# 云主机上若还要直接做转换，再叠加 requirements-convert.txt（TF 那套）。
+
+torch>=2.5
+torchvision
+numpy
+pillow
+scipy
+tqdm

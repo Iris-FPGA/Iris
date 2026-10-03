@@ -1,0 +1,22 @@
+# 云上批次实验矩阵（TSV，制表符分隔）
+#
+# 用法： run_batch.sh 会逐行跑「训练 → 导出 ONNX → INT8 量化 → 算子门禁 → 精度对比」
+#
+# 列： name  channels  blocks  kernel  epochs  image_size  batch_size  lr  style_weight  content_weight
+#
+# 说明
+# ----
+# * `channels`/`blocks` 决定算力，档位表见 deploy/train/flatfns_model.py 的 __main__
+#   （C=16,N=3 → 14,688 MAC/px；C=24,N=3 → 32,400；C=32,N=3 → 57,024）
+# * **style_weight 必须重扫**：InstanceNorm 换成 BatchNorm 之后风格强度会明显变化，
+#   队友原来的 1e10 是配 IN 扫出来的，直接沿用大概率偏弱或偏强。
+# * `kernel` 默认 3；改成 9 会把首尾两层变成 9×9，算力 ×9（原版就是 9×9）。
+# * `image_size` 只是**训练**尺寸；网络是全卷积的，导出时用 export_onnx.py --size 指定部署尺寸。
+#
+# name	channels	blocks	kernel	epochs	image_size	batch_size	lr	style_weight	content_weight
+c16b3_s1e10	16	3	3	2	256	4	1e-3	1e10	1e5
+c16b3_s3e9	16	3	3	2	256	4	1e-3	3e9	1e5
+c16b3_s3e10	16	3	3	2	256	4	1e-3	3e10	1e5
+c16b4_s1e10	16	4	3	2	256	4	1e-3	1e10	1e5
+c24b3_s1e10	24	3	3	2	256	4	1e-3	1e10	1e5
+c32b3_s1e10	32	3	3	2	256	4	1e-3	1e10	1e5
