@@ -139,26 +139,36 @@ else
 fi
 
 hr "5/5 下一步"
-cat <<EOF
-  0) 转换栈：冒烟的 [2/7] 起要 ONNX/量化/算子门禁，镜像里没有就得先装一次：
-       bash $DEPLOY/cloud/bootstrap.sh --with-convert --dataset <数据集根>
-     或下次跑本脚本时加 --with-convert。（不给的话会在训练跑完后死在 [2/7]）
+if [[ "$DATASET_OK" == "1" ]]; then
+    cat <<EOF
+  数据集已就位（$DS_ROOT）—— 不用再下 COCO，直接往下跑：
 
-  先下 COCO（13 GB，全量；下完再抽子集）：
+  转换栈没装就先装一次（不装的话 [2/7] 导出 ONNX 起会失败）：
+      bash $DEPLOY/cloud/bootstrap.sh --with-convert --dataset $DS_ROOT
+
+  小规模网格（1 万张子集，摸 style_weight 方向）：
+      cd $DATA_DIR
+      ./Iris/deploy/cloud/run_batch.sh --dataset $SUBSET_DIR \\
+          --out $DATA_DIR/runs/grid
+
+  全量（--dataset 传**根目录**，不是 train2014 那一层）：
+      ./Iris/deploy/cloud/run_batch.sh --dataset $DS_ROOT \\
+          --out $DATA_DIR/runs/full --only c16b3
+EOF
+else
+    cat <<EOF
+  还没有可用数据集。COCO 2014 train（13 GB）：
     mkdir -p $DATA_DIR/coco && cd $DATA_DIR/coco
     wget -c http://images.cocodataset.org/zips/train2014.zip
     unzip -q train2014.zip && rm train2014.zip
-  下完重跑一次本脚本，让它抽 1 万张子集并冒烟：
-    bash $DEPLOY/cloud/web_quickstart.sh --dataset $DATA_DIR/coco
+  下完重跑一次本脚本（带 --with-convert），它会抽 1 万张子集 + 冒烟：
+    bash $DEPLOY/cloud/web_quickstart.sh --dataset $DATA_DIR/coco --with-convert
 
-  跑小规模网格（摸 style_weight 方向）：
-    cd $DATA_DIR
-    ./Iris/deploy/cloud/run_batch.sh --dataset $SUBSET_DIR \\
-        --out $DATA_DIR/runs/grid
-
-  跑全量（注意 --dataset 是**根目录** $DATA_DIR/coco，不是 coco/train2014）：
-    ./Iris/deploy/cloud/run_batch.sh --dataset $DATA_DIR/coco \\
-        --out $DATA_DIR/runs/full --only c16b3
+  ⚠ 数据盘上若已经有别人下好的 train2014/，**别重下**，直接指过去：
+      bash $DEPLOY/cloud/web_quickstart.sh --dataset <train2014 的父目录> --with-convert
+EOF
+fi
+cat <<EOF
 
   结果：
     $DATA_DIR/runs/.../results.csv        ← 汇总表
