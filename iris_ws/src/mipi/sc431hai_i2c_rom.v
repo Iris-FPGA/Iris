@@ -5,8 +5,11 @@
 //   0x3200-0x3207 kept at vendor defaults -- any change to them kills the
 //   DE pixel output (write path goes to 0).  Output window 1920x1080 at crop
 //   (324,5) inside the default 2568x1090 region.
-//   VTS=1150, HTS=1800. These timing settings measured 30-31 fps at 1080p;
-//   native sensor 60 fps is not yet verified. Exposure 512 half-lines.
+//   VTS=1150, HTS=1622, exposure 512 half-lines.
+//   PLL candidate uses the clock-only values from the SC431HAI 27 MHz
+//   4-lane 630 Mbps driver table; HDR controls remain linear. Native frame
+//   HTS is derived from measured 54.10623 fps at HTS=1800 (about 60.043 fps).
+//   Final frame rate and complete-frame writes must be measured after boot.
 //   Consumed by i2c_subsystem (src/i2c).
 //   Implemented as a registered case-ROM (no BRAM init dependency).
 //=====================================================================
@@ -109,8 +112,8 @@ begin
         8'h52: rdata_out <= {16'h36a6,8'h98,1'b0};
         8'h53: rdata_out <= {16'h36d0,8'h15,1'b0};
         8'h54: rdata_out <= {16'h36ea,8'h23,1'b0};
-        8'h55: rdata_out <= {16'h36eb,8'h0d,1'b0};
-        8'h56: rdata_out <= {16'h36ec,8'h65,1'b0};
+        8'h55: rdata_out <= {16'h36eb,8'h0c,1'b0};
+        8'h56: rdata_out <= {16'h36ec,8'h55,1'b0};
         8'h57: rdata_out <= {16'h36ed,8'h18,1'b0};
         8'h58: rdata_out <= {16'h370f,8'h01,1'b0};
         8'h59: rdata_out <= {16'h3722,8'h03,1'b0};
@@ -122,8 +125,8 @@ begin
         8'h5f: rdata_out <= {16'h37b3,8'h88,1'b0};
         8'h60: rdata_out <= {16'h37b4,8'hb8,1'b0};
         8'h61: rdata_out <= {16'h37fa,8'h23,1'b0};
-        8'h62: rdata_out <= {16'h37fb,8'h54,1'b0};
-        8'h63: rdata_out <= {16'h37fc,8'h21,1'b0};
+        8'h62: rdata_out <= {16'h37fb,8'h44,1'b0};
+        8'h63: rdata_out <= {16'h37fc,8'h20,1'b0};
         8'h64: rdata_out <= {16'h37fd,8'h1c,1'b0};
         8'h65: rdata_out <= {16'h391f,8'h41,1'b0};
         8'h66: rdata_out <= {16'h3926,8'he0,1'b0};
@@ -166,29 +169,29 @@ begin
         8'h8b: rdata_out <= {16'h5795,8'h04,1'b0};
         8'h8c: rdata_out <= {16'h57ac,8'h00,1'b0};
         8'h8d: rdata_out <= {16'h57ad,8'h00,1'b0};
-        8'h8e: rdata_out <= {16'h36e9,8'h53,1'b0};
-        8'h8f: rdata_out <= {16'h37f9,8'h53,1'b0};
-        8'h90: rdata_out <= {16'h0100,8'h01,1'b0};
-        8'h91: rdata_out <= {16'h3200,8'h00,1'b0};
-        8'h92: rdata_out <= {16'h3201,8'h00,1'b0};
-        8'h93: rdata_out <= {16'h3202,8'h00,1'b0};
-        8'h94: rdata_out <= {16'h3203,8'hb3,1'b0};
-        8'h95: rdata_out <= {16'h3204,8'h0a,1'b0};
-        8'h96: rdata_out <= {16'h3205,8'h07,1'b0};
-        8'h97: rdata_out <= {16'h3206,8'h04,1'b0};
-        8'h98: rdata_out <= {16'h3207,8'hf4,1'b0};
-        8'h99: rdata_out <= {16'h3208,8'h07,1'b0};
-        8'h9a: rdata_out <= {16'h3209,8'h80,1'b0};
-        8'h9b: rdata_out <= {16'h320a,8'h04,1'b0};
-        8'h9c: rdata_out <= {16'h320b,8'h38,1'b0};
-        8'h9d: rdata_out <= {16'h3210,8'h01,1'b0};
-        8'h9e: rdata_out <= {16'h3211,8'h44,1'b0};
-        8'h9f: rdata_out <= {16'h3212,8'h00,1'b0};
-        8'ha0: rdata_out <= {16'h3213,8'h05,1'b0};
-        8'ha1: rdata_out <= {16'h320e,8'h04,1'b0};
-        8'ha2: rdata_out <= {16'h320f,8'h7e,1'b0};
-        8'ha3: rdata_out <= {16'h320c,8'h07,1'b0};
-        8'ha4: rdata_out <= {16'h320d,8'h08,1'b0};
+        8'h8e: rdata_out <= {16'h36e9,8'h44,1'b0};
+        8'h8f: rdata_out <= {16'h37f9,8'h44,1'b0};
+        8'h90: rdata_out <= {16'h3200,8'h00,1'b0};
+        8'h91: rdata_out <= {16'h3201,8'h00,1'b0};
+        8'h92: rdata_out <= {16'h3202,8'h00,1'b0};
+        8'h93: rdata_out <= {16'h3203,8'hb3,1'b0};
+        8'h94: rdata_out <= {16'h3204,8'h0a,1'b0};
+        8'h95: rdata_out <= {16'h3205,8'h07,1'b0};
+        8'h96: rdata_out <= {16'h3206,8'h04,1'b0};
+        8'h97: rdata_out <= {16'h3207,8'hf4,1'b0};
+        8'h98: rdata_out <= {16'h3208,8'h07,1'b0};
+        8'h99: rdata_out <= {16'h3209,8'h80,1'b0};
+        8'h9a: rdata_out <= {16'h320a,8'h04,1'b0};
+        8'h9b: rdata_out <= {16'h320b,8'h38,1'b0};
+        8'h9c: rdata_out <= {16'h3210,8'h01,1'b0};
+        8'h9d: rdata_out <= {16'h3211,8'h44,1'b0};
+        8'h9e: rdata_out <= {16'h3212,8'h00,1'b0};
+        8'h9f: rdata_out <= {16'h3213,8'h05,1'b0};
+        8'ha0: rdata_out <= {16'h320e,8'h04,1'b0};
+        8'ha1: rdata_out <= {16'h320f,8'h7e,1'b0};
+        8'ha2: rdata_out <= {16'h320c,8'h06,1'b0};
+        8'ha3: rdata_out <= {16'h320d,8'h56,1'b0};
+        8'ha4: rdata_out <= {16'h0100,8'h01,1'b0};
         default: rdata_out <= {ROM_SIZE{1'b0}};
     endcase
 end

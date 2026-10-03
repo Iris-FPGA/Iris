@@ -1,0 +1,36 @@
+{
+  "status": "1080p60_verified_after_Flash_boot",
+  "capture_seconds": 20,
+  "complete_uart_samples": 16,
+  "width": 1920,
+  "height": 1080,
+  "hts": 1622,
+  "vts": 1150,
+  "frame_period_core_cycles_min": 1665448,
+  "frame_period_core_cycles_max": 1665450,
+  "cam_fps_from_period_min": 60.04383199735807,
+  "cam_fps_from_period_max": 60.04390410267988,
+  "cam_fps_counts": [
+    60,
+    61
+  ],
+  "complete_frame_wr_counts": [
+    60,
+    61
+  ],
+  "hdmi_fps_counts": [
+    60
+  ],
+  "core_reference_hz": 100000000,
+  "flash_part": "Winbond W25Q64",
+  "flash_address": 0,
+  "flash_verify_successful": true,
+  "user_visual_confirmation": "CAM measured 1920x1080 and image normal",
+  "setup_min_ns": 0.014,
+  "hold_min_ns": 0.026,
+  "firmware_sha256": {
+    "iris_ws.bit": "4e5f32ee1dadd094c3a750ecc295b93437a673a7d9307435386ee1d1ddbf9b93",
+    "iris_ws.hex": "fc501a63f2dbd4b2dd6aad7262e95316090eb6e52bdc524c5af4fa58e41c0665"
+  },
+  "limitations": "Finite 20 second capture and user visual confirmation; not a long-term soak or calibrated colour test."
+}

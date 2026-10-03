@@ -15,6 +15,9 @@ source "$SCRIPT_DIR/efinity-env"
 PROJ_DIR="${IRIS_PROJ_DIR:-$SCRIPT_DIR/../iris_ws}"
 cd "$PROJ_DIR"
 
+# Fail before touching the board when the compiled design misses timing.
+python3 "$SCRIPT_DIR/check-iris-timing" outflow/iris_ws.timing.rpt
+
 if [[ -z "$BRIDGE_BIT" ]]; then
     BRIDGE_BIT="$EFINITY_HOME/pgm/fli/titanium/u10660A79.bit"
 fi
@@ -35,7 +38,8 @@ if [[ "$MODE" == "jtag_bridge" || "$MODE" == "jtag_bridge_x8" ]]; then
 fi
 
 echo "==> 烧录 mode=$MODE"
-if ! efx_run --prj iris_ws -f program --pgm_opts "mode=$MODE"; then
+program_log="$(mktemp -t iris-flash-program.XXXXXX)"
+if ! efx_run --prj iris_ws -f program --pgm_opts "mode=$MODE" | tee "$program_log"; then
     echo "❌ 烧录失败（详见上方输出）" >&2
     echo "   常见原因：" >&2
     echo "   1) USB 权限：设备节点非 rw → 运行 .script/setup-usb（需 sudo），再拔插一次 USB" >&2
@@ -44,6 +48,13 @@ if ! efx_run --prj iris_ws -f program --pgm_opts "mode=$MODE"; then
     exit 1
 fi
 
+if [[ "$MODE" == "jtag_bridge" || "$MODE" == "jtag_bridge_x8" ]]; then
+    if ! rg -q 'Flash verify successful' "$program_log"; then
+        echo "❌ 未确认 Flash 回读校验成功，不能报告烧录完成；日志：$program_log" >&2
+        exit 1
+    fi
+fi
+rm -f "$program_log"
 echo "烧录完成"
 if [[ "$MODE" == "jtag_bridge" || "$MODE" == "jtag_bridge_x8" ]]; then
     echo "提示：请断电重上电，从 flash 启动刚烧入的设计"

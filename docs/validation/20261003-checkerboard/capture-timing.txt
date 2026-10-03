@@ -1,0 +1,2 @@
+setup: minimum +0.027 ns (23 relationships)
+hold: minimum +0.026 ns (23 relationships)

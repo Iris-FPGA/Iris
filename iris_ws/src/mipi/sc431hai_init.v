@@ -27,6 +27,7 @@ module sc431hai_init #(
     output wire         sda_padoen_o,
 
     output wire         init_done,
+    output wire [255:0] sensor_readback,
     output wire         sensor_id_ok,   // sensor replied 0xCD6B on 0x3107/08
 
     // ---- reserved CPU / RISC-V control port (bus agnostic) ----
@@ -111,6 +112,7 @@ i2c_subsystem #(
     .done           (init_done),
     .sensor_id_ok   (sensor_id_ok),
     .sensor_dout    (),
+    .sensor_readback(sensor_readback),
 
     .rom_addr       (rom_addr),
     .rom_data       (rom_data),

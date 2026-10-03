@@ -1,0 +1,182 @@
+#!/usr/bin/env python3
+"""Read CRC-checked linear RGB snapshots and fit a fixed checkerboard profile."""
+import argparse
+import binascii
+import json
+import os
+import select
+import statistics
+import struct
+import termios
+import time
+import zlib
+from pathlib import Path
+
+def png(path, width, height, rgb):
+    def chunk(kind, data):
+        return struct.pack('>I', len(data)) + kind + data + struct.pack('>I', binascii.crc32(kind + data) & 0xffffffff)
+    rows = b''.join(b'\x00' + rgb[y * width * 3:(y + 1) * width * 3] for y in range(height))
+    path.write_bytes(b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', width, height, 8, 2, 0, 0, 0)) + chunk(b'IDAT', zlib.compress(rows)) + chunk(b'IEND', b''))
+
+def display(rgb, gains=(256, 256, 256), blacks=(0, 0, 0)):
+    out = bytearray()
+    for p in range(0, len(rgb), 3):
+        c = []
+        for k in range(3):
+            v = min(255, (max(0, rgb[p + k] - blacks[k]) * gains[k] + 128) // 256) / 255
+            s = 12.92 * v if v <= .0031308 else 1.055 * v ** (1 / 2.4) - .055
+            c.append(round(255 * (s + .16 * s * (1 - s) * (2 * s - 1))))
+        y = (c[0] + 2 * c[1] + c[2] + 2) // 4
+        out.extend(max(0, min(255, (5 * x - y + 2) // 4)) for x in c)
+    return bytes(out)
+
+def capture(port, count, directory):
+    fd = os.open(port, os.O_RDWR | os.O_NOCTTY | os.O_NONBLOCK)
+    history = bytearray()
+    try:
+        a = termios.tcgetattr(fd)
+        a[0] = a[1] = a[3] = 0
+        a[2] = termios.CS8 | termios.CREAD | termios.CLOCAL
+        a[4] = a[5] = termios.B115200
+        a[6][termios.VMIN] = a[6][termios.VTIME] = 0
+        termios.tcsetattr(fd, termios.TCSANOW, a)
+        termios.tcflush(fd, termios.TCIFLUSH)
+        for n in range(count):
+            os.write(fd, b'C')
+            buf = bytearray()
+            deadline = time.monotonic() + 10
+            while time.monotonic() < deadline:
+                if select.select([fd], [], [], .25)[0]:
+                    data = os.read(fd, 65536)
+                    history.extend(data)
+                    buf.extend(data)
+                start = buf.find(b'IRISCAL1')
+                if start < 0 or len(buf) < start + 12:
+                    continue
+                w, h = struct.unpack_from('<HH', buf, start + 8)
+                if (w, h) == (0, 0):
+                    raise RuntimeError('No frozen image: press KEY2 first and wait for LED2')
+                if (w, h) != (96, 54):
+                    raise RuntimeError(f'Unexpected snapshot size {w}x{h}')
+                size = 12 + w * h * 3 + 2
+                if len(buf) < start + size:
+                    continue
+                packet = bytes(buf[start:start + size])
+                expected = struct.unpack_from('<H', packet, size - 2)[0]
+                if binascii.crc_hqx(packet[:-2], 0xffff) != expected:
+                    raise RuntimeError('Snapshot CRC mismatch; refusing calibration')
+                rgb = packet[12:-2]
+                (directory / f'frame-{n:02d}.packet').write_bytes(packet)
+                (directory / f'frame-{n:02d}.rgb').write_bytes(rgb)
+                png(directory / f'frame-{n:02d}.png', w, h, display(rgb))
+                print(f'Captured frame {n + 1}/{count}, {w}x{h}, CRC verified', flush=True)
+                break
+            else:
+                raise RuntimeError('No complete snapshot; check Flash boot and UART')
+            time.sleep(.15)
+    finally:
+        os.close(fd)
+        (directory / 'uart-capture.bin').write_bytes(history)
+
+def measure(rgb):
+    w, h = 96, 54
+    px = [tuple(rgb[p:p + 3]) for p in range(0, len(rgb), 3)]
+    luma = [(r + 2 * g + b) / 4 for r, g, b in px]
+    # Board must occupy >75% of the frame. This central ROI excludes the border.
+    roi = [y * w + x for y in range(7, 47) for x in range(12, 84)]
+    vals = sorted(luma[p] for p in roi)
+    lo, hi = vals[len(vals) // 8], vals[len(vals) * 7 // 8]
+    for _ in range(12):
+        mid = (lo + hi) / 2
+        dark = [luma[p] for p in roi if luma[p] < mid]
+        white = [luma[p] for p in roi if luma[p] >= mid]
+        if not dark or not white:
+            raise RuntimeError('No separate black/white populations')
+        lo, hi = statistics.median(dark), statistics.median(white)
+    span = hi - lo
+    if span < 20:
+        raise RuntimeError(f'Insufficient checkerboard contrast: {span:.1f} RAW levels')
+    masks = [[], []]
+    for p in roi:
+        v = luma[p]
+        neighbours = [luma[p + dy * w + dx] for dy in (-1, 0, 1) for dx in (-1, 0, 1)]
+        # Keep square interiors; reject gradients, glare, clipped pixels and edges.
+        if max(neighbours) - min(neighbours) > .28 * span:
+            continue
+        if v < lo + .25 * span:
+            masks[0].append(p)
+        elif v > hi - .25 * span and max(px[p]) < 245:
+            masks[1].append(p)
+    if min(map(len, masks)) < 80:
+        raise RuntimeError(f'Too few square interior samples: {list(map(len, masks))}')
+    means = [[statistics.median(px[p][k] for p in mask) for k in range(3)] for mask in masks]
+    # Validate a spatial alternation pattern, rather than accept a split wall.
+    transitions = 0
+    mid = (lo + hi) / 2
+    for y in range(8, 46, 4):
+        transitions += sum((luma[y*w+x] >= mid) != (luma[y*w+x-1] >= mid) for x in range(13, 84))
+    if transitions < 40:
+        raise RuntimeError('ROI has insufficient checkerboard alternation')
+    return dict(black_rgb=means[0], white_rgb=means[1], interior_counts=list(map(len, masks)), transitions=transitions, luma_span=span)
+
+def analyze(directory):
+    files = sorted(directory.glob('frame-*.rgb'))
+    if len(files) < 4:
+        raise RuntimeError('At least four CRC-checked frames required')
+    if len({f.read_bytes() for f in files}) < 4:
+        raise RuntimeError('Repeated reads of one frozen image are not independent calibration frames')
+    measured = [measure(f.read_bytes()) for f in files]
+    # Reject brightness outliers while retaining a stable reference exposure.
+    # Also check white chromaticity: changing the illuminant must not be hidden
+    # by temporal median filtering or by changing AE brightness.
+    med_g = statistics.median(f['white_rgb'][1] for f in measured)
+    ratios = [[f['white_rgb'][k] / f['white_rgb'][1] for f in measured] for k in (0, 2)]
+    for values in ratios:
+        mid = statistics.median(values)
+        if max(values) - min(values) > .08 * mid:
+            raise RuntimeError('Illuminant chromaticity changed; recapture under fixed lighting')
+    frames = [f for f in measured if abs(f['white_rgb'][1] - med_g) <= max(5, .06 * med_g)]
+    if len(frames) < 4 or len(frames) < .75 * len(measured):
+        raise RuntimeError('Lighting or exposure changed; wait for stable AE and recapture')
+    white = [statistics.median(f['white_rgb'][k] for f in frames) for k in range(3)]
+    black = [statistics.median(f['black_rgb'][k] for f in frames) for k in range(3)]
+    for k in range(3):
+        if max(f['white_rgb'][k] for f in frames) - min(f['white_rgb'][k] for f in frames) > max(6, .08 * white[k]):
+            raise RuntimeError('Lighting or exposure changed; wait for stable AE and recapture')
+    if min(white) < 35 or max(white) > 235:
+        raise RuntimeError('White squares too dim or clipped; adjust illumination/exposure')
+    # These are DISPLAY tone anchors, not measured physical sensor BLC:
+    # reflective black -> linear 8, diffuse white -> linear 180. Preserve a
+    # small black reflectance and neutralise both endpoints, with headroom.
+    blacks = [max(0, min(48, round((180 * black[k] - 8 * white[k]) / 172))) for k in range(3)]
+    gains = [round(256 * 180 / (white[k] - blacks[k])) for k in range(3)]
+    if any(g < 128 or g > 768 for g in gains):
+        raise RuntimeError(f'Profile gains outside 0.5..3x: {gains}; improve exposure')
+    result = dict(board_squares=[12, 9], width=96, height=54, accepted_frames=len(frames), rejected_brightness_frames=len(measured)-len(frames), frames=frames, white_rgb=white, black_rgb=black, display_black_points=blacks, gains_q8=gains, reflective_black_linear_target=8, diffuse_white_linear_target=180, note='Fixed for this illuminant. Paper black is not sensor dark level; no CCM or gamma fit from two colours.')
+    (directory / 'profile-measurement.json').write_text(json.dumps(result, indent=2) + '\n')
+    png(directory / 'profile-preview.png', 96, 54, display(files[-1].read_bytes(), gains, blacks))
+    print(json.dumps(result, indent=2))
+    return result
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--port', default='/dev/ttyUSB2')
+    p.add_argument('--frames', type=int, default=1)
+    p.add_argument('--directory', required=True)
+    p.add_argument('--analyze-only', action='store_true')
+    p.add_argument('--settle', type=float, default=0)
+    p.add_argument('--read-only', action='store_true', help='Save the button-frozen image without fitting')
+    p.add_argument('--profile', help='Measured profile JSON for a matching corrected preview')
+    a = p.parse_args()
+    d = Path(a.directory)
+    d.mkdir(parents=True, exist_ok=True)
+    if not a.analyze_only:
+        time.sleep(a.settle)
+        capture(a.port, a.frames, d)
+    if a.profile:
+        profile = json.loads(Path(a.profile).read_text())
+        for f in d.glob('frame-*.rgb'):
+            png(f.with_suffix('.corrected.png'), 96, 54,
+                display(f.read_bytes(), profile['gains_q8'], profile['display_black_points']))
+    if not a.read_only:
+        analyze(d)

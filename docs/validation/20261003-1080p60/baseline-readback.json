@@ -1,0 +1,12 @@
+{
+  "sensor_id": "CD6B",
+  "width": 1920,
+  "height": 1080,
+  "hts": 1800,
+  "vts": 1150,
+  "mipi_byte_clock_hz": 21231365,
+  "cam_fps_in_one_second": 30,
+  "wr_fps_in_one_second": 30,
+  "hdmi_fps_in_one_second": 60,
+  "verified_from": "actual UART after Flash boot"
+}

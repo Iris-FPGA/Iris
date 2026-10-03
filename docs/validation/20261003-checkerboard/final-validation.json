@@ -1,0 +1,43 @@
+{
+  "status": "fixed_profile_Flash_boot_and_KEY2_capture_verified",
+  "width": 1920,
+  "height": 1080,
+  "cam_fps_min": 60.04383199735807,
+  "cam_fps_max": 60.04390410267988,
+  "cam_count": 60,
+  "complete_frame_wr_count": 60,
+  "hdmi_counts": [
+    60,
+    61
+  ],
+  "uart_seconds": 15,
+  "uart_samples": 12,
+  "flash_verified": true,
+  "gains_q8": [
+    470,
+    305,
+    731
+  ],
+  "display_black_points": [
+    21,
+    23,
+    20
+  ],
+  "independent_calibration_frames": 5,
+  "key2_frozen_snapshot": {
+    "trigger": "physical KEY2",
+    "read_command": "UART C",
+    "resolution": [
+      96,
+      54
+    ],
+    "pixels_before_colour_correction": true,
+    "crc_verified_reads": 2,
+    "identical_frozen_reads": true,
+    "sha256": "3cd0736ec1f07999f98286e6cc08bb2f00c50f5b88f7e38403f39e3a1ecd97a3",
+    "checkerboard_visible": true
+  },
+  "setup_min_ns": 0.011,
+  "hold_min_ns": 0.026,
+  "visual_feedback_pending": true
+}

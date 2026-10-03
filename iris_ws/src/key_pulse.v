@@ -69,7 +69,7 @@ always @(posedge clk or negedge rst_n) begin
         if (press_edge) begin
             pulse   <= 1'b1;
             rep_cnt <= 23'd0;
-        end else if (pressed && (rep_cnt == REP_CNT - 1)) begin
+        end else if (pressed && REP_MS > 0 && (rep_cnt == REP_CNT - 1)) begin
             pulse   <= 1'b1;
             rep_cnt <= 23'd0;
         end else begin

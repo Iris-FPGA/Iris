@@ -24,5 +24,6 @@ PY
 # silently ignores the generated clocks and uses a default 1 ns constraint.
 cp outflow/iris_ws.pt.sdc iris_ws.pt.sdc
 echo "==> pnr";              efx_run --prj iris_ws -f pnr
+python3 "$SCRIPT_DIR/check-iris-timing" outflow/iris_ws.timing.rpt
 echo "==> pgm(生成bit/hex)"; efx_run --prj iris_ws -f pgm
 echo "完成：outflow/iris_ws.bit 与 iris_ws.hex"

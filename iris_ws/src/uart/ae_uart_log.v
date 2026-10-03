@@ -25,6 +25,7 @@ module ae_uart_log #(
 )(
     input  wire        clk,
     input  wire        rst_n,
+    input  wire        i_pause, // Calibration packet owns TX; finish an active line first.
 
     // AE status inputs (gpio_clk_27m domain)
     input  wire        i_init,      // sensor bring-up done && id ok
@@ -35,6 +36,10 @@ module ae_uart_log #(
     input  wire [7:0]  i_writes,
     input  wire [7:0]  i_touts,
     input  wire [7:0]  i_luma,
+    input  wire [7:0]  i_target,    // exposure-compensation target
+    input wire [255:0] i_sensor_readback,
+    input wire [7:0] i_cam_fps,i_wr_fps,i_hdmi_fps,
+    input wire [31:0] i_byte_hz,i_cam_period,
 
     // uart_tx side
     input  wire        tx_req,      // from uart_tx (level, high = wants byte)
@@ -44,7 +49,7 @@ module ae_uart_log #(
     input  wire        fifo_act     // FIFO pop or FIFO DataVal this cycle
 );
 
-localparam LEN = 6'd48;
+localparam LEN = 8'd160;
 
 //---------------------------------------------------------------------
 // snapshot + periodic trigger
@@ -60,6 +65,7 @@ reg  [31:0] snp_sum;
 reg  [7:0]  snp_writes;
 reg  [7:0]  snp_touts;
 reg  [7:0]  snp_luma;
+reg  [7:0]  snp_target;
 
 //---------------------------------------------------------------------
 // tx_req stability guard (see header)
@@ -75,7 +81,7 @@ always @(posedge clk or negedge rst_n) begin
     else if (own_act)        stab <= 3'd0;
     else if (stab != 3'd7)   stab <= stab + 3'd1;
 end
-wire present_ok = tx_req && (stab >= 3'd6);
+wire present_ok = tx_req && (stab >= 3'd6) && !tx_valid;
 
 //---------------------------------------------------------------------
 // state machine
@@ -85,7 +91,10 @@ localparam ST_SEND   = 2'd1;
 localparam ST_DRAIN  = 2'd2;
 
 reg [1:0]  st;
-reg [5:0]  idx;
+reg [7:0] idx;
+reg [255:0] snp_regs;
+reg [7:0] snp_cam,snp_wr,snp_hdmi;
+reg [31:0] snp_byte_hz,snp_period;
 reg        sending;
 
 assign tx_gate = sending;
@@ -101,54 +110,70 @@ endfunction
 reg [7:0] ch;
 always @* begin
     case (idx)
-        6'd0:  ch = "A";
-        6'd1:  ch = "E";
-        6'd2:  ch = " ";
-        6'd3:  ch = "i";
-        6'd4:  ch = "=";
-        6'd5:  ch = snp_init ? "1" : "0";
-        6'd6:  ch = " ";
-        6'd7:  ch = "E";
-        6'd8:  ch = "=";
-        6'd9:  ch = hexc(snp_exp[11:8]);
-        6'd10: ch = hexc(snp_exp[7:4]);
-        6'd11: ch = hexc(snp_exp[3:0]);
-        6'd12: ch = " ";
-        6'd13: ch = "G";
-        6'd14: ch = "=";
-        6'd15: ch = hexc({3'd0, snp_gain});
-        6'd16: ch = " ";
-        6'd17: ch = "S";
-        6'd18: ch = "=";
-        6'd19: ch = hexc({2'd0, snp_state});
-        6'd20: ch = " ";
-        6'd21: ch = "W";
-        6'd22: ch = "=";
-        6'd23: ch = hexc(snp_writes[7:4]);
-        6'd24: ch = hexc(snp_writes[3:0]);
-        6'd25: ch = " ";
-        6'd26: ch = "T";
-        6'd27: ch = "=";
-        6'd28: ch = hexc(snp_touts[7:4]);
-        6'd29: ch = hexc(snp_touts[3:0]);
-        6'd30: ch = " ";
-        6'd31: ch = "L";
-        6'd32: ch = "=";
-        6'd33: ch = hexc(snp_luma[7:4]);
-        6'd34: ch = hexc(snp_luma[3:0]);
-        6'd35: ch = " ";
-        6'd36: ch = "U";
-        6'd37: ch = "=";
-        6'd38: ch = hexc(snp_sum[31:28]);
-        6'd39: ch = hexc(snp_sum[27:24]);
-        6'd40: ch = hexc(snp_sum[23:20]);
-        6'd41: ch = hexc(snp_sum[19:16]);
-        6'd42: ch = hexc(snp_sum[15:12]);
-        6'd43: ch = hexc(snp_sum[11:8]);
-        6'd44: ch = hexc(snp_sum[7:4]);
-        6'd45: ch = hexc(snp_sum[3:0]);
-        6'd46: ch = 8'h0D;    // CR
-        default: ch = 8'h0A;  // LF
+        8'd0:  ch = "A";
+        8'd1:  ch = "E";
+        8'd2:  ch = " ";
+        8'd3:  ch = "i";
+        8'd4:  ch = "=";
+        8'd5:  ch = snp_init ? "1" : "0";
+        8'd6:  ch = " ";
+        8'd7:  ch = "E";
+        8'd8:  ch = "=";
+        8'd9:  ch = hexc(snp_exp[11:8]);
+        8'd10: ch = hexc(snp_exp[7:4]);
+        8'd11: ch = hexc(snp_exp[3:0]);
+        8'd12: ch = " ";
+        8'd13: ch = "G";
+        8'd14: ch = "=";
+        8'd15: ch = hexc({3'd0, snp_gain});
+        8'd16: ch = " ";
+        8'd17: ch = "S";
+        8'd18: ch = "=";
+        8'd19: ch = hexc({2'd0, snp_state});
+        8'd20: ch = " ";
+        8'd21: ch = "W";
+        8'd22: ch = "=";
+        8'd23: ch = hexc(snp_writes[7:4]);
+        8'd24: ch = hexc(snp_writes[3:0]);
+        8'd25: ch = " ";
+        8'd26: ch = "T";
+        8'd27: ch = "=";
+        8'd28: ch = hexc(snp_touts[7:4]);
+        8'd29: ch = hexc(snp_touts[3:0]);
+        8'd30: ch = " ";
+        8'd31: ch = "L";
+        8'd32: ch = "=";
+        8'd33: ch = hexc(snp_luma[7:4]);
+        8'd34: ch = hexc(snp_luma[3:0]);
+        8'd35: ch = " ";
+        8'd36: ch = "U";
+        8'd37: ch = "=";
+        8'd38: ch = hexc(snp_sum[31:28]);
+        8'd39: ch = hexc(snp_sum[27:24]);
+        8'd40: ch = hexc(snp_sum[23:20]);
+        8'd41: ch = hexc(snp_sum[19:16]);
+        8'd42: ch = hexc(snp_sum[15:12]);
+        8'd43: ch = hexc(snp_sum[11:8]);
+        8'd44: ch = hexc(snp_sum[7:4]);
+        8'd45: ch = hexc(snp_sum[3:0]);
+        8'd46:ch=" ";8'd47:ch="R";8'd48:ch="=";
+        8'd113:ch=" ";8'd114:ch="C";8'd115:ch="=";
+        8'd116:ch=hexc(snp_cam[7:4]);8'd117:ch=hexc(snp_cam[3:0]);
+        8'd118:ch=" ";8'd119:ch="W";8'd120:ch="=";
+        8'd121:ch=hexc(snp_wr[7:4]);8'd122:ch=hexc(snp_wr[3:0]);
+        8'd123:ch=" ";8'd124:ch="H";8'd125:ch="=";
+        8'd126:ch=hexc(snp_hdmi[7:4]);8'd127:ch=hexc(snp_hdmi[3:0]);
+        8'd128:ch=" ";8'd129:ch="B";8'd130:ch="Y";8'd131:ch="T";8'd132:ch="E";8'd133:ch="=";
+        8'd142:ch=" ";8'd143:ch="P";8'd144:ch="=";
+        8'd153:ch=" ";8'd154:ch="T";8'd155:ch="=";
+        8'd156:ch=hexc(snp_target[7:4]);8'd157:ch=hexc(snp_target[3:0]);
+        8'd158:ch=8'h0d;8'd159:ch=8'h0a;
+        default:begin
+         if(idx>=49 && idx<113)ch=hexc(snp_regs[255-(idx-49)*4-:4]);
+         else if(idx>=134 && idx<142)ch=hexc(snp_byte_hz[31-(idx-134)*4-:4]);
+         else if(idx>=145 && idx<153)ch=hexc(snp_period[31-(idx-145)*4-:4]);
+         else ch=8'h0a;
+        end
     endcase
 end
 
@@ -157,7 +182,7 @@ always @(posedge clk or negedge rst_n) begin
         timer     <= 25'd0;
         go        <= 1'b0;
         st        <= ST_IDLE;
-        idx       <= 6'd0;
+        idx       <= 8'd0;
         sending   <= 1'b0;
         tx_valid  <= 1'b0;
         tx_data   <= 8'd0;
@@ -168,7 +193,8 @@ always @(posedge clk or negedge rst_n) begin
         snp_sum   <= 32'd0;
         snp_writes<= 8'd0;
         snp_touts <= 8'd0;
-        snp_luma<= 8'd0;
+        snp_luma<=8'd0;snp_regs<=0;snp_cam<=0;snp_wr<=0;snp_hdmi<=0;snp_byte_hz<=0;snp_period<=0;
+        snp_target<=8'd0;
     end else begin
         tx_valid <= 1'b0;                       // default: 1-cycle strobe
 
@@ -179,7 +205,7 @@ always @(posedge clk or negedge rst_n) begin
 
         case (st)
         ST_IDLE: begin
-            if (go && present_ok) begin
+            if (go && present_ok && !i_pause) begin
                 snp_init   <= i_init;
                 snp_state  <= i_state;
                 snp_exp    <= i_exp;
@@ -188,8 +214,11 @@ always @(posedge clk or negedge rst_n) begin
                 snp_writes <= i_writes;
                 snp_touts  <= i_touts;
                 snp_luma <= i_luma;
+                snp_target <= i_target;
+                snp_regs<=i_sensor_readback;snp_cam<=i_cam_fps;snp_wr<=i_wr_fps;
+                snp_hdmi<=i_hdmi_fps;snp_byte_hz<=i_byte_hz;snp_period<=i_cam_period;
                 sending    <= 1'b1;             // gate FIFO pops from now
-                idx        <= 6'd0;
+                idx        <= 8'd0;
                 st         <= ST_SEND;
             end
         end
@@ -198,8 +227,8 @@ always @(posedge clk or negedge rst_n) begin
             if (present_ok) begin
                 tx_valid <= 1'b1;
                 tx_data  <= ch;
-                if (idx == LEN - 6'd1) st <= ST_DRAIN;
-                else                   idx <= idx + 6'd1;
+                if (idx == LEN - 8'd1) st <= ST_DRAIN;
+                else                   idx <= idx + 8'd1;
             end
         end
 
