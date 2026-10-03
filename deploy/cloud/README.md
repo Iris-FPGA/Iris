@@ -12,8 +12,12 @@
 
 ## 一、三步走
 
-> **第一次上云请看 [`运行手册.md`](运行手册.md)** —— 那是按算力自由（gpufree.cn）
-> 平台写的逐步操作清单，包含"无卡模式开机先做完准备工作"这类省钱的顺序。
+> **第一次上云看哪份？**
+> - **在浏览器里操作（JupyterLab / VSCode 网页终端）→ 看 [`网页版运行手册.md`](网页版运行手册.md)** ← 推荐
+> - 用 SSH 从本机连（`ssh root@IP -p 端口`）→ 看 [`运行手册.md`](运行手册.md)
+>
+> 两者只有"取代码"的方式不同：网页版用 `git clone`，SSH 版用 `scp` 传 tar 包。
+> 其余命令完全一样。`scripts/cloud-up.sh` 是 SSH 专用的，网页版用不上。
 
 ### 1. 本机打包（32 KB）
 
@@ -25,17 +29,32 @@ deploy/cloud/pack.sh          # -> deploy/cloud/deploy_code.tar.gz
 
 ### 2. 传到云主机
 
+**网页终端（推荐）** —— 一条命令，不用传文件：
+
 ```bash
-scp deploy/cloud/deploy_code.tar.gz  <user>@<host>:/root/
-ssh <user>@<host>
-mkdir -p /root/gpufree-data && cd /root/gpufree-data
-tar -xzf /root/deploy_code.tar.gz          # 解开是 train/ quant/ verify/ env/ cloud/
+cd /root/gpufree-data && git clone -b dev/tinyml https://github.com/hyperle/Iris-1.git Iris
+# 代码在 /root/gpufree-data/Iris/deploy/
+```
+
+**SSH** —— 传 tar 包：
+
+```bash
+deploy/scripts/cloud-up.sh --host <IP> --port <PORT> --dataset <COCO 路径>
+# 或手工： scp deploy/cloud/deploy_code.tar.gz <user>@<host>:/root/
 ```
 
 > `/root/gpufree-data/` 是持久化目录 —— 队友的 `examples/Iris:fast_neural_style/script/para.py:3`
 > 里写死的就是这个路径，说明云主机上代码放这里实例重启不丢。
 
 ### 3. 自检 + 跑批
+
+网页终端里可以一条命令把准备工作做完：
+
+```bash
+bash /root/gpufree-data/Iris/deploy/cloud/web_quickstart.sh \
+     --dataset /root/gpufree-data/coco/train2014
+# 环境自检 + 拉素材 + 抽子集 + 查 GPU + 跑冒烟
+```
 
 ```bash
 # 先自检（装缺的依赖、拉风格图与校准图、检查数据集、生成 env.sh）
