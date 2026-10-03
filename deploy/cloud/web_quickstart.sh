@@ -50,21 +50,39 @@ ARGS=(--data-dir "$DATA_DIR")
 [[ "$MIRROR" == "0" ]] && ARGS+=(--no-mirror)
 "$DEPLOY/cloud/bootstrap.sh" "${ARGS[@]}" || echo "  ⚠ bootstrap 有告警，继续"
 
-hr "2/5 抽训练子集"
-if [[ "$SUBSET_N" == "0" ]]; then
-    echo "  跳过（--no-subset）"
-elif [[ -n "$DATASET" && -d "$DATASET" ]]; then
-    SUBSET_DIR="$DATA_DIR/coco${SUBSET_N}"
-    if [[ -d "$SUBSET_DIR/train2014" ]]; then
-        echo "  已存在，跳过: $SUBSET_DIR（$(ls "$SUBSET_DIR/train2014" | wc -l) 张）"
-    else
-        python3 "$DEPLOY/cloud/make_subset.py" --src "$DATASET" \
-            --dst "$SUBSET_DIR" --num "$SUBSET_N" --val-num 8
+hr "2/5 准备训练集"
+# 冒烟只需要能跑通链路，不需要真数据集。没给 COCO 时，用从 examples 仓库
+# 拉下来的 90 张校准图造一个 tiny 集 —— 这样不用等 13 GB 的 COCO 就能验证全链路。
+CALIB="$DATA_DIR/examples/fast_neural_style/images/calib"
+TINY_DIR="$DATA_DIR/tiny"
+SUBSET_DIR="$DATA_DIR/coco${SUBSET_N}"
+SMOKE_DATASET=""
+
+if [[ -n "$DATASET" && -d "$DATASET" ]]; then
+    echo "  真数据集: $DATASET（$(find "$DATASET" -maxdepth 2 -type f \( -name '*.jpg' -o -name '*.png' \) 2>/dev/null | wc -l) 张）"
+    SMOKE_DATASET="$DATASET"
+    if [[ "$SUBSET_N" != "0" ]]; then
+        if [[ -d "$SUBSET_DIR/train2014" ]]; then
+            echo "  子集已存在: $SUBSET_DIR（$(ls "$SUBSET_DIR/train2014" | wc -l) 张）"
+        else
+            python3 "$DEPLOY/cloud/make_subset.py" --src "$DATASET" \
+                --dst "$SUBSET_DIR" --num "$SUBSET_N" --val-num 8
+        fi
+        echo "  → 之后跑网格用： --dataset $SUBSET_DIR"
     fi
-    echo
-    echo "  → 之后跑网格用： --dataset $SUBSET_DIR"
+elif [[ -d "$CALIB" ]]; then
+    echo "  没给 --dataset（COCO 还没下），用校准图造一个冒烟用的小数据集"
+    if [[ -d "$TINY_DIR/train2014" ]]; then
+        echo "  已存在: $TINY_DIR（$(ls "$TINY_DIR/train2014" | wc -l) 张）"
+    else
+        python3 "$DEPLOY/cloud/make_subset.py" --src "$CALIB" \
+            --dst "$TINY_DIR" --num 90 --val-num 4
+    fi
+    SMOKE_DATASET="$TINY_DIR"
+    echo "  ⚠ 这个集只用于**验证链路**，不能用来训练出有意义的画质"
 else
-    echo "  跳过（没给 --dataset 或目录不存在）"
+    echo "  ⚠ 既没有 --dataset，也找不到校准图 $CALIB"
+    echo "    先确认 bootstrap 成功（它负责拉 examples 仓库）"
 fi
 
 hr "3/5 GPU 检查"
@@ -84,19 +102,27 @@ hr "4/5 冒烟（1 配置 / 1 epoch / 64x64）"
 if [[ "$DO_SMOKE" == "0" ]]; then
     echo "  跳过（--no-smoke）"
 else
-    if [[ -z "$DATASET" || ! -d "$DATASET" ]]; then
-        echo "  ⚠ 没有可用数据集，冒烟会失败。先给 --dataset，或先下 COCO。"
+    if [[ -z "$SMOKE_DATASET" ]]; then
+        echo "  ⚠ 没有可用数据集，跳过冒烟。先下 COCO 或检查 bootstrap。"
     else
+        echo "  用数据集: $SMOKE_DATASET"
         cd "$DATA_DIR" || exit 1
-        "$DEPLOY/cloud/run_batch.sh" --smoke --out "$DATA_DIR/runs/smoke" || true
+        # run_batch 会 source cloud/env.sh 里的 DATASET，这里显式覆盖
+        "$DEPLOY/cloud/run_batch.sh" --smoke --dataset "$SMOKE_DATASET" \
+            --out "$DATA_DIR/runs/smoke" || true
     fi
 fi
 
 hr "5/5 下一步"
 cat <<EOF
+  先下 COCO（13 GB，全量；下完再抽子集）：
+    mkdir -p $DATA_DIR/coco && cd $DATA_DIR/coco
+    wget -c http://images.cocodataset.org/zips/train2014.zip
+    unzip -q train2014.zip && rm train2014.zip
+
   跑小规模网格（摸 style_weight 方向）：
     cd $DATA_DIR
-    ./Iris/deploy/cloud/run_batch.sh --dataset $DATA_DIR/coco${SUBSET_N} \\
+    ./Iris/deploy/cloud/run_batch.sh --dataset $SUBSET_DIR \\
         --out $DATA_DIR/runs/grid
 
   跑全量（改一下 env.sh 里的 DATASET，或直接给 --dataset）：
