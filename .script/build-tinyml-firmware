@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+project="$script_dir/../firmware/tinyml_style"
+if [[ "${1:-}" == --help ]]; then
+    printf '%s\n' 'Usage: build-tinyml-firmware [make arguments]' \
+        'Host model validation: build-tinyml-firmware check-model' \
+        'Firmware needs STANDALONE, BSP_PATH, RISCV_BIN, DDR_BASE, DDR_BYTES.' \
+        'STRICT_DISPATCH=1 deliberately fails until all hardware paths are implemented.' \
+        'See firmware/tinyml_style/README.md. No flash or hardware access is performed.'
+    exit 0
+fi
+exec make -C "$project" "$@"

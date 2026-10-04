@@ -5,14 +5,6 @@
 - 工具链：Efinity `2026.1.132.4.5`
 - 板卡：Ti60F225_DemoBoard_v4
 
-## 已实现
-
-- **L0**：HDMI 1080p60 彩条、UART 回环、LED。
-- **摄像头接入**：SC431HAI（J4/MIPI CSI-2）→ 灰度实时画面到 HDMI（240×135 放大 8×），
-  I²C 初始化 + sensor ID 校验。详见
-  [`docs/摄像头接入_MIPI_CSI2_纪要.md`](docs/摄像头接入_MIPI_CSI2_纪要.md)。
-
-> ⚠️ 关键：CSI RX IP 必须用 `efx_csi2_rx` **5.9**（`ip/csi_rx_59/`），新版（如 5.17）解析不出 `vs`，画面会变成雪花。
 
 ## 目录结构
 
