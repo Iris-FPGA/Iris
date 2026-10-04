@@ -1,0 +1,5 @@
+#ifndef _ONE_LAST_KISS_0_INT8_MODEL_DATA_H
+#define _ONE_LAST_KISS_0_INT8_MODEL_DATA_H
+extern const unsigned int one_last_kiss_0_int8_model_data_len;
+extern const unsigned char one_last_kiss_0_int8_model_data[];
+#endif
