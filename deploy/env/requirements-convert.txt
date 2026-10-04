@@ -1,0 +1,16 @@
+# 转换 / 量化环境（本机，CPU 足够）
+#
+# 用途：.model(PyTorch) -> ONNX -> SavedModel -> INT8 .tflite -> 算子合规校验
+# 对应队友脚本：examples/fast_neural_style/script/model2tf_lite.py
+#   （它 import torch / onnxruntime / tensorflow / PIL，并外部调用 onnx2tf）
+#
+# 安装：见同目录 setup-convert-env.sh（torch 需单独走 PyTorch CPU 源，不在本文件里）
+
+tensorflow-cpu>=2.16      # TFLiteConverter + tf.lite.Interpreter（全整数量化必需）
+onnx>=1.16                # 读/校验 ONNX 图（G1 门禁）
+onnxruntime>=1.18         # ONNX 推理，与 PyTorch 对比
+onnx2tf                   # ONNX -> TF SavedModel（官方推荐的 PyTorch->TFLite 路径）
+pillow                    # 校准集/图片读写
+numpy
+opencv-python-headless    # 图像处理（无 GUI 依赖）
+scikit-image              # PSNR / SSIM 精度报告（G4 门禁）

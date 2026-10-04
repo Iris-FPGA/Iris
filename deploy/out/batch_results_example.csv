@@ -1,0 +1,2 @@
+name,channels,blocks,params,macs_per_px,epochs,seconds,non_whitelisted_ops,gate,res_lut,res_m10k,res_dsp,res_in_parallel,psnr_quant_db,ssim_quant,psnr_e2e_db,ssim_e2e,tflite_kb,status
+c16b3_s1e10_smoke,16,3,14688,14688,1,24,0,通过,18752,77,44,32,63.02520816477265,0.9990751147270203,63.02520691573686,0.9990751147270203,22.0,OK
