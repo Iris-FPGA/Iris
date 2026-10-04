@@ -289,6 +289,24 @@ wire [1:0]   fb_bresp;
 wire [15:0]  fb_vout;
 wire         fb_hs, fb_vs, fb_de;
 wire         fb_wr_sw;
+// KEY3 / UART '4' or '1' requests a mode; commit only at a display VS.
+wire rx_valid;wire [7:0] rx_data;
+wire mode_key;
+reg requested_4k;
+key_pulse #(.REP_MS(0)) u_mode_key (
+ .clk(gpio_clk_27m),.rst_n(video_rst_n),.key_in(key_i[3]),.pulse(mode_key)
+);
+always @(posedge gpio_clk_27m or negedge video_rst_n)begin
+ if(!video_rst_n)requested_4k<=0;
+ else if(rx_valid&&rx_data==8'h34)requested_4k<=1;
+ else if(rx_valid&&rx_data==8'h31)requested_4k<=0;
+ else if(mode_key)requested_4k<=~requested_4k;
+end
+wire hdmi_mode_half,hdmi_mode;
+video_mode_commit u_mode_commit(
+ .read_clk(hdmi_tx_half_clk),.pixel_clk(hdmi_tx_slow_clk),.rst_n(video_rst_n),
+ .request_4k(requested_4k),.read_vs(fb_vs),.read_4k(hdmi_mode_half),.pixel_4k(hdmi_mode)
+);
 
 frame_buffer #(
     .I_VID_WIDTH    (32),
@@ -318,7 +336,7 @@ frame_buffer #(
     .o_de           (fb_de),
     .vout           (fb_vout),
 
-    .H_FRONT_PORCH  (13'd44),
+    .H_FRONT_PORCH  (hdmi_mode_half ? 13'd1144 : 13'd44),
     .H_SYNC         (13'd22),
     .H_VALID        (13'd960),
     .H_BACK_PORCH   (13'd74),
@@ -425,9 +443,17 @@ always @(posedge hdmi_tx_half_clk or negedge video_rst_n) begin
     else if (awb_upd)    awb_upd_tgl <= ~awb_upd_tgl;
 end
 
-debayer_top_2to1 u_debayer (
+wire dbg_vs_o_1080,dbg_hs_o_1080,dbg_de_o_1080,dbg_val_o_1080;
+wire dbg_vs_o_4k,dbg_hs_o_4k,dbg_de_o_4k,dbg_val_o_4k;
+wire [47:0] dbg_rgb_1080,dbg_rgb_4k;
+assign dbg_vs_o=hdmi_mode_half?dbg_vs_o_4k:dbg_vs_o_1080;
+assign dbg_hs_o=hdmi_mode_half?dbg_hs_o_4k:dbg_hs_o_1080;
+assign dbg_de_o=hdmi_mode_half?dbg_de_o_4k:dbg_de_o_1080;
+assign dbg_val_o=hdmi_mode_half?dbg_val_o_4k:dbg_val_o_1080;
+assign dbg_rgb=hdmi_mode_half?dbg_rgb_4k:dbg_rgb_1080;
+debayer_top_2to1 u_debayer_1080 (
     .in_pclk     (hdmi_tx_half_clk),
-    .in_rstn     (video_rst_n),
+    .in_rstn     (video_rst_n && !hdmi_mode_half),
     .raw_vs_i    (fb_vs),
     .raw_hs_i    (fb_hs),
     .raw_de_i    (fb_de),
@@ -437,11 +463,29 @@ debayer_top_2to1 u_debayer (
     .i_r_gain    (3'd4),
     .i_g_gain    (3'd4),
     .i_b_gain    (3'd4),
-    .rgb_vs_o    (dbg_vs_o),
-    .rgb_hs_o    (dbg_hs_o),
-    .rgb_de_o    (dbg_de_o),
-    .rgb_valid_o (dbg_val_o),
-    .rgb_datax2_o(dbg_rgb)
+    .rgb_vs_o    (dbg_vs_o_1080),
+    .rgb_hs_o    (dbg_hs_o_1080),
+    .rgb_de_o    (dbg_de_o_1080),
+    .rgb_valid_o (dbg_val_o_1080),
+    .rgb_datax2_o(dbg_rgb_1080)
+);
+debayer_top_2to1 #(.H_TOTAL(2200)) u_debayer_4k (
+    .in_pclk     (hdmi_tx_half_clk),
+    .in_rstn     (video_rst_n && hdmi_mode_half),
+    .raw_vs_i    (fb_vs),
+    .raw_hs_i    (fb_hs),
+    .raw_de_i    (fb_de),
+    .raw_valid_i (fb_de),
+    .raw_datax4_i(fb_vout),
+    // Linear demosaic; per-channel display gains follow the stats tap.
+    .i_r_gain    (3'd4),
+    .i_g_gain    (3'd4),
+    .i_b_gain    (3'd4),
+    .rgb_vs_o    (dbg_vs_o_4k),
+    .rgb_hs_o    (dbg_hs_o_4k),
+    .rgb_de_o    (dbg_de_o_4k),
+    .rgb_valid_o (dbg_val_o_4k),
+    .rgb_datax2_o(dbg_rgb_4k)
 );
 
 // phase-insensitive 2->1 expansion: async FIFO 74.25MHz -> 148.5MHz
@@ -576,6 +620,9 @@ wire        key1_up;          // KEY1 pressed: exposure comp up (brighter)
 wire [23:0] px_osd;
 wire [11:0] cam_width, cam_height, hdmi_width, hdmi_height;
 wire cam_size_toggle, hdmi_size_toggle;
+wire hdmi_out_hs,hdmi_out_vs,hdmi_out_de;
+wire [11:0] hdmi_word_width;
+assign hdmi_width=hdmi_mode ? {hdmi_word_width[10:0],1'b0} : hdmi_word_width;
 wire [7:0] hdmi_fps;
 wire hdmi_upd;
 video_size_meter #(.PIXELS_PER_CLOCK(4), .USE_HSYNC(1)) u_camera_size (
@@ -585,13 +632,13 @@ video_size_meter #(.PIXELS_PER_CLOCK(4), .USE_HSYNC(1)) u_camera_size (
 );
 video_size_meter #(.PIXELS_PER_CLOCK(1), .USE_HSYNC(0)) u_hdmi_size (
     .clk(hdmi_tx_slow_clk), .rst_n(video_rst_n),
-    .i_hs(hs_r), .i_vs(vs_r), .i_de(de_r),
-    .o_width(hdmi_width), .o_height(hdmi_height), .o_toggle(hdmi_size_toggle)
+    .i_hs(hdmi_out_hs), .i_vs(hdmi_out_vs), .i_de(hdmi_out_de),
+    .o_width(hdmi_word_width), .o_height(hdmi_height), .o_toggle(hdmi_size_toggle)
 );
 reg [2:0] hdmi_vs_sync;
 always @(posedge core_clk or negedge video_rst_n) begin
     if (!video_rst_n) hdmi_vs_sync<=0;
-    else hdmi_vs_sync<={hdmi_vs_sync[1:0],vs_r};
+    else hdmi_vs_sync<={hdmi_vs_sync[1:0],hdmi_out_vs};
 end
 fps_counter #(.CLK_FREQ_HZ(100_000_000)) u_fps_hdmi (
     .clk(core_clk), .rst_n(video_rst_n), .frame_pulse(hdmi_vs_sync[2]),
@@ -629,9 +676,9 @@ osd_ae #(
     .o_rgb     (px_osd_ae)
 );
 
-wire [9:0] tmds_data0;
-wire [9:0] tmds_data1;
-wire [9:0] tmds_data2;
+wire [9:0] tmds_data0, rgb_tmds0;
+wire [9:0] tmds_data1, rgb_tmds1;
+wire [9:0] tmds_data2, rgb_tmds2;
 wire [9:0] tmds_clk;
 
 assign tmds_data0_TX_OE = 1'b1;
@@ -654,11 +701,34 @@ dvi_encoder dvi_encoder_m0
     .hsync      (SWAP_HSVS ? vs_r : hs_r),
     .vsync      (SWAP_HSVS ? hs_r : vs_r),
     .de         (de_r),
-    .tmds_data0 (tmds_data0),
-    .tmds_data1 (tmds_data1),
-    .tmds_data2 (tmds_data2),
+    .tmds_data0 (rgb_tmds0),
+    .tmds_data1 (rgb_tmds1),
+    .tmds_data2 (rgb_tmds2),
     .tmds_clk   (tmds_clk)
 );
+
+wire upscale_hs,upscale_vs,upscale_de,upscale_started;
+wire [23:0] upscale_channels;
+wire [11:0] upscale_x,upscale_y;
+wire [9:0] yuv_tmds0,yuv_tmds1,yuv_tmds2;
+upscale_420 u_upscale (
+ .clk(hdmi_tx_slow_clk),.rst_n(video_rst_n),.enable(hdmi_mode),
+ .i_hs(hs_r),.i_vs(vs_r),.i_de(de_r),.i_rgb(px_osd_ae),
+ .o_hs(upscale_hs),.o_vs(upscale_vs),.o_de(upscale_de),.o_channels(upscale_channels),
+ .o_x(upscale_x),.o_y(upscale_y),.o_started(upscale_started)
+);
+hdmi_420_tx u_hdmi_420 (
+ .clk(hdmi_tx_slow_clk),.rst_n(video_rst_n&&hdmi_mode),
+ .i_hs(upscale_hs),.i_vs(upscale_vs),.i_de(upscale_de),
+ .i_channels(upscale_channels),.i_x(upscale_x),.i_y(upscale_y),
+ .ch0(yuv_tmds0),.ch1(yuv_tmds1),.ch2(yuv_tmds2)
+);
+assign hdmi_out_hs=hdmi_mode?upscale_hs:hs_r;
+assign hdmi_out_vs=hdmi_mode?upscale_vs:vs_r;
+assign hdmi_out_de=hdmi_mode?upscale_de:de_r;
+assign tmds_data0=hdmi_mode?yuv_tmds0:rgb_tmds0;
+assign tmds_data1=hdmi_mode?yuv_tmds1:rgb_tmds1;
+assign tmds_data2=hdmi_mode?yuv_tmds2:rgb_tmds2;
 
 assign tmds_clk_o   = ~tmds_clk;
 assign tmds_data0_o = ~tmds_data0;
@@ -687,10 +757,8 @@ clock_frequency_meter u_sensor_byte_meter (
 //=====================================================================
 wire        RdEmpty;
 wire        tx_valid;
-wire        rx_valid;
 wire        tx_req;
 wire [7:0]  tx_data;
-wire [7:0]  rx_data;
 wire [7:0]  RdDNum;
 wire        fifo_dv;
 wire [7:0]  fifo_data;
@@ -758,7 +826,21 @@ uart_rx_tx #(
     .rx_data    (rx_data)
 );
 
-ae_uart_log u_ae_log (
+// Resolution is published with a frame toggle; sample its stable payload only
+// after the toggle has crossed into the UART clock domain.
+reg [2:0] output_size_sync,output_mode_sync;
+reg [11:0] output_width_uart,output_height_uart;
+always @(posedge gpio_clk_27m or negedge video_rst_n)begin
+ if(!video_rst_n)begin output_size_sync<=0;output_mode_sync<=0;output_width_uart<=0;output_height_uart<=0;end
+ else begin
+  output_size_sync<={output_size_sync[1:0],hdmi_size_toggle};
+  output_mode_sync<={output_mode_sync[1:0],hdmi_mode};
+  if(output_size_sync[2]!=output_size_sync[1])begin
+   output_width_uart<=hdmi_width;output_height_uart<=hdmi_height;
+  end
+ end
+end
+ae_uart_log #(.VIDEO_STATUS(1)) u_ae_log (
     .i_pause   (cal_gate),
     .clk       (gpio_clk_27m),
     .rst_n     (mipi_pll_locked),
@@ -774,6 +856,7 @@ ae_uart_log u_ae_log (
     .i_sensor_readback(sensor_readback),
     .i_cam_fps (sens_fps), .i_wr_fps(wr_fps), .i_hdmi_fps(hdmi_fps),
     .i_byte_hz (sensor_byte_hz), .i_cam_period(cam_period_cycles),
+    .i_4k(output_mode_sync[2]),.i_output_width(output_width_uart),.i_output_height(output_height_uart),
     .tx_req    (tx_req),
     .tx_valid  (log_dv),
     .tx_data   (log_data),
@@ -1017,6 +1100,6 @@ end
 assign led[0] = (sens_fps != wr_fps);
 assign led[1] = wr_fps[5];
 assign led[2] = cal_ready;
-assign led[3] = sens_fps[5];
+assign led[3] = hdmi_mode; // lit = 4K30 4:2:0 mode
 
 endmodule

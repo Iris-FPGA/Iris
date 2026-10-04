@@ -1,0 +1,53 @@
+[
+  {
+    "sensor_id": "CD6B",
+    "width": 1920,
+    "height": 1080,
+    "hts": 1622,
+    "vts": 1150,
+    "register_bytes": "CD6B078004380656047E0144000544230C5518442344201C107A0A20008F1001",
+    "cam_fps": 60,
+    "wr_fps": 60,
+    "hdmi_fps": 60,
+    "mipi_byte_clock_hz": 41849829,
+    "frame_period_core_cycles": 1665448,
+    "cam_fps_from_period": 60.04390410267988,
+    "output_mode": "1080rgb",
+    "output_width": 1920,
+    "output_height": 1080
+  },
+  {
+    "sensor_id": "CD6B",
+    "width": 1920,
+    "height": 1080,
+    "hts": 1622,
+    "vts": 1150,
+    "register_bytes": "CD6B078004380656047E0144000544230C5518442344201C107A0A20008F1001",
+    "cam_fps": 60,
+    "wr_fps": 60,
+    "hdmi_fps": 60,
+    "mipi_byte_clock_hz": 41850198,
+    "frame_period_core_cycles": 1665448,
+    "cam_fps_from_period": 60.04390410267988,
+    "output_mode": "1080rgb",
+    "output_width": 1920,
+    "output_height": 1080
+  },
+  {
+    "sensor_id": "CD6B",
+    "width": 1920,
+    "height": 1080,
+    "hts": 1622,
+    "vts": 1150,
+    "register_bytes": "CD6B078004380656047E0144000544230C5518442344201C107A0A20008F1001",
+    "cam_fps": 60,
+    "wr_fps": 60,
+    "hdmi_fps": 60,
+    "mipi_byte_clock_hz": 41850122,
+    "frame_period_core_cycles": 1665450,
+    "cam_fps_from_period": 60.04383199735807,
+    "output_mode": "1080rgb",
+    "output_width": 1920,
+    "output_height": 1080
+  }
+]

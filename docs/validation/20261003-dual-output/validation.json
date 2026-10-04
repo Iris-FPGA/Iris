@@ -1,0 +1,126 @@
+{
+  "rtl": "passed",
+  "setup_min_ns": 0.01,
+  "hold_min_ns": 0.024,
+  "flash": "write_and_readback_passed",
+  "flash_address": 0,
+  "boot": "new_flash_firmware_confirmed_by_extended_uart",
+  "uart_round_trips": 3,
+  "stable_mode_checks": [
+    {
+      "mode": "1080",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "total_samples": 5,
+      "stable_samples": 3,
+      "hdmi_fps": [
+        60
+      ],
+      "cam_fps": [
+        60
+      ],
+      "wr_fps": [
+        60
+      ]
+    },
+    {
+      "mode": "4k",
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "total_samples": 6,
+      "stable_samples": 4,
+      "hdmi_fps": [
+        30,
+        31
+      ],
+      "cam_fps": [
+        60
+      ],
+      "wr_fps": [
+        60
+      ]
+    },
+    {
+      "mode": "1080",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "total_samples": 6,
+      "stable_samples": 4,
+      "hdmi_fps": [
+        60,
+        61
+      ],
+      "cam_fps": [
+        60,
+        61
+      ],
+      "wr_fps": [
+        60
+      ]
+    },
+    {
+      "mode": "4k",
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "total_samples": 5,
+      "stable_samples": 3,
+      "hdmi_fps": [
+        30
+      ],
+      "cam_fps": [
+        60
+      ],
+      "wr_fps": [
+        60
+      ]
+    },
+    {
+      "mode": "1080",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "total_samples": 6,
+      "stable_samples": 4,
+      "hdmi_fps": [
+        60
+      ],
+      "cam_fps": [
+        60
+      ],
+      "wr_fps": [
+        60
+      ]
+    }
+  ],
+  "final_mode": "1080rgb",
+  "final_dimensions": [
+    1920,
+    1080
+  ],
+  "final_hdmi_fps": [
+    60
+  ],
+  "sensor_native_dimensions": [
+    1920,
+    1080
+  ],
+  "sensor_period_fps_min": 60.04383199735807,
+  "sensor_period_fps_max": 60.04390410267988,
+  "visual_4k": "not_verified_current_monitor_unsupported",
+  "physical_key3": "binding_and_debounce_implemented_frame_commit_simulated_uart_exercised_human_press_not_tested",
+  "end_to_end_latency": "not_measured",
+  "colour_profile_sha256": "8bae05a64b0dbddd4e74c4883c6948b7f077685d314ca7a1b67f23e3f3ea9d3e",
+  "firmware_sha256": {
+    "iris_ws.bit": "32222917a0791e5c7b59260943ddfbd9c0a073929ab9f5e9248bddaf57bc8a8f",
+    "iris_ws.hex": "10f6c8cc03967cb56bcca809b449f83ca86b4f61b0034c79ab32da7a65f518b8"
+  }
+}

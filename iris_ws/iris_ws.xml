@@ -9,6 +9,10 @@
         <efx:design_file name="src/video/debayer/camera_colour_profile.v" version="default" library="default" />
         <efx:design_file name="src/video/debayer/colour_capture.v" version="default" library="default" />
         <efx:design_file name="src/video/osd/clock_frequency_meter.v" version="default" library="default" />
+        <efx:design_file name="src/hdmi/rgb_to_ycbcr709.v" version="default" library="default" />
+        <efx:design_file name="src/hdmi/upscale_420.v" version="default" library="default" />
+        <efx:design_file name="src/hdmi/hdmi_420_tx.v" version="default" library="default" />
+        <efx:design_file name="src/hdmi/video_mode_commit.v" version="default" library="default" />
         <efx:design_file name="src/top.v" version="default" library="default" />
         <efx:design_file name="src/hdmi/color_bar_rgb.v" version="default" library="default" />
         <efx:design_file name="src/hdmi/reset.v" version="default" library="default" />
