@@ -108,3 +108,5 @@ with tempfile.TemporaryDirectory(prefix='iris-video-tests-') as d:
 
     exe=tmp/'colour_capture'
     compile_tb('tb_colour_capture',['tests/video/tb_colour_capture.sv','iris_ws/src/video/debayer/colour_capture.v','iris_ws/src/uart/uart_tx.v'],exe);simulate(exe)
+    exe=tmp/'axi_arbiter'
+    compile_tb('tb_axi_ddr_arbiter',['tests/video/tb_axi_ddr_arbiter.sv','iris_ws/src/ddr/axi_ddr_arbiter.v'],exe);simulate(exe)

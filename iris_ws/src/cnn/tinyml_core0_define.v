@@ -1,19 +1,15 @@
-`define TML_C0_AXI_DW	128
-`define TML_C0_CONV_DEPTHW_MODE	"STANDARD"
-`define TML_C0_CONV_DEPTHW_STD_IN_PARALLEL	4
-`define TML_C0_CONV_DEPTHW_STD_OUT_PARALLEL	2
-`define TML_C0_CONV_DEPTHW_STD_OUT_CH_FIFO_A	32
-`define TML_C0_CONV_DEPTHW_STD_FILTER_FIFO_A	72
-`define TML_C0_CONV_DEPTHW_STD_CNT_DTH	128
-`define TML_C0_CONV_DEPTHW_LITE_PARALLEL	4
-`define TML_C0_CONV_DEPTHW_LITE_AW	7
-`define TML_C0_ADD_MODE	"STANDARD"
-`define TML_C0_LR_MODE	"DISABLE"
-`define TML_C0_FC_MODE	"DISABLE"
-`define TML_C0_FC_MAX_IN_NODE	0
-`define TML_C0_FC_MAX_OUT_NODE	0
-`define TML_C0_MUL_MODE	"DISABLE"
-`define TML_C0_MIN_MAX_MODE	"DISABLE"
-`define TML_C0_RESHAPE_MODE	"DISABLE"
-`define TML_C0_TINYML_CACHE	"ENABLE"
-`define TML_C0_CACHE_DEPTH	512
+// Integration adapter for the official Efinix TinyML Generator output.
+//
+// The Generator's original file is preserved byte-for-byte in
+// tinyml_core0_define.generated.v (see docs/TinyML_移植进度与待办.md).
+// The official RTL (tinyml_top.v / tinyml_accelerator.v /
+// tinyml_accelerator_channels.v) `include`s "tinyml_core0_define.v" and
+// additionally references TML_C0_RS_MODE, while the Generator emits
+// TML_C0_RESHAPE_MODE.  Map the name here, in the integration layer, without
+// touching the Generator original or the official RTL sources.
+
+`include "tinyml_core0_define.generated.v"
+
+`ifndef TML_C0_RS_MODE
+    `define TML_C0_RS_MODE `TML_C0_RESHAPE_MODE
+`endif

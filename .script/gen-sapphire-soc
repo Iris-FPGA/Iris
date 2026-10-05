@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Headless SapphireSoc (efx_soc) IP generation for Iris.
+# Requires Efinity; sources the shared env helper, then runs the Python driver.
+set -euo pipefail
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+# The efx_soc generator shells out to `java -cp EfxSapphireSoc.jar ...`
+# (class file major 61 => Java 17+). Use a bundled/portable JRE when the
+# system has none.
+if ! command -v java >/dev/null 2>&1; then
+    for cand in "$HOME/Applications/jre17/bin" "$script_dir/../path/jre17/bin"; do
+        if [[ -x "$cand/java" ]]; then
+            PATH="$cand:$PATH"
+            export PATH
+            break
+        fi
+    done
+fi
+if ! command -v java >/dev/null 2>&1; then
+    echo "error: java not found; efx_soc generation needs a Java 17+ runtime" >&2
+    exit 1
+fi
+
+# shellcheck source=efinity-env
+source "$script_dir/efinity-env"
+exec python3 "$script_dir/gen-sapphire-soc.py" --project-dir "$script_dir/../iris_ws" "$@"

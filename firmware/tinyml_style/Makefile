@@ -70,8 +70,10 @@ VENDOR_GROUPS := platform/*/*.cc platform/*/*.c platform/*/*/*.cc platform/*/*/*
  tensorflow/lite/kernels/internal/reference/integer_ops/*.cc tensorflow/lite/micro/*.cc \
  tensorflow/lite/micro/kernels/*.cc tensorflow/lite/micro/memory_planner/*.cc tensorflow/lite/schema/*.cc
 VENDOR_SRCS := $(foreach group,$(VENDOR_GROUPS),$(wildcard $(VENDOR_SRC)/$(group)))
-SRCS := $(abspath src/main.cc src/model.cc) $(VENDOR_SRCS) \
- $(STANDALONE)/common/start.S $(STANDALONE)/common/trap.S $(STANDALONE)/common/syscalls.s
+# The Efinity-generated standalone tree ships syscalls.c (not the syscalls.s
+# assumed by the original README); same minimal newlib stubs.
+SRCS := $(abspath src/main.cc src/model.cc src/crt_compat.cc) $(VENDOR_SRCS) \
+ $(STANDALONE)/common/start.S $(STANDALONE)/common/trap.S $(STANDALONE)/common/syscalls.c
 $(foreach source,$(SRCS),$(if $(wildcard $(source)),,$(error Required vendor/BSP source missing: $(source))))
 OBJS := $(addprefix build/obj/,$(addsuffix .o,$(SRCS)))
 LIB := $(VENDOR_STANDALONE)/common/tinyml_lib.a

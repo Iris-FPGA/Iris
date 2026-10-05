@@ -11,7 +11,7 @@
         <efx:design_file name="src/video/osd/clock_frequency_meter.v" version="default" library="default" />
         <efx:design_file name="src/top.v" version="default" library="default" />
         <efx:design_file name="src/hdmi/color_bar_rgb.v" version="default" library="default" />
-        <efx:design_file name="src/hdmi/reset.v" version="default" library="default" />
+        
         <efx:design_file name="src/hdmi/dvi_encoder.v" version="default" library="default" />
         <efx:design_file name="src/hdmi/encode.v" version="default" library="default" />
         <efx:design_file name="src/uart/uart_rx.v" version="default" library="default" />
@@ -66,6 +66,40 @@
         <efx:design_file name="src/video/debayer/rgb_display_2px.v" version="default" library="default" />
         <efx:design_file name="src/video/osd/video_size_meter.v" version="default" library="default" />
         <efx:design_file name="src/video/osd/osd_video_status.v" version="default" library="default" />
+        <efx:design_file name="src/cnn/tinyml_core0_define.generated.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/tinyml_core0_define.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/tinyml_defines.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/tinyml_top.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/tinyml_accelerator.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/tinyml_accelerator_channels.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/tinyml_subsystem.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/common/common_apb3.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/common/common_efx_fifo_wrapper.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/common/common_reset.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/common/common_reset_ctrl.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/common/common_shift_reg.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/common/common_simple_dual_port_ram.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/common/common_true_dual_port_ram.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/axi/axi_full_to_half_duplex.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/axi/axi_interconnect_beta/arbiter.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/axi/axi_interconnect_beta/axi_interconnect_beta.sv" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/axi/axi_interconnect_beta/axi_rdata_sfifo.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/axi/axi_interconnect_beta/axi_wdata_sfifo.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/axi/axi_interconnect_beta/crossbar.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/axi/axi_interconnect_beta/fixed_priority_arbiter.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/axi/axi_interconnect_beta/lb_to_axi.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/axi/axi_interconnect_beta/master_coupler.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/axi/axi_interconnect_beta/round_robin_priority_arbiter.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/axi/axi_interconnect_beta/slave_coupler.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/axi/axi_interconnect_beta/slave_coupler_wrapper.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/hw_accel/hw_accel.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/hw_accel/hw_accel_axi4.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/hw_accel/hw_accel_nearest_neighbor_downscale.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/hw_accel/hw_accel_pack_rgb_gray.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/hw_accel/hw_accel_rgb2gray.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/hw_accel/hw_accel_stream.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/rtl/hw_accel/hw_accel_wrapper.v" version="sv_09" library="default" />
+        <efx:design_file name="src/ddr/axi_ddr_arbiter.v" version="sv_09" library="default" />
         <efx:design_file name="src/ddr/fb/frame_bank_manager.v" version="default" library="default" />
         <efx:top_vhdl_arch name="" />
         <efx:msg_config name="" />
@@ -90,6 +124,9 @@
         <efx:ip instance_name="csi_rx_controller" path="ip/csi_rx_59/settings.json" ooc="false">
             <efx:ip_src_file name="csi_rx_controller.sv" />
         </efx:ip>
+        <efx:ip instance_name="SapphireSoc" path="ip/SapphireSoc/settings.json" ooc="false">
+            <efx:ip_src_file name="SapphireSoc.v" />
+        </efx:ip>
     </efx:ip_info>
     <efx:synthesis tool_name="efx_map">
         <efx:param name="work_dir" value="work_syn" value_type="e_string" />
@@ -98,6 +135,9 @@
         <efx:param name="include" value="src/i2c" value_type="e_string" />
         <efx:param name="include" value="src/ddr" value_type="e_string" />
         <efx:param name="include" value="src/ddr/efx_ddr3" value_type="e_string" />
+        <efx:param name="include" value="src/cnn" value_type="e_string" />
+        <efx:param name="include" value="src/cnn/rtl" value_type="e_string" />
+        <efx:param name="include" value="ip/SapphireSoc" value_type="e_string" />
         <efx:param name="allow-const-ram-index" value="0" value_type="e_option" />
         <efx:param name="blackbox-error" value="1" value_type="e_option" />
         <efx:param name="blast_const_operand_adders" value="1" value_type="e_option" />

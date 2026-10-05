@@ -130,7 +130,17 @@ module top
     (* syn_peri_port = 0 *) input           io_cam_sda_IN,
     (* syn_peri_port = 0 *) output          io_cam_sda_OUT,
     (* syn_peri_port = 0 *) output          io_cam_sda_OE,
-    (* syn_peri_port = 0 *) output          o_cam_rst
+    (* syn_peri_port = 0 *) output          o_cam_rst,
+
+    ////////////////////////    JTAG_USER1 (Sapphire debug)  ////////////////////////
+    input                       jtag_inst1_TCK,
+    input                       jtag_inst1_TDI,
+    output                      jtag_inst1_TDO,
+    input                       jtag_inst1_SEL,
+    input                       jtag_inst1_CAPTURE,
+    input                       jtag_inst1_SHIFT,
+    input                       jtag_inst1_UPDATE,
+    input                       jtag_inst1_RESET
 );
 
 //=====================================================================
@@ -273,14 +283,14 @@ wire         fb_wlast;
 wire         fb_wvalid;
 wire         fb_wready;
 
-wire [7:0]   fb_rid8;
+wire [7:0]   arb_s0_rid;
 wire [127:0] fb_rdata;
 wire         fb_rlast;
 wire         fb_rvalid;
 wire         fb_rready;
 wire [1:0]   fb_rresp;
 wire [5:0]   fb_rid;
-wire [7:0]   fb_bid8;
+wire [7:0]   arb_s0_bid;
 wire [5:0]   fb_bid;
 wire         fb_bvalid;
 wire         fb_bready;
@@ -377,8 +387,8 @@ frame_buffer #(
     .o_wr_sw             (fb_wr_sw)
 );
 
-assign fb_rid = fb_rid8[5:0];
-assign fb_bid = fb_bid8[5:0];
+assign fb_rid = arb_s0_rid[5:0];
+assign fb_bid = arb_s0_bid[5:0];
 
 //=====================================================================
 // Display: debayer (74.25MHz, RGGB) then 2 -> 1 expansion to 148.5MHz
@@ -684,7 +694,15 @@ clock_frequency_meter u_sensor_byte_meter (
 //=====================================================================
 // UART: RX echo + AE status log injection (ae_uart_log wins while a
 // line is in progress; the echo FIFO is gated off then and buffered)
+//
+// The physical TX pin is shared: the Sapphire CPU console (100 MHz) is the
+// default during TinyML bring-up; hold KEY3 (active low) to listen to the
+// legacy Iris logger (27 MHz) instead.
+// RX fans out to both UARTs always.
 //=====================================================================
+wire iris_uart_txd;
+wire soc_uart_txd;
+assign txd = key_i[3] ? soc_uart_txd : iris_uart_txd;
 wire        RdEmpty;
 wire        tx_valid;
 wire        rx_valid;
@@ -750,7 +768,7 @@ uart_rx_tx #(
     .clk        (gpio_clk_27m),
     .rst_n      (mipi_pll_locked),
     .rxd        (rxd),
-    .txd        (txd),
+    .txd        (iris_uart_txd),
     .tx_valid   (tx_valid),
     .tx_data    (tx_data),
     .tx_req     (tx_req),
@@ -868,32 +886,433 @@ assign io_cam_scl_OE = ~cam_scl_padoen;
 assign io_cam_sda_OE = ~cam_sda_padoen;
 
 //=====================================================================
+// TinyML subsystem: Sapphire SoC + TinyML accelerator (core_clk domain)
+//   rst_n is gated by DDR calibration so neither master can touch DDR
+//   before the controller is ready (docs/TinyML_移植进度与待办.md #2).
+//=====================================================================
+wire tinyml_rst_n = core_pll_locked & ddr_pll_locked & ddr_cal_done;
+
+// CPU AXI master (converted from the SoC half-duplex io_ddrA port)
+wire [7:0]   cpu_awid;
+wire [31:0]  cpu_awaddr;
+wire [7:0]   cpu_awlen;
+wire [2:0]   cpu_awsize;
+wire [1:0]   cpu_awburst;
+wire         cpu_awlock;
+wire         cpu_awvalid;
+wire         cpu_awready;
+wire [127:0] cpu_wdata;
+wire [15:0]  cpu_wstrb;
+wire         cpu_wlast;
+wire         cpu_wvalid;
+wire         cpu_wready;
+wire [7:0]   cpu_bid;
+wire [1:0]   cpu_bresp;
+wire         cpu_bvalid;
+wire         cpu_bready;
+wire [7:0]   cpu_arid;
+wire [31:0]  cpu_araddr;
+wire [7:0]   cpu_arlen;
+wire [2:0]   cpu_arsize;
+wire [1:0]   cpu_arburst;
+wire         cpu_arlock;
+wire         cpu_arvalid;
+wire         cpu_arready;
+wire [127:0] cpu_rdata;
+wire [7:0]   cpu_rid;
+wire [1:0]   cpu_rresp;
+wire         cpu_rlast;
+wire         cpu_rvalid;
+wire         cpu_rready;
+
+// TinyML accelerator AXI master
+wire [7:0]   acc_awid;
+wire [31:0]  acc_awaddr;
+wire [7:0]   acc_awlen;
+wire [2:0]   acc_awsize;
+wire [1:0]   acc_awburst;
+wire         acc_awlock;
+wire         acc_awvalid;
+wire         acc_awready;
+wire [127:0] acc_wdata;
+wire [15:0]  acc_wstrb;
+wire         acc_wlast;
+wire         acc_wvalid;
+wire         acc_wready;
+wire [7:0]   acc_bid;
+wire [1:0]   acc_bresp;
+wire         acc_bvalid;
+wire         acc_bready;
+wire [7:0]   acc_arid;
+wire [31:0]  acc_araddr;
+wire [7:0]   acc_arlen;
+wire [2:0]   acc_arsize;
+wire [1:0]   acc_arburst;
+wire         acc_arlock;
+wire         acc_arvalid;
+wire         acc_arready;
+wire [127:0] acc_rdata;
+wire [7:0]   acc_rid;
+wire [1:0]   acc_rresp;
+wire         acc_rlast;
+wire         acc_rvalid;
+wire         acc_rready;
+
+// merged master -> axi_atype_bridge
+wire [7:0]   mem_awid;
+wire [27:0]  mem_awaddr;
+wire [7:0]   mem_awlen;
+wire [2:0]   mem_awsize;
+wire [1:0]   mem_awburst;
+wire         mem_awlock;
+wire         mem_awvalid;
+wire         mem_awready;
+wire [127:0] mem_wdata;
+wire [15:0]  mem_wstrb;
+wire         mem_wlast;
+wire         mem_wvalid;
+wire         mem_wready;
+wire [7:0]   mem_bid;
+wire [1:0]   mem_bresp;
+wire         mem_bvalid;
+wire         mem_bready;
+wire [7:0]   mem_arid;
+wire [27:0]  mem_araddr;
+wire [7:0]   mem_arlen;
+wire [2:0]   mem_arsize;
+wire [1:0]   mem_arburst;
+wire         mem_arlock;
+wire         mem_arvalid;
+wire         mem_arready;
+wire [127:0] mem_rdata;
+wire [7:0]   mem_rid;
+wire [1:0]   mem_rresp;
+wire         mem_rlast;
+wire         mem_rvalid;
+wire         mem_rready;
+wire [7:0]   mem_wid;
+wire [31:0]  dbg_arb_ar_addr;
+wire [7:0]   dbg_arb_ar_len;
+wire [2:0]   dbg_arb_ar_size;
+wire [1:0]   dbg_arb_ar_burst;
+wire [31:0]  dbg_arb_aw_addr;
+wire [7:0]   dbg_arb_aw_len;
+wire [1:0]   dbg_arb_bresp;
+wire [1:0]   dbg_arb_rresp;
+wire [15:0]  dbg_arb_rd_cnt;
+wire [15:0]  dbg_arb_wr_cnt;
+wire [7:0]   dbg_arb_rd_err_cnt;
+wire [7:0]   dbg_arb_wr_err_cnt;
+wire [7:0]   dbg_arb_state;
+wire [31:0]  dbg_arb_cpu_ar_addr;
+wire [31:0]  dbg_arb_fb_ar_addr;
+wire [31:0]  dbg_arb_cpu_aw_addr;
+wire [31:0]  dbg_arb_fb_aw_addr;
+wire [15:0]  dbg_arb_cpu_rd_cnt;
+wire [15:0]  dbg_arb_fb_rd_cnt;
+wire [15:0]  dbg_arb_m_ar_cnt;
+wire [15:0]  dbg_arb_m_aw_cnt;
+
+tinyml_subsystem u_tinyml_subsystem (
+    .clk              (core_clk),
+    .rst_n            (tinyml_rst_n),
+    .uart_txd         (soc_uart_txd),
+    .uart_rxd_async   (rxd),
+    .jtag_inst1_TCK   (jtag_inst1_TCK),
+    .jtag_inst1_TDI   (jtag_inst1_TDI),
+    .jtag_inst1_TDO   (jtag_inst1_TDO),
+    .jtag_inst1_SEL   (jtag_inst1_SEL),
+    .jtag_inst1_CAPTURE(jtag_inst1_CAPTURE),
+    .jtag_inst1_SHIFT (jtag_inst1_SHIFT),
+    .jtag_inst1_UPDATE(jtag_inst1_UPDATE),
+    .jtag_inst1_RESET (jtag_inst1_RESET),
+    .cpu_awid         (cpu_awid),
+    .cpu_awaddr       (cpu_awaddr),
+    .cpu_awlen        (cpu_awlen),
+    .cpu_awsize       (cpu_awsize),
+    .cpu_awburst      (cpu_awburst),
+    .cpu_awlock       (cpu_awlock),
+    .cpu_awvalid      (cpu_awvalid),
+    .cpu_awready      (cpu_awready),
+    .cpu_wdata        (cpu_wdata),
+    .cpu_wstrb        (cpu_wstrb),
+    .cpu_wlast        (cpu_wlast),
+    .cpu_wvalid       (cpu_wvalid),
+    .cpu_wready       (cpu_wready),
+    .cpu_bid          (cpu_bid),
+    .cpu_bresp        (cpu_bresp),
+    .cpu_bvalid       (cpu_bvalid),
+    .cpu_bready       (cpu_bready),
+    .cpu_arid         (cpu_arid),
+    .cpu_araddr       (cpu_araddr),
+    .cpu_arlen        (cpu_arlen),
+    .cpu_arsize       (cpu_arsize),
+    .cpu_arburst      (cpu_arburst),
+    .cpu_arlock       (cpu_arlock),
+    .cpu_arvalid      (cpu_arvalid),
+    .cpu_arready      (cpu_arready),
+    .cpu_rdata        (cpu_rdata),
+    .cpu_rid          (cpu_rid),
+    .cpu_rresp        (cpu_rresp),
+    .cpu_rlast        (cpu_rlast),
+    .cpu_rvalid       (cpu_rvalid),
+    .cpu_rready       (cpu_rready),
+    .acc_awid         (acc_awid),
+    .acc_awaddr       (acc_awaddr),
+    .acc_awlen        (acc_awlen),
+    .acc_awsize       (acc_awsize),
+    .acc_awburst      (acc_awburst),
+    .acc_awlock       (acc_awlock),
+    .acc_awvalid      (acc_awvalid),
+    .acc_awready      (acc_awready),
+    .acc_wdata        (acc_wdata),
+    .acc_wstrb        (acc_wstrb),
+    .acc_wlast        (acc_wlast),
+    .acc_wvalid       (acc_wvalid),
+    .acc_wready       (acc_wready),
+    .acc_bid          (acc_bid),
+    .acc_bresp        (acc_bresp),
+    .acc_bvalid       (acc_bvalid),
+    .acc_bready       (acc_bready),
+    .acc_arid         (acc_arid),
+    .acc_araddr       (acc_araddr),
+    .acc_arlen        (acc_arlen),
+    .acc_arsize       (acc_arsize),
+    .acc_arburst      (acc_arburst),
+    .acc_arlock       (acc_arlock),
+    .acc_arvalid      (acc_arvalid),
+    .acc_arready      (acc_arready),
+    .acc_rdata        (acc_rdata),
+    .acc_rid          (acc_rid),
+    .acc_rresp        (acc_rresp),
+    .acc_rlast        (acc_rlast),
+    .acc_rvalid       (acc_rvalid),
+    .acc_rready       (acc_rready),
+    .subsystem_rst    (),
+    .accel_cmd_int    (),
+    .dbg_arb_ar_addr  (dbg_arb_ar_addr),
+    .dbg_arb_ar_len   (dbg_arb_ar_len),
+    .dbg_arb_ar_size  (dbg_arb_ar_size),
+    .dbg_arb_ar_burst (dbg_arb_ar_burst),
+    .dbg_arb_aw_addr  (dbg_arb_aw_addr),
+    .dbg_arb_aw_len   (dbg_arb_aw_len),
+    .dbg_arb_bresp    (dbg_arb_bresp),
+    .dbg_arb_rresp    (dbg_arb_rresp),
+    .dbg_arb_rd_cnt   (dbg_arb_rd_cnt),
+    .dbg_arb_wr_cnt   (dbg_arb_wr_cnt),
+    .dbg_arb_rd_err_cnt(dbg_arb_rd_err_cnt),
+    .dbg_arb_wr_err_cnt(dbg_arb_wr_err_cnt),
+    .dbg_arb_state    (dbg_arb_state),
+    .dbg_arb_cpu_ar_addr(dbg_arb_cpu_ar_addr),
+    .dbg_arb_fb_ar_addr (dbg_arb_fb_ar_addr),
+    .dbg_arb_cpu_aw_addr(dbg_arb_cpu_aw_addr),
+    .dbg_arb_fb_aw_addr (dbg_arb_fb_aw_addr),
+    .dbg_arb_cpu_rd_cnt (dbg_arb_cpu_rd_cnt),
+    .dbg_arb_fb_rd_cnt  (dbg_arb_fb_rd_cnt),
+    .dbg_arb_m_ar_cnt   (dbg_arb_m_ar_cnt),
+    .dbg_arb_m_aw_cnt   (dbg_arb_m_aw_cnt)
+);
+
+//=====================================================================
+// Shared-DDR arbiter: video frame buffer + CPU + TinyML accelerator
+//   -> single AXI4 master -> axi_atype_bridge -> efx_ddr3_axi
+//=====================================================================
+// Async assert / synchronous release for the shared-path reset: video_rst_n
+// and tinyml_rst_n are ANDs of asynchronous lock signals; releasing the
+// arbiter FSMs off a raw edge risks metastable wr/rd owner state.
+wire arb_rst_n_raw = video_rst_n & tinyml_rst_n;
+reg [3:0] arb_rst_pipe;
+always @(posedge core_clk or negedge arb_rst_n_raw) begin
+    if (!arb_rst_n_raw) arb_rst_pipe <= 4'd0;
+    else                arb_rst_pipe <= {arb_rst_pipe[2:0], 1'b1};
+end
+
+axi_ddr_arbiter #(
+    .DW  (128),
+    .IDW (8),
+    .MAW (28)
+) u_axi_ddr_arbiter (
+    .clk       (core_clk),
+    .rst_n     (arb_rst_pipe[3]),
+    // S0: video frame buffer
+    .s0_awid   ({2'b0, fb_awid}),
+    .s0_awaddr ({4'b0, fb_awaddr}),
+    .s0_awlen  (fb_awlen),
+    .s0_awsize (fb_awsize),
+    .s0_awburst(fb_awburst),
+    .s0_awlock (fb_awlock),
+    .s0_awvalid(fb_awvalid),
+    .s0_awready(fb_awready),
+    .s0_wdata  (fb_wdata),
+    .s0_wstrb  (fb_wstrb),
+    .s0_wlast  (fb_wlast),
+    .s0_wvalid (fb_wvalid),
+    .s0_wready (fb_wready),
+    .s0_bid    (arb_s0_bid),
+    .s0_bresp  (fb_bresp),
+    .s0_bvalid (fb_bvalid),
+    .s0_bready (fb_bready),
+    .s0_arid   ({2'b0, fb_arid}),
+    .s0_araddr ({4'b0, fb_araddr}),
+    .s0_arlen  (fb_arlen),
+    .s0_arsize (fb_arsize),
+    .s0_arburst(fb_arburst),
+    .s0_arlock (fb_arlock),
+    .s0_arvalid(fb_arvalid),
+    .s0_arready(fb_arready),
+    .s0_rdata  (fb_rdata),
+    .s0_rid    (arb_s0_rid),
+    .s0_rresp  (fb_rresp),
+    .s0_rlast  (fb_rlast),
+    .s0_rvalid (fb_rvalid),
+    .s0_rready (fb_rready),
+    // S1: Sapphire CPU
+    .s1_awid   (cpu_awid),
+    .s1_awaddr (cpu_awaddr),
+    .s1_awlen  (cpu_awlen),
+    .s1_awsize (cpu_awsize),
+    .s1_awburst(cpu_awburst),
+    .s1_awlock (cpu_awlock),
+    .s1_awvalid(cpu_awvalid),
+    .s1_awready(cpu_awready),
+    .s1_wdata  (cpu_wdata),
+    .s1_wstrb  (cpu_wstrb),
+    .s1_wlast  (cpu_wlast),
+    .s1_wvalid (cpu_wvalid),
+    .s1_wready (cpu_wready),
+    .s1_bid    (cpu_bid),
+    .s1_bresp  (cpu_bresp),
+    .s1_bvalid (cpu_bvalid),
+    .s1_bready (cpu_bready),
+    .s1_arid   (cpu_arid),
+    .s1_araddr (cpu_araddr),
+    .s1_arlen  (cpu_arlen),
+    .s1_arsize (cpu_arsize),
+    .s1_arburst(cpu_arburst),
+    .s1_arlock (cpu_arlock),
+    .s1_arvalid(cpu_arvalid),
+    .s1_arready(cpu_arready),
+    .s1_rdata  (cpu_rdata),
+    .s1_rid    (cpu_rid),
+    .s1_rresp  (cpu_rresp),
+    .s1_rlast  (cpu_rlast),
+    .s1_rvalid (cpu_rvalid),
+    .s1_rready (cpu_rready),
+    // S2: TinyML accelerator
+    .s2_awid   (acc_awid),
+    .s2_awaddr (acc_awaddr),
+    .s2_awlen  (acc_awlen),
+    .s2_awsize (acc_awsize),
+    .s2_awburst(acc_awburst),
+    .s2_awlock (acc_awlock),
+    .s2_awvalid(acc_awvalid),
+    .s2_awready(acc_awready),
+    .s2_wdata  (acc_wdata),
+    .s2_wstrb  (acc_wstrb),
+    .s2_wlast  (acc_wlast),
+    .s2_wvalid (acc_wvalid),
+    .s2_wready (acc_wready),
+    .s2_bid    (acc_bid),
+    .s2_bresp  (acc_bresp),
+    .s2_bvalid (acc_bvalid),
+    .s2_bready (acc_bready),
+    .s2_arid   (acc_arid),
+    .s2_araddr (acc_araddr),
+    .s2_arlen  (acc_arlen),
+    .s2_arsize (acc_arsize),
+    .s2_arburst(acc_arburst),
+    .s2_arlock (acc_arlock),
+    .s2_arvalid(acc_arvalid),
+    .s2_arready(acc_arready),
+    .s2_rdata  (acc_rdata),
+    .s2_rid    (acc_rid),
+    .s2_rresp  (acc_rresp),
+    .s2_rlast  (acc_rlast),
+    .s2_rvalid (acc_rvalid),
+    .s2_rready (acc_rready),
+    // merged master
+    .m_awid    (mem_awid),
+    .m_awaddr  (mem_awaddr),
+    .m_awlen   (mem_awlen),
+    .m_awsize  (mem_awsize),
+    .m_awburst (mem_awburst),
+    .m_awlock  (mem_awlock),
+    .m_awvalid (mem_awvalid),
+    .m_awready (mem_awready),
+    .m_wdata   (mem_wdata),
+    .m_wstrb   (mem_wstrb),
+    .m_wlast   (mem_wlast),
+    .m_wvalid  (mem_wvalid),
+    .m_wready  (mem_wready),
+    .m_bid     (mem_bid),
+    .m_bresp   (mem_bresp),
+    .m_bvalid  (mem_bvalid),
+    .m_bready  (mem_bready),
+    .m_arid    (mem_arid),
+    .m_araddr  (mem_araddr),
+    .m_arlen   (mem_arlen),
+    .m_arsize  (mem_arsize),
+    .m_arburst (mem_arburst),
+    .m_arlock  (mem_arlock),
+    .m_arvalid (mem_arvalid),
+    .m_arready (mem_arready),
+    .m_rdata   (mem_rdata),
+    .m_rid     (mem_rid),
+    .m_rresp   (mem_rresp),
+    .m_rlast   (mem_rlast),
+    .m_rvalid  (mem_rvalid),
+    .m_rready  (mem_rready),
+    .m_wid     (mem_wid),
+    .dbg_last_ar_addr (dbg_arb_ar_addr),
+    .dbg_last_ar_len  (dbg_arb_ar_len),
+    .dbg_last_ar_size (dbg_arb_ar_size),
+    .dbg_last_ar_burst(dbg_arb_ar_burst),
+    .dbg_last_aw_addr (dbg_arb_aw_addr),
+    .dbg_last_aw_len  (dbg_arb_aw_len),
+    .dbg_last_bresp   (dbg_arb_bresp),
+    .dbg_last_rresp   (dbg_arb_rresp),
+    .dbg_rd_cnt       (dbg_arb_rd_cnt),
+    .dbg_wr_cnt       (dbg_arb_wr_cnt),
+    .dbg_rd_err_cnt   (dbg_arb_rd_err_cnt),
+    .dbg_wr_err_cnt   (dbg_arb_wr_err_cnt),
+    .dbg_state        (dbg_arb_state),
+    .dbg_cpu_ar_addr  (dbg_arb_cpu_ar_addr),
+    .dbg_fb_ar_addr   (dbg_arb_fb_ar_addr),
+    .dbg_cpu_aw_addr  (dbg_arb_cpu_aw_addr),
+    .dbg_fb_aw_addr   (dbg_arb_fb_aw_addr),
+    .dbg_cpu_rd_cnt   (dbg_arb_cpu_rd_cnt),
+    .dbg_fb_rd_cnt    (dbg_arb_fb_rd_cnt),
+    .dbg_m_ar_cnt     (dbg_arb_m_ar_cnt),
+    .dbg_m_aw_cnt     (dbg_arb_m_aw_cnt)
+);
+
+//=====================================================================
 // AXI4 -> shared-address bridge (frame buffer -> DDR3 soft controller)
 //=====================================================================
 axi_atype_bridge #(
-    .IDW (4),
+    .IDW (8),
     .AW  (28)
 ) u_axi_atype_bridge (
     .clk         (core_clk),
     .rst_n       (core_pll_locked & ddr_pll_locked),
 
-    .s_awid      (fb_awid[3:0]),
-    .s_awaddr    (fb_awaddr),
-    .s_awlen     (fb_awlen),
-    .s_awsize    (fb_awsize),
-    .s_awburst   (fb_awburst),
-    .s_awlock    (fb_awlock),
-    .s_awvalid   (fb_awvalid),
-    .s_awready   (fb_awready),
+    .s_awid      (mem_awid),
+    .s_awaddr    (mem_awaddr),
+    .s_awlen     (mem_awlen),
+    .s_awsize    (mem_awsize),
+    .s_awburst   (mem_awburst),
+    .s_awlock    (mem_awlock),
+    .s_awvalid   (mem_awvalid),
+    .s_awready   (mem_awready),
 
-    .s_arid      (fb_arid[3:0]),
-    .s_araddr    (fb_araddr),
-    .s_arlen     (fb_arlen),
-    .s_arsize    (fb_arsize),
-    .s_arburst   (fb_arburst),
-    .s_arlock    (fb_arlock),
-    .s_arvalid   (fb_arvalid),
-    .s_arready   (fb_arready),
+    .s_arid      (mem_arid),
+    .s_araddr    (mem_araddr),
+    .s_arlen     (mem_arlen),
+    .s_arsize    (mem_arsize),
+    .s_arburst   (mem_arburst),
+    .s_arlock    (mem_arlock),
+    .s_arvalid   (mem_arvalid),
+    .s_arready   (mem_arready),
 
     .m_aid       (ddr_ax_aid),
     .m_aaddr     (ddr_ax_aaddr),
@@ -905,11 +1324,11 @@ axi_atype_bridge #(
     .m_avalid    (ddr_ax_avalid),
     .m_aready    (ddr_ax_aready),
 
-    .bvalid      (fb_bvalid),
-    .bready      (fb_bready),
-    .rvalid      (fb_rvalid),
-    .rlast       (fb_rlast),
-    .rready      (fb_rready)
+    .bvalid      (mem_bvalid),
+    .bready      (mem_bready),
+    .rvalid      (mem_rvalid),
+    .rlast       (mem_rlast),
+    .rready      (mem_rready)
 );
 
 //=====================================================================
@@ -963,24 +1382,24 @@ efx_ddr3_axi u_efx_ddr3_axi (
     .axi_aready       (ddr_ax_aready),
     .axi_atype        (ddr_ax_atype),
 
-    .axi_wid          ({2'b0, fb_awid}),
-    .axi_wdata        (fb_wdata),
-    .axi_wstrb        (fb_wstrb),
-    .axi_wlast        (fb_wlast),
-    .axi_wvalid       (fb_wvalid),
-    .axi_wready       (fb_wready),
+    .axi_wid          (mem_wid),
+    .axi_wdata        (mem_wdata),
+    .axi_wstrb        (mem_wstrb),
+    .axi_wlast        (mem_wlast),
+    .axi_wvalid       (mem_wvalid),
+    .axi_wready       (mem_wready),
 
-    .axi_rid          (fb_rid8),
-    .axi_rdata        (fb_rdata),
-    .axi_rlast        (fb_rlast),
-    .axi_rvalid       (fb_rvalid),
-    .axi_rready       (fb_rready),
-    .axi_rresp        (fb_rresp),
+    .axi_rid          (mem_rid),
+    .axi_rdata        (mem_rdata),
+    .axi_rlast        (mem_rlast),
+    .axi_rvalid       (mem_rvalid),
+    .axi_rready       (mem_rready),
+    .axi_rresp        (mem_rresp),
 
-    .axi_bid          (fb_bid8),
-    .axi_bresp        (fb_bresp),
-    .axi_bvalid       (fb_bvalid),
-    .axi_bready       (fb_bready),
+    .axi_bid          (mem_bid),
+    .axi_bresp        (mem_bresp),
+    .axi_bvalid       (mem_bvalid),
+    .axi_bready       (mem_bready),
 
     .shift            (pll_shift),
     .shift_sel        (pll_shift_sel),
