@@ -1,0 +1,12 @@
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "c7e5ce0f9da285b8924d189944ea402a4e35375981db6387fd96efeb07f0c516",
+  "bit_sha256": "2e3495e3c83300bdce0642b41da9e0a8f7110fb73c7e069acbb5fd602ed22ef4",
+  "attached": false,
+  "frames": [],
+  "reset": "",
+  "load": "163188 bytes written at address 0x00800000\ndownloaded 163188 bytes in 3.882496s (41.047 KiB/s)\n",
+  "stop_reason": "IRIS STOP: camera input DMA transport failed",
+  "observation_seconds": 12.162321691997931,
+  "live_ok": false
+}

@@ -37,14 +37,16 @@ PASS AE OSD: parallel address mapping for every 1920 raster position
 tests/video/tb_ae_osd_address.sv:21: $finish called at 19240000 (1ps)
 PASS colour capture: empty read, KEY2 snapshots, repeated frozen reads after scene changes, RGB/CRC, explicit replacement
 tests/video/tb_colour_capture.sv:43: $finish called at 273786000 (1ps)
-[95000] Phase A: basic R/W per master
-[2405000] Phase B: out-of-range writes -> SLVERR
-[2615000] Phase C: out-of-range reads -> SLVERR
-[2815000] Phase D: W-before-AW
-[3185000] Phase E: concurrent hammer
-[14825000] transactions: s0=20 s1=20 s2=20 downstream aw=65 ar=65
+[95000] Phase P: pipelined CPU writes under concurrent video/accelerator traffic
+PASS: pipelined CPU AW/W streams with delayed B
+[7205000] Phase A: basic R/W per master
+[9505000] Phase B: out-of-range writes -> SLVERR
+[9715000] Phase C: out-of-range reads -> SLVERR
+[9915000] Phase D: W-before-AW
+[10365000] Phase E: concurrent hammer
+[22145000] transactions: s0=20 s1=20 s2=20 downstream aw=98 ar=66
 PASS: tb_axi_ddr_arbiter
-tests/video/tb_axi_ddr_arbiter.sv:914: $finish called at 14825000 (1ps)
+tests/video/tb_axi_ddr_arbiter.sv:966: $finish called at 22145000 (1ps)
 PASS AXI shared-address stability writes=338 reads=651
 tests/video/tb_axi_atype_bridge.sv:79: $finish called at 40980000 (1ps)
 PASS serialized controller transactions writes=878 reads=879 cycles=40000

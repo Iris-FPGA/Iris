@@ -20,7 +20,7 @@
 // master only come out of reset after DDR calibration completes
 // (docs/TinyML_移植进度与待办.md #2).
 //=====================================================================
-module tinyml_subsystem (
+module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0) (
     input  wire        clk,             // core_clk 100 MHz (system/peri/memory)
     input  wire        rst_n,           // active-low, gated by DDR cal (see above)
 
@@ -104,6 +104,12 @@ module tinyml_subsystem (
     input  wire        acc_rvalid,
     output wire        acc_rready,
 
+    // Style demo control plane: APB0 at 0xf8100000.
+    output wire [15:0] style_paddr,
+    output wire style_psel, style_penable, style_pwrite,
+    output wire [31:0] style_pwdata,
+    input wire [31:0] style_prdata,
+
     // status / interrupts
     output wire        subsystem_rst,    // io_systemReset, active high
     output wire        accel_cmd_int,    // accelerator "layer done" -> userInterruptA
@@ -181,7 +187,12 @@ module tinyml_subsystem (
     wire [15:0] apb0_paddr, apb1_paddr;
     wire        apb0_psel, apb0_penable, apb0_pwrite, apb1_psel, apb1_penable, apb1_pwrite;
     wire [31:0] apb0_pwdata, apb1_pwdata;
-    wire [31:0] apb0_prdata = 32'd0;
+    wire [31:0] apb0_prdata = ENABLE_STYLE_DEMO ? style_prdata : 32'd0;
+    assign style_paddr=apb0_paddr;
+    assign style_psel=apb0_psel;
+    assign style_penable=apb0_penable;
+    assign style_pwrite=apb0_pwrite;
+    assign style_pwdata=apb0_pwdata;
     // APB1 = shared-DDR arbiter observation bank (see module ports).
     // PADDR is the full APB address; slave base is 0xf8110000.
     reg  [31:0] apb1_prdata;
@@ -307,10 +318,6 @@ module tinyml_subsystem (
         .system_spi_0_io_data_3_write      (),
         .system_spi_0_io_data_3_writeEnable(),
         .system_spi_0_io_data_3_read       (1'b0),
-        .system_i2c_0_io_scl_write         (),
-        .system_i2c_0_io_scl_read          (1'b1),
-        .system_i2c_0_io_sda_write         (),
-        .system_i2c_0_io_sda_read          (1'b1),
 
         .cpu0_customInstruction_cmd_valid       (ci_cmd_valid),
         .cpu0_customInstruction_cmd_ready       (ci_cmd_ready),

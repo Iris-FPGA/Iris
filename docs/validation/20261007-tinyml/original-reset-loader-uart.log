@@ -1,0 +1,54 @@
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x40 cpuAR=0x0x808740 fbAR=0x0xc2000
+arb cpuAW=0x0x70fffc fbAW=0x0x58c000 rdCnt cpu/fb=33475/49330 rresp=0
+arb ARhand=11506 rdDone=11506 AWhand=46106 wrDone=46106
+lastAR addr=0x0x808780 len=127 size=4 burst=1 | lastAW addr=0x0x2a1000 len=127
+Core 0 Hardware Settings:
+  Accelerator Active: 1
+  UUID: 0x4923687a
+  AXI DW: 128
+  AXI_DB_W: 16
+  Cache Enabled: 1
+  Cache Depth: 512
+  Conv Depthw Mode: 2
+  Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:2
+  Add Mode: 2
+  FC Mode: 0
+  Mul Mode: 0
+  LR Mode: 0
+  Min-Max Mode: 0
+  Reshape Mode: 0
+IRIS nodes OK: flatbuffer
+IRIS nodes OK: init
+IRIS prepare node 0 @0x0xc4e13cIRIS prepare node 1 @0x0xc4e158IRIS prepare node 2 @0x0xc4e174IRIS prepare node 3 @0x0xc4e190IRIS prepare node 4 @0x0xc4e1acIRIS prepare node 5 @0x0xc4e1c8IRIS prepare node 6 @0x0xc4e1e4IRIS prepare node 7 @0x0xc4e200IRIS prepare node 8 @0x0xc4e21cIRIS prepare node 9 @0x0xc4e238IRIS prepare node 10 @0x0xc4e254IRIS prepare node 11 @0x0xc4e270IRIS prepare node 12 @0x0xc4e28cIRIS prepare node 13 @0x0xc4e2a8IRIS prepare node 14 @0x0xc4e2c4IRIS prepare node 15 @0x0xc4e2e0IRIS prepare node 16 @0x0xc4e2fcIRIS prepare node 17 @0x0xc4e318IRIS prepare node 18 @0x0xc4e334IRIS prepare node 19 @0x0xc4e350IRIS prepare node 20 @0x0xc4e36cIRIS prepare node 21 @0x0xc4e388IRIS prepare node 22 @0x0xc4e3a4DDR arena: base=0x0xa4e6c0 capacity=2097152 used=399772
+profile: node; op; vendor execution mode; milliseconds
+0; CONV_2D; STANDARD; 23
+1; CONV_2D; STANDARD; 189
+2; CONV_2D; STANDARD; 196
+3; CONV_2D; STANDARD; 239
+4; CONV_2D; STANDARD; 239
+5; ADD; STANDARD; 0
+6; CONV_2D; STANDARD; 239
+7; CONV_2D; STANDARD; 239
+8; ADD; STANDARD; 0
+9; CONV_2D; STANDARD; 239
+10; CONV_2D; STANDARD; 239
+11; ADD; STANDARD; 0
+12; CONV_2D; STANDARD; 239
+13; CONV_2D; STANDARD; 239
+14; ADD; STANDARD; 0
+15; CONV_2D; STANDARD; 239
+16; CONV_2D; STANDARD; 239
+17; ADD; STANDARD; 0
+18; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; 4
+19; CONV_2D; STANDARD; 787
+20; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; 6
+21; CONV_2D; STANDARD; 771
+22; CONV_2D; STANDARD; 22
+output bytes=49152 FNV1a=0x0x8d500404 (diagnostic, no golden parity claim)
+CLINT ticks hi=0x0x0 lo=0x0x1a3bcb5b Hz=100000000 (includes profile UART overhead)
+IRIS STOP: bring-up complete; hardware parity and dispatch-only remain unproven
+

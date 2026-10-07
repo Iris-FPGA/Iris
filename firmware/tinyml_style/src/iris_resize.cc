@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "iris_resize.h"
+#include "iris_dma_cache.h"
 #include "riscv.h"
 #include "bsp.h"
 #include "clint.h"
@@ -48,7 +49,7 @@ TfLiteStatus Eval(TfLiteContext* c,TfLiteNode* n) {
   const uintptr_t src=reinterpret_cast<uintptr_t>(i->data.int8),dst=reinterpret_cast<uintptr_t>(o->data.int8);
   TF_LITE_ENSURE(c,!(src%16) && !(dst%16));
   TF_LITE_ENSURE(c,Cap()==0x49520101u);
-  asm volatile("fence rw,rw" ::: "memory");
+  IrisFlushCpuDataCache();
   cache_reset();
   TF_LITE_ENSURE(c,Addresses(src,dst)==0);
   TF_LITE_ENSURE(c,Dimensions(i->dims->data[1],i->dims->data[2])==0);
@@ -59,7 +60,7 @@ TfLiteStatus Eval(TfLiteContext* c,TfLiteNode* n) {
     const uint32_t status=Status();
     if (!(status&1)) {
       TF_LITE_ENSURE(c,(status&6)==2);
-      asm volatile("fence rw,rw" ::: "memory");
+      IrisFlushCpuDataCache();
       cache_reset();
       layer_mode[0]="IRIS_RESIZE_HW";
       return kTfLiteOk;
@@ -83,3 +84,19 @@ namespace tflite { namespace ops { namespace micro {
 TfLiteRegistration Register_RESIZE_NEAREST_NEIGHBOR() { return IrisRegisterResize2x(); }
 }}}
 #endif
+
+bool IrisCopyTensorDma(uintptr_t src, uintptr_t dst, uint32_t height, uint32_t width, uint32_t channels) {
+  IrisFlushCpuDataCache(); cache_reset();
+  if (Cap()!=0x49520101u || Addresses(src,dst)!=0 ||
+      Dimensions(height,width)!=0 || Channels(channels)!=0 ||
+      opcode_R(CUSTOM0,0,65,0,0)!=0) return false;
+  const uint64_t begin=clint_getTime(BSP_CLINT);
+  while(Status()&1u) {
+    if(clint_getTime(BSP_CLINT)-begin>2ull*SYSTEM_CLINT_HZ) {
+      Abort(); while(Status()&1u) {} return false;
+    }
+  }
+  const bool ok=(Status()&6u)==2u;
+  IrisFlushCpuDataCache(); cache_reset();
+  return ok;
+}

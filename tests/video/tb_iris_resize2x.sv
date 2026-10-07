@@ -92,6 +92,21 @@ module tb_iris_resize2x;
             $display("PASS resize %0dx%0dx%0d",h,w,c);
         end
     endtask
+    task check_copy(input integer h,input integer w,input integer c);
+        integer k, old_reads, old_writes;
+        begin
+            for(k=0;k<h*w*c;k=k+1) mem['h10000+k]=(k*113+41)&255;
+            for(k=0;k<h*w*c+16;k=k+1) mem['h30000+k]=8'hcc;
+            configure(h,w,c,'h30000);old_reads=reads;old_writes=writes;
+            command('h208,0,0);if(response!=0)$fatal(1,"copy rejected");
+            await_idle();command('h205,0,0);if(response!=2)$fatal(1,"copy status");
+            for(k=0;k<h*w*c;k=k+1)
+                if(mem['h10000+k]!==mem['h30000+k])$fatal(1,"copy byte mismatch %0d",k);
+            for(k=0;k<16;k=k+1)if(mem['h30000+h*w*c+k]!==8'hcc)$fatal(1,"copy overrun");
+            if(reads-old_reads!=h*w*c/16 || writes-old_writes!=h*w*c/16)$fatal(1,"copy beat count");
+            $display("PASS DMA copy %0dx%0dx%0d",h,w,c);
+        end
+    endtask
     integer before_writes;
     initial begin
         repeat(4) @(negedge clk);rst_n=1;
@@ -99,6 +114,8 @@ module tb_iris_resize2x;
         command('h2ff,0,0);if(response!='hffffffff)$fatal(1,"unknown command hangs");
         check_shape(32,32,32);check_shape(64,64,16);
         check_shape(3,4,4);check_shape(3,2,8);check_shape(3,1,16);check_shape(3,1,32);
+        check_copy(3,4,4);check_copy(3,2,8);check_copy(3,1,16);check_copy(3,1,32);
+        check_copy(48,640,4);check_shape(2,4,4);
         configure(1,1,4,'h30000);before_writes=writes;command('h204,0,0);
         if(response!='hffffffff || busy || writes!=before_writes)$fatal(1,"invalid row accepted");
         configure(1,4,4,'h10000);command('h204,0,0);if(response!='hffffffff)$fatal(1,"overlap accepted");
@@ -117,5 +134,5 @@ module tb_iris_resize2x;
         check_shape(2,4,4);
         $display("PASS: tb_iris_resize2x reads=%0d writes=%0d",reads,writes);$finish;
     end
-    initial begin #50000000;$fatal(1,"test timeout");end
+    initial begin #100000000;$fatal(1,"test timeout");end
 endmodule

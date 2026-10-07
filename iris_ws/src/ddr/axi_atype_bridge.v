@@ -10,7 +10,7 @@ module axi_atype_bridge #(
     parameter AW  = 32,
     // Conservative board-validation mode: do not overlap controller reads
     // and writes. The two upstream arbiter grants may still be pending.
-    parameter SERIAL_TRANSACTIONS = 1
+    parameter SERIAL_TRANSACTIONS = 0
 )(
     input  wire            clk,
     input  wire            rst_n,
@@ -72,13 +72,13 @@ module axi_atype_bridge #(
             locked_write <= 1'b0;
             active_direction <= 0;
             prefer_write <= 0;
-        end else if (m_avalid && !m_aready) begin
-            selection_locked <= 1'b1;
-            locked_write <= sel_aw;
-        end else if (m_avalid && m_aready) begin
-            selection_locked <= 1'b0;
-        end
-        if (rst_n) begin
+        end else begin
+            if (m_avalid && !m_aready) begin
+                selection_locked <= 1'b1;
+                locked_write <= sel_aw;
+            end else if (m_avalid && m_aready) begin
+                selection_locked <= 1'b0;
+            end
             if (m_avalid && m_aready) begin
                 active_direction <= sel_aw ? 2 : 1;
                 prefer_write <= !sel_aw;

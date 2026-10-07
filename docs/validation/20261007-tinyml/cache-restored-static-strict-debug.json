@@ -1,0 +1,35 @@
+{
+  "elf": "/home/noir/Documents/workspace/Iris/firmware/tinyml_style/build/tinyml_style.elf",
+  "elf_sha256": "54872fb56b212c9c4919c657c16b67310d717a538b921cfedf4f29cbc1fa5a8a",
+  "load": "307460 bytes written at address 0x00800000\ndownloaded 307460 bytes in 7.309963s (41.075 KiB/s)\n",
+  "bit_file_sha256": "1c03fb0451e95167b0a25ce18b11f819d5ebe537b660f74368d1cdf880cd9ebf",
+  "descriptor_address": "0x84e278",
+  "descriptor": [
+    2,
+    3,
+    10806976,
+    49152,
+    2370831364,
+    440136229,
+    0,
+    0
+  ],
+  "raw_descriptor": "0x0084e278: 00000002 00000003 00a4e6c0 0000c000 8d500404 1a3bf225 00000000 00000000 \n",
+  "elapsed_seconds": 5.603272634005407,
+  "registers": {
+    "pc": "pc (/32): 0x008001f4\n",
+    "mcause": "mcause (/32): 0x8000000b\n",
+    "mepc": "mepc (/32): 0x00817b54\n",
+    "mtval": "mtval (/32): 0x00000000\n"
+  },
+  "invoke_completed": true,
+  "output_sha256": "eb1b0624270391f6c627278100817aca99587a82fe594527efb3646fee3919e8",
+  "parity": {
+    "golden": "one_last_kiss_style/build/golden-0.bin",
+    "golden_sha256": "eb1b0624270391f6c627278100817aca99587a82fe594527efb3646fee3919e8",
+    "exact": true,
+    "max_abs_lsb": 0,
+    "mae_lsb": 0.0,
+    "different_bytes": 0
+  }
+}

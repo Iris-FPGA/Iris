@@ -1,0 +1,5 @@
+#ifndef _C448_LOWDEC_SKIP_R0_REFINED_RGBA_640_INT8_MODEL_DATA_H
+#define _C448_LOWDEC_SKIP_R0_REFINED_RGBA_640_INT8_MODEL_DATA_H
+extern const unsigned int c448_lowdec_skip_r0_refined_rgba_640_int8_model_data_len;
+extern const unsigned char c448_lowdec_skip_r0_refined_rgba_640_int8_model_data[];
+#endif

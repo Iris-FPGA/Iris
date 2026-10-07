@@ -1,163 +1,178 @@
 # Iris TinyML Style Firmware
 
-This is static-input firmware integration for the official Ti60 TFLM runtime.
-It is **not dispatch-only** and has not been executed on hardware. It deliberately
-uses the vendor software ResizeNearestNeighbor kernel. Conv2D and Add call the
-vendor accelerator drivers, which can also select software. Every invocation
-prints the vendor layer mode through `FullProfiler`; a successful Invoke or a
-hardware capability report alone is not evidence that all math ran in hardware.
+Static-input bring-up for the official Ti60 TFLM runtime. The strict build now
+contains a real Iris INT8 nearest-neighbor 2x DMA accelerator. Conv/Add dispatch
+must return `OP_OK` with `STANDARD` or `LITE`; unsupported hardware dispatch
+stops before the vendor CPU fallback loops. The original model has completed all 23 hardware operations on board with exact
+49152-byte equality to TensorFlow BUILTIN_REF on one static fixture. Evidence:
+`docs/validation/20261007-tinyml/cache-restored-static-strict-debug.json`.
+Its roughly 4.4-second UART-profiled run does not satisfy real-time acceptance.
+The optimized RGBA640 model has also completed all 10 hardware operations with
+exact 1,228,800-byte equality to its own BUILTIN_REF fixture. Invoke takes
+1.37987371 seconds at 100 MHz, excluding profile UART transmission; it does
+not meet 15 fresh style frames/s. Evidence:
+`docs/validation/20261007-tinyml/rgba640-static-strict-debug.json`.
+The associated SRAM bitstream passed Efinity setup +0.030 ns / hold +0.024 ns
+and uses 59,740 XLRs, 236 RAM blocks and 54 DSPs. Flash remains unchanged.
 
-## Dependencies And Build
+## Build
 
-No TensorFlow, BSP, or accelerator archive is copied here. The default dependency
-is the sibling `../../../tinyml` checkout, pinned to official Efinix revision
-`96886fa0c73e25e6218db7d0863f84677cf65138`. Override `TINYML_ROOT` to relocate that
-checkout. Keep its runtime source tree and `tinyml_lib.a` unmodified. All build
-products stay in this project's ignored `build/` directory.
-
-The runtime comes from:
-
-```text
-tinyml_hello_world/Ti60F225_tinyml_hello_world/embedded_sw/SapphireSoc/software/standalone/
-  tinyml_ypd/src/tensorflow/
-  tinyml_ypd/src/platform/
-  common/tinyml_lib.a
-```
-
-The official checkout only supplies `tinyml_standalone.mk` and the accelerator
-archive under `common/`. Generate the matching Sapphire SoC embedded software
-using the vendor tools. Point `STANDALONE` at its `software/standalone` directory
-and `BSP_PATH` at its generated board BSP (containing `include/soc.mk`, `soc.h`,
-`bsp.h`, and `app/`). Required common files are `bsp.mk`,
-`riscv64-unknown-elf.mk`, `start.S`, `trap.S`, and `syscalls.s`, as named by the
-official Ti60 hello_world Makefile. A generic Efinity sample BSP is not a
-substitute for Iris hardware configuration.
+The sibling `../tinyml` checkout is pinned to official revision
+`96886fa0c73e25e6218db7d0863f84677cf65138`. Its runtime and accelerator archive
+remain unchanged. Narrow licensed source overrides live in `src/overrides`:
+Conv/Add reject fallback, MicroInterpreter propagates Init/Prepare errors, and
+MicroGraph checks immutable node-vector pointers before dereferencing them.
+Allocation tracing remains enabled before Invoke and is excluded from its timing.
 
 Run from the Iris repository root:
 
 ```sh
 .script/build-tinyml-firmware check-model
 .script/build-tinyml-firmware \
-  STANDALONE=/absolute/generated/SapphireSoc/software/standalone \
-  BSP_PATH=/absolute/generated/SapphireSoc/bsp/your-board \
-  RISCV_BIN=/absolute/toolchain/bin/riscv-none-elf- \
-  DDR_BASE=0x01000000 DDR_BYTES=0x00800000
+  STANDALONE="$PWD/iris_ws/embedded_sw/SapphireSoc/software/standalone" \
+  BSP_PATH="$PWD/iris_ws/embedded_sw/SapphireSoc/bsp/efinix/EfxSapphireSoc" \
+  RISCV_BIN=/home/noir/Applications/riscv-none-elf/bin/riscv-none-elf- \
+  DDR_BASE=0x00800000 DDR_BYTES=0x02000000 STRICT_DISPATCH=1 -j8
 ```
 
-The DDR values above illustrate an 8 MiB reservation, **not an established Iris
-memory map**. The parent hardware integration must assign a real CPU-visible
-window before building an image for use. The build intentionally has no default
-DDR address. GNU Make and dependency paths without spaces are required. The
-host check needs a C++17 compiler; firmware keeps the vendor C++11 flags.
+`STRICT_DISPATCH=0` is a diagnostic software-permitting build. Do not use it as
+hardware-only acceptance evidence. The board build must match the generated
+Iris BSP: RV32IM soft-float, one hart, 100 MHz core/peripheral clocks, 16 KiB OCR,
+and 1 KiB instruction/data caches (original parity used 4 KiB). The vendor archive requires Sapphire's
+data-cache flush instruction; disabling the CPU cache causes an illegal instruction. The installed xPack GCC 12.3
+and Efinity 2026.1 are used; the actual generated syscall file is `syscalls.c`.
+The build records compiler, flags, BSP, archive, and model hashes.
 
-`Makefile` imports the generated `bsp.mk` and `riscv64-unknown-elf.mk`, follows the
-official source groups and TFLM defines, and uses the same startup/trap/syscall
-ABI and archive. Local object rules support external source paths without
-writing into the dependency checkout. The local linker replaces the BSP's
-small BRAM linker layout. The vendor archive reports RV32IM plus Zicsr/Zifencei,
-16-byte stack alignment, and the soft-float `ilp32` ABI; a BSP selecting hard-float
-is rejected. Use the vendor GNU toolchain and generated ISA flags compatible
-with that archive. The output is `build/tinyml_style.{elf,hex,bin,map}` and a
-configuration/compiler/archive/model hash record in `build/config.txt`.
+The linker reserves image/BSS, a 2 MiB heap, and a 64-byte-aligned 2 MiB tensor
+arena in the explicit DDR window. Its 8 KiB control stack is in OCR
+`[0xf9002000,0xf9004000)`. A DDR image loader must initialize storage and enter
+`_start`; this ELF is not a Flash bootloader. The arena is NOLOAD, outside BSS
+clear and the libc heap. No CPU boot image has been committed to Flash here.
+
+## Static fixture and acceptance
+
+The checked-in original 125336-byte model is unchanged: INT8 NHWC
+`[1,128,128,3]`, input scale 1 / zero point -128, 16 Conv, 5 Add, 2 Resize nodes.
+A gradient/checkerboard fixture is filled directly in its input tensor.
+`iris_result` is debugger-readable: word 0 is 1=running, 2=output-ready,
+3=stopped; word 1 is the initialization phase; words 2/3 are output address/size,
+word 4 is FNV-1a, words 5/6 are CLINT ticks. Status 2 requires successful Invoke.
+A checksum or capability print is not a numeric-parity result. The new profiler records during Invoke and prints afterward, excluding UART
+transmission from timing. The original parity evidence predates this change.
+Neither a single static Invoke nor HDMI refresh establishes fresh-frame throughput.
+
+The CPU has a native 128-bit DDR line adapter, preserving WSTRB for sub-word
+stores and returning full lines to Sapphire's upstream lane selector. The DDR
+arbiter protects video ownership/ranges. The shared address bridge now retains
+AW/AR selection until acceptance under backpressure. A pipelined write stream is blocked after LAST until its B response releases
+ownership. Without that gate, later W data can precede its address. Independent
+read/write operation remains enabled; transaction serialization is a diagnostic
+parameter only and its board run encountered a startup stall.
+
+## Hardware resize ABI
+
+Custom function-ID bit 9 selects Iris; vendor IDs remain separate. These are
+function IDs, not bit positions in the RISC-V instruction word.
+
+| ID | Operation | Operands/result |
+| --- | --- | --- |
+| 0x200 | Capability | returns 0x49520101 |
+| 0x201 | Addresses | rs1=source, rs2=destination |
+| 0x202 | Shape | rs1=input height, rs2=input width |
+| 0x203 | Channels | rs1=4, 8, 16, or 32 |
+| 0x204 | Start | 0=accepted, FFFFFFFE=busy, FFFFFFFF=invalid |
+| 0x205 | Status | bit 0=busy, bit 1=done, bit 2=error, bits 8+=error code |
+| 0x206 | Abort | drains outstanding AXI response before idle |
+
+Input/output are disjoint, 16-byte-aligned contiguous NHWC INT8. Rows must be
+multiples of 16 bytes; input H/W range is 1..1024. Output H/W are exactly doubled,
+quantization is unchanged, and both TensorFlow resize flags are false.
+`out[y,x,c]=in[y/2,x/2,c]`. Address/size validation is pipelined. Invalid requests
+emit no DMA; completion requires the final successful B response. Vendor and
+Iris DMA cannot acquire ownership while the other has an outstanding request.
+The firmware writes back/invalidates CPU cache and resets TinyML cache at DMA boundaries and aborts on its CLINT
+one-second timeout. It never uses software resize after an error.
+
+## Reproducible board diagnostic
+
+After an Efinity build with passing timing, `.script/sync-iris jtag` changes SRAM
+only. Stop OpenOCD before programming, then start Efinity's bundled OpenOCD with
+`.script/openocd_ftdi_iris.cfg` and the generated `debug_ti.cfg`.
 
 ```sh
-.script/build-tinyml-firmware STRICT_DISPATCH=1
+.script/probe-iris-ddr --execute-ddr --stress-pipeline \
+  --base 0x00700000 --output docs/validation/20261007-tinyml/ddr-stress.json
 ```
 
-This must fail. There is also a C++ `#error` guard. Defining a hypothetical
-hardware flag cannot turn this into a dispatch-only build. Enabling strict mode
-requires implementing resize dispatch and preventing Conv/Add CPU fallback
-before executing those kernels, not merely detecting fallback after inference.
+This requires an already running OpenOCD Tcl server on port 6666. It overwrites
+the selected 64 KiB test window and halts the CPU afterward; do not run against
+a live arena occupying that window. Word/halfword/byte tests, sparse neighboring
+lane preservation, random scatter writes, a three-second retention test, and
+four distinct DDR instructions must all pass. BRAM result word 0 must be
+`600d0001`, word 15 `12345679`, and error counters zero. `--execute-ddr` covers
+concurrent instruction/data traffic; `--stress-pipeline` adds firmware-like O3
+unrolled loops. JSON records compile arguments, ELF/bit-file/source digests and
+raw board results. Link the bit-file digest to the separate programming report
+before making any loaded-image provenance claim.
 
-## Runtime And Memory Contract
+The static model runner loads the ELF, captures the complete stop message,
+reads the descriptor, and dumps output only after successful Invoke:
 
-- One RV32 Sapphire hart, hart ID 0, with the official TinyML custom-instruction
-  responder connected. `init_accel(0)` reads the accelerator count and settings;
-  missing active Conv/Add modes stop execution. Discovery itself is a custom
-  instruction, so an absent responder may trap or stall, not return zero.
-- UART terminal, CLINT base/frequency, PLIC CPU-0 context, and TinyML completion
-  interrupt must match the generated BSP. The official platform dispatches
-  `SYSTEM_PLIC_USER_INTERRUPT_A_INTERRUPT` to `ops_drv_intr()`. The reference
-  SoC settings use user interrupt A ID 6, peripheral base `0xf8000000`, UART0
-  offset `0x1000`, 300 MHz CPU and 100 MHz peripherals. These are reference
-  requirements to reconcile with Iris, not values discovered on an Iris board.
-- A bootloader/debug loader must initialize external DDR, load the image at its
-  linked address, and enter `_start`. This image does not initialize DDR and is
-  not a BRAM bootloader. CPU and accelerator DMA must address the same storage;
-  any address alias and cache-maintenance policy must be established in RTL/BSP.
-- The entire image, model, BSS, heap, stack, and tensor arena reside in the
-  explicitly supplied DDR window. `ddr.ld` reserves 2 MiB heap, 16 KiB stack,
-  and a 64-byte-aligned NOLOAD arena (2 MiB by default, override `ARENA_BYTES`).
-  Linker bounds prevent crossing the reservation. The arena is outside the
-  startup BSS clear and outside the libc heap. `AllocateTensors()` checks actual
-  capacity and logs used bytes; 2 MiB is a bring-up budget, not measured demand.
-- Input/output are INT8 NHWC `[1,128,128,3]`. Input scale is 1 and zero point is
-  -128. A deterministic gradient/checkerboard RGB fixture is written directly
-  into the input tensor. No camera, resize/preprocess, or display path is used.
-- The aligned C-array wrapper includes the existing model under
-  `iris_ws/RISC-V`; it does not duplicate or modify its 125336 bytes. The shared
-  host/firmware contract check verifies the FlatBuffer, I/O, op counts/versions,
-  and both resize shapes/options/quantization. It is not a numeric parity test.
-- The only registered ops are Conv2D v3 (16 nodes), Add v2 (5), and
-  ResizeNearestNeighbor v2 (2). The old vendor resize forces half-pixel centers
-  false; the contract rejects models requesting true. Profiling is enabled and
-  labels software explicitly. Total CLINT time includes profiling UART overhead.
-  Output FNV-1a is a diagnostic checksum with no golden expected value yet.
+```sh
+.script/run-tinyml-bringup --timeout 90 \
+  --output docs/validation/20261007-tinyml/static-strict \
+  --golden one_last_kiss_style/build/golden-0.bin
+```
 
-## Proposed Resize Interface For RTL Owner
+Its parity record distinguishes exact equality, maximum error, MAE, and byte
+mismatches. No numeric tolerance is silently treated as an exact pass.
 
-This is a proposal only; no new custom instruction is emitted by this firmware.
-Agree the IDs with the parent before implementing either side. Reserve custom
-function IDs with **function-ID bit 9 = 1**, separate from the vendor space;
-this does not mean setting bit 9 in the RISC-V instruction word.
+## Still required
 
-| Function ID | Proposed operation | Operands / result |
-| --- | --- | --- |
-| `0x200` | Capability query | rs1=rs2=0; return `0x49520101` for ABI v1, 2x INT8 support |
-| `0x201` | Source/destination | rs1=source physical address, rs2=destination physical address |
-| `0x202` | Input dimensions | rs1=height, rs2=width |
-| `0x203` | Channels | rs1=channels, rs2=0 |
-| `0x204` | Start | rs1=rs2=0; clear previous completion, reject busy/invalid config |
-| `0x205` | Status | rs1=rs2=0; bit0 busy, bit1 done, bit2 error |
-| `0x206` | Abort/reset | rs1=rs2=0; quiesce DMA before acknowledging completion |
+640x480 model output parity and measured
+fresh-frame throughput; hardware camera crop/preprocess and ownership; neural
+output postprocess/HDMI comparison; Flash loader, readback and cold-boot proof.
+The trained low-decoder model is preserved in `one_last_kiss_style/models`;
+official model arrays are in `iris_ws/RISC-V/rgba640`. Source configuration is
+now 4x2/CounterDepth640 for the camera demo; its board validation is separate from original parity.
+Build with `MODEL_PROFILE=rgba640` (4 MiB arena), or `original` (2 MiB).
+The safe firmware scratch window is `[0x00700000,0x00710000)`. See `docs/validation/20261007-tinyml` for measured
+results and failures. RTL passes, target links, and timing passes do not imply
+end-to-end visual or performance acceptance.
 
-Proposed transfer is contiguous, non-overlapping NHWC INT8, batch 1, output
-height/width exactly twice input. For every channel,
-`out[y,x,c] = in[y/2,x/2,c]`; copy bits unchanged, with identical quantization,
-no alignment-corner or half-pixel modes. The model uses `[1,32,32,32]` to
-`[1,64,64,32]` and `[1,64,64,16]` to `[1,128,128,16]`. Input/output buffers must
-meet an agreed DMA alignment (propose 16 bytes), and RTL must handle final bus
-beats without overwriting adjacent tensors.
+## Low-rate camera demo (bring-up in progress)
 
-Command acceptance must always terminate, including unsupported IDs. Invalid
-dimensions/addresses return an error without DMA. Done is sticky until Start or
-Abort; it is asserted only after all destination writes complete. The driver
-must flush/clean source and destination cache lines before launch, fence, poll
-with a CLINT deadline, then invalidate output and fence before handing it to
-TFLM. Error/timeout must return `kTfLiteError`; never retry using CPU resize.
-Abort needs to quiesce outstanding writes before any tensor storage is reused.
-Exact instruction encoding (`funct7`/`funct3`), cache operations, error return
-values, and physical address translation remain parent integration decisions.
+Build `MODEL_PROFILE=rgba640 LIVE_DEMO=1 STRICT_DISPATCH=1`. The current source
+uses hardware DMA tensor transport around Invoke, retaining the statically
+validated arena addresses. CPU code configures transport and operators; it does
+not copy, quantize or process image pixels. CI 0x208 performs an unchanged tensor
+copy with the same alignment, range, overlap, final-B and abort rules as resize;
+0x204 retains nearest-neighbour 2x behavior.
 
-A future local resize registration can reuse vendor Prepare semantics, validate
-the contract above, and invoke the driver. It must mark `layer_mode[0]` hardware
-only after successful completion. Conv/Add also need fail-closed registrations
-or driver wrappers: current reference kernels call the vendor drivers and enter
-CPU loops after an error. The archive alone cannot establish numerical parity
-or prove every model shape uses hardware.
+APB0 at `0xf8100000` exposes capture/commit controls, pair ownership and counters.
+Input banks are `0x03000000` / `0x03200000`; output banks are `0x03400000` /
+`0x03600000`, each containing 1,228,800 RGBA INT8 bytes. Only the inactive pair
+is captured and written. Commit changes both panels at VS; acknowledgement
+precedes reuse. The panels show matched 640x480 input and style on 1080p output.
+OCR control data uses `[0xf9001000,0xf9002000)`; the stack remains in the upper
+8 KiB. The licensed MicroProfiler header override caps events at 24, rebuilt
+consistently across source objects, to fit control data in OCR.
 
-## Verification And Remaining Blockers
+The demo profile reduces the KEY2/UART-C thumbnail to 48x27 to save RAM;
+exposure and AWB remain available. Non-demo defaults retain 96x54.
 
-Verified here: host model contract passes; `main.cc` passes a host syntax-only
-check against official TFLM/platform and installed Sapphire headers (host
-pointer-width/register warnings only); strict mode and missing-BSP builds fail
-explicitly. The installed unrelated Ti60 TSEMAC BSP was used only to inspect
-Makefile/startup conventions and check syntax, not as a valid target BSP.
+After a successful fresh Efinity build/timing check, stop OpenOCD and program
+SRAM with `.script/sync-iris jtag`, restart the official OpenOCD server, then:
 
-No installed `riscv-none-elf-g++` or `riscv64-unknown-elf-g++` was found on PATH
-or in the inspected installation trees. The matching generated Sapphire BSP,
-including `syscalls.s`, is absent from the official checkout. Therefore target
-compilation/linking, DDR arena allocation, DMA/cache correctness, interrupt
-completion, output parity, and hardware execution are **unverified**. No board
-was flashed. The downloaded IDE installer was not installed as part of this
-firmware-only change.
+```sh
+.script/run-iris-style-demo --seconds 25 --snapshot \
+  --output docs/validation/20261007-tinyml/camera-demo
+.venv-style/bin/python .script/verify-style-snapshot.py \
+  docs/validation/20261007-tinyml/camera-demo
+```
+
+The runner records committed pair rate separately from HDMI refresh and saves
+active input/output snapshots for independent integer-reference parity. Use
+`--attach` to observe an already running firmware. After a failed DMA/cache run,
+reload SRAM before loading another ELF: warm reset has not reliably restored
+execution. Current live bring-up is not yet accepted; Flash is unchanged.

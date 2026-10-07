@@ -15,15 +15,20 @@ import time
 
 root = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--base', type=lambda x: int(x, 0), default=0x00f00000)
+parser.add_argument('--base', type=lambda x: int(x, 0), default=0x00700000)
 parser.add_argument('--execute-ddr', action='store_true')
+parser.add_argument('--stress-pipeline', action='store_true', help='match firmware O3 unrolled loops (DDR code only)')
 parser.add_argument('--compiler', default='/home/noir/Applications/riscv-none-elf/bin/riscv-none-elf-gcc')
 parser.add_argument('--port', type=int, default=6666)
 parser.add_argument('--wait', type=float, default=20)
 parser.add_argument('--output', type=Path, required=True)
 args = parser.parse_args()
-if args.base % 16 or not (0x00900000 <= args.base <= 0x0fff0000):
-    parser.error('probe base must be 16-byte aligned in the reserved compute window above 9 MiB')
+if args.stress_pipeline and not args.execute_ddr:
+    parser.error('--stress-pipeline requires --execute-ddr; unrolled code may exceed BRAM probe space')
+safe_scratch = 0x00700000 <= args.base <= 0x007f0000
+compute_window = 0x00900000 <= args.base <= 0x0fff0000
+if args.base % 16 or not (safe_scratch or compute_window):
+    parser.error('probe base must be aligned in 7..8 MiB scratch or above 9 MiB; avoid live tensor arenas')
 if not 4 <= args.wait <= 60:
     parser.error('--wait must be between 4 and 60 seconds')
 probe = root/'firmware/tinyml_style/probe'
@@ -31,12 +36,13 @@ build = root/'firmware/tinyml_style/build'
 build.mkdir(exist_ok=True)
 elf = build/('ddr_code_probe.elf' if args.execute_ddr else 'ddr_probe.elf')
 bsp = root/'iris_ws/embedded_sw/SapphireSoc'
-cmd = [args.compiler, '-Os', '-march=rv32im_zicsr_zifencei', '-mabi=ilp32',
+cmd = [args.compiler, '-O3' if args.stress_pipeline else '-Os', '-march=rv32im_zicsr_zifencei', '-mabi=ilp32',
        '-msmall-data-limit=0', '-nostdlib', f'-DIRIS_PROBE_BASE=0x{args.base:x}',
        '-I'+str(bsp/'bsp/efinix/EfxSapphireSoc/include'),
        '-I'+str(bsp/'software/standalone/driver'),
        '-T'+str(probe/('ddr_code.ld' if args.execute_ddr else 'bram.ld')),
        str(probe/'start.S'), str(probe/'main.c'), '-o', str(elf)]
+if args.stress_pipeline: cmd.append('-funroll-loops')
 subprocess.run(cmd, check=True)
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -51,6 +57,7 @@ with socket.create_connection(('localhost', args.port), timeout=30) as connectio
             response.extend(chunk)
         return response.decode(errors='replace').rstrip('\x1a')
     tcl('halt')
+    reset = tcl('reset halt')
     load = tcl('load_image '+str(elf))
     if 'downloaded' not in load:
         raise RuntimeError('ELF load was not confirmed: '+load)
@@ -65,8 +72,8 @@ with socket.create_connection(('localhost', args.port), timeout=30) as connectio
     registers = {name: tcl('reg '+name+' force') for name in ('pc','mcause','mepc','mtval')}
 report = {'base':hex(args.base), 'code_in_ddr':args.execute_ddr,
           'compile_command':cmd, 'elf_sha256':sha(elf), 'load':load,
-          'words':words, 'raw':raw, 'registers':registers,
-          'bit_sha256':sha(root/'iris_ws/outflow/iris_ws.bit'),
+          'reset':reset, 'words':words, 'raw':raw, 'registers':registers,
+          'bit_file_sha256':sha(root/'iris_ws/outflow/iris_ws.bit'),
           'source_sha256':{str(f.relative_to(root)):sha(f) for f in
               [probe/'main.c',probe/'start.S',probe/'bram.ld',probe/'ddr_code.ld',
                root/'iris_ws/src/ddr/axi_atype_bridge.v',

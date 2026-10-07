@@ -53,6 +53,28 @@ def fixture(kind,tmp,bggr=False):
     return [f'+IN={a}',f'+REF={b}']
 with tempfile.TemporaryDirectory(prefix='iris-video-tests-') as d:
     tmp=Path(d);exe=tmp/'debayer'
+    capture=tmp/'style_capture'
+    compile_tb('tb_style_capture',['tests/video/tb_style_capture.sv','iris_ws/src/cnn/iris_style_capture.v','iris_ws/src/video/afifo_simple.v'],capture);simulate(capture)
+    mux=tmp/'cpu_style_mux'
+    compile_tb('tb_cpu_style_mux',['tests/video/tb_cpu_style_mux.sv','iris_ws/src/ddr/axi_cpu_style_mux.v'],mux);simulate(mux)
+    for negative in (0,1):
+        panels=tmp/f'style_panels_{negative}'
+        run([IV]+(['-B',IVLIB] if IVLIB else [])+['-g2012','-s','tb_style_panels',f'-Ptb_style_panels.NEGATIVE={negative}','-o',str(panels),'tests/video/tb_style_panels.sv','iris_ws/src/cnn/iris_style_panels.v','iris_ws/src/cnn/iris_style_dequant.v'])
+        simulate(panels)
+    preprocess=tmp/'style_preprocess'
+    compile_tb('tb_style_preprocess',['tests/video/tb_style_preprocess.sv','iris_ws/src/cnn/iris_style_preprocess.v'],preprocess);simulate(preprocess)
+    dequant=tmp/'style_dequant';di=tmp/'dequant-in.mem';dr=tmp/'dequant-ref.mem'
+    # Independent IEEE floating point export-scale oracle, not RTL Q24 math.
+    stim=[];ref=[]
+    for v in range(1024):
+        codes=[v%256,(v*17+43)%256,(v*37+89)%256]
+        dummy=(v*71)%256;valid=int(v%9!=0)
+        packed=(dummy<<24)|sum((c^128)<<(8*j) for j,c in enumerate(codes))
+        rgb=0
+        for c in codes:rgb=(rgb<<8)|min(255,int(c*1.2273634672164917+.5))
+        stim.append((valid<<32)|packed);ref.append((valid<<24)|rgb)
+    di.write_text(''.join(f'{v:09x}\n' for v in stim));dr.write_text(''.join(f'{v:07x}\n' for v in ref))
+    compile_tb('tb_style_dequant',['tests/video/tb_style_dequant.sv','iris_ws/src/cnn/iris_style_dequant.v'],dequant);simulate(dequant,[f'+IN={di}',f'+REF={dr}'])
     compile_tb('tb_debayer',['tests/video/tb_debayer.sv','iris_ws/src/video/debayer/debayer_top_2to1.v'],exe)
     for kind in ['colour','ramp','edges']:
         print('Checking',kind,flush=True);simulate(exe,fixture(kind,tmp))

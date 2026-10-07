@@ -155,6 +155,9 @@ def main() -> int:
         postmap_module_enable="false",
     )
     print(f"[gen] result: {result}")
+    if str(result).endswith("SUCCESS"):
+        from sapphire_cli_options import apply_options
+        apply_options(project, args.name)
     gen_dir = project / "ip" / args.name
     produced = sorted(p.name for p in gen_dir.iterdir()) if gen_dir.is_dir() else []
     print(f"[gen] ip/{args.name}: {', '.join(produced) or '(empty)'}")

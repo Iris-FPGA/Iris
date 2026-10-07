@@ -534,6 +534,51 @@ module tb_axi_ddr_arbiter;
         end
     endtask
 
+    // Independent address/data streams can offer the next W before the
+    // previous B returns. That is legal AXI; a one-outstanding arbiter must
+    // backpressure it rather than forward it under the previous address.
+    task automatic bfm_pipelined_cpu_writes;
+        integer a, w, b, response;
+        begin
+            fork
+                begin
+                    for(a=0;a<32;a=a+1) begin
+                        @(negedge clk);
+                        s1_awid<=8'h80+a; s1_awaddr<=32'h00900000+a*256;
+                        s1_awlen<=(a%3==0)?0:((a%3==1)?3:7);
+                        s1_awvalid<=1;
+                        @(posedge clk); while(!s1_awready) @(posedge clk);
+                        s1_awvalid<=0;
+                    end
+                end
+                begin
+                    for(w=0;w<32;w=w+1) begin
+                        for(b=0;b<=((w%3==0)?0:((w%3==1)?3:7));b=b+1) begin
+                            @(negedge clk);
+                            s1_wdata<=wr_beat(32'h00900000+w*256,b);
+                            s1_wstrb<=16'hffff;
+                            s1_wlast<=(b==((w%3==0)?0:((w%3==1)?3:7)));
+                            s1_wvalid<=1;
+                            @(posedge clk);while(!s1_wready) @(posedge clk);
+                            s1_wvalid<=0;
+                        end
+                    end
+                end
+                begin
+                    for(response=0;response<32;response=response+1) begin
+                        // Keep B stalled long enough for the next W to arrive.
+                        repeat(16) @(negedge clk);s1_bready<=1;
+                        @(posedge clk);while(!s1_bvalid) @(posedge clk);
+                        if(s1_bresp!==0 || s1_bid!==(8'h80+response))
+                            fail("pipelined CPU write response ownership");
+                        s1_bready<=0;
+                    end
+                end
+            join
+            $display("PASS: pipelined CPU AW/W streams with delayed B");
+        end
+    endtask
+
     // Out-of-range write: expect a local SLVERR and nothing downstream.
     task automatic bfm_write_expect_err(
         input integer   s,
@@ -837,6 +882,13 @@ module tb_axi_ddr_arbiter;
         repeat (5) @(posedge clk);
         rst_n = 1'b1;
         repeat (5) @(posedge clk);
+
+        $display("[%0t] Phase P: pipelined CPU writes under concurrent video/accelerator traffic",$time);
+        fork
+            bfm_pipelined_cpu_writes();
+            bfm_write(0,8'h71,base0,8'd127,1'b0,0);
+            bfm_read(2,8'h72,base2,8'd127,1'b0,0);
+        join
 
         // Phase A: basic traffic on every master
         $display("[%0t] Phase A: basic R/W per master", $time);

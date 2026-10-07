@@ -1,0 +1,53 @@
+163204 bytes written at address 0x00800000
+downloaded 163204 bytes in 3.881541s (41.061 KiB/s)
+
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x0 cpuAR=0x0x80ca40 fbAR=0x0x1f3000
+arb cpuAW=0x0x70fffc fbAW=0x0x375800 rdCnt cpu/fb=2240/28432 rresp=0
+arb ARhand=30895 rdDone=30895 AWhand=1262 wrDone=1262
+lastAR addr=0x0x808080 len=3 size=4 burst=1 | lastAW addr=0x0x7b800 len=127
+Core 0 Hardware Settings:
+Accelerator Active: 1
+UUID: 0x4923687a
+AXI DW: 128
+AXI_DB_W: 16
+Cache Enabled: 1
+Cache Depth: 512
+Conv Depthw Mode: 2
+Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:2
+Add Mode: 2
+FC Mode: 0
+Mul Mode: 0
+LR Mode: 0
+Min-Max Mode: 0
+Reshape Mode: 0
+IRIS nodes OK: flatbuffer
+IRIS nodes OK: init
+IRIS prepare node 0 @0x0xe27ff4IRIS prepare node 1 @0x0xe28010IRIS prepare node 2 @0x0xe2802cIRIS prepare node 3 @0x0xe28048IRIS prepare node 4 @0x0xe28064IRIS prepare node 5 @0x0xe28080IRIS prepare node 6 @0x0xe2809cIRIS prepare node 7 @0x0xe280b8IRIS prepare node 8 @0x0xe280d4IRIS prepare node 9 @0x0xe280f0DDR arena: base=0x0xa28280 capacity=4194304 used=3688092
+IRIS LIVE: 640x480 paired camera/style; no CPU image processing; SRAM only
+IRIS LIVE before capture: input_view=0x0xe27c38 output_view=0x0xe27bf8 eval23=0x0xb54280
+IRIS LIVE after capture: input_data=0x0xa28280 output_data=0x0xa28280 eval23=0x0xb54280
+IRIS LIVE DMA node=0 tensor=15 output=0x0xc80280
+IRIS LIVE DMA node=1 tensor=16 output=0x0xabe280
+IRIS LIVE DMA node=2 tensor=17 output=0x0xa28280
+IRIS LIVE DMA node=3 tensor=18 output=0x0xa4da80
+IRIS LIVE DMA node=4 tensor=19 output=0x0xa73280
+IRIS LIVE DMA node=5 tensor=20 output=0x0xa28280
+IRIS LIVE DMA node=6 tensor=21 output=0x0xb54280
+IRIS LIVE DMA node=7 tensor=22 output=0x0xa28280
+IRIS LIVE DMA node=8 tensor=23 output=0x0xb54280
+IRIS LIVE DMA node=9 tensor=24 output=0x0x3400000
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "835be0aa2b372e74cbf15d5b8144a7ee928af71f8d58f7be5e2628b2e173f396",
+  "bit_sha256": "05a3e14c917c15014f474aeea43dc918f64d61d7950a0890ac47936cbb93ccde",
+  "attached": false,
+  "frames": [],
+  "reset": "",
+  "load": "163204 bytes written at address 0x00800000\ndownloaded 163204 bytes in 3.881541s (41.061 KiB/s)\n",
+  "observation_seconds": 3.1901612950023264,
+  "live_ok": false
+}

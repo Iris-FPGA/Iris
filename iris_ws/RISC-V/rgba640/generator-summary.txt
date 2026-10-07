@@ -1,0 +1,24 @@
+Model Accelerators Summary
+CONV DEPTHW: STANDARD
+ADD: STANDARD
+LR: DISABLED (not in model)
+FC: DISABLED (not in model)
+MUL: DISABLED (not in model)
+MIN MAX: DISABLED (not in model)
+RESHAPE: DISABLED (not in model)
+
+
+Hardware Definition File
+Generated hardware definition file : ../../../Iris/one_last_kiss_style/build/rgba640-demo4x2/tinyml_core0_define.v...
+Include the file under : source/tinyml
+End File Generation
+
+
+
+
+Software Model File
+Generated model file: ../../../Iris/one_last_kiss_style/build/rgba640-demo4x2/c448_lowdec_skip_r0_refined_rgba_640_int8_model_data.cc...
+Generated model file: ../../../Iris/one_last_kiss_style/build/rgba640-demo4x2/c448_lowdec_skip_r0_refined_rgba_640_int8_model_data.h... 
+Include the file under :embedded_sw/SapphireSoC/software/standalone/<application_name>/src/model
+End File Generation
+

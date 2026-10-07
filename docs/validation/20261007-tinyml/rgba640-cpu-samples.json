@@ -1,0 +1,131 @@
+{
+  "scope": "halt/resume sampling perturbs timing; not a throughput measurement",
+  "samples": [
+    {
+      "sample": 0,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 1,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 2,
+      "pc": "pc (/32): 0x008174c0\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 3,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 4,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 5,
+      "pc": "pc (/32): 0x008174c0\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 6,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 7,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 8,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 9,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 10,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 11,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 12,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 13,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 14,
+      "pc": "pc (/32): 0x008174c0\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 15,
+      "pc": "pc (/32): 0x008174c0\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 16,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 17,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 18,
+      "pc": "pc (/32): 0x008174c0\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 19,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 20,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 21,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 22,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 23,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    },
+    {
+      "sample": 24,
+      "pc": "pc (/32): 0x008174bc\n",
+      "mcause": "mcause (/32): 0x8000000b\n"
+    }
+  ],
+  "uart": "Iris style static bring-up; STRICT HARDWARE DISPATCH\n\rResize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS\n\rDDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0\n\rDDR coher pass2: fails=0\n\rarb state=0x0x40 cpuAR=0x0x808040 fbAR=0x0x15f800\n\rarb cpuAW=0x0x70fffc fbAW=0x0x326000 rdCnt cpu/fb=57062/53440 rresp=0\n\rarb ARhand=43609 rdDone=43609 AWhand=26106 wrDone=26106\n\rlastAR addr=0x0x47a800 len=127 size=4 burst=1 | lastAW addr=0x0x47000 len=127\n\rCore 0 Hardware Settings:\r\n  Accelerator Active: 1\r\n  UUID: 0x4923687a\r\n  AXI DW: 128\r\n  AXI_DB_W: 16\r\n  Cache Enabled: 1\r\n  Cache Depth: 512\r\n  Conv Depthw Mode: 2\r\n  Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:4\r\n  Add Mode: 2\r\n  FC Mode: 0\r\n  Mul Mode: 0\r\n  LR Mode: 0\r\n  Min-Max Mode: 0\r\n  Reshape Mode: 0\r\nIRIS nodes OK: flatbuffer\nIRIS nodes OK: init\nIRIS prepare node 0 @0x0x1a2acb4IRIS prepare node 1 @0x0x1a2acd0IRIS prepare node 2 @0x0x1a2acecIRIS prepare node 3 @0x0x1a2ad08IRIS prepare node 4 @0x0x1a2ad24IRIS prepare node 5 @0x0x1a2ad40IRIS prepare node 6 @0x0x1a2ad5cIRIS prepare node 7 @0x0x1a2ad78IRIS prepare node 8 @0x0x1a2ad94IRIS prepare node 9 @0x0x1a2adb0DDR arena: base=0x0xa2af40 capacity=16777216 used=3688092\n\rprofile: node; op; vendor execution mode; CLINT ticks (printed after Invoke)\n\r0; CONV_2D; STANDARD; ticks=54790358 cache_hit_raw=0 cache_miss_raw=0\n\r1; CONV_2D; STANDARD; ticks=23086862 cache_hit_raw=0 cache_miss_raw=0\n\r2; CONV_2D; STANDARD; ticks=10413559 cache_hit_raw=0 cache_miss_raw=0\n\r3; CONV_2D; STANDARD; ticks=2095517 cache_hit_raw=0 cache_miss_raw=0\n\r4; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=764802 cache_hit_raw=0 cache_miss_raw=0\n\r5; ADD; STANDARD; ticks=664822 cache_hit_raw=0 cache_miss_raw=0\n\r6; CONV_2D; STANDARD; ticks=4199668 cache_hit_raw=0 cache_miss_raw=0\n\r7; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=3093000 cache_hit_raw=0 cache_miss_raw=0\n\r8; ADD; STANDARD; ticks=2622669 cache_hit_raw=0 cache_miss_raw=0\n\r9; CONV_2D; STANDARD; ticks=6610865 cache_hit_raw=0 cache_miss_raw=0\n\routput bytes=1228800 FNV1a=0x0x3830f80b (diagnostic, no golden parity claim)\n\rCLINT ticks hi=0x0x0 lo=0x0x6757f90 Hz=100000000 (excludes profile UART transmission)\n\rIRIS STOP: inference complete; validate output dump against the matching integer reference"
+}

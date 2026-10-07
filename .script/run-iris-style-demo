@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+"""Run the SRAM-only paired camera/HDMI demo and record actual committed frames.
+
+Requires official OpenOCD Tcl6666 and an already programmed, timing-passed demo
+bitstream. --snapshot halts the CPU, waits for any pending VS commit, dumps the
+active input/output pair, then resumes; this pause is excluded from throughput.
+"""
+import argparse,hashlib,json,os,re,select,socket,subprocess,termios,time
+from pathlib import Path
+root=Path(__file__).resolve().parents[1]
+p=argparse.ArgumentParser(description=__doc__)
+p.add_argument('--elf',type=Path,default=root/'firmware/tinyml_style/build/tinyml_style.elf')
+p.add_argument('--bit-file',type=Path,default=root/'iris_ws/outflow/iris_ws.bit')
+p.add_argument('--output',type=Path,required=True)
+p.add_argument('--seconds',type=float,default=25)
+p.add_argument('--snapshot',action='store_true')
+p.add_argument('--attach',action='store_true',help='observe existing firmware without reset/reload')
+p.add_argument('--uart',default='/dev/ttyUSB2')
+a=p.parse_args();a.output.parent.mkdir(parents=True,exist_ok=True)
+if a.seconds<=0:p.error('--seconds must be positive')
+for f in [a.elf,a.output]:
+ if any(c in str(f.resolve()) for c in '{}\n\r'):p.error('unsupported Tcl path')
+def digest(f):return hashlib.sha256(f.read_bytes()).hexdigest()
+def words(raw):
+ return [int(v,16) for l in raw.splitlines() if re.match(r'^0x[0-9a-f]+:',l) for v in l.split(':',1)[1].split()]
+report={'scope':'SRAM live camera/style demo; no Flash boot acceptance','elf_sha256':digest(a.elf),
+        'bit_sha256':digest(a.bit_file),'attached':a.attach,'frames':[]}
+with socket.create_connection(('localhost',6666),timeout=120) as s:
+ def tcl(c):
+  s.sendall(c.encode()+b'\x1a');d=bytearray()
+  while b'\x1a' not in d:
+   chunk=s.recv(65536)
+   if not chunk:raise RuntimeError('OpenOCD disconnected')
+   d.extend(chunk)
+  return d.decode(errors='replace').rstrip('\x1a')
+ fd=os.open(a.uart,os.O_RDWR|os.O_NOCTTY|os.O_NONBLOCK)
+ attr=termios.tcgetattr(fd);attr[0]=attr[1]=attr[3]=0;attr[2]=termios.CS8|termios.CLOCAL|termios.CREAD
+ attr[4]=attr[5]=termios.B115200;attr[6][termios.VMIN]=attr[6][termios.VTIME]=0
+ termios.tcsetattr(fd,termios.TCSANOW,attr);termios.tcflush(fd,termios.TCIFLUSH)
+ raw=bytearray();partial=b''
+ try:
+  if not a.attach:
+   tcl('halt');report['reset']=tcl('reset halt')
+   report['load']=tcl('load_image {'+str(a.elf.resolve())+'}')
+   if 'downloaded' not in report['load']:raise RuntimeError('ELF load not confirmed')
+   print(report['load'],flush=True);tcl('resume 0x00800000')
+  begin=time.monotonic()
+  while time.monotonic()-begin<a.seconds:
+   if not select.select([fd],[],[],.2)[0]:continue
+   try:chunk=os.read(fd,65536)
+   except BlockingIOError:continue
+   raw.extend(chunk);partial+=chunk
+   while b'\n' in partial:
+    line,partial=partial.split(b'\n',1);line=line.decode(errors='replace').strip()
+    if not line:continue
+    print(line,flush=True)
+    match=re.fullmatch(r'IRIS LIVE frame=(\d+) pair=(\d+) Invoke_ticks=(\d+) displayed=(\d+) captures=(\d+) underflow=(\d+) readerr=(\d+) rejects=(\d+)',line)
+    if match:
+     values=list(map(int,match.groups()))
+     report['frames'].append(dict(zip(['sequence','pair','invoke_ticks','displayed','captures','underflows','read_errors','rejects'],values),host_elapsed=time.monotonic()-begin))
+    if line.startswith('IRIS STOP:'):report['stop_reason']=line
+  frames=report['frames'];report['observation_seconds']=time.monotonic()-begin
+  if len(frames)>=2:
+   report['observed_committed_pair_hz']=(frames[-1]['displayed']-frames[0]['displayed'])/(frames[-1]['host_elapsed']-frames[0]['host_elapsed'])
+  if a.snapshot:
+   tcl('halt');time.sleep(.05)
+   status=words(tcl('mdw 0xf8100000 10'));report['snapshot_status']=status
+   if len(status)!=10 or status[0]>>16!=0x4953 or not(status[0]&8):
+    raise RuntimeError('no complete displayed pair')
+   pair=(status[0]>>4)&1
+   report['snapshot_pair']=pair;report['snapshot_displayed_count']=status[4]
+   report['snapshot_files']={}
+   for kind,base in [('input',0x03000000),('output',0x03400000)]:
+    dest=Path(str(a.output)+'-'+kind+'.bin').resolve()
+    result=tcl(f'dump_image {{{dest}}} 0x{base+pair*0x200000:x} 1228800')
+    if not dest.is_file() or dest.stat().st_size!=1228800:raise RuntimeError('incomplete pair dump: '+result)
+    report['snapshot_files'][kind]={'path':str(dest),'sha256':digest(dest)}
+   if words(tcl('mdw 0xf8100000 1'))[0]!=status[0]:raise RuntimeError('display ownership changed during snapshot')
+   # CPU resumes even if a snapshot/check fails; no Flash changes occur.
+  report['live_ok']=len(frames)>=2 and not report.get('stop_reason') and all(f['underflows']==0 and f['read_errors']==0 and f['rejects']==0 for f in frames)
+ finally:
+  if a.snapshot:tcl('resume')
+  os.close(fd)
+  Path(str(a.output)+'-uart.log').write_bytes(raw)
+  Path(str(a.output)+'-report.json').write_text(json.dumps(report,indent=2)+'\n')
+print(json.dumps(report,indent=2),flush=True)
+raise SystemExit(0 if report.get('live_ok') else 1)

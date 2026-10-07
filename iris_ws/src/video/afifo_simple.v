@@ -16,7 +16,8 @@ module afifo_simple #(
     input  wire          rrst_n,
     input  wire          rinc,
     output reg  [DW-1:0] dout,
-    output wire          rempty
+    output wire          rempty,
+    output wire [AW:0]   rlevel
 );
 
 localparam DEPTH = 1 << AW;
@@ -73,5 +74,15 @@ end
 
 assign wfull  = (wgray == {~rgray_s2[AW:AW-1], rgray_s2[AW-2:0]});
 assign rempty = (rgray == wgray_s2);
+function [AW:0] gray2bin;
+    input [AW:0] g;
+    integer k;
+    begin
+        gray2bin[AW] = g[AW];
+        for (k=AW-1;k>=0;k=k-1) gray2bin[k]=gray2bin[k+1]^g[k];
+    end
+endfunction
+// Conservative read-domain occupancy; synchronized write pointer can lag.
+assign rlevel = gray2bin(wgray_s2) - rbin;
 
 endmodule

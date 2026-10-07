@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""Load the static TinyML ELF and capture UART/debug evidence via OpenOCD.
+
+Does not change the FPGA bitstream or Flash. Requires an existing Tcl server.
+"""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import select
+import socket
+import subprocess
+import termios
+import time
+
+root=Path(__file__).resolve().parents[1]
+p=argparse.ArgumentParser(description=__doc__)
+p.add_argument('--elf',type=Path,default=root/'firmware/tinyml_style/build/tinyml_style.elf')
+p.add_argument('--output',type=Path,required=True,help='output filename prefix')
+p.add_argument('--uart',default='/dev/ttyUSB2')
+p.add_argument('--port',type=int,default=6666)
+p.add_argument('--timeout',type=float,default=90)
+p.add_argument('--golden',type=Path)
+p.add_argument('--bit-file',type=Path,default=root/'iris_ws/outflow/iris_ws.bit',
+               help='file identity associated with the separate SRAM programming record')
+a=p.parse_args();elf=a.elf.resolve()
+if any(c in str(elf) for c in '{}\n\r'):
+    p.error('unsupported Tcl path characters')
+nm=subprocess.check_output(['/home/noir/Applications/riscv-none-elf/bin/riscv-none-elf-nm',str(elf)],text=True)
+address=int(re.search(r'^([0-9a-f]+) B iris_result$',nm,re.M)[1],16)
+def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+def words(raw):
+    result=[]
+    for line in raw.splitlines():
+        if re.match(r'^0x[0-9a-f]+:',line):
+            result.extend(int(v,16) for v in line.split(':',1)[1].split())
+    return result
+a.output.parent.mkdir(parents=True,exist_ok=True)
+with socket.create_connection(('localhost',a.port),timeout=45) as connection:
+    def tcl(cmd):
+        connection.sendall(cmd.encode()+b'\x1a');data=bytearray()
+        while b'\x1a' not in data:
+            chunk=connection.recv(65536)
+            if not chunk:raise RuntimeError('OpenOCD disconnected')
+            data.extend(chunk)
+        return data.decode(errors='replace').rstrip('\x1a')
+    fd=os.open(a.uart,os.O_RDWR|os.O_NOCTTY|os.O_NONBLOCK)
+    try:
+        attr=termios.tcgetattr(fd);attr[0]=attr[1]=attr[3]=0
+        attr[2]=termios.CS8|termios.CLOCAL|termios.CREAD
+        attr[4]=attr[5]=termios.B115200
+        attr[6][termios.VMIN]=attr[6][termios.VTIME]=0
+        termios.tcsetattr(fd,termios.TCSANOW,attr);termios.tcflush(fd,termios.TCIFLUSH)
+        # ELF writes through JTAG bypass CPU caches. Reset the halted hart
+        # before loading different code/data; FENCE alone is insufficient.
+        tcl('halt');reset=tcl('reset halt')
+        load=tcl('load_image {'+str(elf)+'}')
+        if 'downloaded' not in load:raise RuntimeError('ELF load not confirmed: '+load)
+        print(load,flush=True);tcl('resume 0x00800000')
+        raw=bytearray();begin=time.monotonic();stop_seen=None
+        while time.monotonic()-begin<a.timeout:
+            if select.select([fd],[],[],.2)[0]:
+                try:
+                    chunk=os.read(fd,65536);raw.extend(chunk)
+                    if chunk:print(chunk.decode(errors='replace'),end='',flush=True)
+                except BlockingIOError:pass
+            if stop_seen is None and b'IRIS STOP:' in raw:stop_seen=time.monotonic()
+            if stop_seen is not None and time.monotonic()-stop_seen>1:break
+        tcl('halt');result=tcl(f'mdw 0x{address:x} 8')
+        descriptor=words(result)
+        report={'elf':str(elf),'elf_sha256':digest(elf),'reset':reset,'load':load,
+                'bit_file_sha256':digest(a.bit_file),
+                'descriptor_address':hex(address),'descriptor':descriptor,
+                'raw_descriptor':result,'elapsed_seconds':time.monotonic()-begin,
+                'registers':{r:tcl('reg '+r+' force') for r in ['pc','mcause','mepc','mtval']},
+                'invoke_completed':len(descriptor)==8 and descriptor[0]==2}
+        decoded=raw.decode(errors='replace').replace('\r','')
+        rows=re.findall(r'^(\d+); ([A-Z_0-9]+); ([A-Z_0-9]+); ([^\n]+)$',decoded,re.M)
+        report['profile']=[{'node':int(node),'op':op,'mode':mode,'duration':duration}
+                           for node,op,mode,duration in rows]
+        report['strict_dispatch_evidence']=('STRICT HARDWARE DISPATCH' in decoded and
+             bool(rows) and all(mode in ('STANDARD','LITE','IRIS_RESIZE_HW')
+                                for _,_,mode,_ in rows))
+        clock=re.search(r'Hz=(\d+)',decoded)
+        if clock and len(descriptor)==8:
+            report['clint_hz']=int(clock[1])
+            report['invoke_seconds']=((descriptor[6]<<32)|descriptor[5])/int(clock[1])
+            report['excludes_profile_uart']='excludes profile UART transmission' in decoded
+            report['fresh_frame_fps']=None  # A static fixture cannot prove fresh-frame throughput.
+        if report['invoke_completed']:
+            output_address,output_bytes=descriptor[2:4]
+            if not (0x00800000<=output_address<0x10000000 and 0<output_bytes<0x02000000):
+                raise RuntimeError('invalid output descriptor')
+            destination=Path(str(a.output)+'-output.bin').resolve()
+            dump=tcl(f'dump_image {{{destination}}} 0x{output_address:x} {output_bytes}')
+            actual=destination.read_bytes()
+            if len(actual)!=output_bytes:raise RuntimeError('incomplete output dump: '+dump)
+            report['output_sha256']=hashlib.sha256(actual).hexdigest()
+            if a.golden:
+                ref=a.golden.read_bytes()
+                if len(ref)!=len(actual):raise RuntimeError('golden/output sizes differ')
+                error=[abs((x if x<128 else x-256)-(y if y<128 else y-256)) for x,y in zip(actual,ref)]
+                report['parity']={'golden':str(a.golden),'golden_sha256':digest(a.golden),
+                                  'exact':actual==ref,'max_abs_lsb':max(error),
+                                  'mae_lsb':sum(error)/len(error),
+                                  'different_bytes':sum(e!=0 for e in error)}
+        Path(str(a.output)+'-uart.log').write_bytes(raw)
+        Path(str(a.output)+'-debug.json').write_text(json.dumps(report,indent=2)+'\n')
+        print(json.dumps(report,indent=2),flush=True)
+    finally:os.close(fd)
+raise SystemExit(1 if not report['invoke_completed'] else
+                 2 if a.golden and not report['parity']['exact'] else 0)

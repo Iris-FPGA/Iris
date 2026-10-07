@@ -1,0 +1,40 @@
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x40 cpuAR=0x0x808040 fbAR=0x0xb9800
+arb cpuAW=0x0x70fffc fbAW=0x0x582800 rdCnt cpu/fb=2251/16611 rresp=0
+arb ARhand=19128 rdDone=19128 AWhand=6590 wrDone=6590
+lastAR addr=0x0x808080 len=3 size=4 burst=1 | lastAW addr=0x0x288000 len=127
+Core 0 Hardware Settings:
+  Accelerator Active: 1
+  UUID: 0x4923687a
+  AXI DW: 128
+  AXI_DB_W: 16
+  Cache Enabled: 1
+  Cache Depth: 512
+  Conv Depthw Mode: 2
+  Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:2
+  Add Mode: 2
+  FC Mode: 0
+  Mul Mode: 0
+  LR Mode: 0
+  Min-Max Mode: 0
+  Reshape Mode: 0
+IRIS nodes OK: flatbuffer
+IRIS nodes OK: init
+IRIS prepare node 0 @0x0x1a2b3b4IRIS prepare node 1 @0x0x1a2b3d0IRIS prepare node 2 @0x0x1a2b3ecIRIS prepare node 3 @0x0x1a2b408IRIS prepare node 4 @0x0x1a2b424IRIS prepare node 5 @0x0x1a2b440IRIS prepare node 6 @0x0x1a2b45cIRIS prepare node 7 @0x0x1a2b478IRIS prepare node 8 @0x0x1a2b494IRIS prepare node 9 @0x0x1a2b4b0DDR arena: base=0x0xa2b640 capacity=16777216 used=3688092
+IRIS LIVE: 640x480 paired camera/style; no CPU image processing; SRAM only
+IRIS LIVE before capture: input_view=0x0x1a2aff8 output_view=0x0x1a2afb8 eval23=0x0xb57640
+IRIS LIVE after capture: input_data=0x0xa2b640 output_data=0x0xa2b640 eval23=0x0xb57640
+IRIS LIVE DMA node=0 tensor=15 output=0x0xc83640
+IRIS LIVE DMA node=1 tensor=16 output=0x0xac1640
+IRIS LIVE DMA node=2 tensor=17 output=0x0xa2b640
+IRIS LIVE DMA node=3 tensor=18 output=0x0xa50e40
+IRIS LIVE DMA node=4 tensor=19 output=0x0xa76640
+IRIS LIVE DMA node=5 tensor=20 output=0x0xa2b640
+IRIS LIVE DMA node=6 tensor=21 output=0x0xb57640
+IRIS LIVE DMA node=7 tensor=22 output=0x0xa2b640
+IRIS LIVE DMA node=8 tensor=23 output=0x0x548f5091
+IRIS STOP: live intermediate DMA points outside tensor arena
+

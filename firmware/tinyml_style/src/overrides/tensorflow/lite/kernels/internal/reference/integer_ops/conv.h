@@ -68,6 +68,12 @@ static inline __attribute__((noinline)) void ConvPerChannel(
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
 
+#if IRIS_LIVE_DEMO
+  MicroPrintf("IRIS CONV input=%x output=%x shape=%dx%dx%d out=%dx%dx%d intr=%x/%x",
+      reinterpret_cast<uintptr_t>(input_data),reinterpret_cast<uintptr_t>(output_data),
+      input_height,input_width,input_depth,output_height,output_width,output_depth,
+      global_intr_id[0],global_intr_id[1]);
+#endif
   // tinyml driver
   auto res = conv_drv(stride_width, stride_height, dilation_width_factor, dilation_height_factor, pad_width, pad_height,
 					  input_offset, output_offset, batches, input_depth, output_depth, input_width, input_height,

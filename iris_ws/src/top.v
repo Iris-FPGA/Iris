@@ -4,7 +4,13 @@
 //   debayer (display domain) -> RGB888 -> TMDS/HDMI 1080p.
 //=====================================================================
 
-module top
+module top #(
+    // Original camera diagnostic configuration defaults to its periodic log.
+    // The style project selects 0 through Efinity top-params and uses the CPU
+    // console; retain the legacy implementation for diagnostic builds.
+    parameter ENABLE_STYLE_DEMO = 0,
+    parameter ENABLE_LEGACY_UART_LOG = 1
+)
 (
     ////////////////////////    CLOCK     ////////////////////////
     input                       gpio_clk_27m,     // 27MHz board clock (UART + LED)
@@ -464,7 +470,9 @@ rgb_display_2px u_display_color (
     .i_black_r(black_r), .i_black_g(black_g), .i_black_b(black_b),
     .o_hs(display_hs), .o_vs(display_vs), .o_de(display_de), .o_rgb(display_rgb)
 );
-wire [50:0] af_din = {display_hs, display_vs, display_de, display_rgb};
+wire style_display_hs,style_display_vs,style_display_de;
+wire [47:0] style_display_rgb;
+wire [50:0] af_din = {style_display_hs, style_display_vs, style_display_de, style_display_rgb};
 wire [50:0] af_dout;
 wire        af_wfull, af_rempty;
 reg         af_rinc;
@@ -728,7 +736,7 @@ key_pulse #(.REP_MS(0)) u_capture_key (
  .clk(gpio_clk_27m),.rst_n(video_rst_n),.key_in(key_i[2]),.pulse(capture_key)
 );
 wire [7:0] cal_data;
-colour_capture u_colour_capture (
+colour_capture #(.STEP(ENABLE_STYLE_DEMO ? 40 : 20)) u_colour_capture (
  .video_clk(hdmi_tx_half_clk),.uart_clk(gpio_clk_27m),.rst_n(video_rst_n),
  .i_vs(dbg_vs_o),.i_de(dbg_de_o),.i_rgb(dbg_rgb),
  .i_capture(capture_key),.rx_valid(rx_valid),.rx_data(rx_data),.log_active(log_gate),.tx_req(tx_req),
@@ -776,6 +784,7 @@ uart_rx_tx #(
     .rx_data    (rx_data)
 );
 
+generate if (ENABLE_LEGACY_UART_LOG) begin : g_legacy_uart_log
 ae_uart_log u_ae_log (
     .i_pause   (cal_gate),
     .clk       (gpio_clk_27m),
@@ -798,6 +807,11 @@ ae_uart_log u_ae_log (
     .tx_gate   (log_gate),
     .fifo_act  (fifo_act)
 );
+end else begin : g_no_legacy_uart_log
+    assign log_dv = 1'b0;
+    assign log_data = 8'd0;
+    assign log_gate = 1'b0;
+end endgenerate
 
 //=====================================================================
 // SC431HAI I2C bring-up
@@ -1013,7 +1027,65 @@ wire [15:0]  dbg_arb_fb_rd_cnt;
 wire [15:0]  dbg_arb_m_ar_cnt;
 wire [15:0]  dbg_arb_m_aw_cnt;
 
-tinyml_subsystem u_tinyml_subsystem (
+// Style demo extends the CPU DDR channel; accelerator routing is unchanged.
+wire [7:0] raw_cpu_awid;
+wire [31:0] raw_cpu_awaddr;
+wire [7:0] raw_cpu_awlen;
+wire [2:0] raw_cpu_awsize;
+wire [1:0] raw_cpu_awburst;
+wire raw_cpu_awlock;
+wire raw_cpu_awvalid;
+wire [127:0] raw_cpu_wdata;
+wire [15:0] raw_cpu_wstrb;
+wire raw_cpu_wlast;
+wire raw_cpu_wvalid;
+wire raw_cpu_bready;
+wire [7:0] raw_cpu_arid;
+wire [31:0] raw_cpu_araddr;
+wire [7:0] raw_cpu_arlen;
+wire [2:0] raw_cpu_arsize;
+wire [1:0] raw_cpu_arburst;
+wire raw_cpu_arlock;
+wire raw_cpu_arvalid;
+wire raw_cpu_rready;
+wire raw_cpu_awready;
+wire raw_cpu_wready;
+wire [7:0] raw_cpu_bid;
+wire [1:0] raw_cpu_bresp;
+wire raw_cpu_bvalid;
+wire raw_cpu_arready;
+wire [127:0] raw_cpu_rdata;
+wire [7:0] raw_cpu_rid;
+wire [1:0] raw_cpu_rresp;
+wire raw_cpu_rlast;
+wire raw_cpu_rvalid;
+wire [31:0] style_awaddr;
+wire [7:0] style_awlen;
+wire style_awvalid;
+wire [127:0] style_wdata;
+wire style_wlast;
+wire style_wvalid;
+wire style_bready;
+wire [31:0] style_araddr;
+wire [7:0] style_arlen;
+wire style_arvalid;
+wire style_rready;
+wire style_awready;
+wire style_wready;
+wire [1:0] style_bresp;
+wire style_bvalid;
+wire style_arready;
+wire [127:0] style_rdata;
+wire [1:0] style_rresp;
+wire style_rlast;
+wire style_rvalid;
+wire [15:0] style_paddr;
+wire style_psel,style_penable,style_pwrite;
+wire [31:0] style_pwdata,style_prdata;
+
+tinyml_subsystem #(.ENABLE_STYLE_DEMO(ENABLE_STYLE_DEMO)) u_tinyml_subsystem (
+    .style_paddr(style_paddr),.style_psel(style_psel),.style_penable(style_penable),
+    .style_pwrite(style_pwrite),.style_pwdata(style_pwdata),.style_prdata(style_prdata),
     .clk              (core_clk),
     .rst_n            (tinyml_rst_n),
     .uart_txd         (soc_uart_txd),
@@ -1026,37 +1098,37 @@ tinyml_subsystem u_tinyml_subsystem (
     .jtag_inst1_SHIFT (jtag_inst1_SHIFT),
     .jtag_inst1_UPDATE(jtag_inst1_UPDATE),
     .jtag_inst1_RESET (jtag_inst1_RESET),
-    .cpu_awid         (cpu_awid),
-    .cpu_awaddr       (cpu_awaddr),
-    .cpu_awlen        (cpu_awlen),
-    .cpu_awsize       (cpu_awsize),
-    .cpu_awburst      (cpu_awburst),
-    .cpu_awlock       (cpu_awlock),
-    .cpu_awvalid      (cpu_awvalid),
-    .cpu_awready      (cpu_awready),
-    .cpu_wdata        (cpu_wdata),
-    .cpu_wstrb        (cpu_wstrb),
-    .cpu_wlast        (cpu_wlast),
-    .cpu_wvalid       (cpu_wvalid),
-    .cpu_wready       (cpu_wready),
-    .cpu_bid          (cpu_bid),
-    .cpu_bresp        (cpu_bresp),
-    .cpu_bvalid       (cpu_bvalid),
-    .cpu_bready       (cpu_bready),
-    .cpu_arid         (cpu_arid),
-    .cpu_araddr       (cpu_araddr),
-    .cpu_arlen        (cpu_arlen),
-    .cpu_arsize       (cpu_arsize),
-    .cpu_arburst      (cpu_arburst),
-    .cpu_arlock       (cpu_arlock),
-    .cpu_arvalid      (cpu_arvalid),
-    .cpu_arready      (cpu_arready),
-    .cpu_rdata        (cpu_rdata),
-    .cpu_rid          (cpu_rid),
-    .cpu_rresp        (cpu_rresp),
-    .cpu_rlast        (cpu_rlast),
-    .cpu_rvalid       (cpu_rvalid),
-    .cpu_rready       (cpu_rready),
+    .cpu_awid         (raw_cpu_awid),
+    .cpu_awaddr       (raw_cpu_awaddr),
+    .cpu_awlen        (raw_cpu_awlen),
+    .cpu_awsize       (raw_cpu_awsize),
+    .cpu_awburst      (raw_cpu_awburst),
+    .cpu_awlock       (raw_cpu_awlock),
+    .cpu_awvalid      (raw_cpu_awvalid),
+    .cpu_awready      (raw_cpu_awready),
+    .cpu_wdata        (raw_cpu_wdata),
+    .cpu_wstrb        (raw_cpu_wstrb),
+    .cpu_wlast        (raw_cpu_wlast),
+    .cpu_wvalid       (raw_cpu_wvalid),
+    .cpu_wready       (raw_cpu_wready),
+    .cpu_bid          (raw_cpu_bid),
+    .cpu_bresp        (raw_cpu_bresp),
+    .cpu_bvalid       (raw_cpu_bvalid),
+    .cpu_bready       (raw_cpu_bready),
+    .cpu_arid         (raw_cpu_arid),
+    .cpu_araddr       (raw_cpu_araddr),
+    .cpu_arlen        (raw_cpu_arlen),
+    .cpu_arsize       (raw_cpu_arsize),
+    .cpu_arburst      (raw_cpu_arburst),
+    .cpu_arlock       (raw_cpu_arlock),
+    .cpu_arvalid      (raw_cpu_arvalid),
+    .cpu_arready      (raw_cpu_arready),
+    .cpu_rdata        (raw_cpu_rdata),
+    .cpu_rid          (raw_cpu_rid),
+    .cpu_rresp        (raw_cpu_rresp),
+    .cpu_rlast        (raw_cpu_rlast),
+    .cpu_rvalid       (raw_cpu_rvalid),
+    .cpu_rready       (raw_cpu_rready),
     .acc_awid         (acc_awid),
     .acc_awaddr       (acc_awaddr),
     .acc_awlen        (acc_awlen),
@@ -1113,6 +1185,156 @@ tinyml_subsystem u_tinyml_subsystem (
     .dbg_arb_m_aw_cnt   (dbg_arb_m_aw_cnt)
 );
 
+
+reg [3:0] arb_rst_pipe;
+generate if(ENABLE_STYLE_DEMO)begin : g_style_demo
+iris_style_demo u_style_demo(
+ .clk(core_clk),.video_clk(hdmi_tx_half_clk),.rst_n(arb_rst_pipe[3]),
+ .paddr(style_paddr),.psel(style_psel),.penable(style_penable),.pwrite(style_pwrite),
+ .pwdata(style_pwdata),.prdata(style_prdata),
+ .i_hs(display_hs),.i_vs(display_vs),.i_de(display_de),.i_rgb(display_rgb),
+ .o_hs(style_display_hs),.o_vs(style_display_vs),.o_de(style_display_de),.o_rgb(style_display_rgb),
+ .awaddr(style_awaddr),
+ .awlen(style_awlen),
+ .awvalid(style_awvalid),
+ .wdata(style_wdata),
+ .wlast(style_wlast),
+ .wvalid(style_wvalid),
+ .bready(style_bready),
+ .araddr(style_araddr),
+ .arlen(style_arlen),
+ .arvalid(style_arvalid),
+ .rready(style_rready),
+ .awready(style_awready),
+ .wready(style_wready),
+ .bresp(style_bresp),
+ .bvalid(style_bvalid),
+ .arready(style_arready),
+ .rdata(style_rdata),
+ .rresp(style_rresp),
+ .rlast(style_rlast),
+ .rvalid(style_rvalid)
+);
+axi_cpu_style_mux u_style_mux(
+ .clk(core_clk),.rst_n(arb_rst_pipe[3]),
+ .cpu_awid(raw_cpu_awid),
+ .cpu_awaddr(raw_cpu_awaddr),
+ .cpu_awlen(raw_cpu_awlen),
+ .cpu_awsize(raw_cpu_awsize),
+ .cpu_awburst(raw_cpu_awburst),
+ .cpu_awlock(raw_cpu_awlock),
+ .cpu_awvalid(raw_cpu_awvalid),
+ .cpu_wdata(raw_cpu_wdata),
+ .cpu_wstrb(raw_cpu_wstrb),
+ .cpu_wlast(raw_cpu_wlast),
+ .cpu_wvalid(raw_cpu_wvalid),
+ .cpu_bready(raw_cpu_bready),
+ .cpu_arid(raw_cpu_arid),
+ .cpu_araddr(raw_cpu_araddr),
+ .cpu_arlen(raw_cpu_arlen),
+ .cpu_arsize(raw_cpu_arsize),
+ .cpu_arburst(raw_cpu_arburst),
+ .cpu_arlock(raw_cpu_arlock),
+ .cpu_arvalid(raw_cpu_arvalid),
+ .cpu_rready(raw_cpu_rready),
+ .cpu_awready(raw_cpu_awready),
+ .cpu_wready(raw_cpu_wready),
+ .cpu_bid(raw_cpu_bid),
+ .cpu_bresp(raw_cpu_bresp),
+ .cpu_bvalid(raw_cpu_bvalid),
+ .cpu_arready(raw_cpu_arready),
+ .cpu_rdata(raw_cpu_rdata),
+ .cpu_rid(raw_cpu_rid),
+ .cpu_rresp(raw_cpu_rresp),
+ .cpu_rlast(raw_cpu_rlast),
+ .cpu_rvalid(raw_cpu_rvalid),
+ .style_awaddr(style_awaddr),
+ .style_awlen(style_awlen),
+ .style_awvalid(style_awvalid),
+ .style_wdata(style_wdata),
+ .style_wlast(style_wlast),
+ .style_wvalid(style_wvalid),
+ .style_bready(style_bready),
+ .style_araddr(style_araddr),
+ .style_arlen(style_arlen),
+ .style_arvalid(style_arvalid),
+ .style_rready(style_rready),
+ .style_awready(style_awready),
+ .style_wready(style_wready),
+ .style_bresp(style_bresp),
+ .style_bvalid(style_bvalid),
+ .style_arready(style_arready),
+ .style_rdata(style_rdata),
+ .style_rresp(style_rresp),
+ .style_rlast(style_rlast),
+ .style_rvalid(style_rvalid),
+ .m_awid(cpu_awid),
+ .m_awaddr(cpu_awaddr),
+ .m_awlen(cpu_awlen),
+ .m_awsize(cpu_awsize),
+ .m_awburst(cpu_awburst),
+ .m_awlock(cpu_awlock),
+ .m_awvalid(cpu_awvalid),
+ .m_wdata(cpu_wdata),
+ .m_wstrb(cpu_wstrb),
+ .m_wlast(cpu_wlast),
+ .m_wvalid(cpu_wvalid),
+ .m_bready(cpu_bready),
+ .m_arid(cpu_arid),
+ .m_araddr(cpu_araddr),
+ .m_arlen(cpu_arlen),
+ .m_arsize(cpu_arsize),
+ .m_arburst(cpu_arburst),
+ .m_arlock(cpu_arlock),
+ .m_arvalid(cpu_arvalid),
+ .m_rready(cpu_rready),
+ .m_awready(cpu_awready),
+ .m_wready(cpu_wready),
+ .m_bid(cpu_bid),
+ .m_bresp(cpu_bresp),
+ .m_bvalid(cpu_bvalid),
+ .m_arready(cpu_arready),
+ .m_rdata(cpu_rdata),
+ .m_rid(cpu_rid),
+ .m_rresp(cpu_rresp),
+ .m_rlast(cpu_rlast),
+ .m_rvalid(cpu_rvalid)
+);
+end else begin : g_no_style_demo
+assign cpu_awid=raw_cpu_awid;
+assign cpu_awaddr=raw_cpu_awaddr;
+assign cpu_awlen=raw_cpu_awlen;
+assign cpu_awsize=raw_cpu_awsize;
+assign cpu_awburst=raw_cpu_awburst;
+assign cpu_awlock=raw_cpu_awlock;
+assign cpu_awvalid=raw_cpu_awvalid;
+assign cpu_wdata=raw_cpu_wdata;
+assign cpu_wstrb=raw_cpu_wstrb;
+assign cpu_wlast=raw_cpu_wlast;
+assign cpu_wvalid=raw_cpu_wvalid;
+assign cpu_bready=raw_cpu_bready;
+assign cpu_arid=raw_cpu_arid;
+assign cpu_araddr=raw_cpu_araddr;
+assign cpu_arlen=raw_cpu_arlen;
+assign cpu_arsize=raw_cpu_arsize;
+assign cpu_arburst=raw_cpu_arburst;
+assign cpu_arlock=raw_cpu_arlock;
+assign cpu_arvalid=raw_cpu_arvalid;
+assign cpu_rready=raw_cpu_rready;
+assign raw_cpu_awready=cpu_awready;
+assign raw_cpu_wready=cpu_wready;
+assign raw_cpu_bid=cpu_bid;
+assign raw_cpu_bresp=cpu_bresp;
+assign raw_cpu_bvalid=cpu_bvalid;
+assign raw_cpu_arready=cpu_arready;
+assign raw_cpu_rdata=cpu_rdata;
+assign raw_cpu_rid=cpu_rid;
+assign raw_cpu_rresp=cpu_rresp;
+assign raw_cpu_rlast=cpu_rlast;
+assign raw_cpu_rvalid=cpu_rvalid;
+assign style_prdata=0;
+assign {style_display_hs,style_display_vs,style_display_de,style_display_rgb}={display_hs,display_vs,display_de,display_rgb};
+end endgenerate
 //=====================================================================
 // Shared-DDR arbiter: video frame buffer + CPU + TinyML accelerator
 //   -> single AXI4 master -> axi_atype_bridge -> efx_ddr3_axi
@@ -1121,7 +1343,6 @@ tinyml_subsystem u_tinyml_subsystem (
 // and tinyml_rst_n are ANDs of asynchronous lock signals; releasing the
 // arbiter FSMs off a raw edge risks metastable wr/rd owner state.
 wire arb_rst_n_raw = video_rst_n & tinyml_rst_n;
-reg [3:0] arb_rst_pipe;
 always @(posedge core_clk or negedge arb_rst_n_raw) begin
     if (!arb_rst_n_raw) arb_rst_pipe <= 4'd0;
     else                arb_rst_pipe <= {arb_rst_pipe[2:0], 1'b1};

@@ -1,0 +1,52 @@
+163076 bytes written at address 0x00800000
+downloaded 163076 bytes in 3.870991s (41.140 KiB/s)
+
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x40 cpuAR=0x0x808040 fbAR=0x0x357800
+arb cpuAW=0x0x70fffc fbAW=0x0x190800 rdCnt cpu/fb=57068/6149 rresp=0
+arb ARhand=60804 rdDone=60805 AWhand=2986 wrDone=2986
+lastAR addr=0x0x808080 len=3 size=4 burst=1 | lastAW addr=0x0x48d000 len=127
+Core 0 Hardware Settings:
+Accelerator Active: 1
+UUID: 0x4923687a
+AXI DW: 128
+AXI_DB_W: 16
+Cache Enabled: 1
+Cache Depth: 512
+Conv Depthw Mode: 2
+Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:2
+Add Mode: 2
+FC Mode: 0
+Mul Mode: 0
+LR Mode: 0
+Min-Max Mode: 0
+Reshape Mode: 0
+IRIS nodes OK: flatbuffer
+IRIS nodes OK: init
+IRIS prepare node 0 @0x0x1a2b2b4IRIS prepare node 1 @0x0x1a2b2d0IRIS prepare node 2 @0x0x1a2b2ecIRIS prepare node 3 @0x0x1a2b308IRIS prepare node 4 @0x0x1a2b324IRIS prepare node 5 @0x0x1a2b340IRIS prepare node 6 @0x0x1a2b35cIRIS prepare node 7 @0x0x1a2b378IRIS prepare node 8 @0x0x1a2b394IRIS prepare node 9 @0x0x1a2b3b0DDR arena: base=0x0xa2b540 capacity=16777216 used=3688092
+IRIS LIVE: 640x480 paired camera/style; no CPU image processing; SRAM only
+IRIS LIVE DMA node=0 tensor=15 output=0x0xc83540
+IRIS LIVE DMA node=1 tensor=16 output=0x0xac1540
+IRIS LIVE DMA node=2 tensor=17 output=0x0xa2b540
+IRIS LIVE DMA node=3 tensor=18 output=0x0xa50d40
+IRIS LIVE DMA node=4 tensor=19 output=0x0xa76540
+IRIS LIVE DMA node=5 tensor=20 output=0x0xa2b540
+IRIS LIVE DMA node=6 tensor=21 output=0x0xb57540
+IRIS LIVE DMA node=7 tensor=22 output=0x0xa2b540
+IRIS LIVE DMA node=8 tensor=23 output=0x0x803e2d0e
+IRIS STOP: live intermediate DMA points outside tensor arena
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "1bb6e01188f64c951df2d0badcbe763d8f588ac2ce7f276dcc7363dc9c71f768",
+  "bit_sha256": "05a3e14c917c15014f474aeea43dc918f64d61d7950a0890ac47936cbb93ccde",
+  "attached": false,
+  "frames": [],
+  "reset": "",
+  "load": "163076 bytes written at address 0x00800000\ndownloaded 163076 bytes in 3.870991s (41.140 KiB/s)\n",
+  "stop_reason": "IRIS STOP: live intermediate DMA points outside tensor arena",
+  "observation_seconds": 10.185234072996536,
+  "live_ok": false
+}

@@ -1,0 +1,2 @@
+PASS 640x480 RGBA hardware preprocessing: crop, all phase positions, RGB/INT8 order, markers, short frame, disable/restart
+tests/video/tb_style_preprocess.sv:58: $finish called at 41925156000 (1ps)

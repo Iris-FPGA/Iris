@@ -72,6 +72,12 @@
         <efx:design_file name="src/cnn/rtl/tinyml_top.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/rtl/tinyml_accelerator.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/rtl/tinyml_accelerator_channels.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/iris_style_preprocess.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/iris_style_dequant.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/iris_style_capture.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/iris_style_panels.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/iris_style_demo.v" version="sv_09" library="default" />
+        <efx:design_file name="src/ddr/axi_cpu_style_mux.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/iris_resize2x.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/tinyml_subsystem.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/rtl/common/common_apb3.v" version="sv_09" library="default" />
@@ -176,6 +182,8 @@
         <efx:param name="dsp-mac-packing" value="1" value_type="e_option" />
         <efx:param name="insert-carry-skip" value="0" value_type="e_option" />
         <efx:param name="pack-luts-to-comb4" value="0" value_type="e_option" />
+        <efx:dynparam name="ENABLE_LEGACY_UART_LOG" value="0" />
+        <efx:dynparam name="ENABLE_STYLE_DEMO" value="1" />
     </efx:synthesis>
     <efx:place_and_route tool_name="efx_pnr">
         <efx:param name="work_dir" value="work_pnr" value_type="e_string" />

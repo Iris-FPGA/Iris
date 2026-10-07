@@ -1,0 +1,10 @@
+[95000] Phase P: pipelined CPU writes under concurrent video/accelerator traffic
+PASS: pipelined CPU AW/W streams with delayed B
+[7205000] Phase A: basic R/W per master
+[9505000] Phase B: out-of-range writes -> SLVERR
+[9715000] Phase C: out-of-range reads -> SLVERR
+[9915000] Phase D: W-before-AW
+[10365000] Phase E: concurrent hammer
+[22145000] transactions: s0=20 s1=20 s2=20 downstream aw=98 ar=66
+PASS: tb_axi_ddr_arbiter
+tests/video/tb_axi_ddr_arbiter.sv:966: $finish called at 22145000 (1ps)

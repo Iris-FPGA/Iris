@@ -116,10 +116,6 @@ port (
     system_uart_0_io_txd : out std_logic;
     io_memoryReset : out std_logic;
     system_uart_0_io_rxd : in std_logic;
-    system_i2c_0_io_scl_read : in std_logic;
-    system_i2c_0_io_scl_write : out std_logic;
-    system_i2c_0_io_sda_read : in std_logic;
-    system_i2c_0_io_sda_write : out std_logic;
     cpu0_customInstruction_cmd_valid : out std_logic;
     cpu0_customInstruction_cmd_ready : in std_logic;
     cpu0_customInstruction_function_id : out std_logic_vector(9 downto 0);
@@ -213,10 +209,6 @@ port map (
     system_uart_0_io_txd => system_uart_0_io_txd,
     io_memoryReset => io_memoryReset,
     system_uart_0_io_rxd => system_uart_0_io_rxd,
-    system_i2c_0_io_scl_read => system_i2c_0_io_scl_read,
-    system_i2c_0_io_scl_write => system_i2c_0_io_scl_write,
-    system_i2c_0_io_sda_read => system_i2c_0_io_sda_read,
-    system_i2c_0_io_sda_write => system_i2c_0_io_sda_write,
     cpu0_customInstruction_cmd_valid => cpu0_customInstruction_cmd_valid,
     cpu0_customInstruction_cmd_ready => cpu0_customInstruction_cmd_ready,
     cpu0_customInstruction_function_id => cpu0_customInstruction_function_id,

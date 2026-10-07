@@ -3,7 +3,20 @@ IRIS_ROOT := $(abspath ../..)
 TINYML_ROOT ?= $(abspath $(IRIS_ROOT)/../tinyml)
 VENDOR_STANDALONE := $(TINYML_ROOT)/tinyml_hello_world/Ti60F225_tinyml_hello_world/embedded_sw/SapphireSoc/software/standalone
 VENDOR_SRC := $(VENDOR_STANDALONE)/tinyml_ypd/src
-MODEL_DIR := $(IRIS_ROOT)/iris_ws/RISC-V
+MODEL_PROFILE ?= original
+LIVE_DEMO ?= 0
+ifeq ($(MODEL_PROFILE),rgba640)
+MODEL_DIR ?= $(IRIS_ROOT)/iris_ws/RISC-V/rgba640
+MODEL_STEM := c448_lowdec_skip_r0_refined_rgba_640_int8
+MODEL_RGBA := 1
+ARENA_BYTES ?= 4194304
+else ifeq ($(MODEL_PROFILE),original)
+MODEL_DIR ?= $(IRIS_ROOT)/iris_ws/RISC-V
+MODEL_STEM := one_last_kiss_0_int8
+MODEL_RGBA := 0
+else
+$(error Unsupported MODEL_PROFILE $(MODEL_PROFILE); choose original or rgba640)
+endif
 OBJDIR := build
 HOST_CXX ?= g++
 STRICT_DISPATCH ?= 0
@@ -15,11 +28,11 @@ $(error TINYML_ROOT must reference official tinyml revision $(EXPECTED_TINYML_RE
 endif
 
 .PHONY: check-model
-check-model: build/check-model
+check-model: build/check-model-$(MODEL_PROFILE)
 	$<
-build/check-model: Makefile check_model.cc src/model.cc src/model_contract.h $(MODEL_DIR)/one_last_kiss_0_int8_model_data.cc $(MODEL_DIR)/one_last_kiss_0_int8_model_data.h
+build/check-model-$(MODEL_PROFILE): Makefile check_model.cc src/model.cc src/model_contract.h src/model_config.h $(MODEL_DIR)/$(MODEL_STEM)_model_data.cc $(MODEL_DIR)/$(MODEL_STEM)_model_data.h
 	@mkdir -p build
-	$(HOST_CXX) -std=c++17 -I$(VENDOR_SRC) -I$(VENDOR_SRC)/tensorflow/third_party/flatbuffers/include -I$(MODEL_DIR) check_model.cc src/model.cc -o $@
+	$(HOST_CXX) -std=c++17 -DIRIS_MODEL_RGBA=$(MODEL_RGBA) -I$(VENDOR_SRC) -I$(VENDOR_SRC)/tensorflow/third_party/flatbuffers/include -I$(MODEL_DIR) check_model.cc src/model.cc -o $@
 
 ifneq ($(MAKECMDGOALS),check-model)
 STANDALONE ?= $(VENDOR_STANDALONE)
@@ -54,7 +67,8 @@ CFLAGS += $(INCLUDES) -DOPTIMIZE_X -funroll-loops -mdiv -ffunction-sections -fda
  -fno-common -fomit-frame-pointer -fno-builtin -g -MMD -MP \
  -DTF_LITE_STATIC_MEMORY -DTF_LITE_USE_GLOBAL_CMATH_FUNCTIONS \
  -DTF_LITE_USE_GLOBAL_MIN -DTF_LITE_USE_GLOBAL_MAX -DTF_LITE_DISABLE_X86_NEON \
- -DIRIS_STRICT_DISPATCH=$(STRICT_DISPATCH) -DIRIS_ARENA_BYTES=$(ARENA_BYTES)
+ -DIRIS_TML_PROFILER_EVENTS=24 \
+ -DIRIS_STRICT_DISPATCH=$(STRICT_DISPATCH) -DIRIS_ARENA_BYTES=$(ARENA_BYTES) -DIRIS_MODEL_RGBA=$(MODEL_RGBA) -DIRIS_LIVE_DEMO=$(LIVE_DEMO)
 CXXFLAGS += $(CFLAGS) -std=c++11 -fstrict-aliasing -fno-rtti -fno-exceptions \
  -fno-threadsafe-statics -fno-use-cxa-atexit
 
@@ -93,7 +107,7 @@ build/config.txt: FORCE
 	@mkdir -p build
 	@printf '%s\n' 'tinyml=$(TINYML_REVISION)' 'BSP_PATH=$(BSP_PATH)' 'CC=$(RISCV_CC)' 'CXX=$(RISCV_CXX)' 'CFLAGS=$(CFLAGS)' 'CXXFLAGS=$(CXXFLAGS)' 'LDFLAGS=$(LDFLAGS)' > $@.tmp
 	@$(RISCV_CXX) --version >> $@.tmp
-	@sha256sum $(LIB) $(MODEL_DIR)/one_last_kiss_0_int8_model_data.cc $(BSP_PATH)/include/soc.mk $(BSP_PATH)/include/soc.h >> $@.tmp
+	@sha256sum $(LIB) $(MODEL_DIR)/$(MODEL_STEM)_model_data.cc $(BSP_PATH)/include/soc.mk $(BSP_PATH)/include/soc.h >> $@.tmp
 	@cmp -s $@.tmp $@ && rm $@.tmp || mv $@.tmp $@
 
 build/obj/%.cc.o: %.cc

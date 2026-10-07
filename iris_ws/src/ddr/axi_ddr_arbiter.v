@@ -341,10 +341,13 @@ module axi_ddr_arbiter #(
     // (w_addr_err bursts never reach the bridge and use the local sink).
     // The pre-slice arbiter guaranteed this ordering; keep it.
     wire w_aw_delivered = wr_busy & ~wr_err & awq_v & m_awready;
-    wire w_data_ok      = wr_busy & wr_aw_done & ~wr_err & aw_sent;
+    // After accepting LAST into the output slice, all further W beats belong
+    // to a later AW. AXI permits that later data to arrive before its address;
+    // hold it upstream until the current B response releases ownership.
+    wire w_data_ok      = wr_busy & wr_aw_done & ~wr_w_done & ~wr_err & aw_sent;
 
     wire w_w_fwd = w_data_ok & w_wvalid;
-    wire w_w_sink = wr_busy & wr_aw_done & wr_err;         // discard beats
+    wire w_w_sink = wr_busy & wr_aw_done & ~wr_w_done & wr_err;
     wire w_w_hs_last = (w_w_fwd & i_wready & w_wlast) |
                        (w_w_sink & w_wvalid & w_wlast);
 
@@ -445,7 +448,7 @@ module axi_ddr_arbiter #(
     // Write data ready: stall beats until this burst's AW has been accepted
     // (needed for the range check), sink them on the local error path, and
     // otherwise follow the downstream ready.  Ready must not depend on valid.
-    wire w_wready_o = wr_busy & wr_aw_done &
+    wire w_wready_o = wr_busy & wr_aw_done & ~wr_w_done &
                       (wr_err ? 1'b1 : (aw_sent & i_wready));
     assign s0_wready = (wr_owner == 2'd0) & w_wready_o;
     assign s1_wready = (wr_owner == 2'd1) & w_wready_o;
