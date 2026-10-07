@@ -72,6 +72,7 @@
         <efx:design_file name="src/cnn/rtl/tinyml_top.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/rtl/tinyml_accelerator.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/rtl/tinyml_accelerator_channels.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/iris_resize2x.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/tinyml_subsystem.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/rtl/common/common_apb3.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/rtl/common/common_efx_fifo_wrapper.v" version="sv_09" library="default" />

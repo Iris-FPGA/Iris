@@ -5,3 +5,7 @@ docs/Ti60F225_DemoBoard_v4完整资料包-0927更新
 iris_ws/outflow/
 iris_ws/work_*/
 iris_ws/iris_ws.pt.sdc
+.venv-style/
+one_last_kiss_style/build/
+one_last_kiss_style/data/
+one_last_kiss_style/__pycache__/

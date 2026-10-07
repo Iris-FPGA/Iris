@@ -187,25 +187,25 @@ module tinyml_subsystem (
     reg  [31:0] apb1_prdata;
     always @* begin
         case (apb1_paddr[6:2])
-            4'd0:  apb1_prdata = {24'd0, dbg_arb_state};
-            4'd1:  apb1_prdata = dbg_arb_ar_addr;
-            4'd2:  apb1_prdata = {24'd0, dbg_arb_ar_len};
-            4'd3:  apb1_prdata = {27'd0, dbg_arb_ar_size, dbg_arb_ar_burst};
-            4'd4:  apb1_prdata = dbg_arb_aw_addr;
-            4'd5:  apb1_prdata = {24'd0, dbg_arb_aw_len};
-            4'd6:  apb1_prdata = {16'd0, dbg_arb_rd_cnt};
-            4'd7:  apb1_prdata = {16'd0, dbg_arb_wr_cnt};
-            4'd8:  apb1_prdata = {16'd0, dbg_arb_wr_err_cnt, dbg_arb_rd_err_cnt};
-            4'd9:  apb1_prdata = {30'd0, dbg_arb_rresp};
-            4'd10: apb1_prdata = {30'd0, dbg_arb_bresp};
-            4'd11: apb1_prdata = dbg_arb_cpu_ar_addr;
-            4'd12: apb1_prdata = dbg_arb_fb_ar_addr;
-            4'd13: apb1_prdata = dbg_arb_cpu_aw_addr;
-            4'd14: apb1_prdata = dbg_arb_fb_aw_addr;
-            4'd15: apb1_prdata = {dbg_arb_fb_rd_cnt, dbg_arb_cpu_rd_cnt};
-            4'd16: apb1_prdata = {dbg_arb_fb_rd_cnt, dbg_arb_cpu_rd_cnt};
-            4'd17: apb1_prdata = {16'd0, dbg_arb_m_ar_cnt};
-            4'd18: apb1_prdata = {16'd0, dbg_arb_m_aw_cnt};
+            5'd0:  apb1_prdata = {24'd0, dbg_arb_state};
+            5'd1:  apb1_prdata = dbg_arb_ar_addr;
+            5'd2:  apb1_prdata = {24'd0, dbg_arb_ar_len};
+            5'd3:  apb1_prdata = {27'd0, dbg_arb_ar_size, dbg_arb_ar_burst};
+            5'd4:  apb1_prdata = dbg_arb_aw_addr;
+            5'd5:  apb1_prdata = {24'd0, dbg_arb_aw_len};
+            5'd6:  apb1_prdata = {16'd0, dbg_arb_rd_cnt};
+            5'd7:  apb1_prdata = {16'd0, dbg_arb_wr_cnt};
+            5'd8:  apb1_prdata = {16'd0, dbg_arb_wr_err_cnt, dbg_arb_rd_err_cnt};
+            5'd9:  apb1_prdata = {30'd0, dbg_arb_rresp};
+            5'd10: apb1_prdata = {30'd0, dbg_arb_bresp};
+            5'd11: apb1_prdata = dbg_arb_cpu_ar_addr;
+            5'd12: apb1_prdata = dbg_arb_fb_ar_addr;
+            5'd13: apb1_prdata = dbg_arb_cpu_aw_addr;
+            5'd14: apb1_prdata = dbg_arb_fb_aw_addr;
+            5'd15: apb1_prdata = {dbg_arb_fb_rd_cnt, dbg_arb_cpu_rd_cnt};
+            5'd16: apb1_prdata = {dbg_arb_fb_rd_cnt, dbg_arb_cpu_rd_cnt};
+            5'd17: apb1_prdata = {16'd0, dbg_arb_m_ar_cnt};
+            5'd18: apb1_prdata = {16'd0, dbg_arb_m_aw_cnt};
             default: apb1_prdata = 32'hDEAD_0000 | {27'd0, apb1_paddr[6:2]};
         endcase
     end
@@ -336,17 +336,23 @@ module tinyml_subsystem (
     // tinyml_soc.v s0 mapping)
     //-----------------------------------------------------------------
     assign cpu_awid    = soc_arw_write ? soc_arw_id    : 8'h0;
-    assign cpu_awaddr  = soc_arw_write ? soc_arw_addr  : 32'h0;
+    // Sapphire emits narrow single-beat CPU transactions. The DDR controller
+    // is fed native 128-bit line transactions: preserve WSTRB for byte stores
+    // and return the complete line for Sapphire's upstream lane selector.
+    wire native_line = soc_arw_len == 0 && soc_arw_size < 3'd4;
+    wire [31:0] memory_addr = native_line ? {soc_arw_addr[31:4],4'b0} : soc_arw_addr;
+    wire [2:0] memory_size = native_line ? 3'd4 : soc_arw_size;
+    assign cpu_awaddr  = soc_arw_write ? memory_addr   : 32'h0;
     assign cpu_awlen   = soc_arw_write ? soc_arw_len   : 8'h0;
-    assign cpu_awsize  = soc_arw_write ? soc_arw_size  : 3'h0;
+    assign cpu_awsize  = soc_arw_write ? memory_size   : 3'h0;
     assign cpu_awburst = soc_arw_write ? soc_arw_burst : 2'h0;
     assign cpu_awlock  = soc_arw_write ? soc_arw_lock  : 1'b0;
     assign cpu_awvalid = soc_arw_write ? soc_arw_valid : 1'b0;
 
     assign cpu_arid    = ~soc_arw_write ? soc_arw_id    : 8'h0;
-    assign cpu_araddr  = ~soc_arw_write ? soc_arw_addr  : 32'h0;
+    assign cpu_araddr  = ~soc_arw_write ? memory_addr  : 32'h0;
     assign cpu_arlen   = ~soc_arw_write ? soc_arw_len   : 8'h0;
-    assign cpu_arsize  = ~soc_arw_write ? soc_arw_size  : 3'h0;
+    assign cpu_arsize  = ~soc_arw_write ? memory_size  : 3'h0;
     assign cpu_arburst = ~soc_arw_write ? soc_arw_burst : 2'h0;
     assign cpu_arlock  = ~soc_arw_write ? soc_arw_lock  : 1'b0;
     assign cpu_arvalid = ~soc_arw_write ? soc_arw_valid : 1'b0;
@@ -376,53 +382,128 @@ module tinyml_subsystem (
     // (function IDs with bit9=0 are the vendor accelerator space; the
     //  bit9=1 user space is reserved for the Iris resize accelerator)
     //-----------------------------------------------------------------
+    // Ownership switches only at a transaction boundary. CPU CI execution is
+    // serialized; the DMA counters also cover vendor operations with a delayed
+    // memory response after their command reply.
+    wire resize_busy, resize_cmd_ready, resize_rsp_valid;
+    wire [31:0] resize_outputs_0;
+    wire v_cmd_ready, v_rsp_valid;
+    wire [31:0] v_outputs_0;
+    wire v_awvalid, v_awready, v_awlock, v_wvalid, v_wready, v_wlast;
+    wire v_bvalid, v_bready, v_arvalid, v_arready, v_arlock, v_rvalid, v_rready;
+    wire [31:0] v_awaddr, v_araddr;
+    wire [7:0] v_awlen, v_arlen;
+    wire [2:0] v_awsize, v_arsize;
+    wire [1:0] v_awburst, v_arburst;
+    wire [127:0] v_wdata;
+    wire [15:0] v_wstrb;
+    reg [7:0] vendor_reads, vendor_writes;
+    always @(posedge clk or posedge io_systemReset) begin
+        if (io_systemReset) begin vendor_reads<=0; vendor_writes<=0; end
+        else begin
+            case ({v_arvalid && v_arready, v_rvalid && v_rready && acc_rlast})
+                2'b10: vendor_reads <= vendor_reads + 1'b1;
+                2'b01: vendor_reads <= vendor_reads - 1'b1;
+                default: begin end
+            endcase
+            case ({v_awvalid && v_awready, v_bvalid && v_bready})
+                2'b10: vendor_writes <= vendor_writes + 1'b1;
+                2'b01: vendor_writes <= vendor_writes - 1'b1;
+                default: begin end
+            endcase
+        end
+    end
+    wire vendor_idle = vendor_reads==0 && vendor_writes==0 &&
+                       !v_arvalid && !v_awvalid && !v_wvalid && !v_rsp_valid;
+    assign ci_cmd_ready = ci_function_id[9] ? resize_cmd_ready : (v_cmd_ready && !resize_busy);
+    assign ci_rsp_valid = resize_rsp_valid || v_rsp_valid;
+    assign ci_outputs_0 = resize_rsp_valid ? resize_outputs_0 : v_outputs_0;
+    wire [31:0] rz_araddr, rz_awaddr;
+    wire [127:0] rz_wdata;
+    wire rz_arvalid, rz_rready, rz_awvalid, rz_wvalid, rz_bready;
+    iris_resize2x u_resize (
+        .clk(clk), .rst_n(~io_systemReset), .vendor_idle(vendor_idle),
+        .cmd_valid(ci_cmd_valid && ci_function_id[9]), .cmd_function_id(ci_function_id),
+        .cmd_inputs_0(ci_inputs_0), .cmd_inputs_1(ci_inputs_1), .cmd_ready(resize_cmd_ready),
+        .rsp_valid(resize_rsp_valid), .rsp_outputs_0(resize_outputs_0), .rsp_ready(ci_rsp_ready),
+        .busy(resize_busy), .araddr(rz_araddr), .arvalid(rz_arvalid),
+        .arready(acc_arready && resize_busy), .rdata(acc_rdata),
+        .rvalid(acc_rvalid && resize_busy), .rready(rz_rready), .rlast(acc_rlast), .rresp(acc_rresp),
+        .awaddr(rz_awaddr), .awvalid(rz_awvalid), .awready(acc_awready && resize_busy),
+        .wdata(rz_wdata), .wvalid(rz_wvalid), .wready(acc_wready && resize_busy),
+        .bvalid(acc_bvalid && resize_busy), .bready(rz_bready), .bresp(acc_bresp)
+    );
+    assign acc_awvalid = resize_busy ? rz_awvalid : v_awvalid;
+    assign acc_awaddr = resize_busy ? rz_awaddr : v_awaddr;
+    assign acc_awlen = resize_busy ? 8'd0 : v_awlen;
+    assign acc_awsize = resize_busy ? 3'd4 : v_awsize;
+    assign acc_awburst = resize_busy ? 2'b01 : v_awburst;
+    assign acc_awlock = resize_busy ? 1'b0 : v_awlock;
+    assign acc_wdata = resize_busy ? rz_wdata : v_wdata;
+    assign acc_wstrb = resize_busy ? 16'hffff : v_wstrb;
+    assign acc_wlast = resize_busy ? 1'b1 : v_wlast;
+    assign acc_wvalid = resize_busy ? rz_wvalid : v_wvalid;
+    assign acc_bready = resize_busy ? rz_bready : v_bready;
+    assign acc_arvalid = resize_busy ? rz_arvalid : v_arvalid;
+    assign acc_araddr = resize_busy ? rz_araddr : v_araddr;
+    assign acc_arlen = resize_busy ? 8'd0 : v_arlen;
+    assign acc_arsize = resize_busy ? 3'd4 : v_arsize;
+    assign acc_arburst = resize_busy ? 2'b01 : v_arburst;
+    assign acc_arlock = resize_busy ? 1'b0 : v_arlock;
+    assign acc_rready = resize_busy ? rz_rready : v_rready;
+    assign v_awready = acc_awready && !resize_busy;
+    assign v_wready = acc_wready && !resize_busy;
+    assign v_bvalid = acc_bvalid && !resize_busy;
+    assign v_arready = acc_arready && !resize_busy;
+    assign v_rvalid = acc_rvalid && !resize_busy;
+
     tinyml_accelerator_channels #(
         .AXI_DW_M (128)
     ) u_accel_channels (
         .clk             (clk),
         .reset           (io_systemReset),
-        .cmd_valid       (ci_cmd_valid),
+        .cmd_valid       (ci_cmd_valid && !ci_function_id[9] && !resize_busy),
         .cmd_function_id (ci_function_id),
         .cmd_inputs_0    (ci_inputs_0),
         .cmd_inputs_1    (ci_inputs_1),
-        .cmd_ready       (ci_cmd_ready),
+        .cmd_ready       (v_cmd_ready),
         .cmd_int         (ci_cmd_int),
-        .rsp_valid       (ci_rsp_valid),
-        .rsp_outputs_0   (ci_outputs_0),
-        .rsp_ready       (ci_rsp_ready),
+        .rsp_valid       (v_rsp_valid),
+        .rsp_outputs_0   (v_outputs_0),
+        .rsp_ready       (ci_rsp_ready && !resize_rsp_valid),
         .m_axi_clk       (clk),
         .m_axi_rstn      (~io_systemReset),
-        .m_axi_awvalid   (acc_awvalid),
-        .m_axi_awaddr    (acc_awaddr),
-        .m_axi_awlen     (acc_awlen),
-        .m_axi_awsize    (acc_awsize),
-        .m_axi_awburst   (acc_awburst),
+        .m_axi_awvalid   (v_awvalid),
+        .m_axi_awaddr    (v_awaddr),
+        .m_axi_awlen     (v_awlen),
+        .m_axi_awsize    (v_awsize),
+        .m_axi_awburst   (v_awburst),
         .m_axi_awprot    (),
-        .m_axi_awlock    (acc_awlock),
+        .m_axi_awlock    (v_awlock),
         .m_axi_awcache   (),
-        .m_axi_awready   (acc_awready),
-        .m_axi_wdata     (acc_wdata),
-        .m_axi_wstrb     (acc_wstrb),
-        .m_axi_wlast     (acc_wlast),
-        .m_axi_wvalid    (acc_wvalid),
-        .m_axi_wready    (acc_wready),
+        .m_axi_awready   (v_awready),
+        .m_axi_wdata     (v_wdata),
+        .m_axi_wstrb     (v_wstrb),
+        .m_axi_wlast     (v_wlast),
+        .m_axi_wvalid    (v_wvalid),
+        .m_axi_wready    (v_wready),
         .m_axi_bresp     (acc_bresp),
-        .m_axi_bvalid    (acc_bvalid),
-        .m_axi_bready    (acc_bready),
-        .m_axi_arvalid   (acc_arvalid),
-        .m_axi_araddr    (acc_araddr),
-        .m_axi_arlen     (acc_arlen),
-        .m_axi_arsize    (acc_arsize),
-        .m_axi_arburst   (acc_arburst),
+        .m_axi_bvalid    (v_bvalid),
+        .m_axi_bready    (v_bready),
+        .m_axi_arvalid   (v_arvalid),
+        .m_axi_araddr    (v_araddr),
+        .m_axi_arlen     (v_arlen),
+        .m_axi_arsize    (v_arsize),
+        .m_axi_arburst   (v_arburst),
         .m_axi_arprot    (),
-        .m_axi_arlock    (acc_arlock),
+        .m_axi_arlock    (v_arlock),
         .m_axi_arcache   (),
-        .m_axi_arready   (acc_arready),
-        .m_axi_rvalid    (acc_rvalid),
+        .m_axi_arready   (v_arready),
+        .m_axi_rvalid    (v_rvalid),
         .m_axi_rdata     (acc_rdata),
         .m_axi_rlast     (acc_rlast),
         .m_axi_rresp     (acc_rresp),
-        .m_axi_rready    (acc_rready)
+        .m_axi_rready    (v_rready)
     );
 
     // tinyml_accelerator_channels leaves m_axi_awid/m_axi_arid undriven in

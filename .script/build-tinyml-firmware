@@ -6,7 +6,7 @@ if [[ "${1:-}" == --help ]]; then
     printf '%s\n' 'Usage: build-tinyml-firmware [make arguments]' \
         'Host model validation: build-tinyml-firmware check-model' \
         'Firmware needs STANDALONE, BSP_PATH, RISCV_BIN, DDR_BASE, DDR_BYTES.' \
-        'STRICT_DISPATCH=1 deliberately fails until all hardware paths are implemented.' \
+        'STRICT_DISPATCH=1 uses Iris hardware resize and rejects Conv/Add CPU fallback.' \
         'See firmware/tinyml_style/README.md. No flash or hardware access is performed.'
     exit 0
 fi

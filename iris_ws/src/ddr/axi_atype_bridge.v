@@ -1,42 +1,16 @@
-//=====================================================================
-// AXI4 -> efx_ddr3_axi "single address channel" bridge
-//
-// The frame buffer is a standard AXI4 master with separate AW and AR
-// channels.  The Efinix DDR3 soft controller instead has ONE address
-// channel (axi_a*) with axi_atype selecting write (1) or read (0).
-// This bridge time-multiplexes AW and AR onto that shared channel.
-// The W, B and R channels are wired straight through in top.v.
-//
-// The controller's internals contain independent AW/AR FSMs and address
-// queues plus outstanding-transaction counters (outflow/iris_ws.map.v:
-//   r_aw_state / r_ar_state, u_wr_addr_fifo / u_rd_addr_fifo,
-//   r_wr_b_count[8:0] / r_rlast_cnt[15:0], top_mc/fifo_aw / fifo_ar),
-// so overlapping read and write bursts are fully supported.  The only
-// hardware limit is one address transfer per clk on the shared axi_a*
-// bus (plus at most a one-cycle direction turnaround).
-//
-// This module therefore does nothing but time-multiplex the two address
-// channels.  Read is granted first whenever it asks, because the display
-// read path is real-time (data_tx holds only a half-line FIFO) while the
-// write path has an 8.5-line WR FIFO fed by a slow sensor.  Read-side
-// address-bus occupancy is <0.1% (one address per 14.8us against a
-// 100MHz bus), so the writer can never starve.
-//
-// An earlier version of this module serialized WHOLE transactions (wait
-// for B before accepting AR, wait for RLAST before accepting AW, and
-// hard-prioritised writes).  That pattern was copied from a reference
-// host's habit, not from any controller requirement, and it blocked the
-// display read for the duration of every write burst.
-//
-// The bvalid/bready/rvalid/rlast/rready ports are kept so the top-level
-// wiring is unchanged, but they are no longer observed here: response
-// tracking lives in the controller's outstanding counters, and this
-// bridge does not need a completion event to pick the next address.
-// bready/rready are driven by the frame buffer on the top-level side.
-//=====================================================================
+// AXI4 AW/AR -> Efinix DDR3 shared address port.
+// Preserve the selected address under backpressure. SERIAL_TRANSACTIONS=1
+// additionally waits for the accepted B/RLAST handshake before issuing any
+// next controller address. New requests alternate directions under contention
+// so neither video reads nor writes can starve. Set the parameter to 0 only
+// for isolated AXI concurrency verification; board concurrency remains under
+// investigation. Response data still passes through the parent arbiter.
 module axi_atype_bridge #(
     parameter IDW = 4,
-    parameter AW  = 32
+    parameter AW  = 32,
+    // Conservative board-validation mode: do not overlap controller reads
+    // and writes. The two upstream arbiter grants may still be pending.
+    parameter SERIAL_TRANSACTIONS = 1
 )(
     input  wire            clk,
     input  wire            rst_n,
@@ -72,8 +46,7 @@ module axi_atype_bridge #(
     output wire            m_avalid,
     input  wire            m_aready,
 
-    // transaction completion observation (W/B/R wired through in top.v)
-    // unused -- see header
+    // Controller response handshakes (W/B/R wired through in top.v)
     input  wire            bvalid,
     input  wire            bready,
     input  wire            rvalid,
@@ -81,14 +54,45 @@ module axi_atype_bridge #(
     input  wire            rready
 );
 
-    // Read wins whenever both channels ask.
-    wire sel_ar = s_arvalid;
-    wire sel_aw = s_awvalid & ~s_arvalid;
+    // Read has priority when selecting a NEW address. Once VALID is
+    // presented under backpressure, AXI requires the selected address and
+    // direction to remain stable until READY. A late AR must not replace
+    // an already-presented AW (nor may a late AW replace an AR).
+    reg selection_locked;
+    reg locked_write;
+    reg [1:0] active_direction; // 0=idle, 1=read, 2=write
+    reg prefer_write;
+    wire eligible = !SERIAL_TRANSACTIONS || active_direction == 0;
+    wire choose_aw = s_awvalid && (!s_arvalid || (SERIAL_TRANSACTIONS && prefer_write));
+    wire sel_aw = selection_locked ? locked_write : choose_aw;
+    wire sel_ar = selection_locked ? ~locked_write : (s_arvalid && !choose_aw);
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            selection_locked <= 1'b0;
+            locked_write <= 1'b0;
+            active_direction <= 0;
+            prefer_write <= 0;
+        end else if (m_avalid && !m_aready) begin
+            selection_locked <= 1'b1;
+            locked_write <= sel_aw;
+        end else if (m_avalid && m_aready) begin
+            selection_locked <= 1'b0;
+        end
+        if (rst_n) begin
+            if (m_avalid && m_aready) begin
+                active_direction <= sel_aw ? 2 : 1;
+                prefer_write <= !sel_aw;
+            end else if ((active_direction == 1 && rvalid && rlast && rready) ||
+                         (active_direction == 2 && bvalid && bready)) begin
+                active_direction <= 0;
+            end
+        end
+    end
 
-    assign s_awready = sel_aw & m_aready;
-    assign s_arready = sel_ar & m_aready;
+    assign s_awready = sel_aw & eligible & m_aready;
+    assign s_arready = sel_ar & eligible & m_aready;
 
-    assign m_avalid = sel_aw | sel_ar;
+    assign m_avalid = eligible & (sel_aw | sel_ar);
     assign m_atype  = sel_aw;
 
     assign m_aid    = sel_aw ? {{(8-IDW){1'b0}}, s_awid}  : {{(8-IDW){1'b0}}, s_arid};

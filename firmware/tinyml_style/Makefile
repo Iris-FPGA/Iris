@@ -14,10 +14,6 @@ ifneq ($(TINYML_REVISION),$(EXPECTED_TINYML_REVISION))
 $(error TINYML_ROOT must reference official tinyml revision $(EXPECTED_TINYML_REVISION); found $(TINYML_REVISION))
 endif
 
-ifeq ($(STRICT_DISPATCH),1)
-$(error Dispatch-only unavailable: hardware resize and fail-closed Conv/Add dispatch must be implemented first)
-endif
-
 .PHONY: check-model
 check-model: build/check-model
 	$<
@@ -49,7 +45,7 @@ ifneq ($(MABI),ilp32)
 $(error tinyml_lib.a requires ilp32 soft-float; generated BSP selected $(MABI))
 endif
 RISCV_CXX := $(RISCV_BIN)g++
-INCLUDES := -Isrc -I$(MODEL_DIR) -I$(VENDOR_SRC) -I$(VENDOR_SRC)/platform \
+INCLUDES := -Isrc/overrides -Isrc -I$(MODEL_DIR) -I$(VENDOR_SRC) -I$(VENDOR_SRC)/platform \
  -I$(VENDOR_SRC)/platform/interrupt -I$(VENDOR_SRC)/platform/misc -I$(VENDOR_SRC)/platform/tinyml \
  -I$(VENDOR_SRC)/tensorflow/third_party/flatbuffers/include \
  -I$(VENDOR_SRC)/tensorflow/third_party/gemmlowp -I$(VENDOR_SRC)/tensorflow/third_party/ruy \
@@ -70,9 +66,13 @@ VENDOR_GROUPS := platform/*/*.cc platform/*/*.c platform/*/*/*.cc platform/*/*/*
  tensorflow/lite/kernels/internal/reference/integer_ops/*.cc tensorflow/lite/micro/*.cc \
  tensorflow/lite/micro/kernels/*.cc tensorflow/lite/micro/memory_planner/*.cc tensorflow/lite/schema/*.cc
 VENDOR_SRCS := $(foreach group,$(VENDOR_GROUPS),$(wildcard $(VENDOR_SRC)/$(group)))
+VENDOR_SRCS := $(filter-out $(VENDOR_SRC)/tensorflow/lite/micro/micro_interpreter.cc $(VENDOR_SRC)/tensorflow/lite/micro/micro_graph.cc,$(VENDOR_SRCS))
+ifeq ($(STRICT_DISPATCH),1)
+VENDOR_SRCS := $(filter-out $(VENDOR_SRC)/tensorflow/lite/micro/kernels/resize_nearest_neighbor.cc,$(VENDOR_SRCS))
+endif
 # The Efinity-generated standalone tree ships syscalls.c (not the syscalls.s
 # assumed by the original README); same minimal newlib stubs.
-SRCS := $(abspath src/main.cc src/model.cc src/crt_compat.cc) $(VENDOR_SRCS) \
+SRCS := $(abspath src/main.cc src/model.cc src/crt_compat.cc src/iris_resize.cc src/overrides/tensorflow/lite/micro/micro_interpreter.cc src/overrides/tensorflow/lite/micro/micro_graph.cc) $(VENDOR_SRCS) \
  $(STANDALONE)/common/start.S $(STANDALONE)/common/trap.S $(STANDALONE)/common/syscalls.c
 $(foreach source,$(SRCS),$(if $(wildcard $(source)),,$(error Required vendor/BSP source missing: $(source))))
 OBJS := $(addprefix build/obj/,$(addsuffix .o,$(SRCS)))

@@ -1,0 +1,7 @@
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+coher fail i=4616 @0x0xf04820 r1=0x0x66346244 exp=0x0xa5001208 cpuAR=0x0x808228 arlen=0 arsize=1 arburst=2
+coher fail i=4617 @0x0xf04824 r1=0x0x6a3c6348 exp=0x0xa5001209 cpuAR=0x0x808400 arlen=0 arsize=1 arburst=2
+DDR coher: fails=2 bad@0x0xf04824 got=0x0x6a3c6348 exp=0x0xa5001209
+DDR coher pass2: fails=0
+IRIS STOP: 

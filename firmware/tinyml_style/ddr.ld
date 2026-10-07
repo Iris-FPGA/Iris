@@ -2,7 +2,10 @@
  * DDR must be initialized before _start. This is not a BRAM bootloader image. */
 OUTPUT_ARCH("riscv")
 ENTRY(_start)
-MEMORY { ddr (rwx) : ORIGIN = __iris_ddr_base, LENGTH = __iris_ddr_bytes }
+MEMORY {
+  ddr (rwx) : ORIGIN = __iris_ddr_base, LENGTH = __iris_ddr_bytes
+  control_stack (rw) : ORIGIN = 0xf9002000, LENGTH = 0x2000
+}
 SECTIONS {
   .init : { KEEP(*(.init)) } > ddr
   .text : { *(.text .text.*) *(.gnu.linkonce.t.*) } > ddr
@@ -40,8 +43,8 @@ SECTIONS {
     . += 0x200000; _heap_end = .;
   } > ddr
   .stack (NOLOAD) : ALIGN(16) {
-    . += 0x4000; _sp = .;
-  } > ddr
+    __iris_stack_bottom = .; . += 0x2000; _sp = .;
+  } > control_stack
   .tinyml_arena (NOLOAD) : ALIGN(64) {
     __iris_arena_start = .; KEEP(*(.tinyml_arena)) __iris_arena_end = .;
   } > ddr

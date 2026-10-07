@@ -110,3 +110,13 @@ with tempfile.TemporaryDirectory(prefix='iris-video-tests-') as d:
     compile_tb('tb_colour_capture',['tests/video/tb_colour_capture.sv','iris_ws/src/video/debayer/colour_capture.v','iris_ws/src/uart/uart_tx.v'],exe);simulate(exe)
     exe=tmp/'axi_arbiter'
     compile_tb('tb_axi_ddr_arbiter',['tests/video/tb_axi_ddr_arbiter.sv','iris_ws/src/ddr/axi_ddr_arbiter.v'],exe);simulate(exe)
+    exe=tmp/'axi_atype'
+    compile_tb('tb_axi_atype_bridge',['tests/video/tb_axi_atype_bridge.sv','iris_ws/src/ddr/axi_atype_bridge.v'],exe);simulate(exe)
+    exe=tmp/'axi_atype_serial'
+    compile_tb('tb_axi_atype_serial',['tests/video/tb_axi_atype_serial.sv','iris_ws/src/ddr/axi_atype_bridge.v'],exe);simulate(exe)
+    exe=tmp/'resize2x'
+    compile_tb('tb_iris_resize2x',['tests/video/tb_iris_resize2x.sv','iris_ws/src/cnn/iris_resize2x.v'],exe);simulate(exe)
+    exe=tmp/'resize_integration'
+    run([IV]+(['-B',IVLIB] if IVLIB else [])+['-g2012','-i','-s','tb_tinyml_resize_integration','-o',str(exe),
+        'tests/video/tb_tinyml_resize_integration.sv','iris_ws/src/cnn/tinyml_subsystem.v','iris_ws/src/cnn/iris_resize2x.v'])
+    simulate(exe)
