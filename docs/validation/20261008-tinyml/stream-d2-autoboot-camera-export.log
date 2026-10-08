@@ -1,0 +1,39 @@
+IRIS STREAM CNN: 640x480 C4; Conv3s2/Conv3d2/Conv1/NN2x hardware; SRAM only
+IRIS CAPTURE AUDIT source_dummy=0 bus_dummy=0 serial_ddr=0
+IRIS STREAM input bytes=1228800 baud=500000
+received input 1228800
+IRIS STREAM END input dummy_bad=0
+IRIS LIVE frame=1 pair=1 Invoke_ticks=1818729 displayed=1506 captures=1507 underflow=0 readerr=0 rejects=0
+IRIS STREAM output bytes=1228800 baud=500000
+received output 1228800
+IRIS STREAM END output dummy_bad=0
+IRIS STREAM DONE pair=1 displayed=1506
+{
+  "scope": "one camera pair exported through hardware DMA CI/UART; no JTAG DDR pixel reads",
+  "elf_sha256": "d1560d41e84c6e56997dc22f652b14aadbbcbd4dea87db7ab67d6923867676e8",
+  "bit_sha256": "c832415c9d28990b59065345f879dd0c269c241eda5aaf79e2371e0878cf7963",
+  "serial_ddr": false,
+  "snapshot_files": {
+    "input": {
+      "path": "/home/noir/Documents/workspace/Iris/docs/validation/20261008-tinyml/stream-d2-autoboot-camera-input.bin",
+      "sha256": "2eae6da938960663e73bb4f62b882e9c722d640517631eb44a6e4a9faf12bd85"
+    },
+    "output": {
+      "path": "/home/noir/Documents/workspace/Iris/docs/validation/20261008-tinyml/stream-d2-autoboot-camera-output.bin",
+      "sha256": "2468ed257763ec6e69d53c4742298aeda2c049fcb04d66de51fe2742297e5d8f"
+    }
+  },
+  "dummy_bad": {
+    "input": 0,
+    "output": 0
+  },
+  "load": "5100 bytes written at address 0x00800000\ndownloaded 5100 bytes in 0.126276s (39.441 KiB/s)\n",
+  "capture_audit": {
+    "source_dummy": 0,
+    "bus_dummy": 0,
+    "serial_ddr": 0
+  },
+  "snapshot_pair": 1,
+  "snapshot_displayed_count": 1506,
+  "export_ok": true
+}

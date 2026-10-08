@@ -5,7 +5,7 @@ Requires official OpenOCD Tcl6666 and an already programmed, timing-passed demo
 bitstream. --snapshot halts the CPU, waits for any pending VS commit, dumps the
 active input/output pair, then resumes; this pause is excluded from throughput.
 """
-import argparse,hashlib,json,os,re,select,socket,subprocess,termios,time
+import argparse,contextlib,hashlib,json,os,re,select,socket,subprocess,termios,time
 from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 p=argparse.ArgumentParser(description=__doc__)
@@ -13,19 +13,28 @@ p.add_argument('--elf',type=Path,default=root/'firmware/tinyml_style/build/tinym
 p.add_argument('--bit-file',type=Path,default=root/'iris_ws/outflow/iris_ws.bit')
 p.add_argument('--output',type=Path,required=True)
 p.add_argument('--seconds',type=float,default=25)
+p.add_argument('--stall-seconds',type=float,default=15,help='fail and save halted CPU/APB state after this long without a new pair')
 p.add_argument('--snapshot',action='store_true')
 p.add_argument('--attach',action='store_true',help='observe existing firmware without reset/reload')
+p.add_argument('--entry',type=lambda s:int(s,0),default=0x00800000,help='entry address for a loaded ELF; use 0xf9000000 to test OCR self-loader')
+p.add_argument('--uart-only',action='store_true',help='observe automatic boot without any JTAG connection, reset or ELF load')
 p.add_argument('--uart',default='/dev/ttyUSB2')
 a=p.parse_args();a.output.parent.mkdir(parents=True,exist_ok=True)
 if a.seconds<=0:p.error('--seconds must be positive')
+if a.stall_seconds<=0:p.error('--stall-seconds must be positive')
+if a.entry not in (0x00800000,0xf9000000):p.error('entry must be the DDR controller or OCR boot address')
+if a.uart_only:
+ if a.snapshot:p.error('UART-only observation cannot take a JTAG snapshot')
+ a.attach=True
 for f in [a.elf,a.output]:
  if any(c in str(f.resolve()) for c in '{}\n\r'):p.error('unsupported Tcl path')
 def digest(f):return hashlib.sha256(f.read_bytes()).hexdigest()
 def words(raw):
  return [int(v,16) for l in raw.splitlines() if re.match(r'^0x[0-9a-f]+:',l) for v in l.split(':',1)[1].split()]
 report={'scope':'SRAM live camera/style demo; no Flash boot acceptance','elf_sha256':digest(a.elf),
-        'bit_sha256':digest(a.bit_file),'attached':a.attach,'frames':[]}
-with socket.create_connection(('localhost',6666),timeout=120) as s:
+        'bit_sha256':digest(a.bit_file),'attached':a.attach,'uart_only':a.uart_only,
+        'entry':None if a.uart_only else hex(a.entry),'frames':[]}
+with (contextlib.nullcontext(None) if a.uart_only else socket.create_connection(('localhost',6666),timeout=120)) as s:
  def tcl(c):
   s.sendall(c.encode()+b'\x1a');d=bytearray()
   while b'\x1a' not in d:
@@ -43,9 +52,30 @@ with socket.create_connection(('localhost',6666),timeout=120) as s:
    tcl('halt');report['reset']=tcl('reset halt')
    report['load']=tcl('load_image {'+str(a.elf.resolve())+'}')
    if 'downloaded' not in report['load']:raise RuntimeError('ELF load not confirmed')
-   print(report['load'],flush=True);tcl('resume 0x00800000')
-  begin=time.monotonic()
+   print(report['load'],flush=True);tcl(f'resume 0x{a.entry:08x}')
+  begin=time.monotonic();last_progress=begin
   while time.monotonic()-begin<a.seconds:
+   if time.monotonic()-last_progress>a.stall_seconds:
+    report['stall_seconds']=time.monotonic()-last_progress
+    if not a.uart_only:
+     tcl('halt')
+     try:
+      report['stall_cpu']={r:tcl('reg '+r+' force') for r in ['pc','mcause','mepc','mtval','mstatus','mie','mip']}
+      report['stall_style_words']=words(tcl('mdw 0xf8100000 13'))
+      report['stall_arbiter_accel_words']=words(tcl('mdw 0xf8110000 28'))
+      w=report['stall_arbiter_accel_words']
+      if len(w)==28 and w[19]!=0xdead0013:
+       report['stall_accel']={
+        'completion_rises_mod65536':w[19]>>16,'irq_level':(w[19]>>10)&1,
+        'last_function_id':w[19]&1023,'starts_mod65536':w[24]>>16,
+        'ack_counter_raw':w[24]&65535,'pending_reads_mod65536':w[20]>>16,
+        'pending_writes_mod65536':w[20]&65535,'last_vendor_araddr':w[21],
+        'last_vendor_awaddr':w[22],'last_ci_input0':w[25],'last_ci_input1':w[26],
+        'dma_handshake_flags':w[27]}
+      report['stall_plic']={c:tcl(c) for c in ['mdw 0xf8c01000 1','mdw 0xf8c02000 1']}
+     finally:tcl('resume')
+    print('IRIS HOST STALL: no new pair; '+('UART evidence saved' if a.uart_only else 'CPU/APB evidence saved'),flush=True)
+    break
    if not select.select([fd],[],[],.2)[0]:continue
    try:chunk=os.read(fd,65536)
    except BlockingIOError:continue
@@ -54,10 +84,11 @@ with socket.create_connection(('localhost',6666),timeout=120) as s:
     line,partial=partial.split(b'\n',1);line=line.decode(errors='replace').strip()
     if not line:continue
     print(line,flush=True)
-    match=re.fullmatch(r'IRIS LIVE frame=(\d+) pair=(\d+) Invoke_ticks=(\d+) displayed=(\d+) captures=(\d+) underflow=(\d+) readerr=(\d+) rejects=(\d+)',line)
+    match=re.search(r'IRIS LIVE frame=(\d+) pair=(\d+) Invoke_ticks=(\d+) displayed=(\d+) captures=(\d+) underflow=(\d+) readerr=(\d+) rejects=(\d+)$',line)
     if match:
      values=list(map(int,match.groups()))
      report['frames'].append(dict(zip(['sequence','pair','invoke_ticks','displayed','captures','underflows','read_errors','rejects'],values),host_elapsed=time.monotonic()-begin))
+     last_progress=time.monotonic()
     if line.startswith('IRIS STOP:'):report['stop_reason']=line
   frames=report['frames'];report['observation_seconds']=time.monotonic()-begin
   if len(frames)>=2:
@@ -77,7 +108,7 @@ with socket.create_connection(('localhost',6666),timeout=120) as s:
     report['snapshot_files'][kind]={'path':str(dest),'sha256':digest(dest)}
    if words(tcl('mdw 0xf8100000 1'))[0]!=status[0]:raise RuntimeError('display ownership changed during snapshot')
    # CPU resumes even if a snapshot/check fails; no Flash changes occur.
-  report['live_ok']=len(frames)>=2 and not report.get('stop_reason') and all(f['underflows']==0 and f['read_errors']==0 and f['rejects']==0 for f in frames)
+  report['live_ok']=len(frames)>=2 and not report.get('stop_reason') and not report.get('stall_seconds') and all(f['underflows']==0 and f['read_errors']==0 and f['rejects']==0 for f in frames)
  finally:
   if a.snapshot:tcl('resume')
   os.close(fd)

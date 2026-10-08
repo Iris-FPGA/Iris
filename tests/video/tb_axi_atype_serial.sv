@@ -7,7 +7,7 @@ module tb_axi_atype_serial;
   wire awr,arr,av,wr; wire [7:0] id;
   reg bv=0,rv=0;
   axi_atype_bridge #(.IDW(8),.AW(28),.SERIAL_TRANSACTIONS(1)) dut(
-    .clk(clk),.rst_n(rst_n),.s_awid(wid),.s_awaddr(wa),
+    .clk(clk),.rst_n(rst_n),.serial_enable(1'b0),.s_awid(wid),.s_awaddr(wa),
     .s_awlen(8'd0),.s_awsize(3'd4),.s_awburst(2'd1),
     .s_awlock(1'b0),.s_awvalid(awv),.s_awready(awr),
     .s_arid(rid),.s_araddr(ra),.s_arlen(8'd0),.s_arsize(3'd4),

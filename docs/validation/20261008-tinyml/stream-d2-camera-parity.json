@@ -1,0 +1,16 @@
+{
+  "scope": "one captured input and its frozen displayed output; student model only",
+  "tensorflow_version": "2.20.0",
+  "resolver": "BUILTIN_REF",
+  "model_sha256": "e4a45f1d9314654565f3300978d8a7b8843fc0c0687c454c4b6e3b47e0f05386",
+  "displayed_count": 1,
+  "pair": 0,
+  "input_sha256": "ccfcf2f4a20d9f98c938679e71ebe706f8e96ff623ee6c9da3a15d41c146d609",
+  "output_sha256": "7ec54ec2e3a0d4db12a9bdf9cf26329c55db12045577067e34ba4bcf98db3eaa",
+  "reference_sha256": "7ec54ec2e3a0d4db12a9bdf9cf26329c55db12045577067e34ba4bcf98db3eaa",
+  "exact": true,
+  "different_bytes": 0,
+  "max_abs_lsb": 0,
+  "mae_lsb": 0.0,
+  "input_rgb_std": 65.50851440429688
+}

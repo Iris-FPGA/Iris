@@ -9,6 +9,9 @@ module top #(
     // The style project selects 0 through Efinity top-params and uses the CPU
     // console; retain the legacy implementation for diagnostic builds.
     parameter ENABLE_STYLE_DEMO = 0,
+    parameter ENABLE_STREAM_CNN = 0,
+    parameter STREAM_DILATION = 2,
+    parameter [24:0] STYLE_SCALE_Q24 = 25'd20591742,
     parameter ENABLE_LEGACY_UART_LOG = 1
 )
 (
@@ -596,6 +599,9 @@ wire [11:0] cam_width, cam_height, hdmi_width, hdmi_height;
 wire cam_size_toggle, hdmi_size_toggle;
 wire [7:0] hdmi_fps;
 wire hdmi_upd;
+wire style_frame_commit_pulse;
+wire [7:0] style_fps;
+wire style_fps_upd;
 video_size_meter #(.PIXELS_PER_CLOCK(4), .USE_HSYNC(1)) u_camera_size (
     .clk(mipi_pixel_clk), .rst_n(video_rst_n),
     .i_hs(fb_ihs), .i_vs(fb_ivs), .i_de(fb_ide),
@@ -615,7 +621,11 @@ fps_counter #(.CLK_FREQ_HZ(100_000_000)) u_fps_hdmi (
     .clk(core_clk), .rst_n(video_rst_n), .frame_pulse(hdmi_vs_sync[2]),
     .fps(hdmi_fps), .upd_toggle(hdmi_upd)
 );
-osd_video_status u_video_status (
+fps_counter #(.CLK_FREQ_HZ(100_000_000)) u_fps_style (
+    .clk(core_clk), .rst_n(video_rst_n), .frame_pulse(style_frame_commit_pulse),
+    .fps(style_fps), .upd_toggle(style_fps_upd)
+);
+osd_video_status #(.ENABLE_STYLE_FPS(ENABLE_STYLE_DEMO)) u_video_status (
     .clk(hdmi_tx_slow_clk), .rst_n(video_rst_n),
     .i_hs(hs_r), .i_vs(vs_r), .i_de(de_r), .i_rgb(px_r),
     .i_cam_width(cam_width), .i_cam_height(cam_height), .i_cam_toggle(cam_size_toggle),
@@ -623,6 +633,7 @@ osd_video_status u_video_status (
     .i_cam_fps(sens_fps), .i_wr_fps(wr_fps), .i_hdmi_fps(hdmi_fps),
     .i_wb_locked(wb_locked), .i_black_g(black_g),
     .i_cam_fps_upd(sens_upd), .i_wr_fps_upd(wr_upd), .i_hdmi_fps_upd(hdmi_upd),
+    .i_style_fps(style_fps), .i_style_fps_upd(style_fps_upd),
     .o_rgb(px_osd)
 );
 
@@ -1082,8 +1093,17 @@ wire style_rvalid;
 wire [15:0] style_paddr;
 wire style_psel,style_penable,style_pwrite;
 wire [31:0] style_pwdata,style_prdata;
+wire style_ddr_serial;
+reg [31:0] style_bus_write_dummy_bad;
+always @(posedge core_clk or negedge tinyml_rst_n)begin
+ if(!tinyml_rst_n)style_bus_write_dummy_bad<=0;
+ else if(mem_wvalid && mem_wready && mem_wid==8'h10)
+  style_bus_write_dummy_bad<=style_bus_write_dummy_bad+
+   {31'd0,mem_wdata[31:24]!=8'h80}+{31'd0,mem_wdata[63:56]!=8'h80}+
+   {31'd0,mem_wdata[95:88]!=8'h80}+{31'd0,mem_wdata[127:120]!=8'h80};
+end
 
-tinyml_subsystem #(.ENABLE_STYLE_DEMO(ENABLE_STYLE_DEMO)) u_tinyml_subsystem (
+tinyml_subsystem #(.ENABLE_STYLE_DEMO(ENABLE_STYLE_DEMO),.ENABLE_STREAM_CNN(ENABLE_STREAM_CNN),.STREAM_DILATION(STREAM_DILATION)) u_tinyml_subsystem (
     .style_paddr(style_paddr),.style_psel(style_psel),.style_penable(style_penable),
     .style_pwrite(style_pwrite),.style_pwdata(style_pwdata),.style_prdata(style_prdata),
     .clk              (core_clk),
@@ -1188,10 +1208,12 @@ tinyml_subsystem #(.ENABLE_STYLE_DEMO(ENABLE_STYLE_DEMO)) u_tinyml_subsystem (
 
 reg [3:0] arb_rst_pipe;
 generate if(ENABLE_STYLE_DEMO)begin : g_style_demo
-iris_style_demo u_style_demo(
+iris_style_demo #(.SCALE_Q24(STYLE_SCALE_Q24)) u_style_demo(
  .clk(core_clk),.video_clk(hdmi_tx_half_clk),.rst_n(arb_rst_pipe[3]),
  .paddr(style_paddr),.psel(style_psel),.penable(style_penable),.pwrite(style_pwrite),
  .pwdata(style_pwdata),.prdata(style_prdata),
+ .bus_write_dummy_bad(style_bus_write_dummy_bad),.ddr_serial_enable(style_ddr_serial),
+ .frame_commit_pulse(style_frame_commit_pulse),
  .i_hs(display_hs),.i_vs(display_vs),.i_de(display_de),.i_rgb(display_rgb),
  .o_hs(style_display_hs),.o_vs(style_display_vs),.o_de(style_display_de),.o_rgb(style_display_rgb),
  .awaddr(style_awaddr),
@@ -1333,7 +1355,9 @@ assign raw_cpu_rresp=cpu_rresp;
 assign raw_cpu_rlast=cpu_rlast;
 assign raw_cpu_rvalid=cpu_rvalid;
 assign style_prdata=0;
+assign style_ddr_serial=0;
 assign {style_display_hs,style_display_vs,style_display_de,style_display_rgb}={display_hs,display_vs,display_de,display_rgb};
+assign style_frame_commit_pulse=1'b0;
 end endgenerate
 //=====================================================================
 // Shared-DDR arbiter: video frame buffer + CPU + TinyML accelerator
@@ -1516,6 +1540,7 @@ axi_atype_bridge #(
 ) u_axi_atype_bridge (
     .clk         (core_clk),
     .rst_n       (core_pll_locked & ddr_pll_locked),
+    .serial_enable(style_ddr_serial),
 
     .s_awid      (mem_awid),
     .s_awaddr    (mem_awaddr),

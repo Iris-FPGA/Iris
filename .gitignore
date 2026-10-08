@@ -9,4 +9,6 @@ iris_ws/iris_ws.pt.sdc
 one_last_kiss_style/build/
 one_last_kiss_style/data/
 one_last_kiss_style/__pycache__/
+firmware/stream_style/build/
 .script/__pycache__/
+tests/video/__pycache__/

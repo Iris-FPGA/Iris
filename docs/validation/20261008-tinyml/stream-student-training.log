@@ -1,0 +1,78 @@
+2026-10-08 08:33:09.637323: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-08 08:33:09.660843: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-10-08 08:33:11.304317: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+/home/noir/Documents/workspace/Iris/.venv-style/lib/python3.11/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+teacher train pairs 0
+teacher train pairs 10
+teacher train pairs 20
+teacher train pairs 30
+teacher train pairs 40
+teacher train pairs 50
+teacher train pairs 60
+teacher train pairs 70
+{"step": 0, "elapsed_s": 3.57, "loss": {"micro4_d1": 1.2848769426345825, "micro4_d2": 1.3444554805755615}}
+{"step": 100, "elapsed_s": 4.14, "loss": {"micro4_d1": 0.9289290904998779, "micro4_d2": 0.9899894595146179}}
+{"step": 200, "elapsed_s": 4.69, "loss": {"micro4_d1": 0.6656053066253662, "micro4_d2": 0.7811001539230347}}
+{"step": 300, "elapsed_s": 5.24, "loss": {"micro4_d1": 0.458334356546402, "micro4_d2": 0.5702553391456604}}
+{"step": 400, "elapsed_s": 5.75, "loss": {"micro4_d1": 0.34830886125564575, "micro4_d2": 0.3322605788707733}}
+{"step": 500, "elapsed_s": 6.24, "loss": {"micro4_d1": 0.27605149149894714, "micro4_d2": 0.2300931215286255}}
+{"step": 600, "elapsed_s": 6.77, "loss": {"micro4_d1": 0.18081164360046387, "micro4_d2": 0.1557845175266266}}
+{"step": 700, "elapsed_s": 7.31, "loss": {"micro4_d1": 0.147877037525177, "micro4_d2": 0.12563969194889069}}
+{"step": 800, "elapsed_s": 7.8, "loss": {"micro4_d1": 0.11740294843912125, "micro4_d2": 0.13018982112407684}}
+{"step": 900, "elapsed_s": 8.33, "loss": {"micro4_d1": 0.11843346059322357, "micro4_d2": 0.14157409965991974}}
+{"step": 1000, "elapsed_s": 8.88, "loss": {"micro4_d1": 0.10643543303012848, "micro4_d2": 0.13424646854400635}}
+{"step": 1100, "elapsed_s": 9.41, "loss": {"micro4_d1": 0.09552965313196182, "micro4_d2": 0.1070021539926529}}
+{"step": 1200, "elapsed_s": 9.94, "loss": {"micro4_d1": 0.1086340993642807, "micro4_d2": 0.10835153609514236}}
+{"step": 1300, "elapsed_s": 10.49, "loss": {"micro4_d1": 0.1134355366230011, "micro4_d2": 0.0992954820394516}}
+{"step": 1400, "elapsed_s": 11.0, "loss": {"micro4_d1": 0.1078377366065979, "micro4_d2": 0.0887581929564476}}
+{"step": 1500, "elapsed_s": 11.55, "loss": {"micro4_d1": 0.09377452731132507, "micro4_d2": 0.09092836827039719}}
+{"step": 1600, "elapsed_s": 12.1, "loss": {"micro4_d1": 0.0885830894112587, "micro4_d2": 0.09149093180894852}}
+{"step": 1700, "elapsed_s": 12.65, "loss": {"micro4_d1": 0.09077475219964981, "micro4_d2": 0.0908750370144844}}
+{"step": 1800, "elapsed_s": 13.19, "loss": {"micro4_d1": 0.13169477880001068, "micro4_d2": 0.10808870196342468}}
+{"step": 1900, "elapsed_s": 13.71, "loss": {"micro4_d1": 0.10550335049629211, "micro4_d2": 0.0908559188246727}}
+{"step": 2000, "elapsed_s": 14.25, "loss": {"micro4_d1": 0.11035607755184174, "micro4_d2": 0.09787867963314056}}
+{"step": 2100, "elapsed_s": 14.75, "loss": {"micro4_d1": 0.10025466978549957, "micro4_d2": 0.09162817895412445}}
+{"step": 2200, "elapsed_s": 15.23, "loss": {"micro4_d1": 0.10087450593709946, "micro4_d2": 0.09047972410917282}}
+{"step": 2300, "elapsed_s": 15.77, "loss": {"micro4_d1": 0.13232627511024475, "micro4_d2": 0.0904935672879219}}
+{"step": 2400, "elapsed_s": 16.34, "loss": {"micro4_d1": 0.09692327678203583, "micro4_d2": 0.08663943409919739}}
+{"step": 2500, "elapsed_s": 16.87, "loss": {"micro4_d1": 0.09018789231777191, "micro4_d2": 0.08901719748973846}}
+{"step": 2600, "elapsed_s": 17.4, "loss": {"micro4_d1": 0.08639941364526749, "micro4_d2": 0.08701516687870026}}
+{"step": 2700, "elapsed_s": 17.9, "loss": {"micro4_d1": 0.09548230469226837, "micro4_d2": 0.08966779708862305}}
+{"step": 2800, "elapsed_s": 18.38, "loss": {"micro4_d1": 0.09417693316936493, "micro4_d2": 0.08698277175426483}}
+{"step": 2900, "elapsed_s": 18.92, "loss": {"micro4_d1": 0.0949559360742569, "micro4_d2": 0.08847653120756149}}
+{"step": 3000, "elapsed_s": 19.46, "loss": {"micro4_d1": 0.1104985773563385, "micro4_d2": 0.08745253831148148}}
+{"step": 3100, "elapsed_s": 19.96, "loss": {"micro4_d1": 0.08927057683467865, "micro4_d2": 0.0814531072974205}}
+{"step": 3200, "elapsed_s": 20.5, "loss": {"micro4_d1": 0.0852690041065216, "micro4_d2": 0.08045297861099243}}
+{"step": 3300, "elapsed_s": 21.04, "loss": {"micro4_d1": 0.08793288469314575, "micro4_d2": 0.08224666118621826}}
+{"step": 3400, "elapsed_s": 21.56, "loss": {"micro4_d1": 0.08519650995731354, "micro4_d2": 0.08063022792339325}}
+{"step": 3500, "elapsed_s": 22.09, "loss": {"micro4_d1": 0.09184104949235916, "micro4_d2": 0.07898605614900589}}
+{"step": 3600, "elapsed_s": 22.63, "loss": {"micro4_d1": 0.09055884182453156, "micro4_d2": 0.08297796547412872}}
+{"step": 3700, "elapsed_s": 23.12, "loss": {"micro4_d1": 0.09287278354167938, "micro4_d2": 0.07927003502845764}}
+{"step": 3800, "elapsed_s": 23.63, "loss": {"micro4_d1": 0.08462187647819519, "micro4_d2": 0.07895515114068985}}
+{"step": 3900, "elapsed_s": 24.19, "loss": {"micro4_d1": 0.08409568667411804, "micro4_d2": 0.07991117238998413}}
+{"step": 4000, "elapsed_s": 24.73, "loss": {"micro4_d1": 0.1401101052761078, "micro4_d2": 0.0798317939043045}}
+{"step": 4100, "elapsed_s": 25.28, "loss": {"micro4_d1": 0.10761629045009613, "micro4_d2": 0.07942213118076324}}
+{"step": 4200, "elapsed_s": 25.81, "loss": {"micro4_d1": 0.10006298124790192, "micro4_d2": 0.07878001034259796}}
+{"step": 4300, "elapsed_s": 26.33, "loss": {"micro4_d1": 0.09128406643867493, "micro4_d2": 0.08062631636857986}}
+{"step": 4400, "elapsed_s": 26.86, "loss": {"micro4_d1": 0.09218331426382065, "micro4_d2": 0.07902269810438156}}
+{"step": 4500, "elapsed_s": 27.38, "loss": {"micro4_d1": 0.08835302293300629, "micro4_d2": 0.08106757700443268}}
+{"step": 4600, "elapsed_s": 27.95, "loss": {"micro4_d1": 0.08619679510593414, "micro4_d2": 0.08031375706195831}}
+{"step": 4700, "elapsed_s": 28.51, "loss": {"micro4_d1": 0.08255431801080704, "micro4_d2": 0.07947725057601929}}
+{"step": 4800, "elapsed_s": 29.04, "loss": {"micro4_d1": 0.08356872200965881, "micro4_d2": 0.08005088567733765}}
+{"step": 4900, "elapsed_s": 29.57, "loss": {"micro4_d1": 0.08426837623119354, "micro4_d2": 0.0767827257514}}
+{"step": 5000, "elapsed_s": 30.08, "loss": {"micro4_d1": 0.08369869738817215, "micro4_d2": 0.08017049729824066}}
+{"step": 5100, "elapsed_s": 30.57, "loss": {"micro4_d1": 0.08460862934589386, "micro4_d2": 0.07855428755283356}}
+{"step": 5200, "elapsed_s": 31.1, "loss": {"micro4_d1": 0.08721524477005005, "micro4_d2": 0.08115757256746292}}
+{"step": 5300, "elapsed_s": 31.63, "loss": {"micro4_d1": 0.09388884156942368, "micro4_d2": 0.08011887222528458}}
+{"step": 5400, "elapsed_s": 32.14, "loss": {"micro4_d1": 0.08479392528533936, "micro4_d2": 0.08149521052837372}}
+{"step": 5500, "elapsed_s": 32.67, "loss": {"micro4_d1": 0.07892435044050217, "micro4_d2": 0.07632336020469666}}
+{"step": 5600, "elapsed_s": 33.2, "loss": {"micro4_d1": 0.09829215705394745, "micro4_d2": 0.07919708639383316}}
+{"step": 5700, "elapsed_s": 33.71, "loss": {"micro4_d1": 0.0823153480887413, "micro4_d2": 0.0786592960357666}}
+{"step": 5800, "elapsed_s": 34.24, "loss": {"micro4_d1": 0.10091499984264374, "micro4_d2": 0.07936461269855499}}
+{"step": 5900, "elapsed_s": 34.77, "loss": {"micro4_d1": 0.08595019578933716, "micro4_d2": 0.08141271770000458}}

@@ -1,0 +1,17 @@
+{
+  "scope": "one camera pair exported through hardware DMA CI/UART; no JTAG DDR pixel reads",
+  "elf_sha256": "f297bdc2b754592063070595920445c1c012a04f929491472cf8625b345c662b",
+  "bit_sha256": "e5aee3e2e950e4311cc47de86d5f099810386076582399fb01227ff09067675a",
+  "snapshot_files": {
+    "input": {
+      "path": "/home/noir/Documents/workspace/Iris/docs/validation/20261008-tinyml/demo-hardware-stream-input.bin",
+      "sha256": "37b2a3dac39072336870847a9329433df91e60343a529e58ad4e931d521ef737"
+    }
+  },
+  "dummy_bad": {
+    "input": 22506
+  },
+  "load": "163204 bytes written at address 0x00800000\n4 bytes written at address 0x00827d90\n2108 bytes written at address 0x00827da0\ndownloaded 165316 bytes in 3.937560s (41.000 KiB/s)\n",
+  "stop_reason": "IRIS STOP: camera hardware stream failed",
+  "export_ok": false
+}

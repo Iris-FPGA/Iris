@@ -11,6 +11,7 @@
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 
+
 namespace {
 uint32_t Cap() { return opcode_R(CUSTOM0,0,64,0,0); }
 uint32_t Addresses(uint32_t src,uint32_t dst) { return opcode_R(CUSTOM0,1,64,src,dst); }
@@ -50,7 +51,7 @@ TfLiteStatus Eval(TfLiteContext* c,TfLiteNode* n) {
   TF_LITE_ENSURE(c,!(src%16) && !(dst%16));
   TF_LITE_ENSURE(c,Cap()==0x49520101u);
   IrisFlushCpuDataCache();
-  cache_reset();
+  IrisResetVendorCache();
   TF_LITE_ENSURE(c,Addresses(src,dst)==0);
   TF_LITE_ENSURE(c,Dimensions(i->dims->data[1],i->dims->data[2])==0);
   TF_LITE_ENSURE(c,Channels(i->dims->data[3])==0);
@@ -61,7 +62,7 @@ TfLiteStatus Eval(TfLiteContext* c,TfLiteNode* n) {
     if (!(status&1)) {
       TF_LITE_ENSURE(c,(status&6)==2);
       IrisFlushCpuDataCache();
-      cache_reset();
+      IrisResetVendorCache();
       layer_mode[0]="IRIS_RESIZE_HW";
       return kTfLiteOk;
     }
@@ -86,7 +87,7 @@ TfLiteRegistration Register_RESIZE_NEAREST_NEIGHBOR() { return IrisRegisterResiz
 #endif
 
 bool IrisCopyTensorDma(uintptr_t src, uintptr_t dst, uint32_t height, uint32_t width, uint32_t channels) {
-  IrisFlushCpuDataCache(); cache_reset();
+  IrisFlushCpuDataCache(); IrisResetVendorCache();
   if (Cap()!=0x49520101u || Addresses(src,dst)!=0 ||
       Dimensions(height,width)!=0 || Channels(channels)!=0 ||
       opcode_R(CUSTOM0,0,65,0,0)!=0) return false;
@@ -96,7 +97,41 @@ bool IrisCopyTensorDma(uintptr_t src, uintptr_t dst, uint32_t height, uint32_t w
       Abort(); while(Status()&1u) {} return false;
     }
   }
-  const bool ok=(Status()&6u)==2u;
-  IrisFlushCpuDataCache(); cache_reset();
+  const uint32_t bad_dummy=opcode_R(CUSTOM0,1,65,0,0);
+  if(bad_dummy)MicroPrintf("IRIS DMA dummy violation src=%x dst=%x lanes=%u\n\r",src,dst,bad_dummy);
+  const bool ok=(Status()&6u)==2u && bad_dummy==0;
+  IrisFlushCpuDataCache(); IrisResetVendorCache();
   return ok;
+}
+
+// Diagnostic export reads pixels through the hardware AXI DMA, bypassing CPU
+// DDR loads/JTAG memory access. CPU forwards four CI words to UART unchanged.
+bool IrisStreamTensorUart(uintptr_t src, uint32_t height, uint32_t width, uint32_t channels, const char* kind) {
+  const uint32_t bytes=height*width*channels;
+  IrisFlushCpuDataCache();IrisResetVendorCache();
+  if(Cap()!=0x49520101u || Addresses(src,0)!=0 || Dimensions(height,width)!=0 ||
+      Channels(channels)!=0 || opcode_R(CUSTOM0,7,65,0,0)!=0)return false;
+  MicroPrintf("IRIS STREAM %s bytes=%u baud=500000\n\r",kind,bytes);
+  uint64_t deadline=clint_getTime(BSP_CLINT)+SYSTEM_CLINT_HZ/50;
+  while(clint_getTime(BSP_CLINT)<deadline){}
+  write_u32(SYSTEM_CLINT_HZ/(500000u*BSP_UART_DATA_LEN)-1,BSP_UART_TERMINAL+UART_CLOCK_DIVIDER);
+  deadline=clint_getTime(BSP_CLINT)+5ull*SYSTEM_CLINT_HZ;
+  while(!uart_readOccupancy(BSP_UART_TERMINAL))if(clint_getTime(BSP_CLINT)>deadline)return false;
+  if(uart_read(BSP_UART_TERMINAL)!='S')return false;
+  for(uint32_t offset=0;offset<bytes;offset+=16) {
+    deadline=clint_getTime(BSP_CLINT)+SYSTEM_CLINT_HZ;
+    while(!(Status()&8u))if(!(Status()&1u) || clint_getTime(BSP_CLINT)>deadline)return false;
+    const uint32_t w0=opcode_R(CUSTOM0,2,65,0,0),w1=opcode_R(CUSTOM0,3,65,0,0);
+    const uint32_t w2=opcode_R(CUSTOM0,4,65,0,0),w3=opcode_R(CUSTOM0,5,65,0,0);
+    const uint32_t words[4]={w0,w1,w2,w3};
+    for(unsigned w=0;w<4;++w)for(unsigned b=0;b<4;++b)
+      uart_write(BSP_UART_TERMINAL,static_cast<char>(words[w]>>(8*b)));
+    if(opcode_R(CUSTOM0,6,65,0,0)!=0)return false;
+  }
+  const uint32_t bad_dummy=opcode_R(CUSTOM0,1,65,0,0);
+  deadline=clint_getTime(BSP_CLINT)+SYSTEM_CLINT_HZ/50;
+  while(clint_getTime(BSP_CLINT)<deadline){}
+  write_u32(SYSTEM_CLINT_HZ/(BSP_UART_BAUDRATE*BSP_UART_DATA_LEN)-1,BSP_UART_TERMINAL+UART_CLOCK_DIVIDER);
+  MicroPrintf("IRIS STREAM END %s dummy_bad=%u\n\r",kind,bad_dummy);
+  return (Status()&6u)==2u && bad_dummy==0;
 }

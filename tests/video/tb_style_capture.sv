@@ -7,20 +7,23 @@ reg request=0,pair=0,i_vs=0,i_valid=0,i_sof=0,i_eof=0;
 reg [31:0] i_rgba=0;
 wire busy,done,error,capture_enable,awvalid,wvalid,wlast,bready;
 wire [31:0] awaddr;wire [7:0] awlen;wire [127:0] wdata;
+wire [31:0] write_dummy_bad;
 reg awready=0,wready=0,bvalid=0;reg [1:0] bresp=0;
 iris_style_capture #(.FRAME_WORDS(64),.FIFO_AW(5)) dut(.*);
 integer cycle=0,beats=0,bursts=0,pending=0,delay_b=0,scenario=0;
 reg [31:0] address;
 reg stall=0,inject_error=0;
 reg [127:0] held;reg was_stalled=0;
-function [31:0] pixel(input integer i);pixel=32'h80000000 | (i*32'h010203);endfunction
+reg started_w=0;
+function [31:0] pixel(input integer i);pixel=32'h80000000 | ((i*32'h010203)&32'h00ffffff);endfunction
 always @(posedge clk)begin
     if(!rst_n)begin
-        cycle<=0;awready<=0;wready<=0;bvalid<=0;pending<=0;was_stalled<=0;
+        cycle<=0;awready<=0;wready<=0;bvalid<=0;pending<=0;was_stalled<=0;started_w<=0;
     end else begin
         cycle<=cycle+1;awready<=!pending && cycle%5!=0;
         wready<=pending && !stall && cycle%4!=0;
         if(was_stalled && (wdata!==held || !wvalid))$fatal(1,"W changed under backpressure");
+        if(started_w && !wvalid)$fatal(1,"bubble inside staged write burst");
         was_stalled<=wvalid && !wready;held<=wdata;
         if(awvalid && awready)begin
             if(pending)$fatal(1,"multiple writes in flight");
@@ -29,6 +32,7 @@ always @(posedge clk)begin
             address<=awaddr;pending<=1;beats<=0;
         end
         if(wvalid && wready)begin
+            started_w<=!wlast;
             if(!pending)$fatal(1,"W before AW");
             if(wlast!=(beats==15))$fatal(1,"LAST mismatch");
             if(scenario==0 || scenario==1)begin
@@ -57,13 +61,14 @@ endtask
 task send_pixels(input integer n,input bit eof);
     for(integer i=0;i<n;i=i+1)begin
         @(negedge video_clk);i_valid=1;i_sof=i==0;i_eof=eof && i==n-1;i_rgba=pixel(i);
+        if(scenario==4 && i==63)i_rgba[31:24]=8'h81;
         @(negedge video_clk);i_valid=0;i_sof=0;i_eof=0;
     end
 endtask
 initial begin
     repeat(4)@(negedge clk);rst_n=1;
     start(0);send_pixels(256,1);wait(done);
-    if(error || bursts!=4)$fatal(1,"complete frame failed");
+    if(error || bursts!=4 || write_dummy_bad!=0)$fatal(1,"complete frame failed");
     start(1);send_pixels(256,1);wait(done);
     if(!error)$fatal(1,"B error published success");
     start(2);send_pixels(20,0);repeat(3)@(negedge video_clk);
@@ -72,8 +77,10 @@ initial begin
     stall=1;start(3);send_pixels(256,1);repeat(40)@(negedge clk);stall=0;wait(done);
     if(!error || pending)$fatal(1,"overflow must drain accepted burst");
     start(0);send_pixels(256,1);wait(done);
-    if(error || bursts!=4)$fatal(1,"recovery after errors");
-    $display("PASS style capture: order, backpressure, final B, B errors, short frame, overflow, recovery");$finish;
+    if(error || bursts!=4 || write_dummy_bad!=0)$fatal(1,"recovery after errors");
+    start(4);send_pixels(256,1);wait(done);
+    if(error || write_dummy_bad!=1)$fatal(1,"dummy lane audit missed injected byte");
+    $display("PASS style capture: staged continuous W, order, backpressure, final B, B errors, short frame, overflow, recovery, dummy audit");$finish;
 end
 initial begin #2000000;$fatal(1,"capture timeout state=%d level=%d words=%d",dut.state,dut.fifo_level,dut.words);end
 endmodule

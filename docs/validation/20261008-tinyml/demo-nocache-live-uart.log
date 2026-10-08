@@ -1,0 +1,159 @@
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x40 cpuAR=0x0x808300 fbAR=0x0x101800
+arb cpuAW=0x0x70fffc fbAW=0x0x222800 rdCnt cpu/fb=2250/13681 rresp=0
+arb ARhand=16204 rdDone=16205 AWhand=56604 wrDone=56604
+lastAR addr=0x0x808380 len=3 size=4 burst=1 | lastAW addr=0x0x347800 len=127
+Core 0 Hardware Settings:
+  Accelerator Active: 1
+  UUID: 0x4923687a
+  AXI DW: 128
+  AXI_DB_W: 16
+  Cache Enabled: 0
+  Cache Depth: 512
+  Conv Depthw Mode: 2
+  Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:2
+  Add Mode: 2
+  FC Mode: 0
+  Mul Mode: 0
+  LR Mode: 0
+  Min-Max Mode: 0
+  Reshape Mode: 0
+IRIS nodes OK: flatbuffer
+IRIS nodes OK: init
+IRIS prepare node 0 @0x0xe284b4IRIS prepare node 1 @0x0xe284d0IRIS prepare node 2 @0x0xe284ecIRIS prepare node 3 @0x0xe28508IRIS prepare node 4 @0x0xe28524IRIS prepare node 5 @0x0xe28540IRIS prepare node 6 @0x0xe2855cIRIS prepare node 7 @0x0xe28578IRIS prepare node 8 @0x0xe28594IRIS prepare node 9 @0x0xe285b0DDR arena: base=0x0xa28740 capacity=4194304 used=3688092
+IRIS LIVE: 640x480 paired camera/style; no CPU image processing; SRAM only
+IRIS LIVE before capture: input_view=0x0xe280f8 output_view=0x0xe280b8 eval23=0x0xb54740
+IRIS LIVE after capture: input_data=0x0xa28740 output_data=0x0xa28740 eval23=0x0xb54740
+IRIS CAPTURE AUDIT source_dummy=0 bus_dummy=0 serial_ddr=0
+IRIS CTRL before input copy: intr=0x0/0x0 ops=0x827b04
+IRIS CTRL after input copy: intr=0x0/0x0 ops=0x827b04
+IRIS LIVE DMA node=0 tensor=15 output=0x0xc80740
+IRIS LIVE DMA node=1 tensor=16 output=0x0xabe740
+IRIS LIVE DMA node=2 tensor=17 output=0x0xa28740
+IRIS LIVE DMA node=3 tensor=18 output=0x0xa4df40
+IRIS LIVE DMA node=4 tensor=19 output=0x0xa73740
+IRIS LIVE DMA node=5 tensor=20 output=0x0xa28740
+IRIS LIVE DMA node=6 tensor=21 output=0x0xb54740
+IRIS LIVE DMA node=7 tensor=22 output=0x0xa28740
+IRIS LIVE DMA node=8 tensor=23 output=0x0xb54740
+IRIS LIVE DMA node=9 tensor=24 output=0x0xa28740
+0; CONV_2D; STANDARD; ticks=242126480 cache_hit_raw=0 cache_miss_raw=0
+1; CONV_2D; STANDARD; ticks=60306580 cache_hit_raw=0 cache_miss_raw=0
+2; CONV_2D; STANDARD; ticks=24913149 cache_hit_raw=0 cache_miss_raw=0
+3; CONV_2D; STANDARD; ticks=29926202 cache_hit_raw=0 cache_miss_raw=0
+4; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=775077 cache_hit_raw=0 cache_miss_raw=0
+5; ADD; STANDARD; ticks=1121650 cache_hit_raw=0 cache_miss_raw=0
+6; CONV_2D; STANDARD; ticks=60511308 cache_hit_raw=0 cache_miss_raw=0
+7; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=3096324 cache_hit_raw=0 cache_miss_raw=0
+8; ADD; STANDARD; ticks=5611745 cache_hit_raw=0 cache_miss_raw=0
+9; CONV_2D; STANDARD; ticks=28816579 cache_hit_raw=0 cache_miss_raw=0
+IRIS LIVE frame=1 pair=0 Invoke_ticks=457223074 displayed=1 captures=1 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=2 pair=1 Invoke_ticks=550413494 displayed=2 captures=2 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=3 pair=0 Invoke_ticks=550369540 displayed=3 captures=3 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=4 pair=1 Invoke_ticks=548898089 displayed=4 captures=4 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=5 pair=0 Invoke_ticks=550188146 displayed=5 captures=5 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=6 pair=1 Invoke_ticks=550510000 displayed=6 captures=6 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=7 pair=0 Invoke_ticks=548868750 displayed=7 captures=7 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=8 pair=1 Invoke_ticks=549893238 displayed=8 captures=8 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=9 pair=0 Invoke_ticks=550561679 displayed=9 captures=9 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=10 pair=1 Invoke_ticks=548919534 displayed=10 captures=10 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=11 pair=0 Invoke_ticks=549615832 displayed=11 captures=11 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=12 pair=1 Invoke_ticks=550602954 displayed=12 captures=12 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=13 pair=0 Invoke_ticks=548979206 displayed=13 captures=13 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=14 pair=1 Invoke_ticks=549415769 displayed=14 captures=14 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=15 pair=0 Invoke_ticks=550634906 displayed=15 captures=15 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=16 pair=1 Invoke_ticks=549112089 displayed=16 captures=16 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=17 pair=0 Invoke_ticks=549302314 displayed=17 captures=17 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=18 pair=1 Invoke_ticks=550562437 displayed=18 captures=18 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=19 pair=0 Invoke_ticks=549333402 displayed=19 captures=19 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=20 pair=1 Invoke_ticks=549234028 displayed=20 captures=20 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=21 pair=0 Invoke_ticks=550502238 displayed=21 captures=21 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=22 pair=1 Invoke_ticks=549458874 displayed=22 captures=22 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=23 pair=0 Invoke_ticks=549089421 displayed=23 captures=23 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=24 pair=1 Invoke_ticks=550516873 displayed=24 captures=24 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=25 pair=0 Invoke_ticks=549785445 displayed=25 captures=25 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=26 pair=1 Invoke_ticks=548971840 displayed=26 captures=26 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=27 pair=0 Invoke_ticks=550541445 displayed=27 captures=27 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=28 pair=1 Invoke_ticks=549982635 displayed=28 captures=28 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=29 pair=0 Invoke_ticks=548868288 displayed=29 captures=29 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=30 pair=1 Invoke_ticks=550562554 displayed=30 captures=30 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=31 pair=0 Invoke_ticks=550226653 displayed=31 captures=31 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=32 pair=1 Invoke_ticks=548830605 displayed=32 captures=32 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=33 pair=0 Invoke_ticks=550391787 displayed=33 captures=33 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=34 pair=1 Invoke_ticks=550390714 displayed=34 captures=34 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=35 pair=0 Invoke_ticks=548854835 displayed=35 captures=35 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=36 pair=1 Invoke_ticks=550136186 displayed=36 captures=36 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=37 pair=0 Invoke_ticks=550525470 displayed=37 captures=37 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=38 pair=1 Invoke_ticks=548856675 displayed=38 captures=38 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=39 pair=0 Invoke_ticks=549889993 displayed=39 captures=39 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=40 pair=1 Invoke_ticks=550573270 displayed=40 captures=40 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=41 pair=0 Invoke_ticks=548884004 displayed=41 captures=41 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=42 pair=1 Invoke_ticks=549586868 displayed=42 captures=42 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=43 pair=0 Invoke_ticks=550623410 displayed=43 captures=43 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=44 pair=1 Invoke_ticks=549017835 displayed=44 captures=44 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=45 pair=0 Invoke_ticks=549410785 displayed=45 captures=45 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=46 pair=1 Invoke_ticks=550606598 displayed=46 captures=46 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=47 pair=0 Invoke_ticks=549137554 displayed=47 captures=47 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=48 pair=1 Invoke_ticks=549319094 displayed=48 captures=48 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=49 pair=0 Invoke_ticks=550563259 displayed=49 captures=49 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=50 pair=1 Invoke_ticks=549322192 displayed=50 captures=50 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=51 pair=0 Invoke_ticks=549216911 displayed=51 captures=51 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=52 pair=1 Invoke_ticks=550518895 displayed=52 captures=52 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=53 pair=0 Invoke_ticks=549466393 displayed=53 captures=53 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=54 pair=1 Invoke_ticks=549120329 displayed=54 captures=54 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=55 pair=0 Invoke_ticks=550490573 displayed=55 captures=55 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=56 pair=1 Invoke_ticks=549688408 displayed=56 captures=56 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=57 pair=0 Invoke_ticks=548966559 displayed=57 captures=57 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=58 pair=1 Invoke_ticks=550563775 displayed=58 captures=58 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=59 pair=0 Invoke_ticks=550025939 displayed=59 captures=59 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=60 pair=1 Invoke_ticks=548895000 displayed=60 captures=60 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=61 pair=0 Invoke_ticks=550549864 displayed=61 captures=61 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=62 pair=1 Invoke_ticks=550276272 displayed=62 captures=62 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=63 pair=0 Invoke_ticks=548822111 displayed=63 captures=63 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=64 pair=1 Invoke_ticks=550408013 displayed=64 captures=64 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=65 pair=0 Invoke_ticks=550333838 displayed=65 captures=65 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=66 pair=1 Invoke_ticks=548845176 displayed=66 captures=66 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=67 pair=0 Invoke_ticks=550133969 displayed=67 captures=67 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=68 pair=1 Invoke_ticks=550535349 displayed=68 captures=68 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=69 pair=0 Invoke_ticks=548830939 displayed=69 captures=69 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=70 pair=1 Invoke_ticks=549845235 displayed=70 captures=70 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=71 pair=0 Invoke_ticks=550586489 displayed=71 captures=71 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=72 pair=1 Invoke_ticks=548891782 displayed=72 captures=72 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=73 pair=0 Invoke_ticks=549637051 displayed=73 captures=73 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=74 pair=1 Invoke_ticks=550631409 displayed=74 captures=74 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=75 pair=0 Invoke_ticks=549004861 displayed=75 captures=75 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=76 pair=1 Invoke_ticks=549403289 displayed=76 captures=76 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=77 pair=0 Invoke_ticks=550559950 displayed=77 captures=77 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=78 pair=1 Invoke_ticks=549164981 displayed=78 captures=78 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=79 pair=0 Invoke_ticks=549333294 displayed=79 captures=79 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=80 pair=1 Invoke_ticks=550508150 displayed=80 captures=80 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=81 pair=0 Invoke_ticks=549350567 displayed=81 captures=81 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=82 pair=1 Invoke_ticks=549210865 displayed=82 captures=82 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=83 pair=0 Invoke_ticks=550523258 displayed=83 captures=83 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=84 pair=1 Invoke_ticks=549451293 displayed=84 captures=84 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=85 pair=0 Invoke_ticks=549082396 displayed=85 captures=85 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=86 pair=1 Invoke_ticks=550586771 displayed=86 captures=86 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=87 pair=0 Invoke_ticks=549724221 displayed=87 captures=87 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=88 pair=1 Invoke_ticks=548959477 displayed=88 captures=88 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=89 pair=0 Invoke_ticks=550582201 displayed=89 captures=89 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=90 pair=1 Invoke_ticks=550071930 displayed=90 captures=90 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=91 pair=0 Invoke_ticks=548831259 displayed=91 captures=91 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=92 pair=1 Invoke_ticks=550538275 displayed=92 captures=92 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=93 pair=0 Invoke_ticks=550259212 displayed=93 captures=93 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=94 pair=1 Invoke_ticks=548812507 displayed=94 captures=94 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=95 pair=0 Invoke_ticks=550386273 displayed=95 captures=95 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=96 pair=1 Invoke_ticks=550402503 displayed=96 captures=96 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=97 pair=0 Invoke_ticks=548839640 displayed=97 captures=97 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=98 pair=1 Invoke_ticks=550123894 displayed=98 captures=98 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=99 pair=0 Invoke_ticks=550543783 displayed=99 captures=99 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=100 pair=1 Invoke_ticks=548820301 displayed=100 captures=100 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=101 pair=0 Invoke_ticks=549915635 displayed=101 captures=101 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=102 pair=1 Invoke_ticks=550528873 displayed=102 captures=102 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=103 pair=0 Invoke_ticks=548962365 displayed=103 captures=103 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=104 pair=1 Invoke_ticks=549575695 displayed=104 captures=104 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=105 pair=0 Invoke_ticks=550551955 displayed=105 captures=105 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=106 pair=1 Invoke_ticks=549086837 displayed=106 captures=106 underflow=0 readerr=0 rejects=0
+

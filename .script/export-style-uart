@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+"""Freeze/export one strict camera pair through hardware DMA CI + UART.
+Requires LIVE_SNAPSHOT=1 firmware and an already programmed timing-passed bit.
+CPU forwards DMA register words to UART unchanged; no CPU DDR pixel reads.
+"""
+import argparse,hashlib,json,os,re,select,socket,termios,time
+from pathlib import Path
+root=Path(__file__).resolve().parents[1]
+p=argparse.ArgumentParser(description=__doc__)
+p.add_argument('--elf',type=Path,default=root/'firmware/tinyml_style/build/tinyml_style.elf')
+p.add_argument('--bit-file',type=Path,default=root/'iris_ws/outflow/iris_ws.bit',help='identity of the already programmed FPGA bitstream')
+p.add_argument('--output',type=Path,required=True)
+p.add_argument('--serial-ddr',action='store_true',help='drain then serialize DDR controller reads/writes for diagnosis')
+p.add_argument('--uart',default='/dev/ttyUSB2');a=p.parse_args()
+a.output.parent.mkdir(parents=True,exist_ok=True)
+def sha(f):return hashlib.sha256(f.read_bytes()).hexdigest()
+r={'scope':'one camera pair exported through hardware DMA CI/UART; no JTAG DDR pixel reads',
+   'elf_sha256':sha(a.elf),'bit_sha256':sha(a.bit_file),'serial_ddr':a.serial_ddr,'snapshot_files':{},'dummy_bad':{}}
+if any(c in str(a.elf.resolve()) for c in '{}\n\r'):p.error('unsupported Tcl path')
+fd=os.open(a.uart,os.O_RDWR|os.O_NOCTTY|os.O_NONBLOCK)
+def baud(speed):
+ attr=termios.tcgetattr(fd);attr[0]=attr[1]=attr[3]=0;attr[2]=termios.CS8|termios.CLOCAL|termios.CREAD
+ attr[4]=attr[5]=speed;attr[6][termios.VMIN]=attr[6][termios.VTIME]=0
+ termios.tcsetattr(fd,termios.TCSANOW,attr)
+baud(termios.B115200);termios.tcflush(fd,termios.TCIFLUSH)
+rawlog=bytearray();linebuf=bytearray();deadline=time.monotonic()+120
+try:
+ with socket.create_connection(('localhost',6666),timeout=60) as s:
+  def tcl(c):
+   s.sendall(c.encode()+b'\x1a');b=b''
+   while b'\x1a' not in b:
+    chunk=s.recv(65536)
+    if not chunk:raise RuntimeError('OpenOCD disconnected')
+    b+=chunk
+   return b.decode().rstrip('\x1a')
+  tcl('halt');tcl('reset halt');tcl('mww 0xf8100030 '+str(int(a.serial_ddr)))
+  r['load']=tcl('load_image {'+str(a.elf.resolve())+'}')
+  if 'downloaded' not in r['load']:raise RuntimeError('ELF load not confirmed')
+  tcl('resume 0x00800000')
+ while time.monotonic()<deadline:
+  if not select.select([fd],[],[],.2)[0]:continue
+  chunk=os.read(fd,65536);rawlog.extend(chunk);linebuf.extend(chunk)
+  while b'\n' in linebuf:
+   line,_,tail=linebuf.partition(b'\n');linebuf=bytearray(tail)
+   line=line.decode(errors='replace').strip()
+   if not line:continue
+   print(line,flush=True)
+   m=re.fullmatch(r'IRIS CAPTURE AUDIT source_dummy=(\d+) bus_dummy=(\d+) serial_ddr=(\d+)',line)
+   if m:r['capture_audit']={k:int(v) for k,v in zip(['source_dummy','bus_dummy','serial_ddr'],m.groups())}
+   m=re.fullmatch(r'IRIS STREAM (input|output) bytes=(\d+) baud=500000',line)
+   if m:
+    kind,n=m[1],int(m[2]);assert n==1228800
+    baud(termios.B500000);time.sleep(.05);termios.tcflush(fd,termios.TCIFLUSH);linebuf.clear();os.write(fd,b'S')
+    data=bytearray();binary_deadline=time.monotonic()+60
+    while len(data)<n:
+     if time.monotonic()>binary_deadline:raise RuntimeError('binary stream timeout '+kind)
+     if select.select([fd],[],[],.2)[0]:data.extend(os.read(fd,min(65536,n-len(data))))
+    dest=Path(str(a.output)+'-'+kind+'.bin');dest.write_bytes(data)
+    r['snapshot_files'][kind]={'path':str(dest.resolve()),'sha256':sha(dest)}
+    baud(termios.B115200);print('received',kind,n,flush=True)
+   m=re.fullmatch(r'IRIS STREAM END (input|output) dummy_bad=(\d+)',line)
+   if m:r['dummy_bad'][m[1]]=int(m[2])
+   m=re.fullmatch(r'IRIS STREAM DONE pair=(\d+) displayed=(\d+)',line)
+   if m:
+    r['snapshot_pair']=int(m[1]);r['snapshot_displayed_count']=int(m[2]);deadline=0;break
+   if line.startswith('IRIS STOP:'):r['stop_reason']=line;deadline=0;break
+ r['export_ok']=(set(r['snapshot_files'])=={'input','output'} and
+                 r['dummy_bad']=={'input':0,'output':0} and 'snapshot_pair' in r and
+                 r.get('capture_audit',{}).get('source_dummy')==0 and
+                 r.get('capture_audit',{}).get('bus_dummy')==0)
+finally:
+ baud(termios.B115200);os.close(fd)
+ Path(str(a.output)+'-uart.log').write_bytes(rawlog)
+ Path(str(a.output)+'-report.json').write_text(json.dumps(r,indent=2)+'\n')
+print(json.dumps(r,indent=2),flush=True)
+raise SystemExit(0 if r.get('export_ok') else 1)

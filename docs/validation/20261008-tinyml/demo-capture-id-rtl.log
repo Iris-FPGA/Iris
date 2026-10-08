@@ -1,0 +1,2 @@
+PASS CPU/style mux: concurrent streams, backpressure, response ownership, independent AW/W, WLAST gate
+tests/video/tb_cpu_style_mux.sv:194: $finish called at 13005000 (1ps)

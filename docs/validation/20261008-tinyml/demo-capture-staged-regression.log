@@ -1,0 +1,85 @@
+PASS style capture: staged continuous W, order, backpressure, final B, B errors, short frame, overflow, recovery, dummy audit
+tests/video/tb_style_capture.sv:83: $finish called at 42805000 (1ps)
+PASS CPU/style mux: concurrent streams, backpressure, response ownership, independent AW/W, WLAST gate
+tests/video/tb_cpu_style_mux.sv:194: $finish called at 13005000 (1ps)
+PASS style panels:     2073600 two-pixel samples, RGB/dequant, 4K bursts, full-frame pairing
+tests/video/tb_style_panels.sv:102: $finish called at 34650252000 (1ps)
+PASS style panels:     2073600 two-pixel samples, RGB/dequant, 4K bursts, full-frame pairing
+tests/video/tb_style_panels.sv:102: $finish called at 34650252000 (1ps)
+PASS 640x480 RGBA hardware preprocessing: crop, all phase positions, RGB/INT8 order, markers, short frame, disable/restart
+tests/video/tb_style_preprocess.sv:58: $finish called at 41925156000 (1ps)
+PASS output dequantization: 1024 independent floating-reference RGB pixels, saturation, pipeline/valid/reset
+tests/video/tb_style_dequant.sv:26: $finish called at 10291000 (1ps)
+Checking colour
+PASS debayer: 3 complete frames incl borders, RGB and raster timing
+tests/video/tb_debayer.sv:42: $finish called at 4520000 (1ps)
+Checking ramp
+PASS debayer: 3 complete frames incl borders, RGB and raster timing
+tests/video/tb_debayer.sv:42: $finish called at 4520000 (1ps)
+Checking edges
+PASS debayer: 3 complete frames incl borders, RGB and raster timing
+tests/video/tb_debayer.sv:42: $finish called at 4520000 (1ps)
+PASS debayer: 3 complete frames incl borders, RGB and raster timing
+tests/video/tb_debayer.sv:42: $finish called at 4520000 (1ps)
+PASS debayer: 3 complete frames incl borders, RGB and raster timing
+tests/video/tb_debayer.sv:42: $finish called at 4520000 (1ps)
+PASS debayer: 3 complete frames incl borders, RGB and raster timing
+tests/video/tb_debayer.sv:42: $finish called at 4520000 (1ps)
+PASS measured resolution: gapped RAW10 1920x1080, then mode change to 1280x720
+tests/video/tb_size_meter.sv:25: $finish called at 12708080000 (1ps)
+PASS display: 256 levels x 8 Q8 gains, black clipping, contrast/chroma and raster alignment
+tests/video/tb_display.sv:26: $finish called at 20540000 (1ps)
+PASS OSD: actual 1920x1080 and independent CAM/WR/HDMI FPS, glyphs and passthrough
+tests/video/tb_osd.sv:36: $finish called at 503150000 (1ps)
+PASS 1080p frame banks: disjoint 2080768-byte strides, writer/reader locks and coincident swaps
+tests/video/tb_frame_banks.sv:36: $finish called at 30040000 (1ps)
+PASS actual DDR writer: ordered pixels/bursts, final-burst stall, delayed B, exactly one complete-frame publication
+tests/video/tb_write_commit.sv:97: $finish called at 22840000 (1ps)
+PASS exposure sensor contract: I2C sequences decode to controller half-lines, 4..2289, group hold and automatic exposure
+tests/video/tb_ae_exposure.sv:56: $finish called at 600050000 (1ps)
+PASS white balance: 1080p division, exposure/scene lock, manual calibration, frame-boundary commits, black reject, neutral mask
+tests/video/tb_white_balance.sv:78: $finish called at 28690000 (1ps)
+PASS sensor telemetry: 3 decoded UART lines incl 32 register readbacks/CAM/WR/HDMI, Gray byte clock ratio
+tests/video/tb_sensor_telemetry.sv:40: $finish called at 897156000 (1ps)
+PASS sensor readback: exact 32 addresses/snapshot, early ID check, pending AE arbitration and resume
+tests/video/tb_sensor_readback.sv:26: $finish called at 1800000 (1ps)
+PASS sensor mode contract: exact 165 I2C writes, 1080 window/exposure, published clock values, linear mode, stream on last
+tests/video/tb_sensor_mode.sv:39: $finish called at 14900000 (1ps)
+PASS AE OSD: parallel address mapping for every 1920 raster position
+tests/video/tb_ae_osd_address.sv:21: $finish called at 19240000 (1ps)
+PASS colour capture: empty read, KEY2 snapshots, repeated frozen reads after scene changes, RGB/CRC, explicit replacement
+tests/video/tb_colour_capture.sv:43: $finish called at 273786000 (1ps)
+[95000] Phase P: pipelined CPU writes under concurrent video/accelerator traffic
+PASS: pipelined CPU AW/W streams with delayed B
+[7205000] Phase A: basic R/W per master
+[9505000] Phase B: out-of-range writes -> SLVERR
+[9715000] Phase C: out-of-range reads -> SLVERR
+[9915000] Phase D: W-before-AW
+[10365000] Phase E: concurrent hammer
+[22145000] transactions: s0=20 s1=20 s2=20 downstream aw=98 ar=66
+PASS: tb_axi_ddr_arbiter
+tests/video/tb_axi_ddr_arbiter.sv:966: $finish called at 22145000 (1ps)
+PASS AXI shared-address stability writes=338 reads=651
+tests/video/tb_axi_atype_bridge.sv:79: $finish called at 40980000 (1ps)
+PASS serialized controller transactions writes=878 reads=879 cycles=40000
+tests/video/tb_axi_atype_serial.sv:50: $finish called at 400030000 (1ps)
+PASS DDR mode switch: held VALID, drain both directions, response backpressure
+tests/video/tb_axi_atype_mode.sv:46: $finish called at 200000 (1ps)
+PASS resize 32x32x32
+PASS resize 64x64x16
+PASS resize 3x4x4
+PASS resize 3x2x8
+PASS resize 3x1x16
+PASS resize 3x1x32
+PASS read-only CI tensor stream: samples, audit, no writes, abort
+PASS DMA copy 3x4x4
+PASS DMA copy 3x2x8
+PASS DMA copy 3x1x16
+PASS DMA copy 3x1x32
+PASS DMA copy 48x640x4
+PASS resize 2x4x4
+PASS resize 2x4x4
+PASS: tb_iris_resize2x reads=24123 writes=32349
+tests/video/tb_iris_resize2x.sv:166: $finish called at 3850850000 (1ps)
+PASS: TinyML resize CI/AXI ownership and native line conversion
+tests/video/tb_tinyml_resize_integration.sv:65: $finish called at 372000 (1ps)

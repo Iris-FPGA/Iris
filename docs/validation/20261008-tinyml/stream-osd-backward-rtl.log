@@ -1,0 +1,2 @@
+PASS OSD: actual 1920x1080 and independent CAM/WR/HDMI FPS, glyphs and passthrough
+tests/video/tb_osd.sv:36: $finish called at 657550000 (1ps)

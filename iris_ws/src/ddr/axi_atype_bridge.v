@@ -2,9 +2,10 @@
 // Preserve the selected address under backpressure. SERIAL_TRANSACTIONS=1
 // additionally waits for the accepted B/RLAST handshake before issuing any
 // next controller address. New requests alternate directions under contention
-// so neither video reads nor writes can starve. Set the parameter to 0 only
-// for isolated AXI concurrency verification; board concurrency remains under
-// investigation. Response data still passes through the parent arbiter.
+// so neither video reads nor writes can starve. serial_enable also permits
+// controlled board diagnostics without replacing the FPGA image. Outstanding
+// transactions in both directions drain before entering serialized mode.
+// Response data still passes through the parent arbiter.
 module axi_atype_bridge #(
     parameter IDW = 4,
     parameter AW  = 32,
@@ -14,6 +15,7 @@ module axi_atype_bridge #(
 )(
     input  wire            clk,
     input  wire            rst_n,
+    input  wire            serial_enable,
 
     // master write address (standard AXI4)
     input  wire [IDW-1:0]  s_awid,
@@ -60,17 +62,21 @@ module axi_atype_bridge #(
     // an already-presented AW (nor may a late AW replace an AR).
     reg selection_locked;
     reg locked_write;
-    reg [1:0] active_direction; // 0=idle, 1=read, 2=write
+    reg read_active, write_active;
     reg prefer_write;
-    wire eligible = !SERIAL_TRANSACTIONS || active_direction == 0;
-    wire choose_aw = s_awvalid && (!s_arvalid || (SERIAL_TRANSACTIONS && prefer_write));
+    wire serialized = SERIAL_TRANSACTIONS || serial_enable;
+    // A diagnostic mode change must not withdraw an address already offered
+    // under backpressure. Accept that locked request, then drain both sides.
+    wire eligible = selection_locked || !serialized || !(read_active || write_active);
+    wire choose_aw = s_awvalid && (!s_arvalid || (serialized && prefer_write));
     wire sel_aw = selection_locked ? locked_write : choose_aw;
     wire sel_ar = selection_locked ? ~locked_write : (s_arvalid && !choose_aw);
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             selection_locked <= 1'b0;
             locked_write <= 1'b0;
-            active_direction <= 0;
+            read_active <= 0;
+            write_active <= 0;
             prefer_write <= 0;
         end else begin
             if (m_avalid && !m_aready) begin
@@ -80,12 +86,12 @@ module axi_atype_bridge #(
                 selection_locked <= 1'b0;
             end
             if (m_avalid && m_aready) begin
-                active_direction <= sel_aw ? 2 : 1;
                 prefer_write <= !sel_aw;
-            end else if ((active_direction == 1 && rvalid && rlast && rready) ||
-                         (active_direction == 2 && bvalid && bready)) begin
-                active_direction <= 0;
             end
+            if (m_avalid && m_aready && sel_aw) write_active <= 1;
+            else if (bvalid && bready) write_active <= 0;
+            if (m_avalid && m_aready && sel_ar) read_active <= 1;
+            else if (rvalid && rlast && rready) read_active <= 0;
         end
     end
 

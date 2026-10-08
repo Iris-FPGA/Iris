@@ -1,0 +1,570 @@
+4116 bytes written at address 0x00800000
+downloaded 4116 bytes in 0.106342s (37.798 KiB/s)
+
+IRIS STREAM CNN: 640x480 C4; Conv3s2/Conv3d2/Conv1/NN2x hardware; SRAM only
+IRIS CAPTURE AUDIT source_dummy=0 bus_dummy=0 serial_ddr=0
+IRIS LIVE frame=1 pair=1 Invoke_ticks=1818392 displayed=2 captures=2 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=30 pair=0 Invoke_ticks=1815369 displayed=31 captures=31 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=60 pair=0 Invoke_ticks=1812065 displayed=61 captures=61 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=90 pair=0 Invoke_ticks=1818193 displayed=91 captures=91 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=120 pair=0 Invoke_ticks=1814835 displayed=121 captures=121 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=150 pair=0 Invoke_ticks=1815024 displayed=151 captures=151 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=180 pair=0 Invoke_ticks=1812987 displayed=181 captures=181 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=210 pair=0 Invoke_ticks=1816596 displayed=211 captures=211 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=240 pair=0 Invoke_ticks=1817637 displayed=241 captures=241 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=270 pair=0 Invoke_ticks=1818307 displayed=271 captures=271 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=300 pair=0 Invoke_ticks=1818763 displayed=301 captures=301 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=330 pair=0 Invoke_ticks=1814336 displayed=331 captures=331 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=360 pair=0 Invoke_ticks=1817523 displayed=361 captures=361 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=390 pair=0 Invoke_ticks=1815208 displayed=391 captures=391 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=420 pair=0 Invoke_ticks=1816098 displayed=421 captures=421 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=450 pair=0 Invoke_ticks=1820785 displayed=451 captures=451 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=480 pair=0 Invoke_ticks=1817110 displayed=481 captures=481 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=510 pair=0 Invoke_ticks=1818168 displayed=511 captures=511 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=540 pair=0 Invoke_ticks=1815491 displayed=541 captures=541 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=570 pair=0 Invoke_ticks=1813958 displayed=571 captures=571 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=600 pair=0 Invoke_ticks=1816206 displayed=601 captures=601 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=630 pair=0 Invoke_ticks=1815261 displayed=631 captures=631 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=660 pair=0 Invoke_ticks=1818348 displayed=661 captures=661 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=690 pair=0 Invoke_ticks=1820666 displayed=691 captures=691 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=720 pair=0 Invoke_ticks=1814766 displayed=721 captures=721 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=750 pair=0 Invoke_ticks=1816765 displayed=751 captures=751 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=780 pair=0 Invoke_ticks=1817122 displayed=781 captures=781 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=810 pair=0 Invoke_ticks=1818347 displayed=811 captures=811 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=840 pair=0 Invoke_ticks=1813958 displayed=841 captures=841 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=870 pair=0 Invoke_ticks=1814377 displayed=871 captures=871 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=900 pair=0 Invoke_ticks=1814405 displayed=901 captures=901 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=930 pair=0 Invoke_ticks=1818550 displayed=931 captures=931 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=960 pair=0 Invoke_ticks=1820201 displayed=961 captures=961 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=990 pair=0 Invoke_ticks=1815692 displayed=991 captures=991 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=1020 pair=0 Invoke_ticks=1815930 displayed=1021 captures=1021 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=1050 pair=0 Invoke_ticks=1816604 displayed=1051 captures=1051 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=1080 pair=0 Invoke_ticks=1818164 displayed=1081 captures=1081 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=1110 pair=0 Invoke_ticks=1811630 displayed=1111 captures=1111 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=1140 pair=0 Invoke_ticks=1815582 displayed=1141 captures=1141 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=1170 pair=0 Invoke_ticks=1815018 displayed=1171 captures=1171 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=1200 pair=0 Invoke_ticks=1814782 displayed=1201 captures=1201 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=1230 pair=0 Invoke_ticks=1816661 displayed=1231 captures=1231 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=1260 pair=0 Invoke_ticks=1820622 displayed=1261 captures=1261 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=1290 pair=0 Invoke_ticks=1816801 displayed=1291 captures=1291 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=1320 pair=0 Invoke_ticks=1817456 displayed=1321 captures=1321 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=1350 pair=0 Invoke_ticks=1814526 displayed=1351 captures=1351 underflow=0 readerr=0 rejects=0
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "90525087b19a454d676fb24911dcc272b5cc9b5cde0fb09146c3a877ff067dd2",
+  "bit_sha256": "73bee165bc40d9141e8c567a46c1a0fda6c84aa9bb2a61ff0f5b2868288ee02a",
+  "attached": false,
+  "frames": [
+    {
+      "sequence": 1,
+      "pair": 1,
+      "invoke_ticks": 1818392,
+      "displayed": 2,
+      "captures": 2,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 0.07368622897774912
+    },
+    {
+      "sequence": 30,
+      "pair": 0,
+      "invoke_ticks": 1815369,
+      "displayed": 31,
+      "captures": 31,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 2.0096965289849322
+    },
+    {
+      "sequence": 60,
+      "pair": 0,
+      "invoke_ticks": 1812065,
+      "displayed": 61,
+      "captures": 61,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 4.009767079987796
+    },
+    {
+      "sequence": 90,
+      "pair": 0,
+      "invoke_ticks": 1818193,
+      "displayed": 91,
+      "captures": 91,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 5.993766164989211
+    },
+    {
+      "sequence": 120,
+      "pair": 0,
+      "invoke_ticks": 1814835,
+      "displayed": 121,
+      "captures": 121,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 7.993830658990191
+    },
+    {
+      "sequence": 150,
+      "pair": 0,
+      "invoke_ticks": 1815024,
+      "displayed": 151,
+      "captures": 151,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 9.99388900998747
+    },
+    {
+      "sequence": 180,
+      "pair": 0,
+      "invoke_ticks": 1812987,
+      "displayed": 181,
+      "captures": 181,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 11.99395334898145
+    },
+    {
+      "sequence": 210,
+      "pair": 0,
+      "invoke_ticks": 1816596,
+      "displayed": 211,
+      "captures": 211,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 13.993941578984959
+    },
+    {
+      "sequence": 240,
+      "pair": 0,
+      "invoke_ticks": 1817637,
+      "displayed": 241,
+      "captures": 241,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 15.978021842980525
+    },
+    {
+      "sequence": 270,
+      "pair": 0,
+      "invoke_ticks": 1818307,
+      "displayed": 271,
+      "captures": 271,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 17.97804156699567
+    },
+    {
+      "sequence": 300,
+      "pair": 0,
+      "invoke_ticks": 1818763,
+      "displayed": 301,
+      "captures": 301,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 19.97812297998462
+    },
+    {
+      "sequence": 330,
+      "pair": 0,
+      "invoke_ticks": 1814336,
+      "displayed": 331,
+      "captures": 331,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 21.978159425983904
+    },
+    {
+      "sequence": 360,
+      "pair": 0,
+      "invoke_ticks": 1817523,
+      "displayed": 361,
+      "captures": 361,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 23.9782168949896
+    },
+    {
+      "sequence": 390,
+      "pair": 0,
+      "invoke_ticks": 1815208,
+      "displayed": 391,
+      "captures": 391,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 25.962286790978396
+    },
+    {
+      "sequence": 420,
+      "pair": 0,
+      "invoke_ticks": 1816098,
+      "displayed": 421,
+      "captures": 421,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 27.962263833003817
+    },
+    {
+      "sequence": 450,
+      "pair": 0,
+      "invoke_ticks": 1820785,
+      "displayed": 451,
+      "captures": 451,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 29.962332517985487
+    },
+    {
+      "sequence": 480,
+      "pair": 0,
+      "invoke_ticks": 1817110,
+      "displayed": 481,
+      "captures": 481,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 31.962364854989573
+    },
+    {
+      "sequence": 510,
+      "pair": 0,
+      "invoke_ticks": 1818168,
+      "displayed": 511,
+      "captures": 511,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 33.9624541719968
+    },
+    {
+      "sequence": 540,
+      "pair": 0,
+      "invoke_ticks": 1815491,
+      "displayed": 541,
+      "captures": 541,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 35.94646749299136
+    },
+    {
+      "sequence": 570,
+      "pair": 0,
+      "invoke_ticks": 1813958,
+      "displayed": 571,
+      "captures": 571,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 37.94650731497677
+    },
+    {
+      "sequence": 600,
+      "pair": 0,
+      "invoke_ticks": 1816206,
+      "displayed": 601,
+      "captures": 601,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 39.946570706000784
+    },
+    {
+      "sequence": 630,
+      "pair": 0,
+      "invoke_ticks": 1815261,
+      "displayed": 631,
+      "captures": 631,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 41.94657033900148
+    },
+    {
+      "sequence": 660,
+      "pair": 0,
+      "invoke_ticks": 1818348,
+      "displayed": 661,
+      "captures": 661,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 43.94662325800164
+    },
+    {
+      "sequence": 690,
+      "pair": 0,
+      "invoke_ticks": 1820666,
+      "displayed": 691,
+      "captures": 691,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 45.93069004200515
+    },
+    {
+      "sequence": 720,
+      "pair": 0,
+      "invoke_ticks": 1814766,
+      "displayed": 721,
+      "captures": 721,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 47.930704367987346
+    },
+    {
+      "sequence": 750,
+      "pair": 0,
+      "invoke_ticks": 1816765,
+      "displayed": 751,
+      "captures": 751,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 49.93072441898403
+    },
+    {
+      "sequence": 780,
+      "pair": 0,
+      "invoke_ticks": 1817122,
+      "displayed": 781,
+      "captures": 781,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 51.930795703985495
+    },
+    {
+      "sequence": 810,
+      "pair": 0,
+      "invoke_ticks": 1818347,
+      "displayed": 811,
+      "captures": 811,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 53.93083348197979
+    },
+    {
+      "sequence": 840,
+      "pair": 0,
+      "invoke_ticks": 1813958,
+      "displayed": 841,
+      "captures": 841,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 55.91489455199917
+    },
+    {
+      "sequence": 870,
+      "pair": 0,
+      "invoke_ticks": 1814377,
+      "displayed": 871,
+      "captures": 871,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 57.91488221599138
+    },
+    {
+      "sequence": 900,
+      "pair": 0,
+      "invoke_ticks": 1814405,
+      "displayed": 901,
+      "captures": 901,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 59.91495762299746
+    },
+    {
+      "sequence": 930,
+      "pair": 0,
+      "invoke_ticks": 1818550,
+      "displayed": 931,
+      "captures": 931,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 61.91494938798132
+    },
+    {
+      "sequence": 960,
+      "pair": 0,
+      "invoke_ticks": 1820201,
+      "displayed": 961,
+      "captures": 961,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 63.914999161992455
+    },
+    {
+      "sequence": 990,
+      "pair": 0,
+      "invoke_ticks": 1815692,
+      "displayed": 991,
+      "captures": 991,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 65.89905480400193
+    },
+    {
+      "sequence": 1020,
+      "pair": 0,
+      "invoke_ticks": 1815930,
+      "displayed": 1021,
+      "captures": 1021,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 67.89910173698445
+    },
+    {
+      "sequence": 1050,
+      "pair": 0,
+      "invoke_ticks": 1816604,
+      "displayed": 1051,
+      "captures": 1051,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 69.89911487599602
+    },
+    {
+      "sequence": 1080,
+      "pair": 0,
+      "invoke_ticks": 1818164,
+      "displayed": 1081,
+      "captures": 1081,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 71.89916423999239
+    },
+    {
+      "sequence": 1110,
+      "pair": 0,
+      "invoke_ticks": 1811630,
+      "displayed": 1111,
+      "captures": 1111,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 73.89920414498192
+    },
+    {
+      "sequence": 1140,
+      "pair": 0,
+      "invoke_ticks": 1815582,
+      "displayed": 1141,
+      "captures": 1141,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 75.88320199598093
+    },
+    {
+      "sequence": 1170,
+      "pair": 0,
+      "invoke_ticks": 1815018,
+      "displayed": 1171,
+      "captures": 1171,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 77.88323900598334
+    },
+    {
+      "sequence": 1200,
+      "pair": 0,
+      "invoke_ticks": 1814782,
+      "displayed": 1201,
+      "captures": 1201,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 79.88326959498227
+    },
+    {
+      "sequence": 1230,
+      "pair": 0,
+      "invoke_ticks": 1816661,
+      "displayed": 1231,
+      "captures": 1231,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 81.88332745298976
+    },
+    {
+      "sequence": 1260,
+      "pair": 0,
+      "invoke_ticks": 1820622,
+      "displayed": 1261,
+      "captures": 1261,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 83.88333692098968
+    },
+    {
+      "sequence": 1290,
+      "pair": 0,
+      "invoke_ticks": 1816801,
+      "displayed": 1291,
+      "captures": 1291,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 85.86736311999266
+    },
+    {
+      "sequence": 1320,
+      "pair": 0,
+      "invoke_ticks": 1817456,
+      "displayed": 1321,
+      "captures": 1321,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 87.86736775000463
+    },
+    {
+      "sequence": 1350,
+      "pair": 0,
+      "invoke_ticks": 1814526,
+      "displayed": 1351,
+      "captures": 1351,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 89.86739421699895
+    }
+  ],
+  "reset": "",
+  "load": "4116 bytes written at address 0x00800000\ndownloaded 4116 bytes in 0.106342s (37.798 KiB/s)\n",
+  "observation_seconds": 90.06761102299788,
+  "observed_committed_pair_hz": 15.023324353416404,
+  "live_ok": true
+}

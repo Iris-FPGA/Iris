@@ -79,6 +79,8 @@
         <efx:design_file name="src/cnn/iris_style_demo.v" version="sv_09" library="default" />
         <efx:design_file name="src/ddr/axi_cpu_style_mux.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/iris_resize2x.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/iris_stream_conv.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/iris_stream_cnn.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/tinyml_subsystem.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/rtl/common/common_apb3.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/rtl/common/common_efx_fifo_wrapper.v" version="sv_09" library="default" />
@@ -184,6 +186,9 @@
         <efx:param name="pack-luts-to-comb4" value="0" value_type="e_option" />
         <efx:dynparam name="ENABLE_LEGACY_UART_LOG" value="0" />
         <efx:dynparam name="ENABLE_STYLE_DEMO" value="1" />
+        <efx:dynparam name="ENABLE_STREAM_CNN" value="1" />
+        <efx:dynparam name="STREAM_DILATION" value="2" />
+        <efx:dynparam name="STYLE_SCALE_Q24" value="20596120" />
     </efx:synthesis>
     <efx:place_and_route tool_name="efx_pnr">
         <efx:param name="work_dir" value="work_pnr" value_type="e_string" />

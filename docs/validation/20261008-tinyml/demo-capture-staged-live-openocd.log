@@ -1,0 +1,31 @@
+Open On-Chip Debugger 0.11.0+dev-04060-g967f8f6f0-dirty (2026-03-24-19:53)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+cpu.yaml not found within 3 levels
+Info : auto-selecting first available session transport "jtag". To override use 'transport select <transport>'.
+Info : Simple Register based Bscan Tunnel Selected
+Info : Bscan tunnel IR 0x8 selected
+Info : set servers polling period to 50ms
+Info : clock speed 800 kHz
+Info : JTAG tap: fpga_spinal.bridge tap/device found: 0x10660a79 (mfg: 0x53c (Efinix Inc), part: 0x0660, ver: 0x1)
+Info : [fpga_spinal.cpu0] datacount=1 progbufsize=2
+Info : Disabling abstract command reads from CSRs.
+Info : [fpga_spinal.cpu0] Examined RISC-V core; found 1 harts
+Info : [fpga_spinal.cpu0]  XLEN=32, misa=0x40001101
+[fpga_spinal.cpu0] Target successfully examined.
+Info : starting gdb server for fpga_spinal.cpu0 on 3333
+Info : Listening on port 3333 for gdb connections
+Info : Listening on port 6666 for tcl connections
+Info : Listening on port 4444 for telnet connections
+Info : accepting 'tcl' connection on tcp/6666
+Info : JTAG tap: fpga_spinal.bridge tap/device found: 0x10660a79 (mfg: 0x53c (Efinix Inc), part: 0x0660, ver: 0x1)
+162372 bytes written at address 0x00800000
+4 bytes written at address 0x00827a50
+2108 bytes written at address 0x00827a60
+downloaded 164484 bytes in 3.916686s (41.011 KiB/s)
+
+Info : Disabling abstract command writes to CSRs.
+Info : dropped 'tcl' connection
+Info : accepting 'tcl' connection on tcp/6666
+shutdown command invoked

@@ -12,7 +12,7 @@ module tb_axi_atype_bridge;
   wire [7:0] id,len; wire [27:0] addr;
   wire [2:0] size; wire [1:0] burst,lock;
   axi_atype_bridge #(.IDW(8),.AW(28),.SERIAL_TRANSACTIONS(0)) dut(
-    .clk(clk),.rst_n(rst_n),.s_awid(awid),.s_awaddr(awaddr),
+    .clk(clk),.rst_n(rst_n),.serial_enable(1'b0),.s_awid(awid),.s_awaddr(awaddr),
     .s_awlen(awlen),.s_awsize(awsize),.s_awburst(awburst),
     .s_awlock(awlock),.s_awvalid(awv),.s_awready(awready),
     .s_arid(arid),.s_araddr(araddr),.s_arlen(arlen),

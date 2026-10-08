@@ -1,0 +1,57 @@
+Open On-Chip Debugger 0.11.0+dev-04060-g967f8f6f0-dirty (2026-03-24-19:53)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+cpu.yaml not found within 3 levels
+Info : auto-selecting first available session transport "jtag". To override use 'transport select <transport>'.
+Info : Simple Register based Bscan Tunnel Selected
+Info : Bscan tunnel IR 0x8 selected
+Info : set servers polling period to 50ms
+Info : clock speed 800 kHz
+Info : JTAG tap: fpga_spinal.bridge tap/device found: 0x10660a79 (mfg: 0x53c (Efinix Inc), part: 0x0660, ver: 0x1)
+Info : [fpga_spinal.cpu0] datacount=1 progbufsize=2
+Info : Disabling abstract command reads from CSRs.
+Info : [fpga_spinal.cpu0] Examined RISC-V core; found 1 harts
+Info : [fpga_spinal.cpu0]  XLEN=32, misa=0x40001101
+[fpga_spinal.cpu0] Target successfully examined.
+Info : starting gdb server for fpga_spinal.cpu0 on 3333
+Info : Listening on port 3333 for gdb connections
+Info : Listening on port 6666 for tcl connections
+Info : Listening on port 4444 for telnet connections
+Info : accepting 'tcl' connection on tcp/6666
+Info : JTAG tap: fpga_spinal.bridge tap/device found: 0x10660a79 (mfg: 0x53c (Efinix Inc), part: 0x0660, ver: 0x1)
+162452 bytes written at address 0x00800000
+4 bytes written at address 0x00827aa0
+2108 bytes written at address 0x00827ab0
+downloaded 164564 bytes in 3.922269s (40.973 KiB/s)
+
+Info : Disabling abstract command writes to CSRs.
+pc (/32): 0x00816e20
+
+mcause (/32): 0x8000000b
+
+mepc (/32): 0x00817ec8
+
+mtval (/32): 0x00000000
+
+mstatus (/32): 0x00000088
+
+mie (/32): 0x00000800
+
+mip (/32): 0x00000080
+
+0xf8100000: 4953001a 00000000 03000000 03400000 00000020 00000021 00000000 00000000 
+0xf8100020: 00000000 000a0001 00000000 00000000 00000000 
+
+0xf8110000: 00000040 036d5000 0000001f 00000011 004fe000 0000007f 00006540 00002267 
+0xf8110020: 00000000 00000000 00000000 03703000 00350800 00e286fc 0051b800 99ccb4e4 
+0xf8110040: 99d2b4fe 0000668d 000022a8 01040029 00000000 00b09700 00a736e0 561d5cff 
+0xf8110060: 01050040 00000001 00000001 00000081 
+
+0xf8c01000: 00000000 
+
+0xf8c02000: 00000040 
+
+Info : dropped 'tcl' connection
+Info : accepting 'tcl' connection on tcp/6666
+shutdown command invoked

@@ -26,7 +26,7 @@ class IrisProfiler : public tflite::MicroProfiler {
     if (strcmp(mode,"STANDARD") && strcmp(mode,"LITE") && strcmp(mode,"IRIS_RESIZE_HW"))
       IrisDispatchStop("operation completed without a hardware mode");
 #endif
-    const bool vendor = strcmp(layer_mode[0],"IRIS_RESIZE_HW") != 0;
+    const bool vendor = strcmp(layer_mode[0],"IRIS_RESIZE_HW") != 0 && hw_accel_setting[0].cache_en;
     const uint32_t hits = vendor ? static_cast<uint32_t>(get_cache_hit_cntr()) : 0;
     const uint32_t misses = vendor ? static_cast<uint32_t>(get_cache_miss_cntr()) : 0;
     events_[count_++] = {tag_,layer_mode[0],ticks,hits,misses};

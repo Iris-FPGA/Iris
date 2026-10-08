@@ -1,0 +1,2 @@
+PASS: fresh AI FPS 15 vs HDMI 60, held pulses, CDC, glyphs and freeze-to-zero
+tests/video/tb_style_fps.sv:53: $finish called at 883862000 (1ps)

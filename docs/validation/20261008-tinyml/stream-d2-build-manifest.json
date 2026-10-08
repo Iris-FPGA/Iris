@@ -1,0 +1,7 @@
+{
+  "bit_sha256": "73bee165bc40d9141e8c567a46c1a0fda6c84aa9bb2a61ff0f5b2868288ee02a",
+  "project": "/tmp/iris-stream-project/iris_ws",
+  "source_manifest": "stream-d2-source-manifest.json",
+  "style_scale_q24": 20596120,
+  "model_sha256": "e4a45f1d9314654565f3300978d8a7b8843fc0c0687c454c4b6e3b47e0f05386"
+}

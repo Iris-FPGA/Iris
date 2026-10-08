@@ -107,6 +107,36 @@ module tb_iris_resize2x;
             $display("PASS DMA copy %0dx%0dx%0d",h,w,c);
         end
     endtask
+    task check_stream;
+        integer k,w,b,old_writes;
+        reg [31:0] got;
+        begin
+            for(k=0;k<48;k=k+1)mem['h10000+k]=(k%4==3) ? 8'h80 : (k*19+5)&255;
+            old_writes=writes;configure(3,4,4,0);command('h20f,0,0);
+            if(response!=0)$fatal(1,"stream start rejected");
+            for(k=0;k<48;k=k+16)begin
+                command('h205,0,0);
+                while(!response[3])begin
+                    if(!response[0])$fatal(1,"stream finished early");
+                    command('h205,0,0);
+                end
+                for(w=0;w<4;w=w+1)begin
+                    command('h20a+w,0,0);got=response;
+                    for(b=0;b<4;b=b+1)if(got[b*8+:8]!==mem['h10000+k+4*w+b])$fatal(1,"stream sample mismatch");
+                end
+                command('h20e,0,0);if(response!=0)$fatal(1,"stream ack rejected");
+            end
+            command('h205,0,0);if(response!=2)$fatal(1,"stream did not complete");
+            command('h209,0,0);if(response!=0)$fatal(1,"dummy audit false positive");
+            if(writes!=old_writes)$fatal(1,"read-only stream wrote DDR");
+            mem['h10003]=8'h81;configure(1,4,4,0);command('h20f,0,0);
+            command('h205,0,0);while(!response[3])command('h205,0,0);
+            command('h209,0,0);if(response!=1)$fatal(1,"dummy violation missed");
+            command('h206,0,0);await_idle();command('h205,0,0);
+            if(!response[2] || response[1])$fatal(1,"stream abort status");
+            $display("PASS read-only CI tensor stream: samples, audit, no writes, abort");
+        end
+    endtask
     integer before_writes;
     initial begin
         repeat(4) @(negedge clk);rst_n=1;
@@ -114,6 +144,7 @@ module tb_iris_resize2x;
         command('h2ff,0,0);if(response!='hffffffff)$fatal(1,"unknown command hangs");
         check_shape(32,32,32);check_shape(64,64,16);
         check_shape(3,4,4);check_shape(3,2,8);check_shape(3,1,16);check_shape(3,1,32);
+        check_stream();
         check_copy(3,4,4);check_copy(3,2,8);check_copy(3,1,16);check_copy(3,1,32);
         check_copy(48,640,4);check_shape(2,4,4);
         configure(1,1,4,'h30000);before_writes=writes;command('h204,0,0);

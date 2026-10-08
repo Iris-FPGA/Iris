@@ -1,0 +1,12 @@
+{
+  "active_project": "iris_ws",
+  "built_project": "/tmp/iris-stream-boot-project/iris_ws",
+  "all_source_semantically_equal": true,
+  "raw_text_differences": [
+    {
+      "file": "iris_ws.xml",
+      "reason": "Efinity removed trailing newline only",
+      "semantic_equal": true
+    }
+  ]
+}

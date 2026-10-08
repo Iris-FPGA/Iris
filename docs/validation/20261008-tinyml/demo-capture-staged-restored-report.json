@@ -1,0 +1,57 @@
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "80a806869623c862316f5ac3c5472117b0d8751e4adbe8c7933d913a4ff071ce",
+  "bit_sha256": "b1152a34dcabc33085b48d5b46452747863ab2ddd3965e2ab29ac16e8e1e34f8",
+  "attached": false,
+  "frames": [
+    {
+      "sequence": 1,
+      "pair": 0,
+      "invoke_ticks": 220476292,
+      "displayed": 1,
+      "captures": 1,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 2.5583804170018993
+    },
+    {
+      "sequence": 2,
+      "pair": 1,
+      "invoke_ticks": 258890263,
+      "displayed": 2,
+      "captures": 2,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 5.278258036996704
+    },
+    {
+      "sequence": 3,
+      "pair": 0,
+      "invoke_ticks": 259205094,
+      "displayed": 3,
+      "captures": 3,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 8.030085308011621
+    },
+    {
+      "sequence": 4,
+      "pair": 1,
+      "invoke_ticks": 259285432,
+      "displayed": 4,
+      "captures": 4,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 10.765996844012989
+    }
+  ],
+  "reset": "",
+  "load": "162372 bytes written at address 0x00800000\n4 bytes written at address 0x00827a50\n2108 bytes written at address 0x00827a60\ndownloaded 164484 bytes in 3.918634s (40.991 KiB/s)\n",
+  "observation_seconds": 12.167299760010792,
+  "observed_committed_pair_hz": 0.3655141570854925,
+  "live_ok": true
+}

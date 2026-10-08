@@ -1,0 +1,11 @@
+2026-10-08 06:09:46.725136: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-08 06:09:47.157015: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-10-08 06:09:48.606281: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+/home/noir/.config/matplotlib is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-r9js__4a because there was an issue with the default path (/home/noir/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Traceback (most recent call last):
+  File "/home/noir/Documents/workspace/Iris/.script/verify-style-snapshot.py", line 19, in <module>
+    assert np.all(x[:,:,:,3]==-128),'dummy input channel changed'
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: dummy input channel changed

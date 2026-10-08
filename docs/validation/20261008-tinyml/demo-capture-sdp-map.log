@@ -1,0 +1,108 @@
+/usr/bin/ldd: line 39: printf: write error: Broken pipe
+/usr/bin/ldd: line 43: printf: write error: Broken pipe
+WARNING: The system libstdc++.so is more recent (version 36) than the copy shipped with the Efinity software (version 32).
+The Efinity software may not function correctly on this system.
+To avoid potential compatibility issues, please back up and remove "/home/noir/Applications/efinity/2026.1/lib/libstdc++.so.6"
+
+INFO     : Elitestek FPGA Synthesis.
+INFO     : Version: 2026.1.132.4.5
+INFO     : Compiled: Aug 31 2026.
+INFO     : 
+INFO     : Copyright (C) 2013 - 2026 Efinix, Inc. All rights reserved.
+
+INFO     : Maximum concurrency has been set to 10 [FlowMsg::MaxThreads]
+INFO     : ***** Beginning Analysis ... *****
+INFO     : default VHDL library search path is now "/home/noir/Applications/efinity/2026.1/sim_models/vhdl/packages/vhdl_2008" [VHDL-1504]
+INFO     : Restoring all Verilog modules from file '/home/noir/Applications/efinity/2026.1/sim_models/maplib/perilib_efxlib_parsetree.vdb' [VERI-2484]
+INFO     : Restoring all Verilog modules from file '/home/noir/Applications/efinity/2026.1/sim_models/maplib/maplib_efxlib_parsetree.vdb' [VERI-2484]
+INFO     : Analyzing Verilog file '/home/noir/Applications/efinity/2026.1/sim_models/maplib/efinix_maplib.v' [VERI-1482]
+INFO     : Analyzing Verilog file '/home/noir/Applications/efinity/2026.1/sim_models/maplib/efinix_peri_lib.v' [VERI-1482]
+INFO     : Analyzing Verilog file '/home/noir/Documents/workspace/Iris/iris_ws/src/cnn/iris_style_capture.v' [VERI-1482]
+INFO     : Analyzing Verilog file '/home/noir/Documents/workspace/Iris/iris_ws/src/video/afifo_simple.v' [VERI-1482]
+INFO     : Analysis took 0.007928787 seconds [FlowMsg::StageDuration]
+INFO     :     Analysis took 0.01 seconds (approximately) in total CPU time [FlowMsg::StageDuration::CPUTime]
+INFO     : Analysis virtual memory usage: begin = 153.096 MB, end = 153.096 MB, delta = 0 MB [FlowMsg::VMUsage]
+INFO     : Analysis resident set memory usage: begin = 86.98 MB, end = 90.936 MB, delta = 3.956 MB [FlowMsg::RSSUsage]
+INFO     :     Analysis peak resident set memory usage = 90.936 MB [FlowMsg::RSSUsage::Peak]
+INFO     : ***** Ending Analysis ... *****
+INFO     : ***** Beginning Elaboration ... *****
+INFO     : /home/noir/Documents/workspace/Iris/iris_ws/src/cnn/iris_style_capture.v(5): compiling module 'iris_style_capture' [VERI-1018]
+INFO     : /home/noir/Documents/workspace/Iris/iris_ws/src/cnn/iris_style_capture.v(76): extracting RAM for identifier 'burst_data' [VERI-2571]
+INFO     : /home/noir/Documents/workspace/Iris/iris_ws/src/video/afifo_simple.v(5): compiling module 'afifo_simple(DW=130,AW=8)' [VERI-1018]
+INFO     : /home/noir/Documents/workspace/Iris/iris_ws/src/video/afifo_simple.v(25): extracting RAM for identifier 'mem' [VERI-2571]
+INFO     : Elaboration took 0.010769162 seconds [FlowMsg::StageDuration]
+INFO     :     Elaboration took 0.01 seconds (approximately) in total CPU time [FlowMsg::StageDuration::CPUTime]
+INFO     : Elaboration virtual memory usage: begin = 153.096 MB, end = 155.144 MB, delta = 2.048 MB [FlowMsg::VMUsage]
+INFO     : Elaboration resident set memory usage: begin = 91.192 MB, end = 93.496 MB, delta = 2.304 MB [FlowMsg::RSSUsage]
+INFO     :     Elaboration peak resident set memory usage = 93.496 MB [FlowMsg::RSSUsage::Peak]
+INFO     : ***** Ending Elaboration ... *****
+INFO     : ... Setting Synthesis Option: mode=speed
+INFO     : ***** Beginning Reading Mapping Library ... *****
+INFO     : Reading Mapping Library took 0.001469849 seconds [FlowMsg::StageDuration]
+INFO     :     Reading Mapping Library took 0 seconds (approximately) in total CPU time [FlowMsg::StageDuration::CPUTime]
+INFO     : Reading Mapping Library virtual memory usage: begin = 155.144 MB, end = 155.144 MB, delta = 0 MB [FlowMsg::VMUsage]
+INFO     : Reading Mapping Library resident set memory usage: begin = 95.924 MB, end = 95.924 MB, delta = 0 MB [FlowMsg::RSSUsage]
+INFO     :     Reading Mapping Library peak resident set memory usage = 95.924 MB [FlowMsg::RSSUsage::Peak]
+INFO     : ***** Ending Reading Mapping Library ... *****
+INFO     : ... Pre-synthesis checks begin
+INFO     : ... Memory 'mem' is not initialized, assuming empty initial contents. (/home/noir/Documents/workspace/Iris/iris_ws/src/video/afifo_simple.v:25) [EFX-0677]
+WARNING  : Removing redundant signal : bin2gray[8:0]. (/home/noir/Documents/workspace/Iris/iris_ws/src/video/afifo_simple.v:30) [EFX-0200]
+WARNING  : Removing redundant signal : bin2gray.b[8:0]. (/home/noir/Documents/workspace/Iris/iris_ws/src/video/afifo_simple.v:30) [EFX-0200]
+WARNING  : Removing redundant signal : gray2bin[8:0]. (/home/noir/Documents/workspace/Iris/iris_ws/src/video/afifo_simple.v:77) [EFX-0200]
+WARNING  : Removing redundant signal : gray2bin.g[8:0]. (/home/noir/Documents/workspace/Iris/iris_ws/src/video/afifo_simple.v:78) [EFX-0200]
+WARNING  : Removing redundant signal : gray2bin.k[31:0]. (/home/noir/Documents/workspace/Iris/iris_ws/src/video/afifo_simple.v:79) [EFX-0200]
+INFO     : ... Memory 'burst_data' is not initialized, assuming empty initial contents. (/home/noir/Documents/workspace/Iris/iris_ws/src/cnn/iris_style_capture.v:76) [EFX-0677]
+INFO     : ... Pre-synthesis checks end (Real time : 0s CPU user time : 0s CPU sys time : 0s MEM : 96180KB)
+INFO     : ... NameSpace init begin
+INFO     : ... NameSpace init end (Real time : 0s CPU user time : 0s CPU sys time : 0s MEM : 96308KB)
+INFO     : ... Mapping design "iris_style_capture"
+INFO     : ... Hierarchical pre-synthesis "afifo_simple(DW=130,AW=8)" begin
+INFO     : ... Hierarchical pre-synthesis "afifo_simple(DW=130,AW=8)" end (Real time : 0s CPU user time : 0s CPU sys time : 0s MEM : 98120KB)
+INFO     : ... Hierarchical pre-synthesis "iris_style_capture" begin
+INFO     : ... Clock Enable Synthesis Performed on 461 flops.
+INFO     : ... Hierarchical pre-synthesis "iris_style_capture" end (Real time : 0s CPU user time : 0s CPU sys time : 0s MEM : 98760KB)
+INFO     : ... Flat optimizations begin
+INFO     : ... Flat optimizations end (Real time : 0s CPU user time : 0s CPU sys time : 0s MEM : 98760KB)
+INFO     : ... Flat synthesis begin
+INFO     : ... Flat synthesis end (Real time : 0s CPU user time : 0s CPU sys time : 0s MEM : 98888KB)
+INFO     : ... Flat optimizations begin
+INFO     : ... Flat optimizations end (Real time : 0s CPU user time : 0s CPU sys time : 0s MEM : 98888KB)
+INFO     : ... Check and break combinational loops begin
+INFO     : ... Check and break combinational loops end (Real time : 0s CPU user time : 0s CPU sys time : 0s MEM : 98888KB)
+INFO     : ... Sequential Optimization begin
+INFO     : ... Clock Network 'video_clk' with 141 loads will be considered for sequential optimization.
+INFO     : ... Clock Network 'clk' with 125 loads will be considered for sequential optimization.
+INFO     : ... Sequential Optimization deduced 17 equivalent points.
+INFO     : ... Sequential Optimization end (Real time : 1s CPU user time : 0s CPU sys time : 0s MEM : 111380KB)
+INFO     : ... Setup for logic synthesis begin
+INFO     : ... Setup for logic synthesis end (Real time : 0s CPU user time : 0s CPU sys time : 0s MEM : 111380KB)
+INFO     : ... LUT mapping begin
+INFO     : ... LS, strategy: 3, nd: 539, ed: 1388, lv: 4, pw: 1138.28
+INFO     : ... LUT mapping end (Real time : 1s CPU user time : 1s CPU sys time : 0s MEM : 167416KB)
+INFO     : ... Post-synthesis Verific netlist creation begin
+INFO     : ... Post-synthesis Verific netlist creation end (Real time : 0s CPU user time : 1s CPU sys time : 0s MEM : 167416KB)
+INFO     : ... Postmap Retiming Optimization begin
+INFO     : ... Using advanced retiming technique.
+INFO     : ... Clock Network 'video_clk~video_clk' with 141 loads will be considered for retiming optimization.
+INFO     : ... Clock Network 'clk~clk' with 125 loads will be considered for retiming optimization.
+INFO     : ... Performed 6 retime moves.
+INFO     : ... Postmap Retiming Optimization end (Real time : 0s CPU user time : 1s CPU sys time : 0s MEM : 167416KB)
+INFO     : ***** Beginning VDB Netlist Checker ... *****
+INFO     : VDB Netlist Checker took 0.002761622 seconds [FlowMsg::StageDuration]
+INFO     :     VDB Netlist Checker took 0 seconds (approximately) in total CPU time [FlowMsg::StageDuration::CPUTime]
+INFO     : VDB Netlist Checker virtual memory usage: begin = 290.148 MB, end = 290.148 MB, delta = 0 MB [FlowMsg::VMUsage]
+INFO     : VDB Netlist Checker resident set memory usage: begin = 122.708 MB, end = 122.708 MB, delta = 0 MB [FlowMsg::RSSUsage]
+INFO     :     VDB Netlist Checker peak resident set memory usage = 167.416 MB [FlowMsg::RSSUsage::Peak]
+INFO     : ***** Ending VDB Netlist Checker ... *****
+INFO     : Resource Summary 
+INFO     : ======================================= 
+INFO     : EFX_ADD                 : 	93
+INFO     : EFX_LUT4                : 	539
+INFO     : EFX_FF                  : 	277
+INFO     : EFX_RAM10               : 	14
+INFO     : ======================================= 
+INFO     : The entire flow of EFX_MAP took 1.703604455 seconds [FlowMsg::StageDuration]
+INFO     :     The entire flow of EFX_MAP took 1.58 seconds (approximately) in total CPU time [FlowMsg::StageDuration::CPUTime]
+INFO     : The entire flow of EFX_MAP virtual memory usage: begin = 108.744 MB, end = 290.148 MB, delta = 181.404 MB [FlowMsg::VMUsage]
+INFO     : The entire flow of EFX_MAP resident set memory usage: begin = 35.832 MB, end = 125.568 MB, delta = 89.736 MB [FlowMsg::RSSUsage]
+INFO     :     The entire flow of EFX_MAP peak resident set memory usage = 167.416 MB [FlowMsg::RSSUsage::Peak]

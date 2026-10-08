@@ -109,7 +109,7 @@ always @(posedge clk)begin
   end
   if(m_wvalid && m_wready)begin
    if(!wp || wb>wlen)$fatal(1,"W before AW or after LAST");
-   if(m_wdata!==(wid==8'he0 ? 128'hd000 : 128'hc000)+(wa & 32'hffff)+wb || m_wlast!=(wb==wlen))$fatal(1,"W response routing/data");
+   if(m_wdata!==(wid==8'h10 ? 128'hd000 : 128'hc000)+(wa & 32'hffff)+wb || m_wlast!=(wb==wlen))$fatal(1,"W response routing/data");
    wb<=wb+1;if(m_wlast)bdelay<=11;
   end
   if(bdelay>0)begin bdelay<=bdelay-1;if(bdelay==1)begin m_bvalid<=1;m_bid<=wid;m_bresp<=0;end end

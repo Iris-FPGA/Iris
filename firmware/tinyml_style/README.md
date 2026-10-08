@@ -81,8 +81,13 @@ function IDs, not bit positions in the RISC-V instruction word.
 | 0x202 | Shape | rs1=input height, rs2=input width |
 | 0x203 | Channels | rs1=4, 8, 16, or 32 |
 | 0x204 | Start | 0=accepted, FFFFFFFE=busy, FFFFFFFF=invalid |
-| 0x205 | Status | bit 0=busy, bit 1=done, bit 2=error, bits 8+=error code |
+| 0x205 | Status | bit 0=busy, bit 1=done, bit 2=error, bit 3=stream word ready, bits 8+=error code |
 | 0x206 | Abort | drains outstanding AXI response before idle |
+| 0x208 | Tensor copy | unchanged 1x transfer, final B required |
+| 0x209 | Dummy audit | counts read RGBA lanes whose fourth byte differs from 0x80 |
+| 0x20A..0x20D | Stream words | four unchanged 32-bit words from the current DMA read |
+| 0x20E | Stream acknowledge | releases the published 16-byte word |
+| 0x20F | Read-only stream | source H/W/C configured above; no DDR writes |
 
 Input/output are disjoint, 16-byte-aligned contiguous NHWC INT8. Rows must be
 multiples of 16 bytes; input H/W range is 1..1024. Output H/W are exactly doubled,
@@ -171,8 +176,62 @@ SRAM with `.script/sync-iris jtag`, restart the official OpenOCD server, then:
   docs/validation/20261007-tinyml/camera-demo
 ```
 
-The runner records committed pair rate separately from HDMI refresh and saves
-active input/output snapshots for independent integer-reference parity. Use
+The runner records committed pair rate separately from HDMI refresh. Its JTAG
+pixel snapshots showed dummy-channel anomalies; do not treat them as accepted
+camera parity. Use the DMA/UART snapshot procedure below to audit actual reads. Use
 `--attach` to observe an already running firmware. After a failed DMA/cache run,
 reload SRAM before loading another ELF: warm reset has not reliably restored
 execution. Current live bring-up is not yet accepted; Flash is unchanged.
+
+### Hardware DMA snapshot
+
+Rebuild with `LIVE_DEMO=1 LIVE_SNAPSHOT=1` and load the freshly timing-passed
+audit bitstream into SRAM. The firmware exports the first complete camera
+input before Invoke, then its corresponding output after display commit. CPU
+code forwards CI register words unchanged to UART; it does not read DDR pixels
+or alter them. The host switches UART to 500000 baud and acknowledges readiness.
+
+```sh
+.script/export-style-uart --output docs/validation/20261008-tinyml/camera-stream
+.venv-style/bin/python .script/verify-style-snapshot.py \
+  docs/validation/20261008-tinyml/camera-stream
+```
+
+Successful export requires both full 1,228,800-byte tensors and zero hardware
+dummy violations. The independent verifier compares every byte to BUILTIN_REF
+and renders the pair. Snapshot firmware freezes after this pair; rebuild with
+`LIVE_SNAPSHOT=0` for continuous operation. The first hardware export failed:
+22506 of 307200 input dummy bytes were wrong. Firmware stopped before Invoke;
+neither camera parity nor visible image correctness has been established.
+
+The later staged-burst capture bit (`b1152a34...`) passed a full real-camera
+export: both dummy audits were zero and all 1,228,800 output bytes matched
+TensorFlow 2.20 BUILTIN_REF. The 40-second continuous run committed 14 pairs
+at 0.365842 Hz with zero underflows/read errors/rejections. See
+`docs/validation/20261008-tinyml/demo-capture-staged-*`. A later run froze
+after 154 displayed pairs: the user confirmed both HDMI panels stopped
+changing, and the CPU was waiting for the official Add driver completion flag.
+The PLIC had no pending interrupt, its enable/priority and the driver list were
+valid, and DDR display traffic continued. See `demo-display-freeze-*.json`;
+the short passing windows do not establish long-running stability. Actual HDMI sink
+appearance remains a separate user check; 15 Hz and Flash boot remain pending.
+
+Diagnostic APB words 10/11 count dummy violations at the capture writer and the
+DDR controller write bus. Word 12 controls DDR read/write serialization; default
+0 preserves concurrent operation. `export-style-uart --serial-ddr` sets it before
+ELF loading. The bridge drains both outstanding directions when changing mode
+and retains an already offered address under backpressure. This is a diagnostic
+control, not performance or end-to-end acceptance evidence.
+
+`.script/probe-iris-style-dma --output <report.json>` runs a 64KiB known RGBA
+fixture entirely from OCR, checking CPU stores, CI reads, hardware copy and
+one-second retention. Reload SRAM before **each** invocation. Source defaults
+to 7MiB and destination to 48MiB; both windows are overwritten. `--capture-first`
+adds one real camera capture before these checks and separately audits the
+captured bank. The clean no-capture test passed, while adding capture reproduced
+the DDR failure. Warm-reset failures are recorded separately and cannot establish
+an address-capacity limit. Both tests leave the CPU halted.
+`--capture-first --captures 30` also records the CLINT interval between first
+and last capture completions. The staged-burst bit passed all 30 captures at
+60.1011 Hz and passed the subsequent fixture checks. This isolated acquisition
+test does not include concurrent neural inference or displayed style panels.

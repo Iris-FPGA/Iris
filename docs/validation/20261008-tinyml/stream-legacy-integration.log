@@ -1,0 +1,2 @@
+PASS: TinyML resize CI/AXI ownership and native line conversion
+tests/video/tb_tinyml_resize_integration.sv:72: $finish called at 372000 (1ps)

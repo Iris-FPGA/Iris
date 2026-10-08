@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+"""Build the line-buffer CNN camera/HDMI controller; no hardware access."""
+import argparse,hashlib,json,subprocess
+from pathlib import Path
+root=Path(__file__).resolve().parents[1]
+p=argparse.ArgumentParser(description=__doc__)
+p.add_argument('--parameters',type=Path,required=True)
+p.add_argument('--snapshot',action='store_true')
+a=p.parse_args();fw=root/'firmware/stream_style';out=fw/'build';out.mkdir(exist_ok=True)
+bp=root/'iris_ws/embedded_sw/SapphireSoc';prefix='/home/noir/Applications/riscv-none-elf/bin/riscv-none-elf-'
+suffix='snapshot' if a.snapshot else 'live';elf=out/('stream_style-'+suffix+'.elf')
+cmd=[prefix+'gcc','-O2','-g','-march=rv32im_zicsr_zifencei','-mabi=ilp32','-msmall-data-limit=0',
+     '-nostdlib','-ffunction-sections','-fdata-sections','-fno-builtin',
+     '-DIRIS_STREAM_SNAPSHOT='+str(int(a.snapshot)),
+     '-I'+str(bp/'bsp/efinix/EfxSapphireSoc/include'),'-I'+str(bp/'software/standalone/driver'),
+     '-I'+str(a.parameters.resolve()),'-T'+str(fw/'stream.ld'),
+     str(fw/'start.S'),str(fw/'main.c'),str(bp/'software/standalone/common/trap.S'),
+     '-Wl,--gc-sections,-Map,'+str(out/('stream_style-'+suffix+'.map')),'-lgcc','-o',str(elf)]
+subprocess.run(cmd,check=True)
+subprocess.run([prefix+'objcopy','-O','binary',str(elf),str(elf.with_suffix('.bin'))],check=True)
+manifest={'compile_command':cmd,'elf_sha256':hashlib.sha256(elf.read_bytes()).hexdigest(),
+          'parameters_sha256':hashlib.sha256((a.parameters/'stream_model.h').read_bytes()).hexdigest(),
+          'source_sha256':hashlib.sha256((fw/'main.c').read_bytes()).hexdigest(),'snapshot':a.snapshot}
+(elf.with_suffix('.json')).write_text(json.dumps(manifest,indent=2)+'\n');print(json.dumps(manifest,indent=2))

@@ -1,0 +1,24 @@
+{
+  "scope": "project RAM initializer only; no programming",
+  "payload_bytes": 4116,
+  "payload_fnv1a": "7d66ca38",
+  "payload_sha256": "1e37524c4495fbe39abc8bda2f95080a793343a663ab7349b7e8f894abfa3fce",
+  "boot_bytes": 4320,
+  "boot_sha256": "7f3952d146aa3872f524a793e80dcd441f48030aeb1cad8003b8b6de638824e8",
+  "boot_source_sha256": "31b968b62e738f97dc0e8b96a0ba1cd6796ae03b477a710a72b08d4bbdf014ac",
+  "compile_command": [
+    "/home/noir/Applications/riscv-none-elf/bin/riscv-none-elf-gcc",
+    "-nostdlib",
+    "-march=rv32im_zicsr_zifencei",
+    "-mabi=ilp32",
+    "-DPAYLOAD_BYTES=4116",
+    "-DPAYLOAD_FNV=2103888440",
+    "-I/home/noir/Documents/workspace/Iris/iris_ws/embedded_sw/SapphireSoc/bsp/efinix/EfxSapphireSoc/include",
+    "-Wa,-I/home/noir/Documents/workspace/Iris/firmware/stream_style/build",
+    "-T/home/noir/Documents/workspace/Iris/firmware/stream_style/boot.ld",
+    "/home/noir/Documents/workspace/Iris/firmware/stream_style/boot.S",
+    "-o",
+    "/home/noir/Documents/workspace/Iris/firmware/stream_style/build/stream_boot.elf"
+  ],
+  "installed_project": "/tmp/iris-stream-boot-project/iris_ws"
+}

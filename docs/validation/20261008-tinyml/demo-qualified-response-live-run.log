@@ -1,0 +1,192 @@
+162500 bytes written at address 0x00800000
+4 bytes written at address 0x00827ad0
+2108 bytes written at address 0x00827ae0
+downloaded 164612 bytes in 3.924368s (40.963 KiB/s)
+
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x40 cpuAR=0x0x808300 fbAR=0x0xb7000
+arb cpuAW=0x0x70fffc fbAW=0x0x576800 rdCnt cpu/fb=2250/34839 rresp=0
+arb ARhand=37357 rdDone=37358 AWhand=24587 wrDone=24587
+lastAR addr=0x0x808380 len=3 size=4 burst=1 | lastAW addr=0x0x282000 len=127
+Core 0 Hardware Settings:
+Accelerator Active: 1
+UUID: 0x4923687a
+AXI DW: 128
+AXI_DB_W: 16
+Cache Enabled: 1
+Cache Depth: 512
+Conv Depthw Mode: 2
+Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:2
+Add Mode: 2
+FC Mode: 0
+Mul Mode: 0
+LR Mode: 0
+Min-Max Mode: 0
+Reshape Mode: 0
+IRIS nodes OK: flatbuffer
+IRIS nodes OK: init
+IRIS prepare node 0 @0x0xe284b4IRIS prepare node 1 @0x0xe284d0IRIS prepare node 2 @0x0xe284ecIRIS prepare node 3 @0x0xe28508IRIS prepare node 4 @0x0xe28524IRIS prepare node 5 @0x0xe28540IRIS prepare node 6 @0x0xe2855cIRIS prepare node 7 @0x0xe28578IRIS prepare node 8 @0x0xe28594IRIS prepare node 9 @0x0xe285b0DDR arena: base=0x0xa28740 capacity=4194304 used=3688092
+IRIS LIVE: 640x480 paired camera/style; no CPU image processing; SRAM only
+IRIS LIVE before capture: input_view=0x0xe280f8 output_view=0x0xe280b8 eval23=0x0xb54740
+IRIS LIVE after capture: input_data=0x0xa28740 output_data=0x0xa28740 eval23=0x0xb54740
+IRIS CAPTURE AUDIT source_dummy=0 bus_dummy=0 serial_ddr=0
+IRIS CTRL before input copy: intr=0x0/0x0 ops=0x827b04
+IRIS CTRL after input copy: intr=0x0/0x0 ops=0x827b04
+IRIS LIVE DMA node=0 tensor=15 output=0x0xc80740
+IRIS LIVE DMA node=1 tensor=16 output=0x0xabe740
+IRIS LIVE DMA node=2 tensor=17 output=0x0xa28740
+IRIS LIVE DMA node=3 tensor=18 output=0x0xa4df40
+IRIS LIVE DMA node=4 tensor=19 output=0x0xa73740
+IRIS LIVE DMA node=5 tensor=20 output=0x0xa28740
+IRIS LIVE DMA node=6 tensor=21 output=0x0xb54740
+IRIS LIVE DMA node=7 tensor=22 output=0x0xa28740
+IRIS LIVE DMA node=8 tensor=23 output=0x0xb54740
+IRIS LIVE DMA node=9 tensor=24 output=0x0xa28740
+0; CONV_2D; STANDARD; ticks=135905275 cache_hit_raw=0 cache_miss_raw=0
+1; CONV_2D; STANDARD; ticks=41812295 cache_hit_raw=0 cache_miss_raw=0
+2; CONV_2D; STANDARD; ticks=19646410 cache_hit_raw=0 cache_miss_raw=0
+3; CONV_2D; STANDARD; ticks=3131262 cache_hit_raw=0 cache_miss_raw=0
+4; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=768782 cache_hit_raw=0 cache_miss_raw=0
+5; ADD; STANDARD; ticks=663595 cache_hit_raw=0 cache_miss_raw=0
+6; CONV_2D; STANDARD; ticks=6269668 cache_hit_raw=0 cache_miss_raw=0
+7; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=3092488 cache_hit_raw=0 cache_miss_raw=0
+8; ADD; STANDARD; ticks=2621975 cache_hit_raw=0 cache_miss_raw=0
+9; CONV_2D; STANDARD; ticks=6611064 cache_hit_raw=0 cache_miss_raw=0
+IRIS LIVE frame=1 pair=0 Invoke_ticks=220543877 displayed=1 captures=1 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=2 pair=1 Invoke_ticks=259209459 displayed=2 captures=2 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=3 pair=0 Invoke_ticks=259279668 displayed=3 captures=3 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=4 pair=1 Invoke_ticks=259233642 displayed=4 captures=4 underflow=0 readerr=0 rejects=0
+IRIS HOST STALL: no new pair; CPU/APB evidence saved
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "8b569596732ee13f7d8819d9d0c737b1cb817119025035967087f9de39e435e2",
+  "bit_sha256": "dee6b0c08e4779dd97861e83ac87acf3bc9bea419f2d4ae1315693c55312befd",
+  "attached": false,
+  "frames": [
+    {
+      "sequence": 1,
+      "pair": 0,
+      "invoke_ticks": 220543877,
+      "displayed": 1,
+      "captures": 1,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 2.553291378018912
+    },
+    {
+      "sequence": 2,
+      "pair": 1,
+      "invoke_ticks": 259209459,
+      "displayed": 2,
+      "captures": 2,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 5.257062019023579
+    },
+    {
+      "sequence": 3,
+      "pair": 0,
+      "invoke_ticks": 259279668,
+      "displayed": 3,
+      "captures": 3,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 7.992874411022058
+    },
+    {
+      "sequence": 4,
+      "pair": 1,
+      "invoke_ticks": 259233642,
+      "displayed": 4,
+      "captures": 4,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 10.728603946015937
+    }
+  ],
+  "reset": "",
+  "load": "162500 bytes written at address 0x00800000\n4 bytes written at address 0x00827ad0\n2108 bytes written at address 0x00827ae0\ndownloaded 164612 bytes in 3.924368s (40.963 KiB/s)\n",
+  "stall_seconds": 15.014803939004196,
+  "stall_cpu": {
+    "pc": "pc (/32): 0x00816e44\n",
+    "mcause": "mcause (/32): 0x8000000b\n",
+    "mepc": "mepc (/32): 0x00817ef0\n",
+    "mtval": "mtval (/32): 0x00000000\n",
+    "mstatus": "mstatus (/32): 0x00000088\n",
+    "mie": "mie (/32): 0x00000800\n",
+    "mip": "mip (/32): 0x00000080\n"
+  },
+  "stall_style_words": [
+    1230176282,
+    0,
+    50331648,
+    54525952,
+    4,
+    5,
+    0,
+    0,
+    0,
+    655361,
+    0,
+    0,
+    0
+  ],
+  "stall_arbiter_accel_words": [
+    0,
+    57572352,
+    127,
+    17,
+    1142784,
+    127,
+    29855,
+    13432,
+    0,
+    0,
+    0,
+    57757696,
+    5613568,
+    14845756,
+    1263616,
+    1996120263,
+    1996513504,
+    30182,
+    13496,
+    2359337,
+    0,
+    11573056,
+    10958624,
+    4268609791,
+    2424868,
+    1,
+    1,
+    1
+  ],
+  "stall_accel": {
+    "completion_rises_mod65536": 36,
+    "irq_level": 0,
+    "last_function_id": 41,
+    "starts_mod65536": 37,
+    "ack_counter_raw": 36,
+    "pending_reads_mod65536": 0,
+    "pending_writes_mod65536": 0,
+    "last_vendor_araddr": 11573056,
+    "last_vendor_awaddr": 10958624,
+    "last_ci_input0": 1,
+    "last_ci_input1": 1,
+    "dma_handshake_flags": 1
+  },
+  "stall_plic": {
+    "mdw 0xf8c01000 1": "0xf8c01000: 00000000 \n",
+    "mdw 0xf8c02000 1": "0xf8c02000: 00000040 \n"
+  },
+  "observation_seconds": 25.79415210901061,
+  "observed_committed_pair_hz": 0.3669584465484246,
+  "live_ok": false
+}

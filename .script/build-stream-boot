@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+"""Embed live firmware in existing Sapphire OCR; optionally install RAM init files.
+
+This writes project files only. It never programs SRAM or Flash. Rebuild the FPGA
+after installation; the generated CPU architecture and reset vector are unchanged.
+"""
+import argparse,hashlib,json,subprocess
+from pathlib import Path
+root=Path(__file__).resolve().parents[1]
+p=argparse.ArgumentParser(description=__doc__)
+p.add_argument('--project-dir',type=Path,help='install into this Efinity project')
+a=p.parse_args();fw=root/'firmware/stream_style';out=fw/'build'
+payload=(out/'stream_style-live.bin').read_bytes()
+if not payload or len(payload)%4:raise SystemExit('Live firmware must be nonempty and word aligned')
+fnv=0x811c9dc5
+for b in payload:fnv=((fnv^b)*0x01000193)&0xffffffff
+prefix='/home/noir/Applications/riscv-none-elf/bin/riscv-none-elf-'
+elf=out/'stream_boot.elf';binary=out/'stream_boot.bin';hexfile=out/'stream_boot.hex'
+cmd=[prefix+'gcc','-nostdlib','-march=rv32im_zicsr_zifencei','-mabi=ilp32',
+ '-DPAYLOAD_BYTES='+str(len(payload)),'-DPAYLOAD_FNV='+str(fnv),
+ '-I'+str(root/'iris_ws/embedded_sw/SapphireSoc/bsp/efinix/EfxSapphireSoc/include'),
+ '-Wa,-I'+str(out),'-T'+str(fw/'boot.ld'),str(fw/'boot.S'),'-o',str(elf)]
+subprocess.run(cmd,check=True)
+subprocess.run([prefix+'objcopy','-O','binary',str(elf),str(binary)],check=True)
+subprocess.run([prefix+'objcopy','-O','ihex',str(elf),str(hexfile)],check=True)
+hexfile.write_text(hexfile.read_text())  # Normalize objcopy CRLF to repository LF.
+boot=binary.read_bytes();ram=boot+b'\0'*(16384-len(boot))
+if len(ram)!=16384:raise SystemExit('Boot image exceeds OCR capacity')
+lanes=[''.join(f'{v:08b}\n' for v in ram[lane::4]) for lane in range(4)]
+assert bytes(int(lanes[i%4].splitlines()[i//4],2) for i in range(16384))==ram
+manifest={'scope':'project RAM initializer only; no programming',
+ 'payload_bytes':len(payload),'payload_fnv1a':f'{fnv:08x}',
+ 'payload_sha256':hashlib.sha256(payload).hexdigest(),
+ 'boot_bytes':len(boot),'boot_sha256':hashlib.sha256(boot).hexdigest(),
+ 'boot_source_sha256':hashlib.sha256((fw/'boot.S').read_bytes()).hexdigest(),
+ 'compile_command':cmd,'installed_project':str(a.project_dir.resolve()) if a.project_dir else None}
+if a.project_dir:
+ prj=a.project_dir.resolve();ip=prj/'ip/SapphireSoc'
+ if not (ip/'SapphireSoc.v').is_file():raise SystemExit('Not an Iris Sapphire project')
+ for base in (ip,ip/'source/hardware/netlist'):
+  for lane,data in enumerate(lanes):
+   (base/f'EfxSapphireSoc.v_toplevel_system_ramA_logic_ram_symbol{lane}.bin').write_text(data)
+ (prj/'ref_files/bootloader_16MB/SapphireSoc/bootloader.hex').write_bytes(hexfile.read_bytes())
+(out/'stream_boot.json').write_text(json.dumps(manifest,indent=2)+'\n')
+print(json.dumps(manifest,indent=2))

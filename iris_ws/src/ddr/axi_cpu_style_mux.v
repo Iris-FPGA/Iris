@@ -107,7 +107,9 @@ always @(posedge clk or negedge rst_n)begin
   if(m_rvalid && m_rready && m_rlast)begin rd_busy<=0;rd_next<=!rd_style;end
  end
 end
-assign m_awid=wr_style ? 8'he0 : cpu_awid;
+// Use a small dedicated tag while investigating the controller interaction
+// triggered by capture writes. Global ownership still routes B/R responses.
+assign m_awid=wr_style ? 8'h10 : cpu_awid;
 assign m_awaddr=wr_style ? style_awaddr : cpu_awaddr;
 assign m_awlen=wr_style ? style_awlen : cpu_awlen;
 assign m_awsize=wr_style ? 3'd4 : cpu_awsize;
@@ -116,7 +118,7 @@ assign m_awlock=wr_style ? 1'b0 : cpu_awlock;
 assign m_wdata=wr_style ? style_wdata : cpu_wdata;
 assign m_wstrb=wr_style ? 16'hffff : cpu_wstrb;
 assign m_wlast=wr_style ? style_wlast : cpu_wlast;
-assign m_arid=rd_style ? 8'he0 : cpu_arid;
+assign m_arid=rd_style ? 8'h10 : cpu_arid;
 assign m_araddr=rd_style ? style_araddr : cpu_araddr;
 assign m_arlen=rd_style ? style_arlen : cpu_arlen;
 assign m_arsize=rd_style ? 3'd4 : cpu_arsize;

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """RTL regression fixtures are independent scalar Bayer/RGB reference models."""
 import os, subprocess, tempfile
+import random
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 IV=os.environ.get('IVERILOG','iverilog')
@@ -53,6 +54,39 @@ def fixture(kind,tmp,bggr=False):
     return [f'+IN={a}',f'+REF={b}']
 with tempfile.TemporaryDirectory(prefix='iris-video-tests-') as d:
     tmp=Path(d);exe=tmp/'debayer'
+    # Independent C-style division reference for gemmlowp double rounding.
+    rng=random.Random(20261008);quant_in=[];quant_ref=[]
+    for j in range(8192):
+        cases=[-2147483648,-2147483647,-1073741824,-1025,-1024,-3,-2,-1,0,1,2,3,1024,1025,1073741824,2147483647]
+        value=cases[j%len(cases)] if j<2048 else rng.randrange(-2147483648,2147483648)
+        mult=[0,1073741824,2147483647,536870912][j%4] if j<2048 else rng.randrange(0,2147483648)
+        shift=-(j//4%32);zero=[-128,0,127][j%3];lo,hi=-128,127
+        product=value*mult;nudge=(1<<30) if product>=0 else 1-(1<<30)
+        num=product+nudge;high=(abs(num)//(1<<31))*(-1 if num<0 else 1)
+        divisor=1<<(-shift)
+        # Nearest division, ties away from zero. This does not use the RTL
+        # mask/remainder implementation or its signed-shift expression.
+        rounded=((abs(high)+divisor//2)//divisor)*(-1 if high<0 else 1) if shift else high
+        expected=min(hi,max(lo,rounded+zero))
+        packed=((value&0xffffffff)<<64)|(mult<<32)|((shift&255)<<24)|((zero&255)<<16)|((lo&255)<<8)|hi
+        quant_in.append(packed);quant_ref.append(expected&255)
+    qi=tmp/'cnn-quant-in.mem';qr=tmp/'cnn-quant-ref.mem';qe=tmp/'cnn-quant'
+    qi.write_text(''.join(f'{v:024x}\n' for v in quant_in));qr.write_text(''.join(f'{v:02x}\n' for v in quant_ref))
+    compile_tb('tb_cnn_requant',['tests/video/tb_cnn_requant.sv','iris_ws/src/cnn/iris_stream_conv.v'],qe)
+    simulate(qe,[f'+IN={qi}',f'+REF={qr}'])
+    stream=tmp/'stream_cnn'
+    compile_tb('tb_stream_cnn',['tests/video/tb_stream_cnn.sv','iris_ws/src/cnn/iris_stream_conv.v'],stream)
+    simulate(stream,['+DIR='+str(ROOT/'tests/video/fixtures/stream_d2')])
+    stream_dma=tmp/'stream_dma'
+    compile_tb('tb_stream_cnn_dma',['tests/video/tb_stream_cnn_dma.sv','iris_ws/src/cnn/iris_stream_conv.v','iris_ws/src/cnn/iris_stream_cnn.v'],stream_dma)
+    simulate(stream_dma,['+DIR='+str(ROOT/'tests/video/fixtures/stream_d2')])
+    stream_integration=tmp/'stream_subsystem'
+    run([IV]+(['-B',IVLIB] if IVLIB else [])+['-g2012','-i','-s','tb_stream_subsystem','-o',str(stream_integration),
+        'tests/video/tb_stream_subsystem.sv','iris_ws/src/cnn/tinyml_subsystem.v','iris_ws/src/cnn/iris_resize2x.v',
+        'iris_ws/src/cnn/iris_stream_conv.v','iris_ws/src/cnn/iris_stream_cnn.v'])
+    simulate(stream_integration)
+    observer=tmp/'accel_observer'
+    compile_tb('tb_accel_observer',['tests/video/tb_accel_observer.sv','iris_ws/src/cnn/tinyml_subsystem.v'],observer);simulate(observer)
     capture=tmp/'style_capture'
     compile_tb('tb_style_capture',['tests/video/tb_style_capture.sv','iris_ws/src/cnn/iris_style_capture.v','iris_ws/src/video/afifo_simple.v'],capture);simulate(capture)
     mux=tmp/'cpu_style_mux'
@@ -64,17 +98,21 @@ with tempfile.TemporaryDirectory(prefix='iris-video-tests-') as d:
     preprocess=tmp/'style_preprocess'
     compile_tb('tb_style_preprocess',['tests/video/tb_style_preprocess.sv','iris_ws/src/cnn/iris_style_preprocess.v'],preprocess);simulate(preprocess)
     dequant=tmp/'style_dequant';di=tmp/'dequant-in.mem';dr=tmp/'dequant-ref.mem'
-    # Independent IEEE floating point export-scale oracle, not RTL Q24 math.
-    stim=[];ref=[]
-    for v in range(1024):
-        codes=[v%256,(v*17+43)%256,(v*37+89)%256]
-        dummy=(v*71)%256;valid=int(v%9!=0)
-        packed=(dummy<<24)|sum((c^128)<<(8*j) for j,c in enumerate(codes))
-        rgb=0
-        for c in codes:rgb=(rgb<<8)|min(255,int(c*1.2273634672164917+.5))
-        stim.append((valid<<32)|packed);ref.append((valid<<24)|rgb)
-    di.write_text(''.join(f'{v:09x}\n' for v in stim));dr.write_text(''.join(f'{v:07x}\n' for v in ref))
-    compile_tb('tb_style_dequant',['tests/video/tb_style_dequant.sv','iris_ws/src/cnn/iris_style_dequant.v'],dequant);simulate(dequant,[f'+IN={di}',f'+REF={dr}'])
+    # Independent IEEE floating point oracle for both exported model scales.
+    for scale,q24 in [(1.2273634672164917,20591742),(1.2276244163513184,20596120)]:
+        stim=[];ref=[]
+        for v in range(1024):
+            codes=[v%256,(v*17+43)%256,(v*37+89)%256]
+            dummy=(v*71)%256;valid=int(v%9!=0)
+            packed=(dummy<<24)|sum((c^128)<<(8*j) for j,c in enumerate(codes))
+            rgb=0
+            for c in codes:rgb=(rgb<<8)|min(255,int(c*scale+.5))
+            stim.append((valid<<32)|packed);ref.append((valid<<24)|rgb)
+        di.write_text(''.join(f'{v:09x}\n' for v in stim));dr.write_text(''.join(f'{v:07x}\n' for v in ref))
+        run([IV]+(['-B',IVLIB] if IVLIB else [])+['-g2012','-s','tb_style_dequant',
+             f'-Ptb_style_dequant.SCALE_Q24={q24}','-o',str(dequant),
+             'tests/video/tb_style_dequant.sv','iris_ws/src/cnn/iris_style_dequant.v'])
+        simulate(dequant,[f'+IN={di}',f'+REF={dr}'])
     compile_tb('tb_debayer',['tests/video/tb_debayer.sv','iris_ws/src/video/debayer/debayer_top_2to1.v'],exe)
     for kind in ['colour','ramp','edges']:
         print('Checking',kind,flush=True);simulate(exe,fixture(kind,tmp))
@@ -111,6 +149,8 @@ with tempfile.TemporaryDirectory(prefix='iris-video-tests-') as d:
     compile_tb('tb_display',['tests/video/tb_display.sv','iris_ws/src/video/debayer/rgb_display_2px.v'],exe);simulate(exe,[f'+IN={a}',f'+REF={b}'])
     exe=tmp/'osd'
     compile_tb('tb_osd',['tests/video/tb_osd.sv','iris_ws/src/video/osd/osd_video_status.v'],exe);simulate(exe)
+    exe=tmp/'style_fps'
+    compile_tb('tb_style_fps',['tests/video/tb_style_fps.sv','iris_ws/src/video/osd/osd_video_status.v','iris_ws/src/video/osd/fps_counter.v'],exe);simulate(exe)
     exe=tmp/'banks'
     compile_tb('tb_frame_banks',['tests/video/tb_frame_banks.sv','iris_ws/src/ddr/fb/frame_bank_manager.v'],exe);simulate(exe)
     exe=tmp/'write_commit'
@@ -136,6 +176,8 @@ with tempfile.TemporaryDirectory(prefix='iris-video-tests-') as d:
     compile_tb('tb_axi_atype_bridge',['tests/video/tb_axi_atype_bridge.sv','iris_ws/src/ddr/axi_atype_bridge.v'],exe);simulate(exe)
     exe=tmp/'axi_atype_serial'
     compile_tb('tb_axi_atype_serial',['tests/video/tb_axi_atype_serial.sv','iris_ws/src/ddr/axi_atype_bridge.v'],exe);simulate(exe)
+    exe=tmp/'axi_atype_mode'
+    compile_tb('tb_axi_atype_mode',['tests/video/tb_axi_atype_mode.sv','iris_ws/src/ddr/axi_atype_bridge.v'],exe);simulate(exe)
     exe=tmp/'resize2x'
     compile_tb('tb_iris_resize2x',['tests/video/tb_iris_resize2x.sv','iris_ws/src/cnn/iris_resize2x.v'],exe);simulate(exe)
     exe=tmp/'resize_integration'

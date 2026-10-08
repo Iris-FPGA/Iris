@@ -1,0 +1,59 @@
+
+Elitestek FPGA Placement and Routing.
+Version: 2026.1.132.4.5 
+Date: Thu Oct  8 09:25:38 2026
+
+Copyright (C) 2013 - 2026 Efinix, Inc. All rights reserved.
+ 
+Family: Titanium 
+Device: Ti60F225
+Top-level Entity Name: iris_ws
+
+---------- IO Interface Summary (begin) ----------
+
++------------------------+--------------+
+| Missing Interface Pins | Input/Output |
++------------------------+--------------+
+|    jtag_inst1_DRCK     |    Input     |
+|     jtag_inst1_TMS     |    Input     |
+|   jtag_inst1_RUNTEST   |    Input     |
+|        mipi_fb         |    Input     |
+|           FB           |    Input     |
+|    i_cam_ck_LP_P_IN    |    Input     |
+|    i_cam_ck_LP_N_IN    |    Input     |
++------------------------+--------------+
+
+----------- IO Interface Summary (end) ----------
+
+
+---------- Module Resource Usage Distribution Estimates (begin) ----------
+
+'Module Resource Usage Distribution Estimates' table printed in: outflow/iris_ws.hier_util.rpt
+
+----------- Module Resource Usage Distribution Estimates (end) ----------
+
+Elapsed time for packing: 0 hours 0 minutes 2 seconds
+---------- Resource Summary (begin) ----------
+Inputs: 112 / 1703 (6.58%)
+Outputs: 259 / 2267 (11.42%)
+Global Clocks (GBUF): 14 / 32 (43.75%)
+Regional Clocks (RBUF): 1 / 32 (3.12%)
+	RBUF: Core: 0 / 16 (0.00%)
+	RBUF: Periphery: 1 / 8 (12.50%)
+	RBUF: Multi-Region: 0 / 8 (0.00%)
+XLRs: 49508 / 60800 (81.43%)
+	XLRs needed for LUT4: 20907 / 60800 (34.39%)
+	XLRs needed for LUT4 + FF: 9021 / 60800 (14.84%)
+	XLRs needed for COMB4: 0 / 60800 (0.00%)
+	XLRs needed for COMB4 + FF: 0 / 60800 (0.00%)
+	XLRs needed for Adder: 4162 / 60800 (6.85%)
+	XLRs needed for Adder + FF: 1614 / 60800 (2.65%)
+	XLRs needed for SRL8: 568 / 14720 (3.86%)
+	XLRs needed for SRL8 + FF: 0 / 14720 (0.00%)
+	XLRs needed for FF: 13236 / 60800 (21.77%)
+	XLRs needed for Routing: 0 / 60800 (0.00%)
+Memory Blocks: 241 / 256 (94.14%)
+DSP Blocks: 113 / 160 (70.62%)
+---------- Resource Summary (end) ----------
+
+Elapsed time for placement: 0 hours 0 minutes 45 seconds

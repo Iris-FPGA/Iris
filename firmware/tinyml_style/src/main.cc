@@ -173,6 +173,13 @@ extern "C" int main() {
     if(sequence==1)MicroPrintf("IRIS LIVE after capture: input_data=0x%x output_data=0x%x eval23=0x%x\n\r",
       reinterpret_cast<uintptr_t>(input->data.raw),reinterpret_cast<uintptr_t>(output->data.raw),
       reinterpret_cast<uintptr_t>(interpreter.context_.GetEvalTensor(&interpreter.context_,23)->data.raw));
+    if(sequence==1)MicroPrintf("IRIS CAPTURE AUDIT source_dummy=%u bus_dummy=%u serial_ddr=%u\n\r",
+      demo[10],demo[11],demo[12]);
+    if(demo[10] || demo[11])Stop("camera write payload audit failed");
+#if IRIS_LIVE_SNAPSHOT
+    if(sequence==1 && !IrisStreamTensorUart(input_address,kIrisHeight,kIrisWidth,kIrisChannels,"input"))
+      Stop("camera hardware stream failed");
+#endif
     if(sequence==1)MicroPrintf("IRIS CTRL before input copy: intr=%x/%x ops=%x\n\r",global_intr_id[0],global_intr_id[1],reinterpret_cast<uintptr_t>(ops_list));
     if(!IrisCopyTensorDma(input_address,reinterpret_cast<uintptr_t>(input->data.int8),
                           kIrisHeight,kIrisWidth,kIrisChannels))Stop("camera input DMA transport failed");
@@ -192,13 +199,13 @@ extern "C" int main() {
           Stop("live intermediate DMA points outside tensor arena");
       }
     }
-    IrisFlushCpuDataCache();cache_reset();
+    IrisFlushCpuDataCache();IrisResetVendorCache();
     iris_live_result[0]=2;
     profiler.Reset();
     const uint64_t begin=clint_getTime(BSP_CLINT);
     if(interpreter.Invoke()!=kTfLiteOk)Stop("live Invoke failed");
     const uint64_t ticks=clint_getTime(BSP_CLINT)-begin;
-    IrisFlushCpuDataCache();cache_reset();
+    IrisFlushCpuDataCache();IrisResetVendorCache();
     if(!IrisCopyTensorDma(reinterpret_cast<uintptr_t>(output->data.int8),output_address,
                           kIrisHeight,kIrisWidth,kIrisChannels))Stop("style output DMA transport failed");
     iris_live_result[1]=sequence;iris_live_result[2]=input_address;
@@ -214,6 +221,12 @@ extern "C" int main() {
     if(sequence==1)profiler.Print();
     MicroPrintf("IRIS LIVE frame=%u pair=%u Invoke_ticks=%u displayed=%u captures=%u underflow=%u readerr=%u rejects=%u\n\r",
        sequence,pair,static_cast<unsigned>(ticks),demo[4],demo[5],demo[6],demo[7],demo[8]);
+#if IRIS_LIVE_SNAPSHOT
+    if(!IrisStreamTensorUart(output_address,kIrisHeight,kIrisWidth,kIrisChannels,"output"))
+      Stop("style hardware stream failed");
+    MicroPrintf("IRIS STREAM DONE pair=%u displayed=%u\n\r",pair,demo[4]);
+    iris_live_result[0]=4;while(true){}
+#endif
   }
 #else
   // Deterministic RGB fixture, already quantized with scale=1, zero_point=-128.

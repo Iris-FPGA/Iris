@@ -1,0 +1,238 @@
+162372 bytes written at address 0x00800000
+4 bytes written at address 0x00827a50
+2108 bytes written at address 0x00827a60
+downloaded 164484 bytes in 3.916686s (41.011 KiB/s)
+
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x40 cpuAR=0x0x808300 fbAR=0x0x1ff800
+arb cpuAW=0x0x70fffc fbAW=0x0x1d5800 rdCnt cpu/fb=2252/27713 rresp=0
+arb ARhand=30209 rdDone=30209 AWhand=38020 wrDone=38020
+lastAR addr=0x0x30f800 len=127 size=4 burst=1 | lastAW addr=0x0x4d7800 len=127
+Core 0 Hardware Settings:
+Accelerator Active: 1
+UUID: 0x4923687a
+AXI DW: 128
+AXI_DB_W: 16
+Cache Enabled: 1
+Cache Depth: 512
+Conv Depthw Mode: 2
+Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:2
+Add Mode: 2
+FC Mode: 0
+Mul Mode: 0
+LR Mode: 0
+Min-Max Mode: 0
+Reshape Mode: 0
+IRIS nodes OK: flatbuffer
+IRIS nodes OK: init
+IRIS prepare node 0 @0x0xe28434IRIS prepare node 1 @0x0xe28450IRIS prepare node 2 @0x0xe2846cIRIS prepare node 3 @0x0xe28488IRIS prepare node 4 @0x0xe284a4IRIS prepare node 5 @0x0xe284c0IRIS prepare node 6 @0x0xe284dcIRIS prepare node 7 @0x0xe284f8IRIS prepare node 8 @0x0xe28514IRIS prepare node 9 @0x0xe28530DDR arena: base=0x0xa286c0 capacity=4194304 used=3688092
+IRIS LIVE: 640x480 paired camera/style; no CPU image processing; SRAM only
+IRIS LIVE before capture: input_view=0x0xe28078 output_view=0x0xe28038 eval23=0x0xb546c0
+IRIS LIVE after capture: input_data=0x0xa286c0 output_data=0x0xa286c0 eval23=0x0xb546c0
+IRIS CAPTURE AUDIT source_dummy=0 bus_dummy=0 serial_ddr=0
+IRIS CTRL before input copy: intr=0x0/0x0 ops=0x827a84
+IRIS CTRL after input copy: intr=0x0/0x0 ops=0x827a84
+IRIS LIVE DMA node=0 tensor=15 output=0x0xc806c0
+IRIS LIVE DMA node=1 tensor=16 output=0x0xabe6c0
+IRIS LIVE DMA node=2 tensor=17 output=0x0xa286c0
+IRIS LIVE DMA node=3 tensor=18 output=0x0xa4dec0
+IRIS LIVE DMA node=4 tensor=19 output=0x0xa736c0
+IRIS LIVE DMA node=5 tensor=20 output=0x0xa286c0
+IRIS LIVE DMA node=6 tensor=21 output=0x0xb546c0
+IRIS LIVE DMA node=7 tensor=22 output=0x0xa286c0
+IRIS LIVE DMA node=8 tensor=23 output=0x0xb546c0
+IRIS LIVE DMA node=9 tensor=24 output=0x0xa286c0
+0; CONV_2D; STANDARD; ticks=135925789 cache_hit_raw=0 cache_miss_raw=0
+1; CONV_2D; STANDARD; ticks=41812958 cache_hit_raw=0 cache_miss_raw=0
+2; CONV_2D; STANDARD; ticks=19640577 cache_hit_raw=0 cache_miss_raw=0
+3; CONV_2D; STANDARD; ticks=3131671 cache_hit_raw=0 cache_miss_raw=0
+4; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=763691 cache_hit_raw=0 cache_miss_raw=0
+5; ADD; STANDARD; ticks=663940 cache_hit_raw=0 cache_miss_raw=0
+6; CONV_2D; STANDARD; ticks=6271363 cache_hit_raw=0 cache_miss_raw=0
+7; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=3090730 cache_hit_raw=0 cache_miss_raw=0
+8; ADD; STANDARD; ticks=2622368 cache_hit_raw=0 cache_miss_raw=0
+9; CONV_2D; STANDARD; ticks=6607929 cache_hit_raw=0 cache_miss_raw=0
+IRIS LIVE frame=1 pair=0 Invoke_ticks=220552177 displayed=1 captures=1 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=2 pair=1 Invoke_ticks=258826754 displayed=2 captures=2 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=3 pair=0 Invoke_ticks=258662046 displayed=3 captures=3 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=4 pair=1 Invoke_ticks=258672598 displayed=4 captures=4 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=5 pair=0 Invoke_ticks=259150471 displayed=5 captures=5 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=6 pair=1 Invoke_ticks=259290288 displayed=6 captures=6 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=7 pair=0 Invoke_ticks=259234408 displayed=7 captures=7 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=8 pair=1 Invoke_ticks=259083562 displayed=8 captures=8 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=9 pair=0 Invoke_ticks=258696494 displayed=9 captures=9 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=10 pair=1 Invoke_ticks=258615752 displayed=10 captures=10 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=11 pair=0 Invoke_ticks=258884967 displayed=11 captures=11 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=12 pair=1 Invoke_ticks=259244270 displayed=12 captures=12 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=13 pair=0 Invoke_ticks=259246214 displayed=13 captures=13 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=14 pair=1 Invoke_ticks=259241675 displayed=14 captures=14 underflow=0 readerr=0 rejects=0
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "80a806869623c862316f5ac3c5472117b0d8751e4adbe8c7933d913a4ff071ce",
+  "bit_sha256": "b1152a34dcabc33085b48d5b46452747863ab2ddd3965e2ab29ac16e8e1e34f8",
+  "attached": false,
+  "frames": [
+    {
+      "sequence": 1,
+      "pair": 0,
+      "invoke_ticks": 220552177,
+      "displayed": 1,
+      "captures": 1,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 2.5619580969796516
+    },
+    {
+      "sequence": 2,
+      "pair": 1,
+      "invoke_ticks": 258826754,
+      "displayed": 2,
+      "captures": 2,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 5.265894939977443
+    },
+    {
+      "sequence": 3,
+      "pair": 0,
+      "invoke_ticks": 258662046,
+      "displayed": 3,
+      "captures": 3,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 8.001762339990819
+    },
+    {
+      "sequence": 4,
+      "pair": 1,
+      "invoke_ticks": 258672598,
+      "displayed": 4,
+      "captures": 4,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 10.721637105976697
+    },
+    {
+      "sequence": 5,
+      "pair": 0,
+      "invoke_ticks": 259150471,
+      "displayed": 5,
+      "captures": 5,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 13.457542243995704
+    },
+    {
+      "sequence": 6,
+      "pair": 1,
+      "invoke_ticks": 259290288,
+      "displayed": 6,
+      "captures": 6,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 16.20940364897251
+    },
+    {
+      "sequence": 7,
+      "pair": 0,
+      "invoke_ticks": 259234408,
+      "displayed": 7,
+      "captures": 7,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 18.94528493299731
+    },
+    {
+      "sequence": 8,
+      "pair": 1,
+      "invoke_ticks": 259083562,
+      "displayed": 8,
+      "captures": 8,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 21.681127375981305
+    },
+    {
+      "sequence": 9,
+      "pair": 0,
+      "invoke_ticks": 258696494,
+      "displayed": 9,
+      "captures": 9,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 24.401060482981848
+    },
+    {
+      "sequence": 10,
+      "pair": 1,
+      "invoke_ticks": 258615752,
+      "displayed": 10,
+      "captures": 10,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 27.136912837973796
+    },
+    {
+      "sequence": 11,
+      "pair": 0,
+      "invoke_ticks": 258884967,
+      "displayed": 11,
+      "captures": 11,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 29.85684646698064
+    },
+    {
+      "sequence": 12,
+      "pair": 1,
+      "invoke_ticks": 259244270,
+      "displayed": 12,
+      "captures": 12,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 32.60871050399146
+    },
+    {
+      "sequence": 13,
+      "pair": 0,
+      "invoke_ticks": 259246214,
+      "displayed": 13,
+      "captures": 13,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 35.36056695197476
+    },
+    {
+      "sequence": 14,
+      "pair": 1,
+      "invoke_ticks": 259241675,
+      "displayed": 14,
+      "captures": 14,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 38.0964450709871
+    }
+  ],
+  "reset": "",
+  "load": "162372 bytes written at address 0x00800000\n4 bytes written at address 0x00827a50\n2108 bytes written at address 0x00827a60\ndownloaded 164484 bytes in 3.916686s (41.011 KiB/s)\n",
+  "observation_seconds": 40.098292811977444,
+  "observed_committed_pair_hz": 0.3658417809580074,
+  "live_ok": true
+}

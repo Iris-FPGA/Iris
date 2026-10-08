@@ -1,0 +1,155 @@
+{
+  "model_sha256": "e4a45f1d9314654565f3300978d8a7b8843fc0c0687c454c4b6e3b47e0f05386",
+  "model_bytes": 2968,
+  "clock_hz": 100000000,
+  "target_fps": 15,
+  "mac_lanes": 16,
+  "macs_per_frame": 23347200,
+  "target_cycles_per_frame": 6666666.666666667,
+  "ideal_compute_cycles_per_frame": 1459200.0,
+  "ideal_compute_ms": 14.592,
+  "cycles_remaining_for_all_overhead": 5207466.666666667,
+  "activation_bytes_once_per_layer_per_frame": 4300800,
+  "activation_MB_per_second_at_target": 64.512,
+  "rows": [
+    {
+      "node": 0,
+      "kind": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          480,
+          640,
+          4
+        ],
+        [
+          4,
+          3,
+          3,
+          4
+        ],
+        [
+          4
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          240,
+          320,
+          4
+        ]
+      ],
+      "activation_bytes_once_per_layer": 1536000,
+      "macs": 11059200,
+      "stride": [
+        2,
+        2
+      ],
+      "minimum_input_line_bytes": 5120
+    },
+    {
+      "node": 1,
+      "kind": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          240,
+          320,
+          4
+        ],
+        [
+          4,
+          3,
+          3,
+          4
+        ],
+        [
+          4
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          240,
+          320,
+          4
+        ]
+      ],
+      "activation_bytes_once_per_layer": 614400,
+      "macs": 11059200,
+      "stride": [
+        1,
+        1
+      ],
+      "minimum_input_line_bytes": 2560
+    },
+    {
+      "node": 2,
+      "kind": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          240,
+          320,
+          4
+        ],
+        [
+          4,
+          1,
+          1,
+          4
+        ],
+        [
+          4
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          240,
+          320,
+          4
+        ]
+      ],
+      "activation_bytes_once_per_layer": 614400,
+      "macs": 1228800,
+      "stride": [
+        1,
+        1
+      ],
+      "minimum_input_line_bytes": 0
+    },
+    {
+      "node": 3,
+      "kind": "RESIZE_NEAREST_NEIGHBOR",
+      "input_shapes": [
+        [
+          1,
+          240,
+          320,
+          4
+        ],
+        [
+          2
+        ]
+      ],
+      "output_shapes": [
+        [
+          1,
+          480,
+          640,
+          4
+        ]
+      ],
+      "activation_bytes_once_per_layer": 1536000
+    }
+  ],
+  "hardware_throughput_verified": false,
+  "limits": [
+    "MAC roofline excludes lane underutilization, quantization, padding and stalls.",
+    "Traffic excludes weights, capture/display, input/output copies and AXI inefficiency.",
+    "Line storage excludes banking, skips, FIFOs and frame-boundary handling.",
+    "Quality and measured stable fresh-frame throughput require separate validation."
+  ]
+}

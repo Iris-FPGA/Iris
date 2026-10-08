@@ -20,7 +20,7 @@
 // master only come out of reset after DDR calibration completes
 // (docs/TinyML_移植进度与待办.md #2).
 //=====================================================================
-module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0) (
+module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0,ENABLE_STREAM_CNN=0,STREAM_DILATION=2) (
     input  wire        clk,             // core_clk 100 MHz (system/peri/memory)
     input  wire        rst_n,           // active-low, gated by DDR cal (see above)
 
@@ -181,6 +181,7 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0) (
     wire        ci_cmd_valid, ci_cmd_ready, ci_rsp_valid, ci_rsp_ready, ci_cmd_int;
     wire [9:0]  ci_function_id;
     wire [31:0] ci_inputs_0, ci_inputs_1, ci_outputs_0;
+    wire [31:0] accel_obs [0:8];
 
     // unused APB / SPI / I2C peripherals: respond idle so firmware probes
     // (e.g. a stale DMA driver) cannot hang the APB bus.
@@ -217,6 +218,15 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0) (
             5'd16: apb1_prdata = {dbg_arb_fb_rd_cnt, dbg_arb_cpu_rd_cnt};
             5'd17: apb1_prdata = {16'd0, dbg_arb_m_ar_cnt};
             5'd18: apb1_prdata = {16'd0, dbg_arb_m_aw_cnt};
+            5'd19: apb1_prdata = accel_obs[0];
+            5'd20: apb1_prdata = accel_obs[1];
+            5'd21: apb1_prdata = accel_obs[2];
+            5'd22: apb1_prdata = accel_obs[3];
+            5'd23: apb1_prdata = accel_obs[4];
+            5'd24: apb1_prdata = accel_obs[5];
+            5'd25: apb1_prdata = accel_obs[6];
+            5'd26: apb1_prdata = accel_obs[7];
+            5'd27: apb1_prdata = accel_obs[8];
             default: apb1_prdata = 32'hDEAD_0000 | {27'd0, apb1_paddr[6:2]};
         endcase
     end
@@ -393,11 +403,23 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0) (
     // serialized; the DMA counters also cover vendor operations with a delayed
     // memory response after their command reply.
     wire resize_busy, resize_cmd_ready, resize_rsp_valid;
+    wire cnn_busy,cnn_cmd_ready,cnn_rsp_valid,cnn_irq;
+    wire [31:0] cnn_outputs_0,cn_araddr,cn_awaddr;
+    wire [7:0] cn_arlen,cn_awlen;
+    wire [127:0] cn_wdata;
+    wire cn_arvalid,cn_rready,cn_awvalid,cn_wvalid,cn_wlast,cn_bready;
+    wire cnn_space=ci_function_id[9:4]==6'h24;
+    wire user_busy=resize_busy || cnn_busy;
     wire [31:0] resize_outputs_0;
     wire v_cmd_ready, v_rsp_valid;
     wire [31:0] v_outputs_0;
     wire v_awvalid, v_awready, v_awlock, v_wvalid, v_wready, v_wlast;
     wire v_bvalid, v_bready, v_arvalid, v_arready, v_arlock, v_rvalid, v_rready;
+    // The shared DDR arbiter broadcasts RLAST/RRESP even for other owners.
+    // Hide those unrelated/stale sidebands from the vendor cache and DMA.
+    wire v_rlast = v_rvalid && acc_rlast;
+    wire [1:0] v_rresp = v_rvalid ? acc_rresp : 2'b00;
+    wire [1:0] v_bresp = v_bvalid ? acc_bresp : 2'b00;
     wire [31:0] v_awaddr, v_araddr;
     wire [7:0] v_awlen, v_arlen;
     wire [2:0] v_awsize, v_arsize;
@@ -422,15 +444,16 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0) (
     end
     wire vendor_idle = vendor_reads==0 && vendor_writes==0 &&
                        !v_arvalid && !v_awvalid && !v_wvalid && !v_rsp_valid;
-    assign ci_cmd_ready = ci_function_id[9] ? resize_cmd_ready : (v_cmd_ready && !resize_busy);
-    assign ci_rsp_valid = resize_rsp_valid || v_rsp_valid;
-    assign ci_outputs_0 = resize_rsp_valid ? resize_outputs_0 : v_outputs_0;
+    assign ci_cmd_ready = ENABLE_STREAM_CNN && cnn_space ? cnn_cmd_ready :
+                          ci_function_id[9] ? resize_cmd_ready : (v_cmd_ready && !user_busy);
+    assign ci_rsp_valid = cnn_rsp_valid || resize_rsp_valid || v_rsp_valid;
+    assign ci_outputs_0 = cnn_rsp_valid ? cnn_outputs_0 : resize_rsp_valid ? resize_outputs_0 : v_outputs_0;
     wire [31:0] rz_araddr, rz_awaddr;
     wire [127:0] rz_wdata;
     wire rz_arvalid, rz_rready, rz_awvalid, rz_wvalid, rz_bready;
     iris_resize2x u_resize (
-        .clk(clk), .rst_n(~io_systemReset), .vendor_idle(vendor_idle),
-        .cmd_valid(ci_cmd_valid && ci_function_id[9]), .cmd_function_id(ci_function_id),
+        .clk(clk), .rst_n(~io_systemReset), .vendor_idle(vendor_idle && !cnn_busy),
+        .cmd_valid(ci_cmd_valid && ci_function_id[9] && !(ENABLE_STREAM_CNN && cnn_space)), .cmd_function_id(ci_function_id),
         .cmd_inputs_0(ci_inputs_0), .cmd_inputs_1(ci_inputs_1), .cmd_ready(resize_cmd_ready),
         .rsp_valid(resize_rsp_valid), .rsp_outputs_0(resize_outputs_0), .rsp_ready(ci_rsp_ready),
         .busy(resize_busy), .araddr(rz_araddr), .arvalid(rz_arvalid),
@@ -440,36 +463,54 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0) (
         .wdata(rz_wdata), .wvalid(rz_wvalid), .wready(acc_wready && resize_busy),
         .bvalid(acc_bvalid && resize_busy), .bready(rz_bready), .bresp(acc_bresp)
     );
-    assign acc_awvalid = resize_busy ? rz_awvalid : v_awvalid;
-    assign acc_awaddr = resize_busy ? rz_awaddr : v_awaddr;
-    assign acc_awlen = resize_busy ? 8'd0 : v_awlen;
-    assign acc_awsize = resize_busy ? 3'd4 : v_awsize;
-    assign acc_awburst = resize_busy ? 2'b01 : v_awburst;
-    assign acc_awlock = resize_busy ? 1'b0 : v_awlock;
-    assign acc_wdata = resize_busy ? rz_wdata : v_wdata;
-    assign acc_wstrb = resize_busy ? 16'hffff : v_wstrb;
-    assign acc_wlast = resize_busy ? 1'b1 : v_wlast;
-    assign acc_wvalid = resize_busy ? rz_wvalid : v_wvalid;
-    assign acc_bready = resize_busy ? rz_bready : v_bready;
-    assign acc_arvalid = resize_busy ? rz_arvalid : v_arvalid;
-    assign acc_araddr = resize_busy ? rz_araddr : v_araddr;
-    assign acc_arlen = resize_busy ? 8'd0 : v_arlen;
-    assign acc_arsize = resize_busy ? 3'd4 : v_arsize;
-    assign acc_arburst = resize_busy ? 2'b01 : v_arburst;
-    assign acc_arlock = resize_busy ? 1'b0 : v_arlock;
-    assign acc_rready = resize_busy ? rz_rready : v_rready;
-    assign v_awready = acc_awready && !resize_busy;
-    assign v_wready = acc_wready && !resize_busy;
-    assign v_bvalid = acc_bvalid && !resize_busy;
-    assign v_arready = acc_arready && !resize_busy;
-    assign v_rvalid = acc_rvalid && !resize_busy;
+    assign acc_awvalid = cnn_busy ? cn_awvalid : resize_busy ? rz_awvalid : v_awvalid;
+    assign acc_awaddr = cnn_busy ? cn_awaddr : resize_busy ? rz_awaddr : v_awaddr;
+    assign acc_awlen = cnn_busy ? cn_awlen : resize_busy ? 8'd0 : v_awlen;
+    assign acc_awsize = user_busy ? 3'd4 : v_awsize;
+    assign acc_awburst = user_busy ? 2'b01 : v_awburst;
+    assign acc_awlock = user_busy ? 1'b0 : v_awlock;
+    assign acc_wdata = cnn_busy ? cn_wdata : resize_busy ? rz_wdata : v_wdata;
+    assign acc_wstrb = user_busy ? 16'hffff : v_wstrb;
+    assign acc_wlast = cnn_busy ? cn_wlast : resize_busy ? 1'b1 : v_wlast;
+    assign acc_wvalid = cnn_busy ? cn_wvalid : resize_busy ? rz_wvalid : v_wvalid;
+    assign acc_bready = cnn_busy ? cn_bready : resize_busy ? rz_bready : v_bready;
+    assign acc_arvalid = cnn_busy ? cn_arvalid : resize_busy ? rz_arvalid : v_arvalid;
+    assign acc_araddr = cnn_busy ? cn_araddr : resize_busy ? rz_araddr : v_araddr;
+    assign acc_arlen = cnn_busy ? cn_arlen : resize_busy ? 8'd0 : v_arlen;
+    assign acc_arsize = user_busy ? 3'd4 : v_arsize;
+    assign acc_arburst = user_busy ? 2'b01 : v_arburst;
+    assign acc_arlock = user_busy ? 1'b0 : v_arlock;
+    assign acc_rready = cnn_busy ? cn_rready : resize_busy ? rz_rready : v_rready;
+    assign v_awready = acc_awready && !user_busy;
+    assign v_wready = acc_wready && !user_busy;
+    assign v_bvalid = acc_bvalid && !user_busy;
+    assign v_arready = acc_arready && !user_busy;
+    assign v_rvalid = acc_rvalid && !user_busy;
 
+    generate if(ENABLE_STREAM_CNN)begin:g_cnn
+        iris_stream_cnn #(.DILATION(STREAM_DILATION))u_cnn(
+            .clk(clk),.rst_n(~io_systemReset),.vendor_idle(vendor_idle && !resize_busy),
+            .cmd_valid(ci_cmd_valid && cnn_space),.cmd_function_id(ci_function_id),
+            .cmd_inputs_0(ci_inputs_0),.cmd_inputs_1(ci_inputs_1),.cmd_ready(cnn_cmd_ready),
+            .rsp_valid(cnn_rsp_valid),.rsp_outputs_0(cnn_outputs_0),.rsp_ready(ci_rsp_ready),.busy(cnn_busy),.irq(cnn_irq),
+            .araddr(cn_araddr),.arlen(cn_arlen),.arvalid(cn_arvalid),.arready(acc_arready && cnn_busy),
+            .rdata(acc_rdata),.rvalid(acc_rvalid && cnn_busy),.rready(cn_rready),.rlast(acc_rlast),.rresp(acc_rresp),
+            .awaddr(cn_awaddr),.awlen(cn_awlen),.awvalid(cn_awvalid),.awready(acc_awready && cnn_busy),
+            .wdata(cn_wdata),.wvalid(cn_wvalid),.wready(acc_wready && cnn_busy),.wlast(cn_wlast),
+            .bvalid(acc_bvalid && cnn_busy),.bready(cn_bready),.bresp(acc_bresp));
+    end else begin:g_no_cnn
+        assign cnn_busy=0;assign cnn_cmd_ready=1;assign cnn_rsp_valid=0;assign cnn_irq=0;
+        assign cnn_outputs_0=32'hffffffff;assign cn_araddr=0;assign cn_arlen=0;assign cn_arvalid=0;assign cn_rready=0;
+        assign cn_awaddr=0;assign cn_awlen=0;assign cn_awvalid=0;assign cn_wdata=0;assign cn_wvalid=0;assign cn_wlast=0;assign cn_bready=0;
+    end endgenerate
+
+    generate if(!ENABLE_STREAM_CNN)begin:g_vendor
     tinyml_accelerator_channels #(
         .AXI_DW_M (128)
     ) u_accel_channels (
         .clk             (clk),
         .reset           (io_systemReset),
-        .cmd_valid       (ci_cmd_valid && !ci_function_id[9] && !resize_busy),
+        .cmd_valid       (ci_cmd_valid && !ci_function_id[9] && !user_busy),
         .cmd_function_id (ci_function_id),
         .cmd_inputs_0    (ci_inputs_0),
         .cmd_inputs_1    (ci_inputs_1),
@@ -494,7 +535,7 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0) (
         .m_axi_wlast     (v_wlast),
         .m_axi_wvalid    (v_wvalid),
         .m_axi_wready    (v_wready),
-        .m_axi_bresp     (acc_bresp),
+        .m_axi_bresp     (v_bresp),
         .m_axi_bvalid    (v_bvalid),
         .m_axi_bready    (v_bready),
         .m_axi_arvalid   (v_arvalid),
@@ -508,10 +549,25 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0) (
         .m_axi_arready   (v_arready),
         .m_axi_rvalid    (v_rvalid),
         .m_axi_rdata     (acc_rdata),
-        .m_axi_rlast     (acc_rlast),
-        .m_axi_rresp     (acc_rresp),
+        .m_axi_rlast     (v_rlast),
+        .m_axi_rresp     (v_rresp),
         .m_axi_rready    (v_rready)
     );
+    end else begin:g_no_vendor
+        reg unsupported_rsp;
+        always @(posedge clk or posedge io_systemReset)begin
+            if(io_systemReset)unsupported_rsp<=0;
+            else begin
+                if(unsupported_rsp && ci_rsp_ready)unsupported_rsp<=0;
+                if(ci_cmd_valid && ci_cmd_ready && !ci_function_id[9])unsupported_rsp<=1;
+            end
+        end
+        assign v_cmd_ready=!unsupported_rsp || ci_rsp_ready;
+        assign v_rsp_valid=unsupported_rsp;assign v_outputs_0=32'hffffffff;assign ci_cmd_int=cnn_irq;
+        assign v_awvalid=0;assign v_awaddr=0;assign v_awlen=0;assign v_awsize=0;assign v_awburst=0;assign v_awlock=0;
+        assign v_wdata=0;assign v_wstrb=0;assign v_wlast=0;assign v_wvalid=0;assign v_bready=1;
+        assign v_arvalid=0;assign v_araddr=0;assign v_arlen=0;assign v_arsize=0;assign v_arburst=0;assign v_arlock=0;assign v_rready=1;
+    end endgenerate
 
     // tinyml_accelerator_channels leaves m_axi_awid/m_axi_arid undriven in
     // single-channel mode (the vendor top never consumed them).  The arbiter
@@ -524,4 +580,66 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0) (
     // (the SoC port above samples this net directly).
     assign accel_cmd_int = ci_cmd_int;
 
+    // Passive observation only: never acknowledges an interrupt or changes DMA.
+    iris_accel_observer u_accel_observer (
+        .clk(clk), .rst_n(~io_systemReset),
+        .cmd_fire(ci_cmd_valid && ci_cmd_ready && !ci_function_id[9]),
+        .function_id(ci_function_id), .inputs_0(ci_inputs_0), .inputs_1(ci_inputs_1),
+        .irq(ci_cmd_int),
+        .araddr(v_araddr), .arvalid(v_arvalid), .arready(v_arready),
+        .rvalid(v_rvalid), .rready(v_rready), .rlast(v_rlast),
+        .awaddr(v_awaddr), .awvalid(v_awvalid), .awready(v_awready),
+        .wvalid(v_wvalid), .wready(v_wready), .wlast(v_wlast),
+        .bvalid(v_bvalid), .bready(v_bready),
+        .obs0(accel_obs[0]), .obs1(accel_obs[1]), .obs2(accel_obs[2]),
+        .obs3(accel_obs[3]), .obs4(accel_obs[4]), .obs5(accel_obs[5]),
+        .obs6(accel_obs[6]), .obs7(accel_obs[7]), .obs8(accel_obs[8])
+    );
+
+endmodule
+
+// Counters wrap at 65536. CI IDs are decoded from the official driver opcodes:
+// Conv start/ack share 0x10 (inputs_0=1/2); Add start/ack = 0x29/0x2f.
+module iris_accel_observer (
+    input wire clk, rst_n, cmd_fire, irq,
+    input wire [9:0] function_id,
+    input wire [31:0] inputs_0, inputs_1, araddr, awaddr,
+    input wire arvalid, arready, rvalid, rready, rlast,
+    input wire awvalid, awready, wvalid, wready, wlast, bvalid, bready,
+    output wire [31:0] obs0, obs1, obs2, obs3, obs4, obs5, obs6, obs7, obs8
+);
+    reg irq_q;
+    reg [9:0] last_function;
+    reg [15:0] irq_count, start_count, ack_count;
+    reg [15:0] ar_count, aw_count, r_count, b_count;
+    reg [31:0] last_ar, last_aw, last_input0, last_input1;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            irq_q<=0; last_function<=0;
+            irq_count<=0; start_count<=0; ack_count<=0;
+            ar_count<=0; aw_count<=0; r_count<=0; b_count<=0;
+            last_ar<=0; last_aw<=0; last_input0<=0; last_input1<=0;
+        end else begin
+            irq_q<=irq;
+            if (irq && !irq_q) irq_count<=irq_count+1'b1;
+            if (cmd_fire) begin
+                last_function<=function_id; last_input0<=inputs_0; last_input1<=inputs_1;
+                if ((function_id==10'h010 && inputs_0==1) || function_id==10'h029) start_count<=start_count+1'b1;
+                if ((function_id==10'h010 && inputs_0==2) || function_id==10'h02f) ack_count<=ack_count+1'b1;
+            end
+            if (arvalid && arready) begin ar_count<=ar_count+1'b1; last_ar<=araddr; end
+            if (awvalid && awready) begin aw_count<=aw_count+1'b1; last_aw<=awaddr; end
+            if (rvalid && rready && rlast) r_count<=r_count+1'b1;
+            if (bvalid && bready) b_count<=b_count+1'b1;
+        end
+    end
+    assign obs0={irq_count,5'd0,irq,last_function};
+    assign obs1={ar_count-r_count,aw_count-b_count};
+    assign obs2=last_ar;
+    assign obs3=last_aw;
+    assign obs4={r_count,b_count};
+    assign obs5={start_count,ack_count};
+    assign obs6=last_input0;
+    assign obs7=last_input1;
+    assign obs8={20'd0,arvalid,arready,rvalid,rready,rlast,awvalid,awready,wvalid,wready,wlast,bvalid,bready};
 endmodule

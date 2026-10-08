@@ -1,9 +1,9 @@
 `timescale 1ns/1ps
-module tb_style_dequant;
+module tb_style_dequant #(parameter SCALE_Q24=20591742);
 reg clk=0; always #5 clk=~clk;
 reg rst_n=0, valid=0; reg [31:0] rgba=0;
 wire out_valid; wire [23:0] rgb;
-iris_style_dequant dut(clk,rst_n,valid,rgba,out_valid,rgb);
+iris_style_dequant #(.SCALE_Q24(SCALE_Q24)) dut(clk,rst_n,valid,rgba,out_valid,rgb);
 reg [32:0] stimulus[0:1023]; reg [24:0] reference[0:1023];
 reg [1023:0] in_path,ref_path;
 integer count=0;
