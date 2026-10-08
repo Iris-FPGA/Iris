@@ -1,0 +1,13 @@
+WARNING: The system libstdc++.so is more recent (version 36) than the copy shipped with the Efinity software (version 32).
+The Efinity software may not function correctly on this system.
+To avoid potential compatibility issues, please back up and remove "/home/noir/Applications/efinity/2026.1/lib/libstdc++.so.6"
+
+==> map
+Creating /tmp/iris-style-visibility-project/iris_ws/outflow
+Running: efx_run_map.py iris_ws --family Titanium --device Ti60F225 --project_xml /tmp/iris-style-visibility-project/iris_ws/iris_ws.xml --dir /tmp/iris-style-visibility-project/iris_ws/ip/csi_rx_59 --dir /tmp/iris-style-visibility-project/iris_ws/ip/SapphireSoc --output_dir outflow --work_dir work_syn --opt root=top --opt veri_options=verilog_mode=verilog_2k,vhdl_mode=vhdl_2008 work-dir=work_syn write_efx_verilog=on I=ip/csi_rx_59 I=src/i2c I=src/ddr I=src/ddr/efx_ddr3 I=src/cnn I=src/cnn/rtl I=ip/SapphireSoc top-params=ENABLE_LEGACY_UART_LOG top-params=0 top-params=ENABLE_STYLE_DEMO top-params=1 top-params=ENABLE_STREAM_CNN top-params=1 top-params=ENABLE_STYLE_VISIBILITY top-params=1 top-params=STREAM_DILATION top-params=2 top-params=STYLE_SCALE_Q24 top-params=20596120
+[92m   map :	PASS [0m
+==> interface
+Running: efx_run_pt_unified.py iris_ws Titanium Ti60F225 --output_dir outflow --timing_model I3 --project_xml iris_ws.xml
+[92m   interface :	PASS [0m
+==> 修复 sdc 时钟周期
+==> pnr

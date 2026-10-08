@@ -39,6 +39,8 @@
 
 AI FPS 叠加基于 VS 回执两种 toggle 边沿，每对新画面只计一次；独立于 HDMI 刷新率。仿真验证15 vs60、CDC、保持脉冲及冻结后显示0。该版本 Efinity 全流程 PASS：49,508 XLR、241 RAM、113 DSP，setup +0.005ns、hold +0.007ns。没有把未上板的新位流成绩当作旧位流测量。
 
-自启动镜像采用已有16KiB OCR保存4320字节启动代码/固件/权重，复制至DDR并核对校验后启动。当前仍先做SRAM验证；Flash回读和断电验证没有完成。复现及CI ABI见 `firmware/stream_style/README.md`。
+基线自启动镜像采用已有16KiB OCR保存4320字节启动代码/固件/权重，复制至DDR并核对校验后启动。该阶段先做SRAM验证，没有写Flash。复现及CI ABI见 `firmware/stream_style/README.md`。
 
-最终镜像600.035秒无JTAG运行的自动启动长测通过：新画面15.02460Hz，显示计数1→8820，所有错误0。位流SHA256 `c832415c9d28990b59065345f879dd0c269c241eda5aaf79e2371e0878cf7963`，原样导出的输出与整数参考仍完全相等。工程实时指标已有长测证据；实屏风格质量与Flash断电启动待确认。详见 `stream-realtime-acceptance.json`。
+增强前的最终基线镜像600.035秒无JTAG运行的自动启动长测通过：新画面15.02460Hz，显示计数1→8820，所有错误0。位流SHA256 `c832415c9d28990b59065345f879dd0c269c241eda5aaf79e2371e0878cf7963`，原样导出的输出与整数参考仍完全相等。详见 `stream-realtime-acceptance.json`。
+
+用户确认对比度/加粗后仍有较多噪点，选择突出主轮廓。当前版本保留CNN颜色与硬件推理，显示端引入原图5×5平滑梯度，弱化碎纹理；这不是CNN精度提升。Efinity全流程及时序通过，240秒UART板上观察为15.029116个新画面/秒，错误全部为0。该版本已写入Flash，官方自动重写后最终回读成功；断电启动与当前实屏效果仍待确认。详见 `validation/20261008-style-denoise/acceptance.json`。

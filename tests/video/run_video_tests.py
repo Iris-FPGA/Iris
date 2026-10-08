@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """RTL regression fixtures are independent scalar Bayer/RGB reference models."""
-import os, subprocess, tempfile
+import os, subprocess, tempfile, sys
 import random
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
@@ -91,10 +91,24 @@ with tempfile.TemporaryDirectory(prefix='iris-video-tests-') as d:
     compile_tb('tb_style_capture',['tests/video/tb_style_capture.sv','iris_ws/src/cnn/iris_style_capture.v','iris_ws/src/video/afifo_simple.v'],capture);simulate(capture)
     mux=tmp/'cpu_style_mux'
     compile_tb('tb_cpu_style_mux',['tests/video/tb_cpu_style_mux.sv','iris_ws/src/ddr/axi_cpu_style_mux.v'],mux);simulate(mux)
-    for negative in (0,1):
+    rng_ink=random.Random(20261008);ink_in=[];ink_ref=[]
+    for v in range(4096):
+        mode=v%4;valid=int(v%7!=0)
+        rgb=[v//4%256]*3 if v<1024 else [rng_ink.randrange(256) for _ in range(3)]
+        # Scalar contrast reference; subtraction keeps hue differences until saturation.
+        strength=max(0,255-min(rgb)-(20 if mode==3 else 16))*(8 if mode==3 else 4) if mode else 0
+        out_rgb=[max(0,c-strength) for c in rgb]
+        ink_in.append((valid<<26)|(mode<<24)|(rgb[0]<<16)|(rgb[1]<<8)|rgb[2])
+        ink_ref.append((valid<<24)|(out_rgb[0]<<16)|(out_rgb[1]<<8)|out_rgb[2])
+    ik=tmp/'ink-in.mem';ir=tmp/'ink-ref.mem';it=tmp/'ink'
+    ik.write_text(''.join(f'{x:07x}\n' for x in ink_in));ir.write_text(''.join(f'{x:07x}\n' for x in ink_ref))
+    compile_tb('tb_style_ink',['tests/video/tb_style_ink.sv','iris_ws/src/cnn/iris_style_ink.v'],it);simulate(it,[f'+IN={ik}',f'+REF={ir}'])
+    for negative,visibility in ((0,0),(1,0),(0,1),(1,1)):
         panels=tmp/f'style_panels_{negative}'
-        run([IV]+(['-B',IVLIB] if IVLIB else [])+['-g2012','-s','tb_style_panels',f'-Ptb_style_panels.NEGATIVE={negative}','-o',str(panels),'tests/video/tb_style_panels.sv','iris_ws/src/cnn/iris_style_panels.v','iris_ws/src/cnn/iris_style_dequant.v'])
+        run([IV]+(['-B',IVLIB] if IVLIB else [])+['-g2012','-s','tb_style_panels',f'-Ptb_style_panels.NEGATIVE={negative}',f'-Ptb_style_panels.VISIBILITY={visibility}','-o',str(panels),'tests/video/tb_style_panels.sv','iris_ws/src/cnn/iris_style_panels.v','iris_ws/src/cnn/iris_style_dequant.v','iris_ws/src/cnn/iris_style_ink.v'])
         simulate(panels)
+    contour_python=ROOT/'.venv-style/bin/python'
+    run([str(contour_python) if contour_python.exists() else sys.executable,'tests/video/run_style_contour_tests.py','--panels'])
     preprocess=tmp/'style_preprocess'
     compile_tb('tb_style_preprocess',['tests/video/tb_style_preprocess.sv','iris_ws/src/cnn/iris_style_preprocess.v'],preprocess);simulate(preprocess)
     dequant=tmp/'style_dequant';di=tmp/'dequant-in.mem';dr=tmp/'dequant-ref.mem'

@@ -1,0 +1,13 @@
+IRIS HOST STALL: no new pair; UART evidence saved
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "fde1798617d8d8326add9882053ad67c49596b2eeb17b82a4340f8d91eec9be0",
+  "bit_sha256": "6f3a793a4dd0104659be0319e43e9a0c19a4135e84094e329e26fb70edee18c4",
+  "attached": true,
+  "uart_only": true,
+  "entry": null,
+  "frames": [],
+  "stall_seconds": 25.025074120989302,
+  "observation_seconds": 25.025125129992375,
+  "live_ok": false
+}

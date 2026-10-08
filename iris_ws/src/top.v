@@ -10,6 +10,8 @@ module top #(
     // console; retain the legacy implementation for diagnostic builds.
     parameter ENABLE_STYLE_DEMO = 0,
     parameter ENABLE_STREAM_CNN = 0,
+    parameter ENABLE_STYLE_VISIBILITY = 0,
+    parameter ENABLE_STYLE_CONTOUR = 0,
     parameter STREAM_DILATION = 2,
     parameter [24:0] STYLE_SCALE_Q24 = 25'd20591742,
     parameter ENABLE_LEGACY_UART_LOG = 1
@@ -1208,7 +1210,7 @@ tinyml_subsystem #(.ENABLE_STYLE_DEMO(ENABLE_STYLE_DEMO),.ENABLE_STREAM_CNN(ENAB
 
 reg [3:0] arb_rst_pipe;
 generate if(ENABLE_STYLE_DEMO)begin : g_style_demo
-iris_style_demo #(.SCALE_Q24(STYLE_SCALE_Q24)) u_style_demo(
+iris_style_demo #(.SCALE_Q24(STYLE_SCALE_Q24),.ENABLE_VISIBILITY(ENABLE_STYLE_VISIBILITY),.ENABLE_CONTOUR(ENABLE_STYLE_CONTOUR)) u_style_demo(
  .clk(core_clk),.video_clk(hdmi_tx_half_clk),.rst_n(arb_rst_pipe[3]),
  .paddr(style_paddr),.psel(style_psel),.penable(style_penable),.pwrite(style_pwrite),
  .pwdata(style_pwdata),.prdata(style_prdata),

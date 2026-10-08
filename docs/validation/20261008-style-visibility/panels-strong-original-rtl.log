@@ -1,0 +1,2 @@
+PASS style panels:     2073600 two-pixel samples, RGB/dequant, 4K bursts, full-frame pairing
+tests/video/tb_style_panels.sv:126: $finish called at 34650252000 (1ps)

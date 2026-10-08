@@ -1,7 +1,7 @@
 // APB0 control plane for paired camera/style presentation.
 // Two disjoint input/output pairs. CPU can capture only the non-displayed pair;
 // display ownership changes at VS and is acknowledged before pair reuse.
-module iris_style_demo #(parameter [24:0] SCALE_Q24=25'd20591742)(
+module iris_style_demo #(parameter [24:0] SCALE_Q24=25'd20591742,parameter ENABLE_VISIBILITY=0,parameter ENABLE_CONTOUR=0)(
  input wire clk,video_clk,rst_n,
  input wire [15:0] paddr,input wire psel,penable,pwrite,
  input wire [31:0] pwdata,output reg [31:0] prdata,
@@ -19,6 +19,11 @@ module iris_style_demo #(parameter [24:0] SCALE_Q24=25'd20591742)(
  output wire rready
 );
 reg pair_cfg,capture_request,commit_toggle;
+reg [1:0] visibility_mode;
+reg visibility_toggle;
+wire visibility_ack;
+reg [2:0] visibility_ack_sync;
+wire visibility_pending=visibility_toggle!=visibility_ack_sync[2];
 wire cap_busy,cap_done,cap_error,capture_enable;
 wire [31:0] capture_write_dummy_bad;
 wire commit_ack,video_pair,video_have;
@@ -46,16 +51,31 @@ iris_style_capture u_capture(
  .wdata(wdata),.wlast(wlast),.wvalid(wvalid),.wready(wready),
  .bresp(bresp),.bvalid(bvalid),.bready(bready)
 );
-iris_style_panels #(.SCALE_Q24(SCALE_Q24)) u_panels(
+generate if(ENABLE_CONTOUR)begin : g_contour
+iris_style_contour_panels #(.SCALE_Q24(SCALE_Q24),.ENABLE_VISIBILITY(ENABLE_VISIBILITY)) u_panels(
  .clk(clk),.video_clk(video_clk),.rst_n(rst_n),
  .commit_toggle(commit_toggle),.commit_pair(pair_cfg),.commit_ack(commit_ack),
  .active_pair(video_pair),.have_frame(video_have),
+ .visibility_mode(visibility_mode),.visibility_toggle(visibility_toggle),.visibility_ack(visibility_ack),
  .i_hs(i_hs),.i_vs(i_vs),.i_de(i_de),.i_rgb(i_rgb),
  .o_hs(o_hs),.o_vs(o_vs),.o_de(o_de),.o_rgb(o_rgb),
  .underflows(underflows),.read_errors(read_errors),
  .araddr(araddr),.arlen(arlen),.arvalid(arvalid),.arready(arready),
  .rdata(rdata),.rresp(rresp),.rlast(rlast),.rvalid(rvalid),.rready(rready)
 );
+end else begin : g_legacy
+iris_style_panels #(.SCALE_Q24(SCALE_Q24),.ENABLE_VISIBILITY(ENABLE_VISIBILITY)) u_panels(
+ .clk(clk),.video_clk(video_clk),.rst_n(rst_n),
+ .commit_toggle(commit_toggle),.commit_pair(pair_cfg),.commit_ack(commit_ack),
+ .active_pair(video_pair),.have_frame(video_have),
+ .visibility_mode(visibility_mode),.visibility_toggle(visibility_toggle),.visibility_ack(visibility_ack),
+ .i_hs(i_hs),.i_vs(i_vs),.i_de(i_de),.i_rgb(i_rgb),
+ .o_hs(o_hs),.o_vs(o_vs),.o_de(o_de),.o_rgb(o_rgb),
+ .underflows(underflows),.read_errors(read_errors),
+ .araddr(araddr),.arlen(arlen),.arvalid(arvalid),.arready(arready),
+ .rdata(rdata),.rresp(rresp),.rlast(rlast),.rvalid(rvalid),.rready(rready)
+);
+end endgenerate
 always @*begin
  case(paddr[5:2])
   0:prdata={16'h4953,9'd0,pair_cfg,pending_commit,pair_sync[2],have_sync[2],cap_error,cap_done,cap_busy};
@@ -71,6 +91,9 @@ always @*begin
   10:prdata=capture_write_dummy_bad;
   11:prdata=bus_write_dummy_bad;
   12:prdata={31'd0,ddr_serial_enable};
+  13:prdata={30'd0,visibility_mode};
+  14:prdata={31'd0,visibility_pending};
+  15:prdata=ENABLE_CONTOUR ? 32'h494b0002 : ENABLE_VISIBILITY ? 32'h494b0001 : 0;
   default:prdata=0;
  endcase
 end
@@ -80,15 +103,18 @@ always @(posedge clk or negedge rst_n)begin
   ack_sync<=0;pair_sync<=0;have_sync<=0;ack_previous<=0;done_previous<=0;
   displayed_count<=0;captured_count<=0;rejected_count<=0;
   ddr_serial_enable<=0;
+  visibility_mode<=ENABLE_VISIBILITY ? 2 : 0;visibility_toggle<=0;visibility_ack_sync<=0;
  end else begin
   capture_request<=0;
   ack_sync<={ack_sync[1:0],commit_ack};
+  visibility_ack_sync<={visibility_ack_sync[1:0],visibility_ack};
   pair_sync<={pair_sync[1:0],video_pair};
   have_sync<={have_sync[1:0],video_have};
   ack_previous<=ack_sync[2];done_previous<=cap_done;
   if(ack_sync[2]!=ack_previous)displayed_count<=displayed_count+1'b1;
   if(cap_done && !done_previous && !cap_error)captured_count<=captured_count+1'b1;
   if(write_reg)begin
+   if(ENABLE_VISIBILITY && paddr[5:2]==13 && !visibility_pending)begin visibility_mode<=pwdata[1:0];visibility_toggle<=~visibility_toggle;end
    if(paddr[5:2]==12)ddr_serial_enable<=pwdata[0];
    if(paddr[5:2]==1)begin
     if(!cap_busy && !pending_commit)pair_cfg<=pwdata[0];

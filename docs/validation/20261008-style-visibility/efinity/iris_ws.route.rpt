@@ -1,0 +1,41 @@
+
+Elitestek FPGA Placement and Routing.
+Version: 2026.1.132.4.5 
+Date: Thu Oct  8 10:57:10 2026
+
+Copyright (C) 2013 - 2026 Efinix, Inc. All rights reserved.
+ 
+Family: Titanium 
+Device: Ti60F225
+Top-level Entity Name: iris_ws
+Elapsed time for routing: 0 hours 0 minutes 24 seconds
+
+
+---------- GBUFCE Assignments (begin) ----------
+
+
++------------------+----------+----------+
+|    Clock Net     | GBUFCE_X | GBUFCE_Y |
++------------------+----------+----------+
+|     CLK_25M      |    1     |   164    |
+|     core_clk     |   109    |    1     |
+|   ddr_core_clk   |   218    |   159    |
+|    ddr_pll_fb    |   115    |   322    |
+|   ddr_tac_clk    |   218    |   163    |
+|  ddr_tdqss_clk   |   218    |   162    |
+|   ddr_twd_clk    |   218    |   164    |
+|   gpio_clk_27m   |    1     |   159    |
+| hdmi_tx_fast_clk |   111    |    1     |
+| hdmi_tx_half_clk |   112    |    1     |
+| hdmi_tx_slow_clk |   107    |    1     |
+| i_cam_ck_CLKOUT  |   110    |   322    |
+|  jtag_inst1_TCK  |   106    |    1     |
+|     mipi_clk     |   112    |   322    |
+|  mipi_pixel_clk  |    1     |   163    |
++------------------+----------+----------+
+
+
+----------- GBUFCE Assignments (end) ----------
+
+
+Elapsed time for Latest PnR Run: 0 hours 1 minutes 32 seconds

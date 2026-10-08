@@ -73,6 +73,8 @@ int main(void){
     csr_write(mie,MIE_MEIE);csr_set(mstatus,MSTATUS_MIE);
     volatile uint32_t *demo=(volatile uint32_t *)0xf8100000u;
     if((demo[0]>>16)!=0x4953 || demo[9]!=0x000a0001)stop("camera/display ABI mismatch");
+    const uint32_t ink_supported=demo[15]==0x494b0001u || demo[15]==0x494b0002u;
+    if(ink_supported)bsp_printf("IRIS INK mode=%d; UART n=original c=contrast h=contour s=strong; VS-applied ABI=%x\n",demo[13],demo[15]);
     for(uint32_t sequence=1;;sequence++){
         uint64_t deadline=clint_getTime(BSP_CLINT)+SYSTEM_CLINT_HZ;
         while(demo[0]&32u)if(clint_getTime(BSP_CLINT)>deadline)stop("pair acknowledgement timeout");
@@ -105,6 +107,17 @@ int main(void){
         while(demo[0]&32u)if(clint_getTime(BSP_CLINT)>deadline)stop("display commit timeout");
         if(demo[8]!=rejects || demo[6] || demo[7])stop("display error");
         iris_stream_control[1]=sequence;iris_stream_control[2]=ticks;iris_stream_control[3]=demo[4];
+#if !IRIS_STREAM_SNAPSHOT
+        // One command per completed frame; the mailbox stays stable until VS.
+        if(ink_supported && !(demo[14]&1u) && uart_readOccupancy(BSP_UART_TERMINAL)){
+            const char command=uart_read(BSP_UART_TERMINAL);
+            uint32_t mode=4;
+            if(command=='n')mode=0;else if(command=='c')mode=1;
+            else if(command=='h')mode=2;else if(command=='s')mode=3;
+            if(mode<4){demo[13]=mode;bsp_printf("IRIS INK requested=%d command=%c\n",mode,command);}
+        }
+        if(ink_supported)iris_stream_control[4]=demo[13];
+#endif
         // UART is diagnostic, not part of the pixel path. Sparse logging
         // avoids spending ~12ms printing every newly committed frame.
         if(sequence==1 || sequence%30==0)bsp_printf("IRIS LIVE frame=%d pair=%d Invoke_ticks=%d displayed=%d captures=%d underflow=%d readerr=%d rejects=%d\n",

@@ -1,0 +1,4 @@
+PASS contour: 10240 vectors, independent 5x5 convolution, borders, modes, saturation and pipeline
+tests/video/tb_style_contour.sv:25: $finish called at 102501000 (1ps)
+PASS style panels:     2073600 two-pixel samples, RGB/dequant, 4K bursts, full-frame pairing
+tests/video/tb_style_panels.sv:135: $finish called at 34650252000 (1ps)

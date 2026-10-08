@@ -1,0 +1,11 @@
+{
+  "scope": "offline display reference; raw CNN unmodified",
+  "raw_output_sha256": "2468ed257763ec6e69d53c4742298aeda2c049fcb04d66de51fe2742297e5d8f",
+  "mode": 2,
+  "thicken_kernel": [
+    2,
+    2
+  ],
+  "scale": 1.2276244163513184,
+  "preview": "docs/validation/20261008-style-visibility/selected-preview.png"
+}

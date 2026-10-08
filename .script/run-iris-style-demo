@@ -18,6 +18,7 @@ p.add_argument('--snapshot',action='store_true')
 p.add_argument('--attach',action='store_true',help='observe existing firmware without reset/reload')
 p.add_argument('--entry',type=lambda s:int(s,0),default=0x00800000,help='entry address for a loaded ELF; use 0xf9000000 to test OCR self-loader')
 p.add_argument('--uart-only',action='store_true',help='observe automatic boot without any JTAG connection, reset or ELF load')
+p.add_argument('--await-boot',action='store_true',help='ignore old UART frames until a fresh streaming-firmware boot banner')
 p.add_argument('--uart',default='/dev/ttyUSB2')
 a=p.parse_args();a.output.parent.mkdir(parents=True,exist_ok=True)
 if a.seconds<=0:p.error('--seconds must be positive')
@@ -26,6 +27,7 @@ if a.entry not in (0x00800000,0xf9000000):p.error('entry must be the DDR control
 if a.uart_only:
  if a.snapshot:p.error('UART-only observation cannot take a JTAG snapshot')
  a.attach=True
+if a.await_boot and not a.uart_only:p.error('--await-boot requires --uart-only')
 for f in [a.elf,a.output]:
  if any(c in str(f.resolve()) for c in '{}\n\r'):p.error('unsupported Tcl path')
 def digest(f):return hashlib.sha256(f.read_bytes()).hexdigest()
@@ -53,7 +55,7 @@ with (contextlib.nullcontext(None) if a.uart_only else socket.create_connection(
    report['load']=tcl('load_image {'+str(a.elf.resolve())+'}')
    if 'downloaded' not in report['load']:raise RuntimeError('ELF load not confirmed')
    print(report['load'],flush=True);tcl(f'resume 0x{a.entry:08x}')
-  begin=time.monotonic();last_progress=begin
+  begin=time.monotonic();last_progress=begin;waiting_boot=a.await_boot
   while time.monotonic()-begin<a.seconds:
    if time.monotonic()-last_progress>a.stall_seconds:
     report['stall_seconds']=time.monotonic()-last_progress
@@ -84,8 +86,14 @@ with (contextlib.nullcontext(None) if a.uart_only else socket.create_connection(
     line,partial=partial.split(b'\n',1);line=line.decode(errors='replace').strip()
     if not line:continue
     print(line,flush=True)
+    if waiting_boot and line.startswith('IRIS STREAM CNN:'):
+     report['fresh_boot_host_elapsed']=time.monotonic()-begin
+     waiting_boot=False;last_progress=time.monotonic()
     match=re.search(r'IRIS LIVE frame=(\d+) pair=(\d+) Invoke_ticks=(\d+) displayed=(\d+) captures=(\d+) underflow=(\d+) readerr=(\d+) rejects=(\d+)$',line)
     if match:
+     if waiting_boot:
+      report['ignored_preboot_log_samples']=report.get('ignored_preboot_log_samples',0)+1
+      continue
      values=list(map(int,match.groups()))
      report['frames'].append(dict(zip(['sequence','pair','invoke_ticks','displayed','captures','underflows','read_errors','rejects'],values),host_elapsed=time.monotonic()-begin))
      last_progress=time.monotonic()

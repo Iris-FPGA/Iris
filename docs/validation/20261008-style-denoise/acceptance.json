@@ -1,0 +1,112 @@
+{
+  "scope": "camera-guided contour display; FPGA neural inference retained; Flash programmed and verified",
+  "bit_sha256": "6f3a793a4dd0104659be0319e43e9a0c19a4135e84094e329e26fb70edee18c4",
+  "model_sha256": "e4a45f1d9314654565f3300978d8a7b8843fc0c0687c454c4b6e3b47e0f05386",
+  "resources": {
+    "XLR": 52995,
+    "RAM": 253,
+    "DSP": 113
+  },
+  "display_postprocessing": {
+    "source": "neural colours + smoothed camera-luma contours",
+    "gradient_stencil": [
+      5,
+      5
+    ],
+    "default_mode": 2,
+    "threshold": 32,
+    "gain": 2,
+    "ink_cap": 128
+  },
+  "timing": {
+    "minimum_setup_ns": 0.027,
+    "minimum_hold_ns": 0.026,
+    "core_clock_mhz": 100
+  },
+  "rtl": {
+    "unit_vectors": 10240,
+    "full_frame_two_pixel_samples_per_case": 2073600,
+    "cases": [
+      "normal, modes 2->3, paired banks",
+      "read error and neighbour fallback, modes 2->3"
+    ],
+    "logs": [
+      "unit-rtl.log",
+      "panels-grey-normal-rtl.log",
+      "panels-grey-negative-rtl.log"
+    ],
+    "legacy_regression": "../20261008-style-visibility/regression.log"
+  },
+  "sram_live": {
+    "observed_seconds": 240.1606140920194,
+    "committed_pair_hz": 15.029116139295292,
+    "frame_interval_seconds": 225.49562919000164,
+    "first_displayed": 1,
+    "last_displayed": 3390,
+    "all_error_counts_zero": true,
+    "uart_only": true,
+    "fresh_boot": true,
+    "preset_requests_verified": [
+      [
+        "0",
+        "n"
+      ],
+      [
+        "1",
+        "c"
+      ],
+      [
+        "3",
+        "s"
+      ],
+      [
+        "2",
+        "h"
+      ]
+    ]
+  },
+  "flash": {
+    "programmed": true,
+    "readback_verified": true,
+    "first_verify_mismatch": true,
+    "official_programmer_retry_successful": true,
+    "log": "program-flash.log",
+    "cold_boot_verified": false,
+    "cold_boot_state": "not observed during 300-second UART listener; physical power cycle remains pending",
+    "device": "Winbond W25Q64 8MiB; JEDEC 0xEF6017",
+    "cold_boot_listener_log": "flash-boot-listener.log",
+    "demo_restore": "same verified image loaded to SRAM after listener ended; Flash not modified"
+  },
+  "visual_quality": {
+    "user_feedback_before_contour": "contrast helped, noisy; requested major outlines over texture",
+    "contour_final_screen_feedback": "pending",
+    "preview": "selected-preview.png",
+    "preview_scope": "offline same-frame reference, not HDMI screenshot"
+  },
+  "raw_neural_parity": {
+    "this_change": "CNN RTL, parameters and TFLite remain unchanged; display math is tested separately",
+    "baseline_evidence": "../20261008-tinyml/stream-realtime-acceptance.json"
+  },
+  "source_manifest": "build-manifest.json",
+  "source_integrity": {
+    "compiled_source_hashes_match": true,
+    "compiled_source_count": 136,
+    "model_elf_and_bit_hashes_match": true,
+    "workspace_xml_difference": "final newline only",
+    "workspace_xml_sha256": "9100597c2eab204c260b3f48416a874f99fbca2aa159e50527f5eb9651db89d0"
+  },
+  "post_flash_sram": {
+    "report": "post-flash-sram-report.json",
+    "program_log": "restore-sram-program.log",
+    "observed_seconds": 90.13233222800773,
+    "committed_pair_hz": 15.024624710104911,
+    "first_displayed": 1,
+    "last_displayed": 1260,
+    "all_error_counts_zero": true,
+    "fresh_sram_boot": true,
+    "default_mode": 2,
+    "abi": "0x494b0002",
+    "flash_boot_evidence": false
+  },
+  "final_board_state": "running contour mode 2 from same SRAM image; verified Flash image persists; physical power cycle pending"
+}

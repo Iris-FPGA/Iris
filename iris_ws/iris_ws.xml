@@ -74,6 +74,9 @@
         <efx:design_file name="src/cnn/rtl/tinyml_accelerator_channels.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/iris_style_preprocess.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/iris_style_dequant.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/iris_style_ink.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/iris_style_contour.v" version="sv_09" library="default" />
+        <efx:design_file name="src/cnn/iris_style_contour_panels.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/iris_style_capture.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/iris_style_panels.v" version="sv_09" library="default" />
         <efx:design_file name="src/cnn/iris_style_demo.v" version="sv_09" library="default" />
@@ -187,6 +190,8 @@
         <efx:dynparam name="ENABLE_LEGACY_UART_LOG" value="0" />
         <efx:dynparam name="ENABLE_STYLE_DEMO" value="1" />
         <efx:dynparam name="ENABLE_STREAM_CNN" value="1" />
+        <efx:dynparam name="ENABLE_STYLE_VISIBILITY" value="1" />
+        <efx:dynparam name="ENABLE_STYLE_CONTOUR" value="1" />
         <efx:dynparam name="STREAM_DILATION" value="2" />
         <efx:dynparam name="STYLE_SCALE_Q24" value="20596120" />
     </efx:synthesis>

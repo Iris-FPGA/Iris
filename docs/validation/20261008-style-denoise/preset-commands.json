@@ -1,0 +1,22 @@
+[
+  {
+    "command": "n",
+    "mode": 0,
+    "sent_at_unix": 1791430647.4209015
+  },
+  {
+    "command": "c",
+    "mode": 1,
+    "sent_at_unix": 1791430651.4209862
+  },
+  {
+    "command": "s",
+    "mode": 3,
+    "sent_at_unix": 1791430655.4210274
+  },
+  {
+    "command": "h",
+    "mode": 2,
+    "sent_at_unix": 1791430659.421117
+  }
+]
