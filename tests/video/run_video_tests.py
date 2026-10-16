@@ -3,6 +3,7 @@
 import os, subprocess, tempfile, sys
 import random
 from pathlib import Path
+from run_style_preprocess_tests import check_preprocess
 ROOT=Path(__file__).resolve().parents[2]
 IV=os.environ.get('IVERILOG','iverilog')
 VVP=os.environ.get('VVP','vvp')
@@ -89,6 +90,10 @@ with tempfile.TemporaryDirectory(prefix='iris-video-tests-') as d:
     compile_tb('tb_accel_observer',['tests/video/tb_accel_observer.sv','iris_ws/src/cnn/tinyml_subsystem.v'],observer);simulate(observer)
     capture=tmp/'style_capture'
     compile_tb('tb_style_capture',['tests/video/tb_style_capture.sv','iris_ws/src/cnn/iris_style_capture.v','iris_ws/src/video/afifo_simple.v'],capture);simulate(capture)
+    ownership=tmp/'style_pipeline'
+    run([IV]+(['-B',IVLIB] if IVLIB else [])+['-g2012','-i','-s','tb_style_pipeline','-o',str(ownership),
+        'tests/video/tb_style_pipeline.sv','iris_ws/src/cnn/iris_style_demo.v'])
+    simulate(ownership)
     mux=tmp/'cpu_style_mux'
     compile_tb('tb_cpu_style_mux',['tests/video/tb_cpu_style_mux.sv','iris_ws/src/ddr/axi_cpu_style_mux.v'],mux);simulate(mux)
     rng_ink=random.Random(20261008);ink_in=[];ink_ref=[]
@@ -105,12 +110,11 @@ with tempfile.TemporaryDirectory(prefix='iris-video-tests-') as d:
     compile_tb('tb_style_ink',['tests/video/tb_style_ink.sv','iris_ws/src/cnn/iris_style_ink.v'],it);simulate(it,[f'+IN={ik}',f'+REF={ir}'])
     for negative,visibility in ((0,0),(1,0),(0,1),(1,1)):
         panels=tmp/f'style_panels_{negative}'
-        run([IV]+(['-B',IVLIB] if IVLIB else [])+['-g2012','-s','tb_style_panels',f'-Ptb_style_panels.NEGATIVE={negative}',f'-Ptb_style_panels.VISIBILITY={visibility}','-o',str(panels),'tests/video/tb_style_panels.sv','iris_ws/src/cnn/iris_style_panels.v','iris_ws/src/cnn/iris_style_dequant.v','iris_ws/src/cnn/iris_style_ink.v'])
+        run([IV]+(['-B',IVLIB] if IVLIB else [])+['-g2012','-s','tb_style_panels',f'-Ptb_style_panels.NEGATIVE={negative}',f'-Ptb_style_panels.VISIBILITY={visibility}','-o',str(panels),'tests/video/tb_style_panels.sv','iris_ws/src/cnn/iris_style_panels.v','iris_ws/src/cnn/iris_style_split_scaler.v','iris_ws/src/cnn/iris_style_dequant.v','iris_ws/src/cnn/iris_style_ink.v'])
         simulate(panels)
     contour_python=ROOT/'.venv-style/bin/python'
     run([str(contour_python) if contour_python.exists() else sys.executable,'tests/video/run_style_contour_tests.py','--panels'])
-    preprocess=tmp/'style_preprocess'
-    compile_tb('tb_style_preprocess',['tests/video/tb_style_preprocess.sv','iris_ws/src/cnn/iris_style_preprocess.v'],preprocess);simulate(preprocess)
+    check_preprocess(tmp)
     dequant=tmp/'style_dequant';di=tmp/'dequant-in.mem';dr=tmp/'dequant-ref.mem'
     # Independent IEEE floating point oracle for both exported model scales.
     for scale,q24 in [(1.2273634672164917,20591742),(1.2276244163513184,20596120)]:

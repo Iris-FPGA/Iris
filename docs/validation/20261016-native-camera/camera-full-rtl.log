@@ -1,0 +1,2 @@
+PASS native camera Gaussian3        1920x       1080:     1036800 pairs, exact 2D convolution, RGB order, four replicated borders and complete raster
+tests/video/tb_camera_denoise.sv:36: $finish called at 12386141000 (1ps)

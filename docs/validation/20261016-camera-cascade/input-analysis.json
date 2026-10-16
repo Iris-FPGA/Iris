@@ -1,0 +1,51 @@
+{
+  "scope": "Actual median input with offline smoothing predictions; no ground-truth noise or HDMI measurement",
+  "input_sha256": "f5da55e62bd8a8e4965d62f40fc9b30bf89b93fce2922c2e39cb1ac1029f0457",
+  "roi_xyxy": [
+    30,
+    150,
+    280,
+    400
+  ],
+  "highpass": "RGB minus edge-padded 5x5 local mean; standard deviation per channel",
+  "actual_median_highpass_std": [
+    4.924050626026224,
+    3.2177611987096353,
+    6.114461569605315
+  ],
+  "predicted_one_gaussian_highpass_std": [
+    2.845769363782551,
+    1.8281733203237949,
+    3.522379155725858
+  ],
+  "predicted_two_gaussian_highpass_std": [
+    2.0638722810910917,
+    1.3308714633437657,
+    2.5414942552733333
+  ],
+  "gaussian_kernel": [
+    [
+      1,
+      2,
+      1
+    ],
+    [
+      2,
+      4,
+      2
+    ],
+    [
+      1,
+      2,
+      1
+    ]
+  ],
+  "divisor": 16,
+  "rounding": "add 8, integer divide by 16 after each 2D stage",
+  "border": "replicate at each stage",
+  "limitations": [
+    "Scene texture contributes to high-pass energy.",
+    "The input already passed the median; raw source is unavailable.",
+    "Smoothing also removes real detail; visual acceptance remains necessary."
+  ]
+}

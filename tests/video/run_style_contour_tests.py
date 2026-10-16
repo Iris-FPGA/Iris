@@ -76,18 +76,18 @@ def unit(tmp):
     compile_tb('tb_style_contour',['tests/video/tb_style_contour.sv','iris_ws/src/cnn/iris_style_contour.v','iris_ws/src/cnn/iris_style_dequant.v'],exe)
     simulate(exe,[f'+IN={a}',f'+REF={b}',f'+COUNT={len(stim)}'])
 
-def panels(tmp,negative,first,second):
+def panels(tmp,negative,first,second,first_bank=0,second_bank=1,native_camera=1):
     images=[];y=np.arange(480)[:,None];x=np.arange(640)[None,:]
-    for pair,mode in enumerate([first,second]):
+    for pair,mode in zip((first_bank,second_bank),(first,second)):
         source=np.stack([(y*3+x*7+c*43+pair*23)%256 for c in range(3)],axis=-1)
         neural=(source+31)%256
         grey=(source[:,:,0]+2*source[:,:,1]+source[:,:,2]+2)//4
-        images.append(render(neural,gradient_image(grey,negative and pair==0),mode))
+        images.append(render(neural,gradient_image(grey,negative and pair==first_bank),mode))
     expected=tmp/f'panel-{negative}-{first}-{second}.mem'
     expected.write_text(''.join(f'{int(r):02x}{int(g):02x}{int(b):02x}\n' for image in images for r,g,b in image.reshape(-1,3)))
     exe=tmp/f'panel-{negative}-{first}-{second}'
-    compile_tb('tb_style_panels',['tests/video/tb_style_panels.sv','iris_ws/src/cnn/iris_style_contour_panels.v','iris_ws/src/cnn/iris_style_contour.v','iris_ws/src/cnn/iris_style_dequant.v'],exe,
-        ['-DTEST_CONTOUR','-Ptb_style_panels.CONTOUR=1','-Ptb_style_panels.VISIBILITY=1',f'-Ptb_style_panels.NEGATIVE={negative}',f'-Ptb_style_panels.FIRST_MODE={first}',f'-Ptb_style_panels.SECOND_MODE={second}'])
+    compile_tb('tb_style_panels',['tests/video/tb_style_panels.sv','iris_ws/src/cnn/iris_style_contour_panels.v','iris_ws/src/cnn/iris_style_split_scaler.v','iris_ws/src/cnn/iris_style_contour.v','iris_ws/src/cnn/iris_style_dequant.v'],exe,
+        ['-DTEST_CONTOUR','-Ptb_style_panels.CONTOUR=1','-Ptb_style_panels.VISIBILITY=1',f'-Ptb_style_panels.NEGATIVE={negative}',f'-Ptb_style_panels.FIRST_MODE={first}',f'-Ptb_style_panels.SECOND_MODE={second}',f'-Ptb_style_panels.FIRST_BANK={first_bank}',f'-Ptb_style_panels.SECOND_BANK={second_bank}',f'-Ptb_style_panels.NATIVE_CAMERA={native_camera}'])
     simulate(exe,[f'+CONTOUR_REF={expected}'])
 
 if __name__=='__main__':

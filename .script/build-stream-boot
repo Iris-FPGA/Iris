@@ -4,7 +4,7 @@
 This writes project files only. It never programs SRAM or Flash. Rebuild the FPGA
 after installation; the generated CPU architecture and reset vector are unchanged.
 """
-import argparse,hashlib,json,subprocess
+import argparse,hashlib,json,os,shutil,subprocess
 from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 p=argparse.ArgumentParser(description=__doc__)
@@ -14,7 +14,10 @@ payload=(out/'stream_style-live.bin').read_bytes()
 if not payload or len(payload)%4:raise SystemExit('Live firmware must be nonempty and word aligned')
 fnv=0x811c9dc5
 for b in payload:fnv=((fnv^b)*0x01000193)&0xffffffff
-prefix='/home/noir/Applications/riscv-none-elf/bin/riscv-none-elf-'
+prefix=os.environ.get('RISCV_PREFIX') or next((v for v in (
+    'riscv-none-elf-','riscv64-unknown-elf-','riscv32-unknown-elf-','riscv32-esp-elf-')
+    if shutil.which(v+'gcc')),None)
+if not prefix:raise SystemExit('Set RISCV_PREFIX to the installed RISC-V toolchain prefix')
 elf=out/'stream_boot.elf';binary=out/'stream_boot.bin';hexfile=out/'stream_boot.hex'
 cmd=[prefix+'gcc','-nostdlib','-march=rv32im_zicsr_zifencei','-mabi=ilp32',
  '-DPAYLOAD_BYTES='+str(len(payload)),'-DPAYLOAD_FNV='+str(fnv),

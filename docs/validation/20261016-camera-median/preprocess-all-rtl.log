@@ -1,0 +1,17 @@
+PASS 640x480 RGBA preprocessing Gaussian=0 Median=0: 2D oracle, noise/impulse/edges/black/white, crop phases, INT8 order, markers, short frame, disable/restart
+tests/video/tb_style_preprocess.sv:102: $finish called at 83743596000 (1ps)
+PASS 640x480 RGBA preprocessing Gaussian=1 Median=0: 2D oracle, noise/impulse/edges/black/white, crop phases, INT8 order, markers, short frame, disable/restart
+tests/video/tb_style_preprocess.sv:102: $finish called at 83743596000 (1ps)
+median frame rows=1080 pattern=0 checked=307200 complete=1
+median frame rows=1080 pattern=1 checked=614400 complete=2
+median frame rows=10 pattern=1 checked=616960 complete=2
+median frame rows=1080 pattern=1 checked=0 complete=2
+median frame rows=1080 pattern=1 checked=307200 complete=3
+median frame rows=1080 pattern=2 checked=307200 complete=4
+median frame rows=1080 pattern=3 checked=307200 complete=5
+median frame rows=1080 pattern=4 checked=307200 complete=6
+median frame rows=1080 pattern=5 checked=307200 complete=7
+median frame rows=1080 pattern=6 checked=307200 complete=8
+median frame rows=1080 pattern=7 checked=307200 complete=9
+PASS 640x480 RGBA preprocessing Gaussian=0 Median=1: 2D oracle, noise/impulse/edges/black/white, crop phases, INT8 order, markers, short frame, disable/restart
+tests/video/tb_style_preprocess.sv:102: $finish called at 104652816000 (1ps)

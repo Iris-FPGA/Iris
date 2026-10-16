@@ -1,0 +1,12 @@
+{
+  "iris_ws/src/cnn/iris_style_preprocess.v": "5de80c28ce8be0afbd3b3314694d3204518862c8796c390dfe424b5cd09d66a5",
+  "iris_ws/src/cnn/iris_style_capture.v": "ff5233f31a7515a7e3431b6cea64e00fa0ac881e1a259881b5e709565c4d23f5",
+  "iris_ws/src/top.v": "4d1e735e342b273c76a95d9f6ead892fceb8ab1c088fa906d28ab15f9aefa61d",
+  "iris_ws/iris_ws.xml": "015b1d6e40ddf9ea5dc1424c1dfc46a69591f69e0682c4e286d83071f3764b2c",
+  "iris_ws/iris_ws.peri.xml": "56de8f279a0352c0e32eba91dc0016e35b0ec75c984fc43da291acd7e372d7dc",
+  "tests/video/tb_style_preprocess.sv": "c631c3401815572309cce04d8b638cf6868c4a491007d6fe01136a6c9fe42684",
+  "tests/video/run_style_preprocess_tests.py": "e685cf139c2bbd7cdeeca95ab34a4c9b2afd13e954c7d0b9fa6b65cf6236c0dd",
+  "tests/video/run_style_pipeline_tests.py": "d85f3230b894974136f6312cd75fb98a023bdc14cefbcac9c87ae27942f717a9",
+  "tests/video/run_video_tests.py": "2237a48f85a08cbe65e83370e0d257d6027c40836106406e6f9a1f7deed52280",
+  "firmware/stream_style/build/stream_style-live.elf": "59da1b8347866b87694e2a9b6b853004b84e8bd0715b6886a54801f4b30bf087"
+}

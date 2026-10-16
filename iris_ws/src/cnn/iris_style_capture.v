@@ -6,7 +6,7 @@ module iris_style_capture #(
     parameter FRAME_WORDS=76800, parameter FIFO_AW=8
 )(
     input wire clk, video_clk, rst_n,
-    input wire request, pair,
+    input wire request,input wire [1:0] pair,
     output reg busy, done, error,
     output reg [31:0] write_dummy_bad,
     output wire capture_enable,
@@ -73,7 +73,9 @@ reg [3:0] state;
 // Stage a complete burst before AW. Once WVALID is raised it remains raised
 // through all sixteen beats, with only READY controlling advancement. This
 // also decouples the registered asynchronous FIFO from controller timing.
-(* syn_ramstyle = "block_ram" *) reg [127:0] burst_data [0:15];
+// This tiny 2-Kibit staging buffer otherwise consumes seven wide RAM10s.
+// Use logic storage to leave block RAM available for Gaussian line buffers.
+(* syn_ramstyle = "registers" *) reg [127:0] burst_data [0:15];
 reg [127:0] hold_data;
 reg hold_eof;
 reg [3:0] beat;
@@ -109,7 +111,7 @@ always @(posedge clk or negedge rst_n) begin
                 request_toggle<=~request_toggle;busy<=1;done<=0;error<=0;
                 bad<=0;words<=0;beat<=0;
                 write_dummy_bad<=0;
-                awaddr<=pair ? 32'h03200000 : 32'h03000000;
+                awaddr<=pair==2 ? 32'h03800000 : pair==1 ? 32'h03200000 : 32'h03000000;
                 state<=WAIT_BURST;
             end
             WAIT_BURST:if(fifo_level>=16 || (failure_sync[2] && !fifo_empty))begin

@@ -446,14 +446,21 @@ always @(posedge hdmi_tx_half_clk or negedge video_rst_n) begin
     else if (awb_upd)    awb_upd_tgl <= ~awb_upd_tgl;
 end
 
+wire raw_clean_hs,raw_clean_vs,raw_clean_de;
+wire [15:0] raw_clean;
+camera_raw_denoise_2px u_raw_denoise (
+ .clk(hdmi_tx_half_clk),.rst_n(video_rst_n),
+ .i_hs(fb_hs),.i_vs(fb_vs),.i_de(fb_de),.i_raw(fb_vout),
+ .o_hs(raw_clean_hs),.o_vs(raw_clean_vs),.o_de(raw_clean_de),.o_raw(raw_clean)
+);
 debayer_top_2to1 u_debayer (
     .in_pclk     (hdmi_tx_half_clk),
     .in_rstn     (video_rst_n),
-    .raw_vs_i    (fb_vs),
-    .raw_hs_i    (fb_hs),
-    .raw_de_i    (fb_de),
-    .raw_valid_i (fb_de),
-    .raw_datax4_i(fb_vout),
+    .raw_vs_i    (raw_clean_vs),
+    .raw_hs_i    (raw_clean_hs),
+    .raw_de_i    (raw_clean_de),
+    .raw_valid_i (raw_clean_de),
+    .raw_datax4_i(raw_clean),
     // Linear demosaic; per-channel display gains follow the stats tap.
     .i_r_gain    (3'd4),
     .i_g_gain    (3'd4),
@@ -468,9 +475,16 @@ debayer_top_2to1 u_debayer (
 // phase-insensitive 2->1 expansion: async FIFO 74.25MHz -> 148.5MHz
 wire display_hs, display_vs, display_de;
 wire [47:0] display_rgb;
+wire camera_hs,camera_vs,camera_de;
+wire [47:0] camera_rgb;
+camera_denoise_2px u_camera_denoise (
+ .clk(hdmi_tx_half_clk),.rst_n(video_rst_n),
+ .i_hs(dbg_hs_o),.i_vs(dbg_vs_o),.i_de(dbg_de_o),.i_rgb(dbg_rgb),
+ .o_hs(camera_hs),.o_vs(camera_vs),.o_de(camera_de),.o_rgb(camera_rgb)
+);
 rgb_display_2px u_display_color (
     .clk(hdmi_tx_half_clk), .rst_n(video_rst_n),
-    .i_hs(dbg_hs_o), .i_vs(dbg_vs_o), .i_de(dbg_de_o), .i_rgb(dbg_rgb),
+    .i_hs(camera_hs), .i_vs(camera_vs), .i_de(camera_de), .i_rgb(camera_rgb),
     .i_r_gain(awb_r_gain), .i_g_gain(awb_g_gain), .i_b_gain(awb_b_gain),
     .i_black_r(black_r), .i_black_g(black_g), .i_black_b(black_b),
     .o_hs(display_hs), .o_vs(display_vs), .o_de(display_de), .o_rgb(display_rgb)
@@ -524,7 +538,8 @@ wire [23:0] p_second = ew[23:0];
 wire [23:0] exp_px   = rphase ? p_first : p_second;
 
 reg [23:0] px_r;
-reg        hs_r, vs_r, de_r;
+reg hs_r,vs_r,de_r;
+
 always @(posedge hdmi_tx_slow_clk or negedge video_rst_n) begin
     if (!video_rst_n) begin
         px_r <= 24'd0;
@@ -641,6 +656,8 @@ osd_video_status #(.ENABLE_STYLE_FPS(ENABLE_STYLE_DEMO)) u_video_status (
 
 // AE status line below the fps digits: E=xxx G=x S=x W=xx
 wire [23:0] px_osd_ae;
+// Overlay status after the split composite, including in style mode.
+wire [23:0] presentation_rgb = px_osd_ae;
 osd_ae #(
     .X_START (16),
     .Y_START (48)
@@ -679,9 +696,9 @@ dvi_encoder dvi_encoder_m0
 (
     .pixelclk   (hdmi_tx_slow_clk),
     .rstin      (~video_rst_n),
-    .blue_din   (SWAP_RB   ? px_osd_ae[23:16] : px_osd_ae[7:0]),
-    .green_din  (px_osd_ae[15:8]),
-    .red_din    (SWAP_RB   ? px_osd_ae[7:0]   : px_osd_ae[23:16]),
+    .blue_din   (SWAP_RB   ? presentation_rgb[23:16] : presentation_rgb[7:0]),
+    .green_din  (presentation_rgb[15:8]),
+    .red_din    (SWAP_RB   ? presentation_rgb[7:0]   : presentation_rgb[23:16]),
     .hsync      (SWAP_HSVS ? vs_r : hs_r),
     .vsync      (SWAP_HSVS ? hs_r : vs_r),
     .de         (de_r),

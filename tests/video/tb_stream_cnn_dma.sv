@@ -1,6 +1,8 @@
 `timescale 1ns/1ps
 module tb_stream_cnn_dma;
-    parameter W=16,H=12,D=2;
+    parameter W=16,H=12,D=2,BANK=0;
+    localparam SRC=BANK==2 ? 32'h03800000 : 32'h03000000+BANK*32'h00200000;
+    localparam DST=BANK==2 ? 32'h03a00000 : 32'h03400000+BANK*32'h00200000;
     localparam BEATS=W*H/4;
     reg clk=0;always #5 clk=~clk;
     reg rst_n=0,vendor_idle=1,cmd_valid=0,rsp_ready=1;
@@ -38,7 +40,7 @@ module tb_stream_cnn_dma;
             was_ar_stalled<=arvalid && !arready;held_ar<=araddr;held_arlen<=arlen;
             if(arvalid && arready)begin
                 if(read_pending || araddr[3:0]!=0 || arlen>15)$fatal(1,"read contract");
-                read_pending<=1;read_addr<=(araddr-32'h03000000)/16;read_n<=arlen+1;read_index<=0;read_delay<=7;
+                read_pending<=1;read_addr<=(araddr-SRC)/16;read_n<=arlen+1;read_index<=0;read_delay<=7;
             end
             if(read_delay>0)begin
                 read_delay<=read_delay-1;
@@ -54,7 +56,7 @@ module tb_stream_cnn_dma;
             end
             if(awvalid && awready)begin
                 if(write_pending || awaddr[3:0]!=0 || awlen>15)$fatal(1,"write contract");
-                write_pending<=1;write_addr<=(awaddr-32'h03400000)/16;write_n<=awlen+1;write_index<=0;
+                write_pending<=1;write_addr<=(awaddr-DST)/16;write_n<=awlen+1;write_index<=0;
             end
             if(wvalid && wready)begin
                 if(!write_pending)$fatal(1,"W before AW");
@@ -83,7 +85,7 @@ module tb_stream_cnn_dma;
     task run(input integer sc);
         begin
             scenario=sc;writes=0;reads=0;
-            command('h241,'h03000000,'h03400000,value);
+            command('h241,SRC,DST,value);
             command('h245,0,0,value);if(value!=0)$fatal(1,"start rejected");
             if(sc==3)begin wait(wvalid && wready);command('h247,0,0,value);end
             elapsed=0;

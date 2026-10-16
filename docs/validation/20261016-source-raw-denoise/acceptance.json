@@ -1,0 +1,14 @@
+{
+  "bit_sha256": "73a2c2ca2ae24300bcc437b851fdcd09ec3a942ca32d88669632a6d37eca05ac",
+  "observation_seconds": 120.17570972297108,
+  "observed_committed_pair_hz": 30.048785556810774,
+  "live_ok": true,
+  "errors": {
+    "underflows": 0,
+    "read_errors": 0,
+    "rejects": 0
+  },
+  "visual_quality_accepted": false,
+  "visual_feedback": "雪花仍明显",
+  "flash_modified": false
+}

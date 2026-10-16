@@ -1,0 +1,124 @@
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "59da1b8347866b87694e2a9b6b853004b84e8bd0715b6886a54801f4b30bf087",
+  "bit_sha256": "d90645ed03eb557813b1340b9c24a58e99b0fabf28eba38bbc364502e80cd95b",
+  "attached": true,
+  "uart_only": false,
+  "entry": "0x800000",
+  "frames": [
+    {
+      "sequence": 35730,
+      "pair": 2,
+      "invoke_ticks": 1834010,
+      "displayed": 35730,
+      "captures": 35731,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 0.7201065130066127
+    },
+    {
+      "sequence": 35760,
+      "pair": 2,
+      "invoke_ticks": 1831129,
+      "displayed": 35760,
+      "captures": 35761,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 1.7279896060354076
+    },
+    {
+      "sequence": 35790,
+      "pair": 2,
+      "invoke_ticks": 1829584,
+      "displayed": 35790,
+      "captures": 35791,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 2.720032114011701
+    }
+  ],
+  "performance": [
+    {
+      "sequence": 35730,
+      "capture_ticks": 3316056,
+      "invoke_ticks": 1834010,
+      "commit_ticks": 1501805,
+      "period_ticks": 3328800,
+      "overlap_ticks": 1825822
+    },
+    {
+      "sequence": 35760,
+      "capture_ticks": 3316209,
+      "invoke_ticks": 1831129,
+      "commit_ticks": 1502680,
+      "period_ticks": 3327693,
+      "overlap_ticks": 1823871
+    },
+    {
+      "sequence": 35790,
+      "capture_ticks": 3316818,
+      "invoke_ticks": 1829584,
+      "commit_ticks": 1505979,
+      "period_ticks": 3328849,
+      "overlap_ticks": 1821397
+    }
+  ],
+  "performance_clock_hz": 100000000,
+  "observation_seconds": 3.1366184260114096,
+  "observed_committed_pair_hz": 30.001116026439295,
+  "stage_ms": {
+    "capture": {
+      "min": 33.16056,
+      "max": 33.16818,
+      "mean": 33.16361
+    },
+    "invoke": {
+      "min": 18.29584,
+      "max": 18.3401,
+      "mean": 18.315743333333334
+    },
+    "commit": {
+      "min": 15.01805,
+      "max": 15.05979,
+      "mean": 15.034880000000001
+    },
+    "period": {
+      "min": 33.27693,
+      "max": 33.28849,
+      "mean": 33.28447333333333
+    },
+    "overlap": {
+      "min": 18.21397,
+      "max": 18.25822,
+      "mean": 18.236966666666667
+    }
+  },
+  "snapshot_status": [
+    1230176522,
+    2,
+    58720256,
+    60817408,
+    35803,
+    35805,
+    0,
+    0,
+    0,
+    196610
+  ],
+  "snapshot_pair": 0,
+  "snapshot_displayed_count": 35803,
+  "snapshot_files": {
+    "input": {
+      "path": "/mnt/mydata/Iris/dev/fastnst/docs/validation/20261016-camera-median/diagnostic-input.bin",
+      "sha256": "f5da55e62bd8a8e4965d62f40fc9b30bf89b93fce2922c2e39cb1ac1029f0457"
+    },
+    "output": {
+      "path": "/mnt/mydata/Iris/dev/fastnst/docs/validation/20261016-camera-median/diagnostic-output.bin",
+      "sha256": "bd5d481e4782ad54c5f497121a308429c7626785ed0cb9e477ecdbbead658213"
+    }
+  },
+  "live_ok": true
+}

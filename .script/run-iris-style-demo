@@ -35,7 +35,8 @@ def words(raw):
  return [int(v,16) for l in raw.splitlines() if re.match(r'^0x[0-9a-f]+:',l) for v in l.split(':',1)[1].split()]
 report={'scope':'SRAM live camera/style demo; no Flash boot acceptance','elf_sha256':digest(a.elf),
         'bit_sha256':digest(a.bit_file),'attached':a.attach,'uart_only':a.uart_only,
-        'entry':None if a.uart_only else hex(a.entry),'frames':[]}
+        'entry':None if a.uart_only else hex(a.entry),'frames':[],
+        'performance':[],'performance_clock_hz':100000000}
 with (contextlib.nullcontext(None) if a.uart_only else socket.create_connection(('localhost',6666),timeout=120)) as s:
  def tcl(c):
   s.sendall(c.encode()+b'\x1a');d=bytearray()
@@ -97,24 +98,41 @@ with (contextlib.nullcontext(None) if a.uart_only else socket.create_connection(
      values=list(map(int,match.groups()))
      report['frames'].append(dict(zip(['sequence','pair','invoke_ticks','displayed','captures','underflows','read_errors','rejects'],values),host_elapsed=time.monotonic()-begin))
      last_progress=time.monotonic()
+    perf=re.fullmatch(r'IRIS PERF frame=(\d+) capture_ticks=(\d+) invoke_ticks=(\d+) commit_ticks=(\d+) period_ticks=(\d+) overlap_ticks=(\d+)',line)
+    if perf and not waiting_boot:
+     report['performance'].append(dict(zip(
+      ['sequence','capture_ticks','invoke_ticks','commit_ticks','period_ticks','overlap_ticks'],
+      map(int,perf.groups()))))
     if line.startswith('IRIS STOP:'):report['stop_reason']=line
   frames=report['frames'];report['observation_seconds']=time.monotonic()-begin
   if len(frames)>=2:
    report['observed_committed_pair_hz']=(frames[-1]['displayed']-frames[0]['displayed'])/(frames[-1]['host_elapsed']-frames[0]['host_elapsed'])
+  if report['performance']:
+   report['stage_ms']={}
+   for name in ['capture','invoke','commit','period','overlap']:
+    values=[f[name+'_ticks']/100000 for f in report['performance']
+            if f['sequence']>1 and f[name+'_ticks']>0]
+    if values:report['stage_ms'][name]={'min':min(values),'max':max(values),'mean':sum(values)/len(values)}
   if a.snapshot:
    tcl('halt');time.sleep(.05)
    status=words(tcl('mdw 0xf8100000 10'));report['snapshot_status']=status
    if len(status)!=10 or status[0]>>16!=0x4953 or not(status[0]&8):
     raise RuntimeError('no complete displayed pair')
-   pair=(status[0]>>4)&1
+   ownership=words(tcl('mdw 0xf810004c 1'))[0] if status[9]==0x00030002 else None
+   pair=ownership&3 if ownership is not None else (status[0]>>4)&1
+   if pair>2:raise RuntimeError('invalid displayed bank')
    report['snapshot_pair']=pair;report['snapshot_displayed_count']=status[4]
    report['snapshot_files']={}
-   for kind,base in [('input',0x03000000),('output',0x03400000)]:
+   for kind,base in [('input',[0x03000000,0x03200000,0x03800000][pair]),
+                    ('output',[0x03400000,0x03600000,0x03a00000][pair])]:
     dest=Path(str(a.output)+'-'+kind+'.bin').resolve()
-    result=tcl(f'dump_image {{{dest}}} 0x{base+pair*0x200000:x} 1228800')
+    result=tcl(f'dump_image {{{dest}}} 0x{base:x} 1228800')
     if not dest.is_file() or dest.stat().st_size!=1228800:raise RuntimeError('incomplete pair dump: '+result)
     report['snapshot_files'][kind]={'path':str(dest),'sha256':digest(dest)}
-   if words(tcl('mdw 0xf8100000 1'))[0]!=status[0]:raise RuntimeError('display ownership changed during snapshot')
+   if ownership is not None:
+    if words(tcl('mdw 0xf810004c 1'))[0]!=ownership or words(tcl('mdw 0xf8100010 1'))[0]!=status[4]:
+     raise RuntimeError('display ownership changed during snapshot')
+   elif words(tcl('mdw 0xf8100000 1'))[0]!=status[0]:raise RuntimeError('display ownership changed during snapshot')
    # CPU resumes even if a snapshot/check fails; no Flash changes occur.
   report['live_ok']=len(frames)>=2 and not report.get('stop_reason') and not report.get('stall_seconds') and all(f['underflows']==0 and f['read_errors']==0 and f['rejects']==0 for f in frames)
  finally:

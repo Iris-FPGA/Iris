@@ -1,0 +1,76 @@
+{
+  "scope": "synthetic RGB fixtures only; not real-camera quality acceptance",
+  "seed": 20261016,
+  "cases": {
+    "salt_pepper": {
+      "point": {
+        "flat_rmse": 18.221517780310034,
+        "flat_pixels_error_over_32": 1672,
+        "contour_threshold": 32,
+        "flat_false_contour_fraction": 0.3240979074312408,
+        "image_mae": 2.542252604166667
+      },
+      "gaussian_source_3x3": {
+        "flat_rmse": 6.86051151194334,
+        "flat_pixels_error_over_32": 896,
+        "contour_threshold": 32,
+        "flat_false_contour_fraction": 0.15302206968873636,
+        "image_mae": 2.5217350260416667
+      },
+      "median_tensor_3x3": {
+        "flat_rmse": 0.0,
+        "flat_pixels_error_over_32": 0,
+        "contour_threshold": 64,
+        "flat_false_contour_fraction": 0.0,
+        "image_mae": 0.002916666666666667
+      }
+    },
+    "random": {
+      "point": {
+        "flat_rmse": 18.025700603067772,
+        "flat_pixels_error_over_32": 16611,
+        "contour_threshold": 32,
+        "flat_false_contour_fraction": 0.37849754516421186,
+        "image_mae": 14.36440646701389
+      },
+      "gaussian_source_3x3": {
+        "flat_rmse": 6.75940989745735,
+        "flat_pixels_error_over_32": 0,
+        "contour_threshold": 32,
+        "flat_false_contour_fraction": 0.007590924257590924,
+        "image_mae": 5.440284288194444
+      },
+      "median_tensor_3x3": {
+        "flat_rmse": 7.340062627561115,
+        "flat_pixels_error_over_32": 0,
+        "contour_threshold": 64,
+        "flat_false_contour_fraction": 0.0006315839649172982,
+        "image_mae": 5.890876736111111
+      }
+    },
+    "mixed": {
+      "point": {
+        "flat_rmse": 25.67462167399677,
+        "flat_pixels_error_over_32": 18049,
+        "contour_threshold": 32,
+        "flat_false_contour_fraction": 0.5582725582725583,
+        "image_mae": 16.610571831597223
+      },
+      "gaussian_source_3x3": {
+        "flat_rmse": 9.606694450267504,
+        "flat_pixels_error_over_32": 1540,
+        "contour_threshold": 32,
+        "flat_false_contour_fraction": 0.22818056151389485,
+        "image_mae": 7.049009331597222
+      },
+      "median_tensor_3x3": {
+        "flat_rmse": 7.601712704123726,
+        "flat_pixels_error_over_32": 9,
+        "contour_threshold": 64,
+        "flat_false_contour_fraction": 0.0016087516087516086,
+        "image_mae": 6.0413205295138885
+      }
+    }
+  },
+  "clean_step_edge_preserved": true
+}

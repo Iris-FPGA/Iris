@@ -3,7 +3,8 @@ module tb_style_capture;
 reg clk=0,video_clk=0,rst_n=0;
 always #5 clk=~clk;
 always #7 video_clk=~video_clk;
-reg request=0,pair=0,i_vs=0,i_valid=0,i_sof=0,i_eof=0;
+reg request=0,i_vs=0,i_valid=0,i_sof=0,i_eof=0;
+reg [1:0] pair=0;
 reg [31:0] i_rgba=0;
 wire busy,done,error,capture_enable,awvalid,wvalid,wlast,bready;
 wire [31:0] awaddr;wire [7:0] awlen;wire [127:0] wdata;
@@ -28,14 +29,14 @@ always @(posedge clk)begin
         if(awvalid && awready)begin
             if(pending)$fatal(1,"multiple writes in flight");
             if(awlen!=15 || awaddr[7:0]!=0)$fatal(1,"burst geometry");
-            if(awaddr!=(pair ? 32'h03200000 : 32'h03000000)+bursts*256)$fatal(1,"address");
+            if(awaddr!=(pair==2 ? 32'h03800000 : pair==1 ? 32'h03200000 : 32'h03000000)+bursts*256)$fatal(1,"address");
             address<=awaddr;pending<=1;beats<=0;
         end
         if(wvalid && wready)begin
             started_w<=!wlast;
             if(!pending)$fatal(1,"W before AW");
             if(wlast!=(beats==15))$fatal(1,"LAST mismatch");
-            if(scenario==0 || scenario==1)begin
+            if(scenario==0 || scenario==1 || scenario==5)begin
                 for(integer k=0;k<4;k=k+1)
                     if(wdata[k*32+:32]!==pixel((bursts*16+beats)*4+k))$fatal(1,"pixel order");
             end
@@ -52,7 +53,7 @@ always @(posedge clk)begin
 end
 task start(input integer sc);
     begin
-        wait(!busy);@(negedge clk);scenario=sc;bursts=0;beats=0;pair=sc%2;
+        wait(!busy);@(negedge clk);scenario=sc;bursts=0;beats=0;pair=sc==5 ? 2 : sc%2;
         inject_error=sc==1;request=1;@(negedge clk);request=0;
         wait(capture_enable);repeat(3)@(negedge video_clk);
         i_vs=1;@(negedge video_clk);i_vs=0;
@@ -80,6 +81,8 @@ initial begin
     if(error || bursts!=4 || write_dummy_bad!=0)$fatal(1,"recovery after errors");
     start(4);send_pixels(256,1);wait(done);
     if(error || write_dummy_bad!=1)$fatal(1,"dummy lane audit missed injected byte");
+    start(5);send_pixels(256,1);wait(done);
+    if(error || bursts!=4 || write_dummy_bad!=0)$fatal(1,"third bank capture failed");
     $display("PASS style capture: staged continuous W, order, backpressure, final B, B errors, short frame, overflow, recovery, dummy audit");$finish;
 end
 initial begin #2000000;$fatal(1,"capture timeout state=%d level=%d words=%d",dut.state,dut.fifo_level,dut.words);end

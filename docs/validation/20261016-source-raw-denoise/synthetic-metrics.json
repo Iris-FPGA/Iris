@@ -1,0 +1,8 @@
+{
+  "scope": "synthetic RAW cross-filter, no real-camera quality acceptance",
+  "raw_rmse_before": 10.966501264474644,
+  "raw_rmse_after": 5.354885107541894,
+  "outliers_over_32_before": 324,
+  "outliers_over_32_after": 0,
+  "clean_step_max_bias": 2
+}

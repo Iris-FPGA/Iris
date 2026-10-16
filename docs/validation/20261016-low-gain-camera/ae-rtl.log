@@ -1,0 +1,4 @@
+PASS exposure sensor contract: I2C sequences decode to controller half-lines, 4..2289, group hold and automatic exposure
+tests/video/tb_ae_exposure.sv:56: $finish called at 600050000 (1ps)
+PASS AE gain recovery: dark-to-light, G=A/E=200..410 equivalent -> G=6..8, low-light G=A retained when needed, atomic groups, <0.5% brightness change, two-frame delay and no hunting (18 combined groups)
+tests/video/tb_ae_gain_recovery.sv:103: $finish called at 3316650000 (1ps)

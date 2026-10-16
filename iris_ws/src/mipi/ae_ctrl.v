@@ -12,7 +12,10 @@
 //
 //   Control law (guide 8.4: exposure first, gain only at the limit):
 //     too dark : exp += step   (until EXP_MAX, then gain index +1)
+//     spare exposure: lower gain and compensate exposure in one group hold
 //     too bright: exp -= step   (until EXP_MIN, then gain index -1)
+//   Rebalancing also runs inside the brightness dead-band, so a brightened
+//   scene cannot retain high analogue gain with an unnecessarily short exposure.
 //   step = clamp(exp>>4, 8, 128)  (~6.25% of current exposure,
 //   below 2x the 5% dead-band -> no limit-cycle flicker).
 //
@@ -26,6 +29,7 @@
 //   (i2c_subsystem): group-hold wrapped sequences
 //     exposure: 0x3812=00 | 3e00,3e01,3e02 | 0x3812=30   (5 writes)
 //     gain    : 0x3812=00 | 3e08,3e09      | 0x3812=30   (4 writes)
+//     combined: 0x3812=00 | 3e08,3e09,3e00,3e01,3e02 | 3812=30 (7 writes)
 //   After boot an explicit 1.0x gain write runs once (sensor gain
 //   defaults are not published, so make them known).
 //
@@ -106,8 +110,9 @@ localparam [1:0] S_WAIT  = 2'd3;   // wait ae_done / timeout
 
 reg [1:0]  st;
 reg [2:0]  seq_pos;                // current entry within the sequence
-reg [2:0]  seq_len;                // 5 (exposure) or 4 (gain)
+reg [2:0]  seq_len;                // 5 (exposure), 4 (gain), 7 (combined)
 reg        seq_gain;               // 1 = gain sequence
+reg        seq_combined;           // gain + compensated exposure, one group hold
 reg [19:0] to_cnt;                 // ~19.4 ms write timeout @27 MHz
 
 reg        pending;                // fresh stats available
@@ -157,6 +162,33 @@ always @* begin
 end
 localparam [3:0] GAIN_MAX = 4'd12;
 
+// Adjacent gain ratios from the LUT above, rounded to Q8. The compensation
+// error is below 0.2%, inside the existing brightness dead-band. Keep the
+// full product until range checking; truncating to 12 bits could wrap a long
+// exposure and incorrectly permit another gain reduction.
+reg [8:0] lower_gain_ratio;
+always @* begin
+    case (gain_idx)
+        4'd1:  lower_gain_ratio = 9'd384;
+        4'd2:  lower_gain_ratio = 9'd345;
+        4'd3:  lower_gain_ratio = 9'd317;
+        4'd4:  lower_gain_ratio = 9'd315;
+        4'd5:  lower_gain_ratio = 9'd336;
+        4'd6:  lower_gain_ratio = 9'd384;
+        4'd7:  lower_gain_ratio = 9'd341;
+        4'd8:  lower_gain_ratio = 9'd384;
+        4'd9:  lower_gain_ratio = 9'd341;
+        4'd10: lower_gain_ratio = 9'd390;
+        4'd11: lower_gain_ratio = 9'd336;
+        4'd12: lower_gain_ratio = 9'd384;
+        default: lower_gain_ratio = 9'd256;
+    endcase
+end
+wire [20:0] compensated_product = exp_val * lower_gain_ratio + 21'd128;
+wire [12:0] compensated_exp = compensated_product[20:8];
+wire rebalance_gain = (gain_idx != 4'd0) &&
+                      (compensated_exp <= {1'b0, EXP_MAX});
+
 //---------------------------------------------------------------------
 // sequence entry decode (combinational; the inputs only change at
 // safe points, so ae_addr/ae_data are stable for the whole transaction)
@@ -167,6 +199,15 @@ always @* begin
     if (seq_pos == 3'd0) begin
         wr_addr_c = 16'h3812;
         wr_data_c = 8'h00;                        // group hold start
+    end else if (seq_combined) begin
+        case (seq_pos)
+            3'd1: begin wr_addr_c = 16'h3e08; wr_data_c = lut_ana; end
+            3'd2: begin wr_addr_c = 16'h3e09; wr_data_c = lut_fine; end
+            3'd3: begin wr_addr_c = 16'h3e00; wr_data_c = 8'h00; end
+            3'd4: begin wr_addr_c = 16'h3e01; wr_data_c = exp_val[11:4]; end
+            3'd5: begin wr_addr_c = 16'h3e02; wr_data_c = {exp_val[3:0], 4'h0}; end
+            default: begin wr_addr_c = 16'h3812; wr_data_c = 8'h30; end
+        endcase
     end else if (seq_gain) begin
         if (seq_pos == 3'd1) begin
             wr_addr_c = 16'h3e08;
@@ -206,6 +247,7 @@ always @(posedge clk or negedge rst_n) begin
         seq_pos  <= 3'd0;
         seq_len  <= 3'd4;
         seq_gain <= 1'b1;
+        seq_combined <= 1'b0;
         to_cnt   <= 20'd0;
         luma_sum <= 32'd0;
         pending  <= 1'b0;
@@ -240,6 +282,7 @@ always @(posedge clk or negedge rst_n) begin
             if (init_done) begin
                 ae_req   <= 1'b1;
                 seq_gain <= 1'b1;
+                seq_combined <= 1'b0;
                 seq_len  <= 3'd4;
                 seq_pos  <= 3'd0;
                 to_cnt   <= 20'd0;
@@ -250,11 +293,23 @@ always @(posedge clk or negedge rst_n) begin
         //---------------------------------------------------------
         S_EVAL: begin
             if (init_done && pending && holdoff == 4'd0) begin
-                if (too_dark) begin
+                if (rebalance_gain) begin
+                    exp_val  <= compensated_exp[11:0];
+                    gain_idx <= gain_idx - 4'd1;
+                    seq_gain <= 1'b0;
+                    seq_combined <= 1'b1;
+                    seq_len  <= 3'd7;
+                    seq_pos  <= 3'd0;
+                    ae_req   <= 1'b1;
+                    pending  <= 1'b0;
+                    to_cnt   <= 20'd0;
+                    st       <= S_ISSUE;
+                end else if (too_dark) begin
                     if (exp_val < EXP_MAX) begin
                         exp_val  <= (exp_val > EXP_MAX - step) ? EXP_MAX
                                                                : exp_val + step;
                         seq_gain <= 1'b0;
+                        seq_combined <= 1'b0;
                         seq_len  <= 3'd5;
                         seq_pos  <= 3'd0;
                         ae_req   <= 1'b1;
@@ -264,6 +319,7 @@ always @(posedge clk or negedge rst_n) begin
                     end else if (gain_idx < GAIN_MAX) begin
                         gain_idx <= gain_idx + 4'd1;
                         seq_gain <= 1'b1;
+                        seq_combined <= 1'b0;
                         seq_len  <= 3'd4;
                         seq_pos  <= 3'd0;
                         ae_req   <= 1'b1;
@@ -276,6 +332,7 @@ always @(posedge clk or negedge rst_n) begin
                         exp_val  <= (exp_val < EXP_MIN + step) ? EXP_MIN
                                                                : exp_val - step;
                         seq_gain <= 1'b0;
+                        seq_combined <= 1'b0;
                         seq_len  <= 3'd5;
                         seq_pos  <= 3'd0;
                         ae_req   <= 1'b1;
@@ -285,6 +342,7 @@ always @(posedge clk or negedge rst_n) begin
                     end else if (gain_idx > 4'd0) begin
                         gain_idx <= gain_idx - 4'd1;
                         seq_gain <= 1'b1;
+                        seq_combined <= 1'b0;
                         seq_len  <= 3'd4;
                         seq_pos  <= 3'd0;
                         ae_req   <= 1'b1;
