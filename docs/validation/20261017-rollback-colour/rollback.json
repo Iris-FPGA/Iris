@@ -1,0 +1,71 @@
+{
+  "scope": "Restore colour display from before CNN stripe enhancement; retain black-and-white to colour fix",
+  "restored_from": "docs/validation/20261017-neural-colour/before",
+  "configuration": {
+    "source_mix_q2": 3,
+    "saturation_q2": 5,
+    "colour_bits": 5,
+    "normal_threshold": 20
+  },
+  "restored_files": [
+    ".script/render-style-visibility.py",
+    "docs/风格彩色与调参.md",
+    "firmware/stream_style/README.md",
+    "iris_ws/src/cnn/iris_style_contour.v",
+    "iris_ws/src/cnn/iris_style_contour_panels.v",
+    "tests/video/run_style_contour_tests.py",
+    "tests/video/tb_style_contour.sv",
+    "tests/video/tb_style_panels.sv"
+  ],
+  "source_manifest_matches": {
+    "iris_ws/src/cnn/iris_style_contour.v": true,
+    "iris_ws/src/cnn/iris_style_contour_panels.v": true,
+    "tests/video/tb_style_contour.sv": true,
+    "tests/video/run_style_contour_tests.py": true,
+    ".script/render-style-visibility.py": true,
+    "docs/风格彩色与调参.md": true
+  },
+  "hardware": {
+    "bitstream_loaded_this_turn": false,
+    "flash_modified_this_turn": false
+  },
+  "offline_preview": {
+    "pixel_identical_to": "docs/validation/20261017-style-colour/colour-comparison.png",
+    "matches": true,
+    "preview": "docs/validation/20261017-rollback-colour/colour-comparison.png"
+  },
+  "unit_tests": {
+    "status": "PASS",
+    "exit_code": 0,
+    "configurations": 3,
+    "vectors_each": 10240,
+    "total_vectors": 30720
+  },
+  "display_tests": {
+    "status": "PASS",
+    "exit_code": 0,
+    "cases": [
+      [
+        0,
+        2,
+        3
+      ]
+    ],
+    "samples": 2074559,
+    "previous_full_regression": "docs/validation/20261017-style-colour/validation.json",
+    "command": "IVERILOG=/tmp/iris-iverilog/usr/bin/iverilog VVP=/tmp/iris-iverilog/usr/bin/vvp IVERILOG_LIB=/tmp/iris-iverilog/usr/lib/x86_64-linux-gnu/ivl python3 -u tests/video/run_style_contour_tests.py --panels --negative 0"
+  },
+  "build": {
+    "map": "PASS",
+    "interface": "PASS",
+    "pnr": "PASS",
+    "timing": "PASS",
+    "pgm": "PASS",
+    "exit_code": 0,
+    "minimum_setup_slack_ns": 0.014,
+    "minimum_hold_slack_ns": 0.026,
+    "bitstream": "iris_ws/outflow/iris_ws.bit",
+    "bitstream_sha256": "a3fb4e54eb14b89cfbf4bc98712360f13e2045e4cb83d394f6b1b66d9b20ba65",
+    "hex_sha256": "900297259864efb86c97322d7037a751a0f1a2c8bfaf789abe1f6b28caf6927b"
+  }
+}

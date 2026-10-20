@@ -27,15 +27,17 @@ reg req_prime;
 reg [8:0] current_row;
 reg [3:0] row_phase;
 // Four compact full-colour banks; six camera-grey banks.
-// Retain only the visible original 0..319 and neural 320..639 columns.
+// Retain neural 320..639 and same-frame camera 320..639 for colour guidance.
 // Hidden camera columns still populate the complete grey contour stencil.
 // The grey stencil keeps row-2..row+2 while row+3 fills the spare bank.
-// Share one read port across the four rows. A row occupies a 256-word
-// address slice; only 160 words are used. Strip the unused INT8 alpha bytes
-// explicitly so the block RAM maps as 1024x96 instead of four wide RAMs.
-(* syn_ramdecomp="area" *) reg [95:0] colour_rows[0:1023];
+// The native-camera build does not cache the unused left original. Two
+// 512x96 memories replace its 1024x96 memory, retaining the RAM bit budget.
+// The optional non-native build still retains the original left panel.
+localparam COLOUR_ADDR_BITS=NATIVE_CAMERA_LEFT ? 9 : 10;
+(* syn_ramdecomp="area" *) reg [95:0] colour_rows[0:(1<<COLOUR_ADDR_BITS)-1];
+(* syn_ramdecomp="area" *) reg [95:0] source_rows[0:511];
 reg [31:0] grey0[0:159],grey1[0:159],grey2[0:159],grey3[0:159],grey4[0:159],grey5[0:159];
-reg [95:0] colour_q;
+reg [95:0] colour_q,source_q;
 reg [31:0] grey_q[0:5];
 reg word_half_q;
 reg line_good,first_right_q,last_right_q,right_q;
@@ -53,6 +55,9 @@ wire panel_left=x<160;
 wire panel_right=x>=320 && x<480;
 wire [7:0] grey_index=x>=160 && x<480 ? ((x-11'd160)>>1) : 8'd0;
 wire [7:0] word_index=panel_left ? (x>>1) : x<480 ? grey_index : 8'd0;
+wire [COLOUR_ADDR_BITS-1:0] colour_read_addr=NATIVE_CAMERA_LEFT ?
+ {current_row[1:0],(word_index[6:0]-7'd80)} : {current_row[1:0],word_index};
+wire [8:0] source_read_addr={current_row[1:0],(grey_index[6:0]-7'd80)};
 wire [2:0] current_bank=current_row%6;
 // Make every tag an explicit function input, so a DDR-ready update also
 // re-evaluates row zero and neighbours when the source row has not changed.
@@ -86,6 +91,9 @@ wire [14:0] ready_banks={neighbour_bank(current_row,2,video_tags,active_pair),ne
 wire [47:0] colour_pair=word_half_q ? colour_q[95:48] : colour_q[47:0];
 wire [63:0] plain_pair={8'h80,colour_pair[47:24],8'h80,colour_pair[23:0]};
 wire [63:0] neural_pair=plain_pair;
+wire [47:0] source_pair=word_half_q ? source_q[95:48] : source_q[47:0];
+wire [47:0] source_rgb={source_pair[7:0]^8'h80,source_pair[15:8]^8'h80,source_pair[23:16]^8'h80,
+ source_pair[31:24]^8'h80,source_pair[39:32]^8'h80,source_pair[47:40]^8'h80};
 wire [79:0] grey_rows;
 function [7:0] grey;
  input [31:0] rgba;
@@ -103,7 +111,7 @@ end endgenerate
 wire [47:0] styled;
 iris_style_contour #(.SCALE_Q24(SCALE_Q24)) u_contour(
  .clk(video_clk),.rst_n(rst_n),.i_valid(right_q),.i_first(first_right_q),.i_last(last_right_q),
- .i_mode(mode_live),.i_grey_rows(grey_rows),.i_neural_rgba(neural_pair),.o_valid(),.o_rgb(styled));
+ .i_mode(mode_live),.i_grey_rows(grey_rows),.i_neural_rgba(neural_pair),.i_source_rgb(source_rgb),.o_valid(),.o_rgb(styled));
 localparam DELAY=7;
 reg [47:0] plain_pipe[0:DELAY-2];
 reg [DELAY-1:0] inside_pipe,good_pipe,panel_pipe;
@@ -133,7 +141,7 @@ iris_style_split_scaler u_split_scaler(
  .o_hs(scaled_hs),.o_vs(scaled_vs),.o_de(scaled_de),.o_rgb(scaled_rgb));
 // Memory ports have no reset, so Efinity can infer true dual-clock block RAM.
 always @(posedge video_clk)begin
- colour_q<=colour_rows[{current_row[1:0],word_index}];
+ colour_q<=colour_rows[colour_read_addr];source_q<=source_rows[source_read_addr];
  grey_q[0]<=grey0[grey_index];grey_q[1]<=grey1[grey_index];grey_q[2]<=grey2[grey_index];
  grey_q[3]<=grey3[grey_index];grey_q[4]<=grey4[grey_index];grey_q[5]<=grey5[grey_index];
 end
@@ -228,11 +236,16 @@ assign rready=state==DATA;
 wire [2:0] refill_bank=row%6;
 wire [7:0] refill_index=word_count<160 ? word_count : word_count-160;
 wire [31:0] refill_grey={grey(rdata[127:96]),grey(rdata[95:64]),grey(rdata[63:32]),grey(rdata[31:0])};
-wire colour_visible=word_count<80 || word_count>=240;
+wire colour_visible=(!NATIVE_CAMERA_LEFT && word_count<80) || word_count>=240;
 wire [7:0] colour_index=word_count<80 ? word_count[7:0] : word_count-9'd160;
+wire [COLOUR_ADDR_BITS-1:0] colour_write_addr=NATIVE_CAMERA_LEFT ?
+ {row[1:0],(colour_index[6:0]-7'd80)} : {row[1:0],colour_index};
+wire [8:0] source_write_addr={row[1:0],(word_count[6:0]-7'd80)};
 always @(posedge clk)begin
  if(rvalid && rready && rresp==0)begin
-  if(colour_visible)colour_rows[{row[1:0],colour_index}]<=
+  if(colour_visible)colour_rows[colour_write_addr]<=
+    {rdata[119:96],rdata[87:64],rdata[55:32],rdata[23:0]};
+  if(word_count>=80 && word_count<160)source_rows[source_write_addr]<=
     {rdata[119:96],rdata[87:64],rdata[55:32],rdata[23:0]};
   if(word_count<160)case(refill_bank)
    0:grey0[refill_index]<=refill_grey;1:grey1[refill_index]<=refill_grey;2:grey2[refill_index]<=refill_grey;

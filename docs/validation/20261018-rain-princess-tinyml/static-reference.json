@@ -1,0 +1,41 @@
+{
+  "scope": "software reference for the deterministic static firmware fixture",
+  "runtime": "tflite-runtime",
+  "runtime_version": "2.14.0",
+  "resolver": "BUILTIN_REF",
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "input_shape": [
+    1,
+    128,
+    128,
+    3
+  ],
+  "output_shape": [
+    1,
+    128,
+    128,
+    3
+  ],
+  "input_quantization": [
+    1.0,
+    -128
+  ],
+  "output_quantization": [
+    2.283437490463257,
+    -89
+  ],
+  "output_fnv1a": "b334633c",
+  "files": {
+    "input": {
+      "path": "docs/validation/20261018-rain-princess-tinyml/static-input.bin",
+      "bytes": 49152,
+      "sha256": "0d4f62fda65e8439a98344751bdd6d04810120abeb04c941d503786d944cb73a"
+    },
+    "golden": {
+      "path": "docs/validation/20261018-rain-princess-tinyml/static-golden.bin",
+      "bytes": 49152,
+      "sha256": "818a4c3d7b1cd2850f4276b2dab594360fe971aae983b7b390910fc55b1e35e7"
+    }
+  },
+  "hardware_execution_verified": false
+}

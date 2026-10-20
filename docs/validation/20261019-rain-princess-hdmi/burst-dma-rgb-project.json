@@ -1,0 +1,32 @@
+{
+  "scope": "live camera + complete 128x128 RGB TinyML; 1920x1080 HDMI split",
+  "source_project": "/mnt/mydata/Iris/dev/fastnst/iris_ws",
+  "project": "/mnt/mydata/Iris/dev/fastnst/firmware/tinyml_style/build/rain_princess_rect_8x2_burst_rgb/iris_ws",
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "accelerator_sha256": "fcfd9d22df0ae3781dd2cc914886938b0c072be775cf7aea1ea425ad36f0d28d",
+  "in_parallel": 8,
+  "out_parallel": 2,
+  "cache_depth_override": 1024,
+  "add_mode_override": "LITE",
+  "live_rgb": true,
+  "tensor_burst_dma": true,
+  "tensor_resize_channels": [
+    16,
+    32
+  ],
+  "tensor_copy_channels": [
+    3,
+    16,
+    32
+  ],
+  "source_sha256": {
+    "src/top.v": "ef5a15383e570a47d0aed55689acc594b1af20d7f19d8491336abab62f01f8c9",
+    "src/cnn/tinyml_subsystem.v": "c596b4fbae3a9cb1152b46f571fc3165f30e0f11320eb210c53a3528bdb6f00d",
+    "src/cnn/iris_resize2x.v": "64f10c37f10cb3884ededcf4c00583704bcdcbdbb40584465cc8d918601d903c",
+    "src/cnn/iris_style_capture.v": "c95c378a4d2c6d1b9cb98e121872170e9b46f5bedd1b87431d673827018457ac",
+    "src/cnn/iris_tinyml_video.v": "44c19240a8cadeea2c24c72c6204d17a5765b69a0ed7a25cf60f18a2b0bd5b64",
+    "src/cnn/iris_style_demo.v": "b2b1a30a7f8f7f9bd8ae60f1b45fe8dfeec61b5a93484e47be40ca025c3371bc"
+  },
+  "reset_behavior": "OCR JAL x0,0; load ELF at 0x00800000 with OpenOCD",
+  "hardware_execution_verified": false
+}

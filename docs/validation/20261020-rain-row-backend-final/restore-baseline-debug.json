@@ -1,0 +1,269 @@
+{
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "model_bytes": 125336,
+  "model_symbol": "rain_princess_int8_model_data",
+  "rain_row_backend": false,
+  "project_manifest": "/mnt/mydata/Iris/dev/fastnst/firmware/tinyml_style/build/rain_princess_rect_8x2_burst_rgb/iris_ws/tinyml-project.json",
+  "elf_sha256": "426c89c1925f5a5d4368ffb32efc0ae381aefefcf0a762b9a119d585df1a53cc",
+  "bit_sha256": "6ee41aeab508f75deff0e38da5e5edfd48798328c4ec71e508cb35ccd82e05b8",
+  "reset": "",
+  "load": "281252 bytes written at address 0x00800000\n4 bytes written at address 0x00844ab0\n2108 bytes written at address 0x00844ac0\ndownloaded 283364 bytes in 6.950014s (39.816 KiB/s)\n",
+  "descriptor": [
+    2,
+    4,
+    50331648,
+    54525952,
+    49152,
+    35448452,
+    0,
+    4,
+    5,
+    0,
+    0,
+    0
+  ],
+  "apb_registers": [
+    1230176522,
+    2,
+    58720256,
+    60817408,
+    4,
+    6,
+    0,
+    0,
+    0,
+    196611,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1229980417,
+    7,
+    5,
+    4,
+    2,
+    0,
+    273
+  ],
+  "frames": [
+    {
+      "sequence": 1,
+      "pair": 0,
+      "invoke_ticks": 35440103,
+      "displayed": 1,
+      "captures": 2,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 2,
+      "pair": 1,
+      "invoke_ticks": 35450282,
+      "displayed": 2,
+      "captures": 3,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 3,
+      "pair": 2,
+      "invoke_ticks": 35459464,
+      "displayed": 3,
+      "captures": 4,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 4,
+      "pair": 0,
+      "invoke_ticks": 35448452,
+      "displayed": 4,
+      "captures": 5,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    }
+  ],
+  "elapsed_seconds": 1.8091290909796953,
+  "frame_receipt_seconds": [
+    0.690823795972392,
+    1.0429849119391292,
+    1.4109811709495261,
+    1.7788649490103126
+  ],
+  "steady_intervals_seconds": [
+    0.3679962590103969,
+    0.3678837780607864
+  ],
+  "profile": [
+    {
+      "node": 0,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=2317291 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 1,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1011589 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 2,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=956501 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 3,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1896743 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 4,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1897217 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 5,
+      "op": "ADD",
+      "mode": "LITE",
+      "duration": "ticks=451483 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 6,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1896665 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 7,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1896528 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 8,
+      "op": "ADD",
+      "mode": "LITE",
+      "duration": "ticks=452726 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 9,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1896890 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 10,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1897146 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 11,
+      "op": "ADD",
+      "mode": "LITE",
+      "duration": "ticks=454749 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 12,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1897229 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 13,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1898069 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 14,
+      "op": "ADD",
+      "mode": "LITE",
+      "duration": "ticks=455317 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 15,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1895988 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 16,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1895094 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 17,
+      "op": "ADD",
+      "mode": "LITE",
+      "duration": "ticks=449609 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 18,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "mode": "IRIS_RESIZE_HW",
+      "duration": "ticks=98380 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 19,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=3995981 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 20,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "mode": "IRIS_RESIZE_HW",
+      "duration": "ticks=195856 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 21,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=4443606 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 22,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1142393 cache_hit_raw=0 cache_miss_raw=0"
+    }
+  ],
+  "strict_dispatch": true,
+  "registers": {
+    "pc": "pc (/32): 0x00817df0\n",
+    "mcause": "mcause (/32): 0x8000000b\n",
+    "mepc": "mepc (/32): 0x00817df4\n",
+    "mtval": "mtval (/32): 0x00000000\n"
+  },
+  "camera_output_numeric_parity_verified": false,
+  "visual_confirmation": false,
+  "completed": true,
+  "dump_pair": 0,
+  "files": {
+    "input": {
+      "path": "/mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-backend-final/restore-baseline-input.bin",
+      "address": "0x3000000",
+      "bytes": 49152,
+      "sha256": "19c3ee235ebfbfa5799f1047e0613d98b2022fed367c1c47e1173f28cd5eb3ff"
+    },
+    "output": {
+      "path": "/mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-backend-final/restore-baseline-output.bin",
+      "address": "0x3400000",
+      "bytes": 49152,
+      "sha256": "3b8f5c0ded07d468aa4e915224db8b1164066a01c3223ff671dbc1b243a3c06a"
+    }
+  },
+  "cpu_left_running": true
+}

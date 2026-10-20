@@ -23,12 +23,20 @@ class IrisProfiler : public tflite::MicroProfiler {
     if (count_ == 24) IrisDispatchStop("profiler capacity exceeded");
 #if IRIS_STRICT_DISPATCH
     const char* mode = layer_mode[0];
-    if (strcmp(mode,"STANDARD") && strcmp(mode,"LITE") && strcmp(mode,"IRIS_RESIZE_HW"))
+    if (strcmp(mode,"STANDARD") && strcmp(mode,"LITE") && strcmp(mode,"IRIS_RESIZE_HW")
+#if IRIS_RAIN_BACKEND
+        && strcmp(mode,"IRIS_ROW_CONV") && strcmp(mode,"IRIS_ROW_ADD")
+#endif
+        )
       IrisDispatchStop("operation completed without a hardware mode");
 #endif
+#if IRIS_RAIN_BACKEND
+    const uint32_t hits=0,misses=0;
+#else
     const bool vendor = strcmp(layer_mode[0],"IRIS_RESIZE_HW") != 0 && hw_accel_setting[0].cache_en;
     const uint32_t hits = vendor ? static_cast<uint32_t>(get_cache_hit_cntr()) : 0;
     const uint32_t misses = vendor ? static_cast<uint32_t>(get_cache_miss_cntr()) : 0;
+#endif
     events_[count_++] = {tag_,layer_mode[0],ticks,hits,misses};
   }
   void Print() const {

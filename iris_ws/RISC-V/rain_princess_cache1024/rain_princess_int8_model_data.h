@@ -1,0 +1,5 @@
+#ifndef _RAIN_PRINCESS_INT8_MODEL_DATA_H
+#define _RAIN_PRINCESS_INT8_MODEL_DATA_H
+extern const unsigned int rain_princess_int8_model_data_len;
+extern const unsigned char rain_princess_int8_model_data[];
+#endif

@@ -22,6 +22,9 @@ limitations under the License.
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "platform/tinyml/ops/add.h"
 #include "dispatch_guard.h"
+#if IRIS_RAIN_BACKEND
+#include "iris_rain_backend.h"
+#endif
 
 namespace tflite {
 namespace reference_integer_ops {
@@ -42,6 +45,11 @@ inline void ElementWise(
 	const int8_t* input2_data, int8_t* output_data,
 	void (*check_arithmetic_params)(const ArithmeticParams&),
 	int8_t (*binary_func)(int8_t, int8_t, const ArithmeticParams&)) {
+#if IRIS_RAIN_BACKEND
+  if(!IrisRainAdd(size,params,input1_data,input2_data,output_data))
+    IrisDispatchStop("row Add failed");
+  return;
+#endif
   OP_STATUS_T res = add_drv(size, input1_data, input2_data, output_data,
 					 params.input1_offset, params.input2_offset, params.output_offset,
 					 params.output_multiplier, params.output_shift, params.left_shift,

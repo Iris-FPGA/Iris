@@ -1,0 +1,158 @@
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x40 cpuAR=0x0x8083c0 fbAR=0x0x205000
+arb cpuAW=0x0x70fffc fbAW=0x0xa3800 rdCnt cpu/fb=2213/12683 rresp=0
+arb ARhand=15168 rdDone=15168 AWhand=12405 wrDone=12405
+lastAR addr=0x0x808400 len=3 size=4 burst=1 | lastAW addr=0x0x1c9800 len=127
+Iris 8x8 row-cached Conv and pipelined Add backend
+IRIS nodes OK: flatbuffer
+IRIS nodes OK: init
+IRIS prepare node 0 @0x0xc5c63cIRIS prepare node 1 @0x0xc5c658IRIS prepare node 2 @0x0xc5c674IRIS prepare node 3 @0x0xc5c690IRIS prepare node 4 @0x0xc5c6acIRIS prepare node 5 @0x0xc5c6c8IRIS prepare node 6 @0x0xc5c6e4IRIS prepare node 7 @0x0xc5c700IRIS prepare node 8 @0x0xc5c71cIRIS prepare node 9 @0x0xc5c738IRIS prepare node 10 @0x0xc5c754IRIS prepare node 11 @0x0xc5c770IRIS prepare node 12 @0x0xc5c78cIRIS prepare node 13 @0x0xc5c7a8IRIS prepare node 14 @0x0xc5c7c4IRIS prepare node 15 @0x0xc5c7e0IRIS prepare node 16 @0x0xc5c7fcIRIS prepare node 17 @0x0xc5c818IRIS prepare node 18 @0x0xc5c834IRIS prepare node 19 @0x0xc5c850IRIS prepare node 20 @0x0xc5c86cIRIS prepare node 21 @0x0xc5c888IRIS prepare node 22 @0x0xc5c8a4DDR arena: base=0x0xa5cbc0 capacity=2097152 used=399772
+IRIS LIVE: 128x128x3 paired camera/style; strict hardware; SRAM only
+IRIS LIVE: capture/inference overlap=1
+0; CONV_2D; IRIS_ROW_CONV; ticks=197709 cache_hit_raw=0 cache_miss_raw=0
+1; CONV_2D; IRIS_ROW_CONV; ticks=141888 cache_hit_raw=0 cache_miss_raw=0
+2; CONV_2D; IRIS_ROW_CONV; ticks=168817 cache_hit_raw=0 cache_miss_raw=0
+3; CONV_2D; IRIS_ROW_CONV; ticks=288696 cache_hit_raw=0 cache_miss_raw=0
+4; CONV_2D; IRIS_ROW_CONV; ticks=288784 cache_hit_raw=0 cache_miss_raw=0
+5; ADD; IRIS_ROW_ADD; ticks=63197 cache_hit_raw=0 cache_miss_raw=0
+6; CONV_2D; IRIS_ROW_CONV; ticks=289602 cache_hit_raw=0 cache_miss_raw=0
+7; CONV_2D; IRIS_ROW_CONV; ticks=288895 cache_hit_raw=0 cache_miss_raw=0
+8; ADD; IRIS_ROW_ADD; ticks=68295 cache_hit_raw=0 cache_miss_raw=0
+9; CONV_2D; IRIS_ROW_CONV; ticks=289883 cache_hit_raw=0 cache_miss_raw=0
+10; CONV_2D; IRIS_ROW_CONV; ticks=288891 cache_hit_raw=0 cache_miss_raw=0
+11; ADD; IRIS_ROW_ADD; ticks=67919 cache_hit_raw=0 cache_miss_raw=0
+12; CONV_2D; IRIS_ROW_CONV; ticks=288184 cache_hit_raw=0 cache_miss_raw=0
+13; CONV_2D; IRIS_ROW_CONV; ticks=291861 cache_hit_raw=0 cache_miss_raw=0
+14; ADD; IRIS_ROW_ADD; ticks=66351 cache_hit_raw=0 cache_miss_raw=0
+15; CONV_2D; IRIS_ROW_CONV; ticks=289810 cache_hit_raw=0 cache_miss_raw=0
+16; CONV_2D; IRIS_ROW_CONV; ticks=288949 cache_hit_raw=0 cache_miss_raw=0
+17; ADD; IRIS_ROW_ADD; ticks=66933 cache_hit_raw=0 cache_miss_raw=0
+18; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=99102 cache_hit_raw=0 cache_miss_raw=0
+19; CONV_2D; IRIS_ROW_CONV; ticks=384523 cache_hit_raw=0 cache_miss_raw=0
+20; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=192016 cache_hit_raw=0 cache_miss_raw=0
+21; CONV_2D; IRIS_ROW_CONV; ticks=350726 cache_hit_raw=0 cache_miss_raw=0
+22; CONV_2D; IRIS_ROW_CONV; ticks=176670 cache_hit_raw=0 cache_miss_raw=0
+IRIS LIVE frame=1 pair=0 Invoke_ticks=4990431 displayed=1 captures=2 underflow=0 readerr=0 rejects=0 period_ticks=0
+IRIS LIVE frame=2 pair=1 Invoke_ticks=3625084 displayed=2 captures=3 underflow=0 readerr=0 rejects=0 period_ticks=18302462
+IRIS LIVE frame=3 pair=2 Invoke_ticks=3639531 displayed=3 captures=4 underflow=0 readerr=0 rejects=0 period_ticks=4991629
+IRIS LIVE frame=4 pair=0 Invoke_ticks=3638209 displayed=4 captures=5 underflow=0 readerr=0 rejects=0 period_ticks=4991607
+IRIS LIVE frame=5 pair=1 Invoke_ticks=3646519 displayed=5 captures=6 underflow=0 readerr=0 rejects=0 period_ticks=4991554
+IRIS LIVE frame=6 pair=2 Invoke_ticks=3639966 displayed=6 captures=7 underflow=0 readerr=0 rejects=0 period_ticks=4991612
+IRIS LIVE frame=7 pair=0 Invoke_ticks=3641119 displayed=7 captures=8 underflow=0 readerr=0 rejects=0 period_ticks=4991610
+IRIS LIVE frame=8 pair=1 Invoke_ticks=3642114 displayed=8 captures=9 underflow=0 readerr=0 rejects=0 period_ticks=4991568
+IRIS LIVE frame=9 pair=2 Invoke_ticks=3645467 displayed=9 captures=10 underflow=0 readerr=0 rejects=0 period_ticks=4991619
+IRIS LIVE frame=10 pair=0 Invoke_ticks=3643551 displayed=10 captures=11 underflow=0 readerr=0 rejects=0 period_ticks=4991574
+IRIS LIVE frame=11 pair=1 Invoke_ticks=3643529 displayed=11 captures=12 underflow=0 readerr=0 rejects=0 period_ticks=4991673
+IRIS LIVE frame=12 pair=2 Invoke_ticks=3641774 displayed=12 captures=13 underflow=0 readerr=0 rejects=0 period_ticks=4991590
+IRIS LIVE frame=13 pair=0 Invoke_ticks=3642289 displayed=13 captures=14 underflow=0 readerr=0 rejects=0 period_ticks=4991499
+IRIS LIVE frame=14 pair=1 Invoke_ticks=3634507 displayed=14 captures=15 underflow=0 readerr=0 rejects=0 period_ticks=4991625
+IRIS LIVE frame=15 pair=2 Invoke_ticks=3639748 displayed=15 captures=16 underflow=0 readerr=0 rejects=0 period_ticks=4991568
+IRIS LIVE frame=16 pair=0 Invoke_ticks=3641295 displayed=16 captures=17 underflow=0 readerr=0 rejects=0 period_ticks=4991625
+IRIS LIVE frame=17 pair=1 Invoke_ticks=3641198 displayed=17 captures=18 underflow=0 readerr=0 rejects=0 period_ticks=4991609
+IRIS LIVE frame=18 pair=2 Invoke_ticks=3641585 displayed=18 captures=19 underflow=0 readerr=0 rejects=0 period_ticks=4991553
+IRIS LIVE frame=19 pair=0 Invoke_ticks=3634647 displayed=19 captures=20 underflow=0 readerr=0 rejects=0 period_ticks=4991597
+IRIS LIVE frame=20 pair=1 Invoke_ticks=3642231 displayed=20 captures=21 underflow=0 readerr=0 rejects=0 period_ticks=4991633
+IRIS LIVE frame=21 pair=2 Invoke_ticks=3644387 displayed=21 captures=22 underflow=0 readerr=0 rejects=0 period_ticks=4991615
+IRIS LIVE frame=22 pair=0 Invoke_ticks=3639087 displayed=22 captures=23 underflow=0 readerr=0 rejects=0 period_ticks=4991544
+IRIS LIVE frame=23 pair=1 Invoke_ticks=3642786 displayed=23 captures=24 underflow=0 readerr=0 rejects=0 period_ticks=4991709
+IRIS LIVE frame=24 pair=2 Invoke_ticks=3642544 displayed=24 captures=25 underflow=0 readerr=0 rejects=0 period_ticks=4991543
+IRIS LIVE frame=25 pair=0 Invoke_ticks=3638953 displayed=25 captures=26 underflow=0 readerr=0 rejects=0 period_ticks=4991536
+IRIS LIVE frame=26 pair=1 Invoke_ticks=3643267 displayed=26 captures=27 underflow=0 readerr=0 rejects=0 period_ticks=4991662
+IRIS LIVE frame=27 pair=2 Invoke_ticks=3629608 displayed=27 captures=28 underflow=0 readerr=0 rejects=0 period_ticks=4991562
+IRIS LIVE frame=28 pair=0 Invoke_ticks=3638407 displayed=28 captures=29 underflow=0 readerr=0 rejects=0 period_ticks=4991640
+IRIS LIVE frame=29 pair=1 Invoke_ticks=3642237 displayed=29 captures=30 underflow=0 readerr=0 rejects=0 period_ticks=4991528
+IRIS LIVE frame=30 pair=2 Invoke_ticks=3631440 displayed=30 captures=31 underflow=0 readerr=0 rejects=0 period_ticks=4991622
+IRIS LIVE frame=31 pair=0 Invoke_ticks=3627372 displayed=31 captures=32 underflow=0 readerr=0 rejects=0 period_ticks=4991597
+IRIS LIVE frame=32 pair=1 Invoke_ticks=3631832 displayed=32 captures=33 underflow=0 readerr=0 rejects=0 period_ticks=4991567
+IRIS LIVE frame=33 pair=2 Invoke_ticks=3629857 displayed=33 captures=34 underflow=0 readerr=0 rejects=0 period_ticks=4991599
+IRIS LIVE frame=34 pair=0 Invoke_ticks=3637524 displayed=34 captures=35 underflow=0 readerr=0 rejects=0 period_ticks=4991618
+IRIS LIVE frame=35 pair=1 Invoke_ticks=3629127 displayed=35 captures=36 underflow=0 readerr=0 rejects=0 period_ticks=4991620
+IRIS LIVE frame=36 pair=2 Invoke_ticks=3631480 displayed=36 captures=37 underflow=0 readerr=0 rejects=0 period_ticks=4991579
+IRIS LIVE frame=37 pair=0 Invoke_ticks=3628671 displayed=37 captures=38 underflow=0 readerr=0 rejects=0 period_ticks=4991620
+IRIS LIVE frame=38 pair=1 Invoke_ticks=3633423 displayed=38 captures=39 underflow=0 readerr=0 rejects=0 period_ticks=4991538
+IRIS LIVE frame=39 pair=2 Invoke_ticks=3633832 displayed=39 captures=40 underflow=0 readerr=0 rejects=0 period_ticks=4991601
+IRIS LIVE frame=40 pair=0 Invoke_ticks=3631205 displayed=40 captures=41 underflow=0 readerr=0 rejects=0 period_ticks=4991627
+IRIS LIVE frame=41 pair=1 Invoke_ticks=3630587 displayed=41 captures=42 underflow=0 readerr=0 rejects=0 period_ticks=4991603
+IRIS LIVE frame=42 pair=2 Invoke_ticks=3631301 displayed=42 captures=43 underflow=0 readerr=0 rejects=0 period_ticks=4991621
+IRIS LIVE frame=43 pair=0 Invoke_ticks=3629224 displayed=43 captures=44 underflow=0 readerr=0 rejects=0 period_ticks=4991596
+IRIS LIVE frame=44 pair=1 Invoke_ticks=3630747 displayed=44 captures=45 underflow=0 readerr=0 rejects=0 period_ticks=4991573
+IRIS LIVE frame=45 pair=2 Invoke_ticks=3630126 displayed=45 captures=46 underflow=0 readerr=0 rejects=0 period_ticks=4991628
+IRIS LIVE frame=46 pair=0 Invoke_ticks=3631867 displayed=46 captures=47 underflow=0 readerr=0 rejects=0 period_ticks=4991602
+IRIS LIVE frame=47 pair=1 Invoke_ticks=3636419 displayed=47 captures=48 underflow=0 readerr=0 rejects=0 period_ticks=4991554
+IRIS LIVE frame=48 pair=2 Invoke_ticks=3627975 displayed=48 captures=49 underflow=0 readerr=0 rejects=0 period_ticks=4991636
+IRIS LIVE frame=49 pair=0 Invoke_ticks=3632112 displayed=49 captures=50 underflow=0 readerr=0 rejects=0 period_ticks=4991601
+IRIS LIVE frame=50 pair=1 Invoke_ticks=3630709 displayed=50 captures=51 underflow=0 readerr=0 rejects=0 period_ticks=4991522
+IRIS LIVE frame=51 pair=2 Invoke_ticks=3629614 displayed=51 captures=52 underflow=0 readerr=0 rejects=0 period_ticks=4991697
+IRIS LIVE frame=52 pair=0 Invoke_ticks=3629404 displayed=52 captures=53 underflow=0 readerr=0 rejects=0 period_ticks=4991496
+IRIS LIVE frame=53 pair=1 Invoke_ticks=3630522 displayed=53 captures=54 underflow=0 readerr=0 rejects=0 period_ticks=4991628
+IRIS LIVE frame=54 pair=2 Invoke_ticks=3629370 displayed=54 captures=55 underflow=0 readerr=0 rejects=0 period_ticks=4991666
+IRIS LIVE frame=55 pair=0 Invoke_ticks=3629712 displayed=55 captures=56 underflow=0 readerr=0 rejects=0 period_ticks=4991527
+IRIS LIVE frame=56 pair=1 Invoke_ticks=3632226 displayed=56 captures=57 underflow=0 readerr=0 rejects=0 period_ticks=4991668
+IRIS LIVE frame=57 pair=2 Invoke_ticks=3629189 displayed=57 captures=58 underflow=0 readerr=0 rejects=0 period_ticks=4991556
+IRIS LIVE frame=58 pair=0 Invoke_ticks=3630614 displayed=58 captures=59 underflow=0 readerr=0 rejects=0 period_ticks=4991622
+IRIS LIVE frame=59 pair=1 Invoke_ticks=3629371 displayed=59 captures=60 underflow=0 readerr=0 rejects=0 period_ticks=4991620
+IRIS LIVE frame=60 pair=2 Invoke_ticks=3631929 displayed=60 captures=61 underflow=0 readerr=0 rejects=0 period_ticks=4991523
+IRIS LIVE frame=61 pair=0 Invoke_ticks=3630843 displayed=61 captures=62 underflow=0 readerr=0 rejects=0 period_ticks=4991621
+IRIS LIVE frame=62 pair=1 Invoke_ticks=3630659 displayed=62 captures=63 underflow=0 readerr=0 rejects=0 period_ticks=4991554
+IRIS LIVE frame=63 pair=2 Invoke_ticks=3629733 displayed=63 captures=64 underflow=0 readerr=0 rejects=0 period_ticks=4991639
+IRIS LIVE frame=64 pair=0 Invoke_ticks=3629907 displayed=64 captures=65 underflow=0 readerr=0 rejects=0 period_ticks=4991613
+IRIS LIVE frame=65 pair=1 Invoke_ticks=3629889 displayed=65 captures=66 underflow=0 readerr=0 rejects=0 period_ticks=4991550
+IRIS LIVE frame=66 pair=2 Invoke_ticks=3627163 displayed=66 captures=67 underflow=0 readerr=0 rejects=0 period_ticks=4991627
+IRIS LIVE frame=67 pair=0 Invoke_ticks=3634308 displayed=67 captures=68 underflow=0 readerr=0 rejects=0 period_ticks=4991606
+IRIS LIVE frame=68 pair=1 Invoke_ticks=3630210 displayed=68 captures=69 underflow=0 readerr=0 rejects=0 period_ticks=4991628
+IRIS LIVE frame=69 pair=2 Invoke_ticks=3634975 displayed=69 captures=70 underflow=0 readerr=0 rejects=0 period_ticks=4991527
+IRIS LIVE frame=70 pair=0 Invoke_ticks=3631552 displayed=70 captures=71 underflow=0 readerr=0 rejects=0 period_ticks=4991651
+IRIS LIVE frame=71 pair=1 Invoke_ticks=3632623 displayed=71 captures=72 underflow=0 readerr=0 rejects=0 period_ticks=4991504
+IRIS LIVE frame=72 pair=2 Invoke_ticks=3636505 displayed=72 captures=73 underflow=0 readerr=0 rejects=0 period_ticks=4991638
+IRIS LIVE frame=73 pair=0 Invoke_ticks=3636214 displayed=73 captures=74 underflow=0 readerr=0 rejects=0 period_ticks=4991622
+IRIS LIVE frame=74 pair=1 Invoke_ticks=3635656 displayed=74 captures=75 underflow=0 readerr=0 rejects=0 period_ticks=4991605
+IRIS LIVE frame=75 pair=2 Invoke_ticks=3636473 displayed=75 captures=76 underflow=0 readerr=0 rejects=0 period_ticks=4991559
+IRIS LIVE frame=76 pair=0 Invoke_ticks=3637450 displayed=76 captures=77 underflow=0 readerr=0 rejects=0 period_ticks=4991585
+IRIS LIVE frame=77 pair=1 Invoke_ticks=3635027 displayed=77 captures=78 underflow=0 readerr=0 rejects=0 period_ticks=4991609
+IRIS LIVE frame=78 pair=2 Invoke_ticks=3639154 displayed=78 captures=79 underflow=0 readerr=0 rejects=0 period_ticks=4991636
+IRIS LIVE frame=79 pair=0 Invoke_ticks=3642486 displayed=79 captures=80 underflow=0 readerr=0 rejects=0 period_ticks=4991586
+IRIS LIVE frame=80 pair=1 Invoke_ticks=3639095 displayed=80 captures=81 underflow=0 readerr=0 rejects=0 period_ticks=4991567
+IRIS LIVE frame=81 pair=2 Invoke_ticks=3637741 displayed=81 captures=82 underflow=0 readerr=0 rejects=0 period_ticks=4991656
+IRIS LIVE frame=82 pair=0 Invoke_ticks=3636137 displayed=82 captures=83 underflow=0 readerr=0 rejects=0 period_ticks=4991542
+IRIS LIVE frame=83 pair=1 Invoke_ticks=3638720 displayed=83 captures=84 underflow=0 readerr=0 rejects=0 period_ticks=4991622
+IRIS LIVE frame=84 pair=2 Invoke_ticks=3636721 displayed=84 captures=85 underflow=0 readerr=0 rejects=0 period_ticks=4991603
+IRIS LIVE frame=85 pair=0 Invoke_ticks=3645845 displayed=85 captures=86 underflow=0 readerr=0 rejects=0 period_ticks=4991562
+IRIS LIVE frame=86 pair=1 Invoke_ticks=3641597 displayed=86 captures=87 underflow=0 readerr=0 rejects=0 period_ticks=4991565
+IRIS LIVE frame=87 pair=2 Invoke_ticks=3642157 displayed=87 captures=88 underflow=0 readerr=0 rejects=0 period_ticks=4991626
+IRIS LIVE frame=88 pair=0 Invoke_ticks=3643672 displayed=88 captures=89 underflow=0 readerr=0 rejects=0 period_ticks=4991627
+IRIS LIVE frame=89 pair=1 Invoke_ticks=3641293 displayed=89 captures=90 underflow=0 readerr=0 rejects=0 period_ticks=4991597
+IRIS LIVE frame=90 pair=2 Invoke_ticks=3643518 displayed=90 captures=91 underflow=0 readerr=0 rejects=0 period_ticks=4991566
+IRIS LIVE frame=91 pair=0 Invoke_ticks=3640256 displayed=91 captures=92 underflow=0 readerr=0 rejects=0 period_ticks=4991602
+IRIS LIVE frame=92 pair=1 Invoke_ticks=3633904 displayed=92 captures=93 underflow=0 readerr=0 rejects=0 period_ticks=4991582
+IRIS LIVE frame=93 pair=2 Invoke_ticks=3646078 displayed=93 captures=94 underflow=0 readerr=0 rejects=0 period_ticks=4991636
+IRIS LIVE frame=94 pair=0 Invoke_ticks=3640540 displayed=94 captures=95 underflow=0 readerr=0 rejects=0 period_ticks=4991603
+IRIS LIVE frame=95 pair=1 Invoke_ticks=3645389 displayed=95 captures=96 underflow=0 readerr=0 rejects=0 period_ticks=4991602
+IRIS LIVE frame=96 pair=2 Invoke_ticks=3646778 displayed=96 captures=97 underflow=0 readerr=0 rejects=0 period_ticks=4991555
+IRIS LIVE frame=97 pair=0 Invoke_ticks=3638900 displayed=97 captures=98 underflow=0 readerr=0 rejects=0 period_ticks=4991569
+IRIS LIVE frame=98 pair=1 Invoke_ticks=3645314 displayed=98 captures=99 underflow=0 readerr=0 rejects=0 period_ticks=4991623
+IRIS LIVE frame=99 pair=2 Invoke_ticks=3647351 displayed=99 captures=100 underflow=0 readerr=0 rejects=0 period_ticks=4991665
+IRIS LIVE frame=100 pair=0 Invoke_ticks=3646887 displayed=100 captures=101 underflow=0 readerr=0 rejects=0 period_ticks=4991546
+IRIS LIVE frame=101 pair=1 Invoke_ticks=3642231 displayed=101 captures=102 underflow=0 readerr=0 rejects=0 period_ticks=4991611
+IRIS LIVE frame=102 pair=2 Invoke_ticks=3646003 displayed=102 captures=103 underflow=0 readerr=0 rejects=0 period_ticks=4991597
+IRIS LIVE frame=103 pair=0 Invoke_ticks=3638947 displayed=103 captures=104 underflow=0 readerr=0 rejects=0 period_ticks=4991566
+IRIS LIVE frame=104 pair=1 Invoke_ticks=3643489 displayed=104 captures=105 underflow=0 readerr=0 rejects=0 period_ticks=4991628
+IRIS LIVE frame=105 pair=2 Invoke_ticks=3638298 displayed=105 captures=106 underflow=0 readerr=0 rejects=0 period_ticks=4991596
+IRIS LIVE frame=106 pair=0 Invoke_ticks=3638902 displayed=106 captures=107 underflow=0 readerr=0 rejects=0 period_ticks=4991596
+IRIS LIVE frame=107 pair=1 Invoke_ticks=3636415 displayed=107 captures=108 underflow=0 readerr=0 rejects=0 period_ticks=4991560
+IRIS LIVE frame=108 pair=2 Invoke_ticks=3639346 displayed=108 captures=109 underflow=0 readerr=0 rejects=0 period_ticks=4991636
+IRIS LIVE frame=109 pair=0 Invoke_ticks=3639486 displayed=109 captures=110 underflow=0 readerr=0 rejects=0 period_ticks=4991593
+IRIS LIVE frame=110 pair=1 Invoke_ticks=3637901 displayed=110 captures=111 underflow=0 readerr=0 rejects=0 period_ticks=4991553
+IRIS LIVE frame=111 pair=2 Invoke_ticks=3638028 displayed=111 captures=112 underflow=0 readerr=0 rejects=0 period_ticks=4991660
+IRIS LIVE frame=112 pair=0 Invoke_ticks=3637954 displayed=112 captures=113 underflow=0 readerr=0 rejects=0 period_ticks=4991547
+IRIS LIVE frame=113 pair=1 Invoke_ticks=3640222 displayed=113 captures=114 underflow=0 readerr=0 rejects=0 period_ticks=4991644
+IRIS LIVE frame=114 pair=2 Invoke_ticks=3637669 displayed=114 captures=115 underflow=0 readerr=0 rejects=0 period_ticks=4991591
+IRIS LIVE frame=115 pair=0 Invoke_ticks=3634471 displayed=115 captures=116 underflow=0 readerr=0 rejects=0 period_ticks=4991563
+IRIS LIVE frame=116 pair=1 Invoke_ticks=3638967 displayed=116 captures=117 underflow=0 readerr=0 rejects=0 period_ticks=4991608
+IRIS LIVE frame=117 pair=2 Invoke_ticks=3636005 displayed=117 captures=118 underflow=0 readerr=0 rejects=0 period_ticks=4991578
+IRIS LIVE frame=118 pair=0 Invoke_ticks=3636916 displayed=118 captures=119 underflow=0 readerr=0 rejects=0 period_ticks=4991626
+IRIS LIVE frame=119 pair=1 Invoke_ticks=3634666 displayed=119 captures=120 underflow=0 readerr=0 rejects=0 period_ticks=4991622
+IRIS LIVE frame=120 pair=2 Invoke_ticks=3639210 displayed=120 captures=121 underflow=0 readerr=0 rejects=0 period_ticks=4991592
+

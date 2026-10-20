@@ -1,0 +1,4 @@
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-add4/fixtures/22 cycles=156341 AR=517 AW=264
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-add4/fixtures/22
+PASS Rain DMA invalid dimensions/parameters/ranges, R/B errors and abort drain
+tests/video/tb_rain_backend.sv:199: $finish called at 3189150000 (1ps)

@@ -11,9 +11,24 @@
 #include "iris_profiler.h"
 #include "iris_resize.h"
 #include "iris_dma_cache.h"
+#if IRIS_RAIN_BACKEND
+#include "iris_rain_backend.h"
+#endif
 extern "C" volatile uint32_t iris_result[8];
 
 namespace {
+#if IRIS_RAIN_BACKEND
+class IrisInterpreter : public tflite::MicroInterpreter {
+ public:
+  using tflite::MicroInterpreter::MicroInterpreter;
+  TfLiteEvalTensor* EvalTensor(int index) {
+    const auto& c=context();
+    return c.GetEvalTensor(&c,index);
+  }
+};
+#else
+using IrisInterpreter=tflite::MicroInterpreter;
+#endif
 alignas(64) uint8_t tensor_arena[IRIS_ARENA_BYTES]
     __attribute__((section(".tinyml_arena")));
 
@@ -103,12 +118,22 @@ extern "C" int main() {
   iris_result[1] = 1;
 
 
+#if defined(IRIS_VENDOR_CACHE_OVERRIDE)
+  override_hw_accel_setting[0].cache_en=IRIS_VENDOR_CACHE_OVERRIDE;
+  override_hw_accel_setting[0].override_flag=1;
+#endif
+#if IRIS_RAIN_BACKEND
+  if(opcode_R(CUSTOM0,0,76,0,0)!=0x49500101u)Stop("row backend ABI mismatch");
+  hw_accel_setting[0].cache_en=0;
+  MicroPrintf("Iris 8x8 row-cached Conv and pipelined Add backend\n\r");
+#else
   // Requires a connected custom-instruction responder, even for discovery.
   init_accel(0);
   print_accel(0);
   if (accel_count < 1 || !hw_accel_setting[0].accel_active ||
       hw_accel_setting[0].conv_depthw_mode == 0 || hw_accel_setting[0].add_mode == 0)
     Stop("required Conv/Add accelerator configuration absent");
+#endif
   IntcInitialize();
   iris_result[1] = 2;
 
@@ -118,7 +143,7 @@ extern "C" int main() {
     Stop("op registration failed");
   if (resolver.AddResizeNearestNeighbor() != kTfLiteOk) Stop("resize registration failed");
   static IrisProfiler profiler __attribute__((section(".tinyml_control")));
-  static tflite::MicroInterpreter interpreter __attribute__((section(".tinyml_control")))(
+  static IrisInterpreter interpreter __attribute__((section(".tinyml_control")))(
       tflite::GetModel(IrisModelData), resolver,
       tensor_arena, sizeof(tensor_arena), &reporter, &profiler);
   if (interpreter.AllocateTensors() != kTfLiteOk) Stop("AllocateTensors failed");
@@ -131,74 +156,93 @@ extern "C" int main() {
   if (input->bytes != kIrisHeight * kIrisWidth * kIrisChannels || input->type != kTfLiteInt8)
     Stop("unexpected input tensor");
 #if IRIS_LIVE_DEMO
-#if !IRIS_MODEL_RGBA || !IRIS_STRICT_DISPATCH
-#error Live demo requires RGBA640 and strict hardware dispatch
+#if !(IRIS_MODEL_RGBA || IRIS_MODEL_RAIN_PRINCESS) || !IRIS_STRICT_DISPATCH
+#error Live demo requires a supported camera model and strict hardware dispatch
 #endif
   volatile uint32_t* demo = reinterpret_cast<volatile uint32_t*>(0xf8100000u);
-  if ((demo[0] >> 16) != 0x4953 || demo[9] != 0x000a0001)
+  const uint32_t expected_abi = IRIS_MODEL_RAIN_PRINCESS ? 0x00030003u : 0x00030002u;
+  if ((demo[0] >> 16) != 0x4953 || demo[9] != expected_abi || demo[16]!=0x49500301u)
     Stop("live camera/display hardware ABI absent");
-  const auto* graph = tflite::GetModel(IrisModelData)->subgraphs()->Get(0);
   auto* output = interpreter.output(0);
   if (!output || output->bytes != input->bytes)
     Stop("live tensor binding failed");
-  MicroPrintf("IRIS LIVE: 640x480 paired camera/style; no CPU image processing; SRAM only\n\r");
+#if IRIS_RAIN_BACKEND
+  // The complete graph uses hardware for every activation access. Bind its
+  // input and final output directly to the leased camera/display pair; the
+  // arena continues to own all intermediate tensors and residual lifetimes.
+  const auto* live_graph=tflite::GetModel(IrisModelData)->subgraphs()->Get(0);
+  auto* live_input=interpreter.EvalTensor(live_graph->inputs()->Get(0));
+  auto* live_output=interpreter.EvalTensor(live_graph->outputs()->Get(0));
+  if(!live_input || !live_output || live_input->type!=kTfLiteInt8 || live_output->type!=kTfLiteInt8)
+    Stop("live eval tensor binding failed");
+#endif
+  MicroPrintf("IRIS LIVE: %ux%ux%u paired camera/style; strict hardware; SRAM only\n\r",
+              kIrisWidth,kIrisHeight,kIrisChannels);
+  const uintptr_t input_banks[3]={0x03000000u,0x03200000u,0x03800000u};
+  const uintptr_t output_banks[3]={0x03400000u,0x03600000u,0x03a00000u};
+  auto start_capture=[&](uint32_t bank) {
+    const uint32_t rejected=demo[8];
+    demo[1]=bank;
+    if(demo[2]!=input_banks[bank] || demo[3]!=output_banks[bank])
+      Stop("capture bank address mismatch");
+    demo[0]=1u;
+    const uint64_t deadline=clint_getTime(BSP_CLINT)+SYSTEM_CLINT_HZ;
+    while(!(demo[0]&1u))
+      if(demo[8]!=rejected || clint_getTime(BSP_CLINT)>deadline)Stop("capture start failed");
+  };
+  MicroPrintf("IRIS LIVE: capture/inference overlap=%u\n\r",IRIS_LIVE_PIPELINE ? 1u : 0u);
+  // A debugger CPU reset leaves the independent camera/display hardware
+  // running. Finish its old capture/commit and release the old CPU lease.
+  const uint64_t startup_deadline=clint_getTime(BSP_CLINT)+2ull*SYSTEM_CLINT_HZ;
+  while(demo[0]&(1u|32u))
+    if(clint_getTime(BSP_CLINT)>startup_deadline)Stop("live startup hardware timeout");
+  const uint32_t old_lease=demo[18];
+  if(old_lease&4u)demo[18]=old_lease&3u;
+  const uint32_t initial_display=demo[19];
+  const uint32_t initial_pair=(initial_display&4u) ? ((initial_display&3u)+1u)%3u : 0u;
+  uint64_t previous_commit=0;
   for (uint32_t sequence=1;;++sequence) {
-    // Wait for VS ownership acknowledgement before choosing the free pair.
     uint64_t deadline=clint_getTime(BSP_CLINT)+SYSTEM_CLINT_HZ;
-    while (demo[0] & 32u)
-      if(clint_getTime(BSP_CLINT)>deadline)Stop("display pair acknowledgement timeout");
-    const uint32_t status=demo[0];
-    const uint32_t pair=(status & 8u) ? ((status >> 4) & 1u)^1u : 0u;
+    while(demo[0]&32u)
+      if(clint_getTime(BSP_CLINT)>deadline)Stop("display acknowledgement timeout");
+    const uint32_t display=demo[19];
+    const uint32_t pair=IRIS_LIVE_PIPELINE ? (initial_pair+sequence-1u)%3u :
+        (display&4u) ? ((display&3u)+1u)%3u : 0u;
+    if((display&4u) && (display&3u)==pair)Stop("inference would overwrite displayed bank");
     demo[1]=pair;
     const uintptr_t input_address=demo[2],output_address=demo[3];
-    if(input_address!=(pair ? 0x03200000u : 0x03000000u) ||
-       output_address!=(pair ? 0x03600000u : 0x03400000u))Stop("live bank address mismatch");
+    if(input_address!=input_banks[pair] || output_address!=output_banks[pair])
+      Stop("live bank address mismatch");
     iris_live_result[0]=1;
-    IrisFlushCpuDataCache();
-    if(sequence==1)MicroPrintf("IRIS LIVE before capture: input_view=0x%x output_view=0x%x eval23=0x%x\n\r",
-      reinterpret_cast<uintptr_t>(input),reinterpret_cast<uintptr_t>(output),
-      reinterpret_cast<uintptr_t>(interpreter.context_.GetEvalTensor(&interpreter.context_,23)->data.raw));
     const uint32_t rejects=demo[8];
-    demo[0]=1u;
-    deadline=clint_getTime(BSP_CLINT)+SYSTEM_CLINT_HZ;
-    while (!(demo[0] & 1u))
-      if(demo[8]!=rejects || clint_getTime(BSP_CLINT)>deadline)Stop("camera capture start failed");
+    if(!IRIS_LIVE_PIPELINE || sequence==1)start_capture(pair);
+    else if(demo[20]!=pair)Stop("prefetched camera bank mismatch");
     deadline=clint_getTime(BSP_CLINT)+2ull*SYSTEM_CLINT_HZ;
-    while (demo[0] & 1u)
-      if(clint_getTime(BSP_CLINT)>deadline)Stop("camera frame capture timeout");
+    while(demo[0]&1u)
+      if(clint_getTime(BSP_CLINT)>deadline)Stop("camera capture timeout");
     if(!(demo[0]&2u) || (demo[0]&4u)) {
-      MicroPrintf("IRIS LIVE: dropped incomplete camera frame, retry\n\r");
+      if(IRIS_LIVE_PIPELINE)Stop("prefetched camera frame incomplete");
+      MicroPrintf("IRIS LIVE: incomplete camera frame; retry\n\r");
       continue;
     }
-    if(sequence==1)MicroPrintf("IRIS LIVE after capture: input_data=0x%x output_data=0x%x eval23=0x%x\n\r",
-      reinterpret_cast<uintptr_t>(input->data.raw),reinterpret_cast<uintptr_t>(output->data.raw),
-      reinterpret_cast<uintptr_t>(interpreter.context_.GetEvalTensor(&interpreter.context_,23)->data.raw));
-    if(sequence==1)MicroPrintf("IRIS CAPTURE AUDIT source_dummy=%u bus_dummy=%u serial_ddr=%u\n\r",
-      demo[10],demo[11],demo[12]);
-    if(demo[10] || demo[11])Stop("camera write payload audit failed");
+    if(demo[10] || demo[11])Stop("camera payload audit failed");
+    demo[18]=4u|pair;
+    if(demo[18]!=(4u|pair) || demo[8]!=rejects)Stop("inference lease rejected");
 #if IRIS_LIVE_SNAPSHOT
     if(sequence==1 && !IrisStreamTensorUart(input_address,kIrisHeight,kIrisWidth,kIrisChannels,"input"))
-      Stop("camera hardware stream failed");
+      Stop("input hardware stream failed");
 #endif
-    if(sequence==1)MicroPrintf("IRIS CTRL before input copy: intr=%x/%x ops=%x\n\r",global_intr_id[0],global_intr_id[1],reinterpret_cast<uintptr_t>(ops_list));
+#if IRIS_RAIN_BACKEND
+    live_input->data.int8=reinterpret_cast<int8_t*>(input_address);
+    live_output->data.int8=reinterpret_cast<int8_t*>(output_address);
+    input->data.int8=live_input->data.int8;output->data.int8=live_output->data.int8;
+#else
     if(!IrisCopyTensorDma(input_address,reinterpret_cast<uintptr_t>(input->data.int8),
-                          kIrisHeight,kIrisWidth,kIrisChannels))Stop("camera input DMA transport failed");
-    if(sequence==1)MicroPrintf("IRIS CTRL after input copy: intr=%x/%x ops=%x\n\r",global_intr_id[0],global_intr_id[1],reinterpret_cast<uintptr_t>(ops_list));
-    // Relocating graph I/O must never redirect intermediate DMA writes into
-    // the ELF, heap metadata or read-only model. Check before issuing Conv.
-    for(unsigned node_index=0;node_index<graph->operators()->size();++node_index) {
-      const auto* node=graph->operators()->Get(node_index);
-      for(unsigned j=0;j<node->outputs()->size();++j) {
-        const int id=node->outputs()->Get(j);
-        const auto* tensor=interpreter.context_.GetEvalTensor(&interpreter.context_,id);
-        const uintptr_t address=reinterpret_cast<uintptr_t>(tensor->data.raw);
-        if(sequence==1)MicroPrintf("IRIS LIVE DMA node=%u tensor=%u output=0x%x\n\r",node_index,id,address);
-        if(address!=output_address &&
-           (address<reinterpret_cast<uintptr_t>(tensor_arena) ||
-            address>=reinterpret_cast<uintptr_t>(tensor_arena)+sizeof(tensor_arena)))
-          Stop("live intermediate DMA points outside tensor arena");
-      }
-    }
+                          kIrisHeight,kIrisWidth,kIrisChannels))Stop("input DMA failed");
+#endif
+    // The third bank is distinct from the displayed and leased banks. Its
+    // capture can finish while all 23 operators process the current tensor.
+    if(IRIS_LIVE_PIPELINE && !IRIS_LIVE_SNAPSHOT)start_capture((pair+1u)%3u);
     IrisFlushCpuDataCache();IrisResetVendorCache();
     iris_live_result[0]=2;
     profiler.Reset();
@@ -206,24 +250,43 @@ extern "C" int main() {
     if(interpreter.Invoke()!=kTfLiteOk)Stop("live Invoke failed");
     const uint64_t ticks=clint_getTime(BSP_CLINT)-begin;
     IrisFlushCpuDataCache();IrisResetVendorCache();
+#if !IRIS_RAIN_BACKEND
     if(!IrisCopyTensorDma(reinterpret_cast<uintptr_t>(output->data.int8),output_address,
-                          kIrisHeight,kIrisWidth,kIrisChannels))Stop("style output DMA transport failed");
+                          kIrisHeight,kIrisWidth,kIrisChannels))Stop("output DMA failed");
+#endif
+    demo[18]=pair;  // Release the inference lease before requesting display.
+    if(demo[18]&4u)Stop("inference lease release failed");
     iris_live_result[1]=sequence;iris_live_result[2]=input_address;
     iris_live_result[3]=output_address;iris_live_result[4]=output->bytes;
     iris_live_result[5]=static_cast<uint32_t>(ticks);iris_live_result[6]=static_cast<uint32_t>(ticks>>32);
+    demo[1]=pair;  // Prefetch selected another capture bank; commit this result.
     demo[0]=2u;
     deadline=clint_getTime(BSP_CLINT)+SYSTEM_CLINT_HZ;
     while(demo[0]&32u)
-      if(clint_getTime(BSP_CLINT)>deadline)Stop("live display commit timeout");
-    if(demo[8]!=rejects)Stop("live command rejected");
+      if(clint_getTime(BSP_CLINT)>deadline)Stop("display commit timeout");
+    if(demo[8]!=rejects || demo[19]!=(4u|pair))Stop("display commit rejected");
     for(unsigned i=7;i<12;++i)iris_live_result[i]=demo[i-3];
+    const uint64_t committed=clint_getTime(BSP_CLINT);
+    const uint32_t frame_period=previous_commit ? static_cast<uint32_t>(committed-previous_commit) : 0;
+    if(previous_commit) {
+      const uint64_t centifps=100ull*SYSTEM_CLINT_HZ/(committed-previous_commit);
+      demo[22]=static_cast<uint32_t>(centifps>4095 ? 4095 : centifps);
+    }
+    previous_commit=committed;
     iris_live_result[0]=3;IrisFlushCpuDataCache();
-    if(sequence==1)profiler.Print();
+    // The row backend verifies each packed filter on its first use. Profile
+    // a warm frame so the operator times describe sustained HDMI throughput.
+    if(sequence==(IRIS_RAIN_BACKEND ? 3u : 1u))profiler.Print();
+#if IRIS_RAIN_BACKEND
+    if(!IrisRainLogFrame(sequence,pair,static_cast<unsigned>(ticks),demo[4],demo[5],demo[6],demo[7],demo[8],frame_period))
+      Stop("live log queue overflow");
+#else
     MicroPrintf("IRIS LIVE frame=%u pair=%u Invoke_ticks=%u displayed=%u captures=%u underflow=%u readerr=%u rejects=%u\n\r",
        sequence,pair,static_cast<unsigned>(ticks),demo[4],demo[5],demo[6],demo[7],demo[8]);
+#endif
 #if IRIS_LIVE_SNAPSHOT
     if(!IrisStreamTensorUart(output_address,kIrisHeight,kIrisWidth,kIrisChannels,"output"))
-      Stop("style hardware stream failed");
+      Stop("output hardware stream failed");
     MicroPrintf("IRIS STREAM DONE pair=%u displayed=%u\n\r",pair,demo[4]);
     iris_live_result[0]=4;while(true){}
 #endif

@@ -1,0 +1,66 @@
+{
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "packed_sha256": "9ae2f51ae910ce96076e0ee468ec1a7a9609a448e56fc99929b96f9ec0b64fcc",
+  "packed_bytes": 104832,
+  "model_changed": false,
+  "hardware_verified": false
+}
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/0 cycles=151042 AR=197 AW=544
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/0
+tests/video/tb_rain_backend.sv:199: $finish called at 3027320000 (1ps)
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/1 cycles=100894 AR=519 AW=272
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/1
+tests/video/tb_rain_backend.sv:199: $finish called at 2023440000 (1ps)
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/2 cycles=88670 AR=276 AW=136
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/2
+tests/video/tb_rain_backend.sv:199: $finish called at 1780780000 (1ps)
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/3 cycles=151526 AR=166 AW=136
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/3
+tests/video/tb_rain_backend.sv:199: $finish called at 3037590000 (1ps)
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/4 cycles=151526 AR=166 AW=136
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/4
+tests/video/tb_rain_backend.sv:199: $finish called at 3037590000 (1ps)
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/6 cycles=151526 AR=166 AW=136
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/6
+tests/video/tb_rain_backend.sv:199: $finish called at 3037590000 (1ps)
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/7 cycles=151526 AR=166 AW=136
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/7
+tests/video/tb_rain_backend.sv:199: $finish called at 3037590000 (1ps)
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/9 cycles=151526 AR=166 AW=136
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/9
+tests/video/tb_rain_backend.sv:199: $finish called at 3037590000 (1ps)
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/10 cycles=151526 AR=166 AW=136
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/10
+tests/video/tb_rain_backend.sv:199: $finish called at 3037590000 (1ps)
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/12 cycles=151526 AR=166 AW=136
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/12
+tests/video/tb_rain_backend.sv:199: $finish called at 3037590000 (1ps)
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/13 cycles=151526 AR=166 AW=136
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/13
+tests/video/tb_rain_backend.sv:199: $finish called at 3037590000 (1ps)
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/15 cycles=151526 AR=166 AW=136
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/15
+tests/video/tb_rain_backend.sv:199: $finish called at 3037590000 (1ps)
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/16 cycles=151526 AR=166 AW=136
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/16
+tests/video/tb_rain_backend.sv:199: $finish called at 3037590000 (1ps)
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/19 cycles=299437 AR=532 AW=272
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/19
+tests/video/tb_rain_backend.sv:199: $finish called at 5995240000 (1ps)
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/21 cycles=299947 AR=1031 AW=544
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/21
+tests/video/tb_rain_backend.sv:199: $finish called at 6005960000 (1ps)
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/22 cycles=150719 AR=517 AW=264
+PASS Rain DMA consecutive Conv restart /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/22
+PASS Rain DMA invalid dimensions/parameters/ranges, R/B errors and abort drain
+tests/video/tb_rain_backend.sv:199: $finish called at 3076070000 (1ps)
+PASS Rain DMA Add /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/add-11 bytes=32768 cycles=30017
+tests/video/tb_rain_backend.sv:112: $finish called at 300740000 (1ps)
+PASS Rain DMA Add /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/add-14 bytes=32768 cycles=30017
+tests/video/tb_rain_backend.sv:112: $finish called at 300740000 (1ps)
+PASS Rain DMA Add /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/add-17 bytes=32768 cycles=30017
+tests/video/tb_rain_backend.sv:112: $finish called at 300740000 (1ps)
+PASS Rain DMA Add /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/add-5 bytes=32768 cycles=30017
+tests/video/tb_rain_backend.sv:112: $finish called at 300740000 (1ps)
+PASS Rain DMA Add /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/fixtures/add-8 bytes=32768 cycles=30017
+tests/video/tb_rain_backend.sv:112: $finish called at 300740000 (1ps)

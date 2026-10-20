@@ -1,0 +1,276 @@
+{
+  "elf_sha256": "f4b1e9dd4b76ae9c3b4863c2387e5f8561d48bd4e9e3538a468fe5656cac7a8a",
+  "bit_sha256": "c27d94d85e2241605e71a31c466f388f4198f5326bd0c7f9dcbc806b46fd3be3",
+  "reset": "",
+  "load": "280932 bytes written at address 0x00800000\n4 bytes written at address 0x00844970\n2108 bytes written at address 0x00844980\ndownloaded 283044 bytes in 7.061200s (39.145 KiB/s)\n",
+  "descriptor": [
+    1,
+    5,
+    52428800,
+    56623104,
+    49152,
+    36378403,
+    0,
+    5,
+    5,
+    0,
+    0,
+    0
+  ],
+  "apb_registers": [
+    1230176538,
+    2,
+    58720256,
+    60817408,
+    5,
+    6,
+    0,
+    0,
+    0,
+    196611,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1229980417,
+    7,
+    1,
+    5,
+    2,
+    1,
+    240
+  ],
+  "frames": [
+    {
+      "sequence": 1,
+      "pair": 0,
+      "invoke_ticks": 36349635,
+      "displayed": 1,
+      "captures": 1,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 2,
+      "pair": 1,
+      "invoke_ticks": 36372919,
+      "displayed": 2,
+      "captures": 2,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 3,
+      "pair": 2,
+      "invoke_ticks": 36376823,
+      "displayed": 3,
+      "captures": 3,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 4,
+      "pair": 0,
+      "invoke_ticks": 36376681,
+      "displayed": 4,
+      "captures": 4,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 5,
+      "pair": 1,
+      "invoke_ticks": 36378403,
+      "displayed": 5,
+      "captures": 5,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    }
+  ],
+  "elapsed_seconds": 2.402415035990998,
+  "frame_receipt_seconds": [
+    0.6869822490261868,
+    1.103043925948441,
+    1.5189948809565976,
+    1.935042500961572,
+    2.3509163160342723
+  ],
+  "steady_intervals_seconds": [
+    0.4159509550081566,
+    0.4160476200049743,
+    0.4158738150727004
+  ],
+  "profile": [
+    {
+      "node": 0,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=2317496 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 1,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1011419 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 2,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=956879 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 3,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1896827 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 4,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1896841 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 5,
+      "op": "ADD",
+      "mode": "LITE",
+      "duration": "ticks=462956 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 6,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1896290 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 7,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1896976 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 8,
+      "op": "ADD",
+      "mode": "LITE",
+      "duration": "ticks=463163 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 9,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1896427 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 10,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1896194 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 11,
+      "op": "ADD",
+      "mode": "LITE",
+      "duration": "ticks=468497 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 12,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1896758 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 13,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1896709 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 14,
+      "op": "ADD",
+      "mode": "LITE",
+      "duration": "ticks=459842 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 15,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1896563 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 16,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1896190 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 17,
+      "op": "ADD",
+      "mode": "LITE",
+      "duration": "ticks=465887 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 18,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "mode": "IRIS_RESIZE_HW",
+      "duration": "ticks=478735 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 19,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=3996194 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 20,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "mode": "IRIS_RESIZE_HW",
+      "duration": "ticks=671035 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 21,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=4444682 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 22,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=1142388 cache_hit_raw=0 cache_miss_raw=0"
+    }
+  ],
+  "strict_dispatch": true,
+  "registers": {
+    "pc": "pc (/32): 0x00808b34\n",
+    "mcause": "mcause (/32): 0x8000000b\n",
+    "mepc": "mepc (/32): 0x00817d38\n",
+    "mtval": "mtval (/32): 0x00000000\n"
+  },
+  "camera_output_numeric_parity_verified": false,
+  "visual_confirmation": false,
+  "completed": true,
+  "dump_pair": 1,
+  "files": {
+    "input": {
+      "path": "/mnt/mydata/Iris/dev/fastnst/docs/validation/20261019-rain-princess-hdmi/restored-complete-model-input.bin",
+      "address": "0x3200000",
+      "bytes": 49152,
+      "sha256": "5d00945d9041d627a5054e79490f6ef5be292376c0bb3fcbfe33ed319804edbc"
+    },
+    "output": {
+      "path": "/mnt/mydata/Iris/dev/fastnst/docs/validation/20261019-rain-princess-hdmi/restored-complete-model-output.bin",
+      "address": "0x3600000",
+      "bytes": 49152,
+      "sha256": "fd735b31b032bcc8417cc9be635f5d42068f18a563ec044db63260ca59fe9a0d"
+    }
+  },
+  "cpu_left_running": true
+}

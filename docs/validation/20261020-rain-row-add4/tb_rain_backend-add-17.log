@@ -1,0 +1,2 @@
+PASS Rain DMA Add /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-add4/fixtures/add-17 bytes=32768 cycles=30017
+tests/video/tb_rain_backend.sv:112: $finish called at 300740000 (1ps)

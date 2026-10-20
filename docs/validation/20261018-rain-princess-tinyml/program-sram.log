@@ -1,0 +1,11 @@
+setup: minimum +0.016 ns (23 relationships)
+hold: minimum +0.019 ns (23 relationships)
+==> 烧录 mode=jtag
+****** Python exception running: /mnt/mydata/efinity/efinity_2026/efinity-2026.1.132-linux-x64/efinity/2026.1/scripts/efx_run.py --prj iris_ws -f program --pgm_opts mode=jtag
+[91m    :	FAIL [0m
+An exception occurred: list index out of range
+❌ 烧录失败（详见上方输出）
+   常见原因：
+   1) USB 权限：设备节点非 rw → 运行 .script/setup-usb（需 sudo），再拔插一次 USB
+   2) 模式选错：板载 USB 下载器请用 jtag_bridge / jtag；active(SPI 直连) 需外接下载器到 J6
+   3) jtag_bridge 失败：桥位流与板卡 SPI 引脚可能不匹配，请用 IRIS_BRIDGE_BIT 指定匹配的桥位流

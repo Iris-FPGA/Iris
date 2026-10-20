@@ -11,6 +11,8 @@ p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('model',type=Path);p.add_argument('output',type=Path)
 p.add_argument('--in-parallel',type=int,default=4);p.add_argument('--out-parallel',type=int,default=4)
 p.add_argument('--cache',choices=['ENABLE','DISABLE'],help='explicit official TinyML cache mode for controlled hardware comparisons')
+p.add_argument('--cache-depth',type=int,choices=[512,1024,2048,4096,8192,16384],help='official cache depth override; model bytes are unchanged')
+p.add_argument('--add-mode',choices=['STANDARD','LITE'],help='official hardware Add implementation; model bytes are unchanged')
 a=p.parse_args();model=a.model.resolve();out=a.output.resolve();vendor=root.parent/'tinyml'
 revision=subprocess.check_output(['git','-C',str(vendor),'rev-parse','HEAD'],text=True).strip()
 if revision!='96886fa0c73e25e6218db7d0863f84677cf65138':raise SystemExit('Unexpected official TinyML revision')
@@ -28,24 +30,36 @@ for name,value in [('CONV_DEPTHW_STD_IN_PARALLEL',a.in_parallel),('CONV_DEPTHW_S
     if widget is None:raise RuntimeError('Missing generator setting '+name)
     widget.setValue(value)
 w.model_file=str(model);w.parse_model()
-if a.cache:
+if a.cache or a.cache_depth or a.add_mode:
     def setting(items,name):
         for key,value in items.items():
             if key==name:return value.get('qval')
             found=setting(value.get('children',{}),name)
             if found is not None:return found
         return None
-    widget=setting(mod.params,'TINYML_CACHE')
-    if widget is None or widget.findText(a.cache)<0:raise RuntimeError('Missing official cache setting')
-    widget.setCurrentIndex(widget.findText(a.cache))
+    if a.cache:
+        widget=setting(mod.params,'TINYML_CACHE')
+        if widget is None or widget.findText(a.cache)<0:raise RuntimeError('Missing official cache setting')
+        widget.setCurrentIndex(widget.findText(a.cache))
+    if a.add_mode:
+        widget=setting(mod.params,'ADD_MODE')
+        if widget is None or widget.findText(a.add_mode)<0:raise RuntimeError('Missing official Add setting')
+        widget.setCurrentIndex(widget.findText(a.add_mode))
+if a.cache_depth:
+    widget=setting(mod.params,'CACHE_DEPTH')
+    if widget is None or widget.findText(str(a.cache_depth))<0:raise RuntimeError('Missing official cache depth setting')
+    widget.setCurrentIndex(widget.findText(str(a.cache_depth)))
 w.op_path=str(out);w.dump_params(mod.params);w.dump_model()
 cache_match=re.search(r'`define\s+TML_C0_TINYML_CACHE\s+"(ENABLE|DISABLE)"',(out/'tinyml_core0_define.v').read_text())
 if not cache_match or (a.cache and cache_match[1]!=a.cache):raise RuntimeError('Generated cache mode differs from requested setting')
+if a.cache_depth and not re.search(r'`define\s+TML_C0_CACHE_DEPTH\s+'+str(a.cache_depth)+r'\b',(out/'tinyml_core0_define.v').read_text()):raise RuntimeError('Generated cache depth differs from requested setting')
+if a.add_mode and not re.search(r'`define\s+TML_C0_ADD_MODE\s+"'+a.add_mode+r'"',(out/'tinyml_core0_define.v').read_text()):raise RuntimeError('Generated Add mode differs from requested setting')
 (out/'generator-summary.txt').write_text(w.E.toPlainText())
 manifest={'official_revision':revision,'generator_sha256':hashlib.sha256((generator/'tinyml_generator.py').read_bytes()).hexdigest(),
           'model_sha256':hashlib.sha256(model.read_bytes()).hexdigest(),'model_bytes':model.stat().st_size,
           'in_parallel':a.in_parallel,'out_parallel':a.out_parallel,'axi_bits':128,
-          'cache_override':a.cache,
+          'cache_override':a.cache,'cache_depth_override':a.cache_depth,
+          'add_mode_override':a.add_mode,
           'generated_cache_mode':cache_match[1],
           'hardware_execution_verified':False,
           'outputs':{f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(out.glob('*')) if f.suffix in ['.v','.h','.cc']}}

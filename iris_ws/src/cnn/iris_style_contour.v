@@ -1,11 +1,22 @@
-// Hybrid display: smoothed camera contours guide unmodified neural colours.
+// Hybrid display: same-frame camera colour, neural tone and camera contours.
 // The 5x5 gradient is Gaussian3 convolved with Sobel3, normalized by 16.
 // Six clocks from the two-pixel RAM stream; borders replicate endpoints.
-module iris_style_contour #(parameter [24:0] SCALE_Q24=25'd20596120)(
+module iris_style_contour #(
+ parameter [24:0] SCALE_Q24=25'd20596120,
+ // Q2 mix: 0=neural only, 3=75% camera, 4=camera only. Keep in 0..4.
+ parameter SOURCE_MIX_Q2=3,
+ // Q2 saturation: 4=1x, 5=1.25x, 6=1.5x. Keep in 0..8.
+ parameter SATURATION_Q2=5,
+ // 5=32 colour levels/channel; 8 disables posterization. Keep in 1..8.
+ parameter COLOUR_BITS=5,
+ parameter NORMAL_THRESHOLD=20,parameter NORMAL_INK_GAIN=2,parameter NORMAL_INK_CAP=128,
+ parameter STRONG_THRESHOLD=40,parameter STRONG_INK_GAIN=4,parameter STRONG_INK_CAP=160
+)(
  input wire clk,rst_n,i_valid,i_first,i_last,
  input wire [1:0] i_mode,
  input wire [79:0] i_grey_rows,
  input wire [63:0] i_neural_rgba,
+ input wire [47:0] i_source_rgb,
  output reg o_valid,output reg [47:0] o_rgb
 );
 reg [79:0] pair_q,left_q,previous;
@@ -21,6 +32,7 @@ wire dv0,dv1;
 iris_style_dequant #(.SCALE_Q24(SCALE_Q24)) d0(.clk(clk),.rst_n(rst_n),.i_valid(i_valid),.i_rgba(i_neural_rgba[31:0]),.o_valid(dv0),.o_rgb(dequant[47:24]));
 iris_style_dequant #(.SCALE_Q24(SCALE_Q24)) d1(.clk(clk),.rst_n(rst_n),.i_valid(i_valid),.i_rgba(i_neural_rgba[63:32]),.o_valid(dv1),.o_rgb(dequant[23:0]));
 reg [47:0] colour_pipe[0:2];
+reg [47:0] source_pipe[0:1];
 function signed [10:0] derivative;
  input [7:0] a,b,d,e;
  begin derivative=($signed({1'b0,e})-$signed({1'b0,a}))+2*($signed({1'b0,d})-$signed({1'b0,b}));end
@@ -49,11 +61,36 @@ endfunction
 function [7:0] strength;
  input [14:0] magnitude;
  input [1:0] mode;
- reg [11:0] grad;
+ integer grad,amount;
  begin
   grad=({1'b0,magnitude}+16'd8)>>4;
-  if(mode==3)strength=grad<=40 ? 0 : grad>=80 ? 160 : (grad-40)<<2;
-  else strength=grad<=32 ? 0 : grad>=96 ? 128 : (grad-32)<<1;
+  amount=mode==3 ? (grad-STRONG_THRESHOLD)*STRONG_INK_GAIN : (grad-NORMAL_THRESHOLD)*NORMAL_INK_GAIN;
+  if(amount<0)amount=0;
+  if(mode==3 && amount>STRONG_INK_CAP)amount=STRONG_INK_CAP;
+  if(mode!=3 && amount>NORMAL_INK_CAP)amount=NORMAL_INK_CAP;
+  strength=amount;
+ end
+endfunction
+// The student is almost white/pink. Its RGB alone cannot recover object
+// hues. Blend the captured RGB from the SAME DDR pair, before saturation.
+// Midpoint colour bins reduce banding bias; exact black/white stay endpoints.
+function [23:0] colourize;
+ input [23:0] neural,source;
+ reg [7:0] mixed[0:2];
+ integer luma,value,ch;
+ begin
+  for(ch=0;ch<3;ch=ch+1)
+   mixed[ch]=(SOURCE_MIX_Q2*source[ch*8+:8]+(4-SOURCE_MIX_Q2)*neural[ch*8+:8]+2)>>2;
+  luma=(mixed[2]+2*{1'b0,mixed[1]}+mixed[0]+2)>>2;
+  for(ch=0;ch<3;ch=ch+1)begin
+   // Arithmetic shift gives the same rounding for negative chroma.
+   value=luma+((($signed({1'b0,mixed[ch]})-luma)*SATURATION_Q2+2)>>>2);
+   if(value<0)value=0;
+   if(value>255)value=255;
+   if(COLOUR_BITS<8 && value>0 && value<255)
+    value=((value>>(8-COLOUR_BITS))<<(8-COLOUR_BITS))+((256>>COLOUR_BITS)>>1);
+   colourize[ch*8+:8]=value;
+  end
  end
 endfunction
 function [23:0] render;
@@ -61,20 +98,15 @@ function [23:0] render;
  input [7:0] ink;
  input [1:0] mode;
  reg [7:0] minimum;
- integer dark,base,value,ch;
+ integer dark,value,ch;
  begin
   minimum=rgb[23:16]<rgb[15:8] ? rgb[23:16] : rgb[15:8];
   if(rgb[7:0]<minimum)minimum=rgb[7:0];
   dark=minimum<239 ? (239-minimum)*4 : 0;
-  base=255-((255-minimum+2)>>2);
   for(ch=0;ch<3;ch=ch+1)begin
    value=rgb[ch*8+:8];
    if(mode==1)value=value-dark;
-   else if(mode>=2)begin
-    value=base+value-minimum;
-    if(value>255)value=255;
-    value=value-ink;
-   end
+   else if(mode>=2)value=value-ink;
    render[ch*8+:8]=value<0 ? 0 : value;
   end
  end
@@ -88,6 +120,7 @@ always @(posedge clk or negedge rst_n)begin
   gx0<=0;gx1<=0;gy0<=0;gy1<=0;magnitude0<=0;magnitude1<=0;ink0<=0;ink1<=0;
   for(row=0;row<5;row=row+1)begin dx0[row]<=0;dx1[row]<=0;smooth0[row]<=0;smooth1[row]<=0;end
   for(row=0;row<3;row=row+1)colour_pipe[row]<=0;
+  for(row=0;row<2;row=row+1)source_pipe[row]<=0;
  end else begin
   pair_valid<=i_valid;pair_q<=i_grey_rows;left_q<=previous;first_q<=i_first;last_q<=i_last;
   if(i_valid)previous<=i_grey_rows;
@@ -104,7 +137,9 @@ always @(posedge clk or negedge rst_n)begin
   gy1<=vertical(smooth1[0],smooth1[1],smooth1[3],smooth1[4]);
   magnitude0<=absolute(gx0)+absolute(gy0);magnitude1<=absolute(gx1)+absolute(gy1);
   ink0<=strength(magnitude0,i_mode);ink1<=strength(magnitude1,i_mode);
-  colour_pipe[0]<=dequant;colour_pipe[1]<=colour_pipe[0];colour_pipe[2]<=colour_pipe[1];
+  source_pipe[0]<=i_source_rgb;source_pipe[1]<=source_pipe[0];
+  colour_pipe[0]<=i_mode>=2 ? {colourize(dequant[47:24],source_pipe[1][47:24]),colourize(dequant[23:0],source_pipe[1][23:0])} : dequant;
+  colour_pipe[1]<=colour_pipe[0];colour_pipe[2]<=colour_pipe[1];
   o_rgb<={render(colour_pipe[2][47:24],ink0,i_mode),render(colour_pipe[2][23:0],ink1,i_mode)};
   valid_pipe<={valid_pipe[2:0],pair_valid};o_valid<=valid_pipe[3];
  end

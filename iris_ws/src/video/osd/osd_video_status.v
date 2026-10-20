@@ -1,7 +1,7 @@
 // Camera and HDMI resolution/FPS. 5x7 font enlarged 2x, white on black.
 // Source buses are captured after their update toggles cross the domains.
 // Binary-to-decimal conversion runs serially in vertical blanking.
-module osd_video_status #(parameter ENABLE_STYLE_FPS=0)(
+module osd_video_status #(parameter ENABLE_STYLE_FPS=0,parameter STYLE_FRACTIONAL=0)(
  input clk, rst_n, i_hs, i_vs, i_de,
  input [23:0] i_rgb,
  input [11:0] i_cam_width, i_cam_height,
@@ -11,6 +11,7 @@ module osd_video_status #(parameter ENABLE_STYLE_FPS=0)(
  input i_cam_fps_upd, i_wr_fps_upd, i_hdmi_fps_upd,
  input [7:0] i_style_fps,
  input i_style_fps_upd,
+ input [11:0] i_style_centifps,input i_style_rate_upd,
  input i_wb_locked,
  input [7:0] i_black_g,
  output wire [23:0] o_rgb
@@ -19,7 +20,7 @@ reg [1:0] wb_sync;
 reg wb_locked;
 reg [2:0] cam_sync, cf_sync, wf_sync, hf_sync, sf_sync;
 reg [11:0] cam_w, cam_h;
-reg [7:0] cam_f, wr_f, hdmi_f, style_f;
+reg [7:0] cam_f, wr_f, hdmi_f;reg [11:0] style_f;
 reg [11:0] x,y;
 reg de_d,vs_d;
 wire vs_rise=i_vs && !vs_d;
@@ -36,12 +37,12 @@ always @(posedge clk or negedge rst_n) begin
   cf_sync<={cf_sync[1:0],i_cam_fps_upd};
   wf_sync<={wf_sync[1:0],i_wr_fps_upd};
   hf_sync<={hf_sync[1:0],i_hdmi_fps_upd};
-  sf_sync<={sf_sync[1:0],ENABLE_STYLE_FPS ? i_style_fps_upd : 1'b0};
+  sf_sync<={sf_sync[1:0],ENABLE_STYLE_FPS ? (STYLE_FRACTIONAL ? i_style_rate_upd : i_style_fps_upd) : 1'b0};
   if (cam_sync[2]^cam_sync[1]) begin cam_w<=i_cam_width;cam_h<=i_cam_height;end
   if (cf_sync[2]^cf_sync[1]) cam_f<=i_cam_fps;
   if (wf_sync[2]^wf_sync[1]) wr_f<=i_wr_fps;
   if (hf_sync[2]^hf_sync[1]) hdmi_f<=i_hdmi_fps;
-  if (sf_sync[2]^sf_sync[1]) style_f<=i_style_fps;
+  if (sf_sync[2]^sf_sync[1]) style_f<=STYLE_FRACTIONAL ? i_style_centifps : {4'd0,i_style_fps};
   vs_d<=i_vs;de_d<=i_de;
   if (vs_rise) y<=0; else if (de_d && !i_de) y<=y+1'b1;
   if (vs_rise || !i_de) x<=0; else x<=x+1'b1;
@@ -68,7 +69,7 @@ always @(posedge clk or negedge rst_n) begin
   values[0]<=cam_w;values[1]<=cam_h;values[2]<={4'b0,cam_f};
   values[3]<={4'b0,wr_f};values[4]<=i_hdmi_width;values[5]<=i_hdmi_height;
   values[6]<={4'b0,hdmi_f};values[7]<={4'b0,i_black_g};
-  values[8]<={4'b0,style_f};
+  values[8]<=style_f;
   binary<=cam_w;bcd<=0;bits_left<=12;field<=0;busy<=1;
  end else if (busy) begin
   if (bits_left!=0) begin
@@ -121,12 +122,23 @@ always @(*) begin
    default:ch=8'd32;
   endcase
  end else if (style_row) begin
-  case(slot)
-   0:ch="A";1:ch="I";
-   3,4,5:ch=decchar(digits[8],slot-2);
-   7:ch="F";8:ch="P";9:ch="S";
-   default:ch=8'd32;
-  endcase
+  if(STYLE_FRACTIONAL)begin
+   case(slot)
+    0:ch="A";1:ch="I";
+    3,4:ch=decchar(digits[8],slot-3);
+    5:ch=".";
+    6,7:ch=decchar(digits[8],slot-4);
+    9:ch="F";10:ch="P";11:ch="S";
+    default:ch=8'd32;
+   endcase
+  end else begin
+   case(slot)
+    0:ch="A";1:ch="I";
+    3,4,5:ch=decchar(digits[8],slot-2);
+    7:ch="F";8:ch="P";9:ch="S";
+    default:ch=8'd32;
+   endcase
+  end
  end else begin
   case(slot)
    0:ch="W";1:ch="B";
@@ -167,6 +179,7 @@ function [34:0] font;
    8'd76:font=35'b10000100001000010000100001000011111;
    8'd79:font=35'b01110100011000110001100011000101110;
    8'd75:font=35'b10001100101010011000101001001010001;
+   8'd46:font=35'b00000000000000000000000000011000110;
    8'd120:font=35'b00000000001000101010001000101010001;
    default:font=0;
   endcase

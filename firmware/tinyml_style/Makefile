@@ -6,6 +6,18 @@ VENDOR_SRC := $(VENDOR_STANDALONE)/tinyml_ypd/src
 MODEL_PROFILE ?= original
 LIVE_DEMO ?= 0
 LIVE_SNAPSHOT ?= 0
+LIVE_PIPELINE ?= 0
+RAIN_BACKEND ?= 0
+RAIN_BACKEND_DIR ?= $(CURDIR)/build/rain_row_backend
+ifeq ($(RAIN_BACKEND),1)
+ifneq ($(MODEL_PROFILE),rain_princess)
+$(error RAIN_BACKEND requires MODEL_PROFILE=rain_princess)
+endif
+ifeq ($(wildcard $(RAIN_BACKEND_DIR)/rain_backend_model.h),)
+$(error Generate rain_backend_model.h with .script/compile-rain-backend.py first)
+endif
+endif
+MODEL_RAIN_PRINCESS := 0
 ifeq ($(MODEL_PROFILE),rgba640)
 MODEL_DIR ?= $(IRIS_ROOT)/iris_ws/RISC-V/rgba640
 MODEL_STEM := c448_lowdec_skip_r0_refined_rgba_640_int8
@@ -15,10 +27,21 @@ else ifeq ($(MODEL_PROFILE),original)
 MODEL_DIR ?= $(IRIS_ROOT)/iris_ws/RISC-V
 MODEL_STEM := one_last_kiss_0_int8
 MODEL_RGBA := 0
+else ifeq ($(MODEL_PROFILE),rain_princess)
+MODEL_DIR ?= $(IRIS_ROOT)/iris_ws/RISC-V/rain_princess
+MODEL_STEM := rain_princess_int8
+MODEL_RGBA := 0
+MODEL_RAIN_PRINCESS := 1
+ifeq ($(LIVE_DEMO),1)
+OBJDIR ?= build/rain_princess_live
 else
-$(error Unsupported MODEL_PROFILE $(MODEL_PROFILE); choose original or rgba640)
+OBJDIR ?= build/rain_princess
 endif
-OBJDIR := build
+STRICT_DISPATCH ?= 1
+else
+$(error Unsupported MODEL_PROFILE $(MODEL_PROFILE); choose original, rgba640 or rain_princess)
+endif
+OBJDIR ?= build
 HOST_CXX ?= g++
 STRICT_DISPATCH ?= 0
 ARENA_BYTES ?= 2097152
@@ -29,11 +52,11 @@ $(error TINYML_ROOT must reference official tinyml revision $(EXPECTED_TINYML_RE
 endif
 
 .PHONY: check-model
-check-model: build/check-model-$(MODEL_PROFILE)
+check-model: $(OBJDIR)/check-model-$(MODEL_PROFILE)
 	$<
-build/check-model-$(MODEL_PROFILE): Makefile check_model.cc src/model.cc src/model_contract.h src/model_config.h $(MODEL_DIR)/$(MODEL_STEM)_model_data.cc $(MODEL_DIR)/$(MODEL_STEM)_model_data.h
-	@mkdir -p build
-	$(HOST_CXX) -std=c++17 -DIRIS_MODEL_RGBA=$(MODEL_RGBA) -I$(VENDOR_SRC) -I$(VENDOR_SRC)/tensorflow/third_party/flatbuffers/include -I$(MODEL_DIR) check_model.cc src/model.cc -o $@
+$(OBJDIR)/check-model-$(MODEL_PROFILE): Makefile check_model.cc src/model.cc src/model_contract.h src/model_config.h $(MODEL_DIR)/$(MODEL_STEM)_model_data.cc $(MODEL_DIR)/$(MODEL_STEM)_model_data.h
+	@mkdir -p $(OBJDIR)
+	$(HOST_CXX) -std=c++17 -DIRIS_MODEL_RGBA=$(MODEL_RGBA) -DIRIS_MODEL_RAIN_PRINCESS=$(MODEL_RAIN_PRINCESS) -I$(VENDOR_SRC) -I$(VENDOR_SRC)/tensorflow/third_party/flatbuffers/include -I$(MODEL_DIR) check_model.cc src/model.cc -o $@
 
 ifneq ($(MAKECMDGOALS),check-model)
 STANDALONE ?= $(VENDOR_STANDALONE)
@@ -69,9 +92,14 @@ CFLAGS += $(INCLUDES) -DOPTIMIZE_X -funroll-loops -mdiv -ffunction-sections -fda
  -DTF_LITE_STATIC_MEMORY -DTF_LITE_USE_GLOBAL_CMATH_FUNCTIONS \
  -DTF_LITE_USE_GLOBAL_MIN -DTF_LITE_USE_GLOBAL_MAX -DTF_LITE_DISABLE_X86_NEON \
  -DIRIS_TML_PROFILER_EVENTS=24 \
- -DIRIS_STRICT_DISPATCH=$(STRICT_DISPATCH) -DIRIS_ARENA_BYTES=$(ARENA_BYTES) -DIRIS_MODEL_RGBA=$(MODEL_RGBA) -DIRIS_LIVE_DEMO=$(LIVE_DEMO) -DIRIS_LIVE_SNAPSHOT=$(LIVE_SNAPSHOT)
+ -DIRIS_STRICT_DISPATCH=$(STRICT_DISPATCH) -DIRIS_ARENA_BYTES=$(ARENA_BYTES) -DIRIS_MODEL_RGBA=$(MODEL_RGBA) -DIRIS_MODEL_RAIN_PRINCESS=$(MODEL_RAIN_PRINCESS) -DIRIS_LIVE_DEMO=$(LIVE_DEMO) -DIRIS_LIVE_SNAPSHOT=$(LIVE_SNAPSHOT) -DIRIS_LIVE_PIPELINE=$(LIVE_PIPELINE)
+ifneq ($(strip $(VENDOR_CACHE_OVERRIDE)),)
+CFLAGS += -DIRIS_VENDOR_CACHE_OVERRIDE=$(VENDOR_CACHE_OVERRIDE)
+endif
 CXXFLAGS += $(CFLAGS) -std=c++11 -fstrict-aliasing -fno-rtti -fno-exceptions \
  -fno-threadsafe-statics -fno-use-cxa-atexit
+CFLAGS += -DIRIS_RAIN_BACKEND=$(RAIN_BACKEND) -I$(RAIN_BACKEND_DIR)
+CXXFLAGS += -DIRIS_RAIN_BACKEND=$(RAIN_BACKEND) -I$(RAIN_BACKEND_DIR)
 
 # Same source groups as the official tinyml_ypd Makefile; no example models/main.
 VENDOR_GROUPS := platform/*/*.cc platform/*/*.c platform/*/*/*.cc platform/*/*/*.c \
@@ -90,39 +118,45 @@ endif
 SRCS := $(abspath src/main.cc src/model.cc src/crt_compat.cc src/iris_resize.cc src/overrides/tensorflow/lite/micro/micro_interpreter.cc src/overrides/tensorflow/lite/micro/micro_graph.cc) $(VENDOR_SRCS) \
  $(STANDALONE)/common/start.S $(STANDALONE)/common/trap.S $(STANDALONE)/common/syscalls.c
 $(foreach source,$(SRCS),$(if $(wildcard $(source)),,$(error Required vendor/BSP source missing: $(source))))
-OBJS := $(addprefix build/obj/,$(addsuffix .o,$(SRCS)))
+ifeq ($(RAIN_BACKEND),1)
+SRCS += $(abspath src/iris_rain_backend.cc)
+endif
+OBJS := $(addprefix $(OBJDIR)/obj/,$(addsuffix .o,$(SRCS)))
 LIB := $(VENDOR_STANDALONE)/common/tinyml_lib.a
+ifeq ($(RAIN_BACKEND),1)
+LIB :=
+endif
 LDFLAGS += -specs=nosys.specs -nostartfiles \
  -Wl,--defsym=__iris_ddr_base=$(DDR_BASE),--defsym=__iris_ddr_bytes=$(DDR_BYTES) \
- -Wl,-Bstatic,-T,$(LDSCRIPT),-Map,build/tinyml_style.map,--gc-sections,--print-memory-usage
+ -Wl,-Bstatic,-T,$(LDSCRIPT),-Map,$(OBJDIR)/tinyml_style.map,--gc-sections,--print-memory-usage
 
 .PHONY: all FORCE
-all: build/tinyml_style.elf
-	$(RISCV_OBJCOPY) -O ihex $< build/tinyml_style.hex
-	$(RISCV_OBJCOPY) -O binary $< build/tinyml_style.bin
-build/tinyml_style.elf: $(OBJS) $(LIB) ddr.ld Makefile build/config.txt
+all: $(OBJDIR)/tinyml_style.elf
+	$(RISCV_OBJCOPY) -O ihex $< $(OBJDIR)/tinyml_style.hex
+	$(RISCV_OBJCOPY) -O binary $< $(OBJDIR)/tinyml_style.bin
+$(OBJDIR)/tinyml_style.elf: $(OBJS) $(LIB) ddr.ld Makefile $(OBJDIR)/config.txt
 	$(RISCV_CXX) $(OBJS) $(LDFLAGS) -Wl,--start-group $(LIB) -lc -lm -lgcc -Wl,--end-group -o $@
 
 # Preserve a build manifest and invalidate objects when the BSP or flags change.
-build/config.txt: FORCE
-	@mkdir -p build
+$(OBJDIR)/config.txt: FORCE
+	@mkdir -p $(OBJDIR)
 	@printf '%s\n' 'tinyml=$(TINYML_REVISION)' 'BSP_PATH=$(BSP_PATH)' 'CC=$(RISCV_CC)' 'CXX=$(RISCV_CXX)' 'CFLAGS=$(CFLAGS)' 'CXXFLAGS=$(CXXFLAGS)' 'LDFLAGS=$(LDFLAGS)' > $@.tmp
 	@$(RISCV_CXX) --version >> $@.tmp
 	@sha256sum $(LIB) $(MODEL_DIR)/$(MODEL_STEM)_model_data.cc $(BSP_PATH)/include/soc.mk $(BSP_PATH)/include/soc.h >> $@.tmp
 	@cmp -s $@.tmp $@ && rm $@.tmp || mv $@.tmp $@
 
-build/obj/%.cc.o: %.cc
+$(OBJDIR)/obj/%.cc.o: %.cc
 	@mkdir -p $(dir $@)
 	$(RISCV_CXX) $(CXXFLAGS) -c $< -o $@
-build/obj/%.c.o: %.c
+$(OBJDIR)/obj/%.c.o: %.c
 	@mkdir -p $(dir $@)
 	$(RISCV_CC) $(CFLAGS) -c $< -o $@
-build/obj/%.S.o: %.S
+$(OBJDIR)/obj/%.S.o: %.S
 	@mkdir -p $(dir $@)
 	$(RISCV_CC) $(CFLAGS) -c $< -o $@
-build/obj/%.s.o: %.s
+$(OBJDIR)/obj/%.s.o: %.s
 	@mkdir -p $(dir $@)
 	$(RISCV_CC) $(CFLAGS) -c $< -o $@
-$(OBJS): Makefile build/config.txt
+$(OBJS): Makefile $(OBJDIR)/config.txt
 -include $(OBJS:.o=.d)
 endif

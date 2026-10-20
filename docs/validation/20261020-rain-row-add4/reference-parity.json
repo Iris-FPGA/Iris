@@ -1,0 +1,21 @@
+{
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "input_sha256": "9fa6429f2f151fe87987fe42ccf6f6bcde1ebcc75ce0db266d4f14406b2a6961",
+  "output_sha256": "f51ef8c0c67dad95d720f7efb91b53b0a08d3151764c1657de1735d06d51cfeb",
+  "golden_sha256": "f51ef8c0c67dad95d720f7efb91b53b0a08d3151764c1657de1735d06d51cfeb",
+  "runtime_version": "2.14.0",
+  "resolver": "BUILTIN_REF",
+  "exact": true,
+  "different_bytes": 0,
+  "max_abs_lsb": 0,
+  "mae_lsb": 0.0,
+  "input_quantization": [
+    1.0,
+    -128
+  ],
+  "output_quantization": [
+    2.283437490463257,
+    -89
+  ],
+  "input_unique_codes": 247
+}

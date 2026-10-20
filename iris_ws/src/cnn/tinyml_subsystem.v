@@ -20,7 +20,8 @@
 // master only come out of reset after DDR calibration completes
 // (docs/TinyML_移植进度与待办.md #2).
 //=====================================================================
-module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0,ENABLE_STREAM_CNN=0,STREAM_DILATION=2) (
+module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0,ENABLE_STREAM_CNN=0,STREAM_DILATION=2,
+                         TENSOR_BURST_DMA=0,TENSOR_RGB_ONLY=0,ENABLE_RAIN_BACKEND=0) (
     input  wire        clk,             // core_clk 100 MHz (system/peri/memory)
     input  wire        rst_n,           // active-low, gated by DDR cal (see above)
 
@@ -408,7 +409,7 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0,ENABLE_STREAM_CNN=0,STRE
     wire [7:0] cn_arlen,cn_awlen;
     wire [127:0] cn_wdata;
     wire cn_arvalid,cn_rready,cn_awvalid,cn_wvalid,cn_wlast,cn_bready;
-    wire cnn_space=ci_function_id[9:4]==6'h24;
+    wire cnn_space=ci_function_id[9:4]==(ENABLE_RAIN_BACKEND ? 6'h26 : 6'h24);
     wire user_busy=resize_busy || cnn_busy;
     wire [31:0] resize_outputs_0;
     wire v_cmd_ready, v_rsp_valid;
@@ -444,39 +445,41 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0,ENABLE_STREAM_CNN=0,STRE
     end
     wire vendor_idle = vendor_reads==0 && vendor_writes==0 &&
                        !v_arvalid && !v_awvalid && !v_wvalid && !v_rsp_valid;
-    assign ci_cmd_ready = ENABLE_STREAM_CNN && cnn_space ? cnn_cmd_ready :
+    assign ci_cmd_ready = (ENABLE_STREAM_CNN || ENABLE_RAIN_BACKEND) && cnn_space ? cnn_cmd_ready :
                           ci_function_id[9] ? resize_cmd_ready : (v_cmd_ready && !user_busy);
     assign ci_rsp_valid = cnn_rsp_valid || resize_rsp_valid || v_rsp_valid;
     assign ci_outputs_0 = cnn_rsp_valid ? cnn_outputs_0 : resize_rsp_valid ? resize_outputs_0 : v_outputs_0;
     wire [31:0] rz_araddr, rz_awaddr;
     wire [127:0] rz_wdata;
-    wire rz_arvalid, rz_rready, rz_awvalid, rz_wvalid, rz_bready;
-    iris_resize2x u_resize (
+    wire [7:0] rz_arlen,rz_awlen;
+    wire rz_arvalid, rz_rready, rz_awvalid, rz_wvalid, rz_wlast, rz_bready;
+    iris_resize2x #(.BURST_DMA(TENSOR_BURST_DMA),.RGB_MODEL_ONLY(TENSOR_RGB_ONLY),
+                    .CHUNK_BEATS(ENABLE_RAIN_BACKEND ? 8 : 2)) u_resize (
         .clk(clk), .rst_n(~io_systemReset), .vendor_idle(vendor_idle && !cnn_busy),
-        .cmd_valid(ci_cmd_valid && ci_function_id[9] && !(ENABLE_STREAM_CNN && cnn_space)), .cmd_function_id(ci_function_id),
+        .cmd_valid(ci_cmd_valid && ci_function_id[9] && !((ENABLE_STREAM_CNN || ENABLE_RAIN_BACKEND) && cnn_space)), .cmd_function_id(ci_function_id),
         .cmd_inputs_0(ci_inputs_0), .cmd_inputs_1(ci_inputs_1), .cmd_ready(resize_cmd_ready),
         .rsp_valid(resize_rsp_valid), .rsp_outputs_0(resize_outputs_0), .rsp_ready(ci_rsp_ready),
-        .busy(resize_busy), .araddr(rz_araddr), .arvalid(rz_arvalid),
+        .busy(resize_busy), .araddr(rz_araddr), .arlen(rz_arlen), .arvalid(rz_arvalid),
         .arready(acc_arready && resize_busy), .rdata(acc_rdata),
         .rvalid(acc_rvalid && resize_busy), .rready(rz_rready), .rlast(acc_rlast), .rresp(acc_rresp),
-        .awaddr(rz_awaddr), .awvalid(rz_awvalid), .awready(acc_awready && resize_busy),
-        .wdata(rz_wdata), .wvalid(rz_wvalid), .wready(acc_wready && resize_busy),
+        .awaddr(rz_awaddr), .awlen(rz_awlen), .awvalid(rz_awvalid), .awready(acc_awready && resize_busy),
+        .wdata(rz_wdata), .wvalid(rz_wvalid), .wlast(rz_wlast), .wready(acc_wready && resize_busy),
         .bvalid(acc_bvalid && resize_busy), .bready(rz_bready), .bresp(acc_bresp)
     );
     assign acc_awvalid = cnn_busy ? cn_awvalid : resize_busy ? rz_awvalid : v_awvalid;
     assign acc_awaddr = cnn_busy ? cn_awaddr : resize_busy ? rz_awaddr : v_awaddr;
-    assign acc_awlen = cnn_busy ? cn_awlen : resize_busy ? 8'd0 : v_awlen;
+    assign acc_awlen = cnn_busy ? cn_awlen : resize_busy ? rz_awlen : v_awlen;
     assign acc_awsize = user_busy ? 3'd4 : v_awsize;
     assign acc_awburst = user_busy ? 2'b01 : v_awburst;
     assign acc_awlock = user_busy ? 1'b0 : v_awlock;
     assign acc_wdata = cnn_busy ? cn_wdata : resize_busy ? rz_wdata : v_wdata;
     assign acc_wstrb = user_busy ? 16'hffff : v_wstrb;
-    assign acc_wlast = cnn_busy ? cn_wlast : resize_busy ? 1'b1 : v_wlast;
+    assign acc_wlast = cnn_busy ? cn_wlast : resize_busy ? rz_wlast : v_wlast;
     assign acc_wvalid = cnn_busy ? cn_wvalid : resize_busy ? rz_wvalid : v_wvalid;
     assign acc_bready = cnn_busy ? cn_bready : resize_busy ? rz_bready : v_bready;
     assign acc_arvalid = cnn_busy ? cn_arvalid : resize_busy ? rz_arvalid : v_arvalid;
     assign acc_araddr = cnn_busy ? cn_araddr : resize_busy ? rz_araddr : v_araddr;
-    assign acc_arlen = cnn_busy ? cn_arlen : resize_busy ? 8'd0 : v_arlen;
+    assign acc_arlen = cnn_busy ? cn_arlen : resize_busy ? rz_arlen : v_arlen;
     assign acc_arsize = user_busy ? 3'd4 : v_arsize;
     assign acc_arburst = user_busy ? 2'b01 : v_arburst;
     assign acc_arlock = user_busy ? 1'b0 : v_arlock;
@@ -487,7 +490,18 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0,ENABLE_STREAM_CNN=0,STRE
     assign v_arready = acc_arready && !user_busy;
     assign v_rvalid = acc_rvalid && !user_busy;
 
-    generate if(ENABLE_STREAM_CNN)begin:g_cnn
+    generate if(ENABLE_RAIN_BACKEND)begin:g_rain
+        iris_rain_backend u_cnn(
+            .clk(clk),.rst_n(~io_systemReset),.vendor_idle(vendor_idle && !resize_busy),
+            .cmd_valid(ci_cmd_valid && cnn_space),.cmd_function_id(ci_function_id),
+            .cmd_inputs_0(ci_inputs_0),.cmd_inputs_1(ci_inputs_1),.cmd_ready(cnn_cmd_ready),
+            .rsp_valid(cnn_rsp_valid),.rsp_outputs_0(cnn_outputs_0),.rsp_ready(ci_rsp_ready),.busy(cnn_busy),.irq(cnn_irq),
+            .araddr(cn_araddr),.arlen(cn_arlen),.arvalid(cn_arvalid),.arready(acc_arready && cnn_busy),
+            .rdata(acc_rdata),.rvalid(acc_rvalid && cnn_busy),.rready(cn_rready),.rlast(acc_rlast),.rresp(acc_rresp),
+            .awaddr(cn_awaddr),.awlen(cn_awlen),.awvalid(cn_awvalid),.awready(acc_awready && cnn_busy),
+            .wdata(cn_wdata),.wvalid(cn_wvalid),.wready(acc_wready && cnn_busy),.wlast(cn_wlast),
+            .bvalid(acc_bvalid && cnn_busy),.bready(cn_bready),.bresp(acc_bresp));
+    end else if(ENABLE_STREAM_CNN)begin:g_cnn
         iris_stream_cnn #(.DILATION(STREAM_DILATION))u_cnn(
             .clk(clk),.rst_n(~io_systemReset),.vendor_idle(vendor_idle && !resize_busy),
             .cmd_valid(ci_cmd_valid && cnn_space),.cmd_function_id(ci_function_id),
@@ -504,7 +518,7 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0,ENABLE_STREAM_CNN=0,STRE
         assign cn_awaddr=0;assign cn_awlen=0;assign cn_awvalid=0;assign cn_wdata=0;assign cn_wvalid=0;assign cn_wlast=0;assign cn_bready=0;
     end endgenerate
 
-    generate if(!ENABLE_STREAM_CNN)begin:g_vendor
+    generate if(!ENABLE_STREAM_CNN && !ENABLE_RAIN_BACKEND)begin:g_vendor
     tinyml_accelerator_channels #(
         .AXI_DW_M (128)
     ) u_accel_channels (

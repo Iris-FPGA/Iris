@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import re
 import select
+import shutil
 import socket
 import subprocess
 import termios
@@ -23,12 +24,17 @@ p.add_argument('--uart',default='/dev/ttyUSB2')
 p.add_argument('--port',type=int,default=6666)
 p.add_argument('--timeout',type=float,default=90)
 p.add_argument('--golden',type=Path)
+p.add_argument('--riscv-prefix',default=os.environ.get('RISCV_PREFIX') or os.environ.get('RISCV_BIN'),
+               help='tool prefix, optionally including a directory; otherwise search PATH')
 p.add_argument('--bit-file',type=Path,default=root/'iris_ws/outflow/iris_ws.bit',
                help='file identity associated with the separate SRAM programming record')
 a=p.parse_args();elf=a.elf.resolve()
 if any(c in str(elf) for c in '{}\n\r'):
     p.error('unsupported Tcl path characters')
-nm=subprocess.check_output(['/home/noir/Applications/riscv-none-elf/bin/riscv-none-elf-nm',str(elf)],text=True)
+prefix=a.riscv_prefix or next((value for value in ('riscv-none-elf-','riscv64-unknown-elf-','riscv32-unknown-elf-')
+                                  if shutil.which(value+'nm')),None)
+if not prefix:p.error('set --riscv-prefix or add the RISC-V toolchain to PATH')
+nm=subprocess.check_output([prefix+'nm',str(elf)],text=True)
 address=int(re.search(r'^([0-9a-f]+) B iris_result$',nm,re.M)[1],16)
 def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 def words(raw):

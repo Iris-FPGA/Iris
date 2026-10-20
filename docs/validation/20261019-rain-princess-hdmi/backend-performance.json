@@ -1,0 +1,214 @@
+{
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "model_changed": false,
+  "clock_hz": 100000000,
+  "measurements": [
+    {
+      "configuration": "cache512 / 4x2",
+      "evidence": "board-live-debug.json",
+      "frames": 4,
+      "median_invoke_seconds": 4.6080899550000005,
+      "display_fps_median": null,
+      "hdmi_geometry": null,
+      "completed": true
+    },
+    {
+      "configuration": "cache off / 4x2",
+      "evidence": "cache-disabled-debug.json",
+      "frames": 2,
+      "median_invoke_seconds": 7.19115375,
+      "display_fps_median": null,
+      "hdmi_geometry": null,
+      "completed": true
+    },
+    {
+      "configuration": "cache1024 / 4x2",
+      "evidence": "rectangle-cache1024-debug.json",
+      "frames": 5,
+      "median_invoke_seconds": 0.64639142,
+      "display_fps_median": 1.4209669191872918,
+      "hdmi_geometry": {
+        "hdmi": [
+          1920,
+          1080
+        ],
+        "left": [
+          960,
+          1080
+        ],
+        "right": [
+          960,
+          1080
+        ],
+        "left_source": "live camera",
+        "right_source": "latest complete full model output"
+      },
+      "completed": true
+    },
+    {
+      "configuration": "cache1024 / 8x2 / Add LITE / hybrid staging",
+      "evidence": "rectangle-8x2-hybrid-debug.json",
+      "frames": 12,
+      "median_invoke_seconds": 0.36362673,
+      "display_fps_median": 2.4038997356955223,
+      "hdmi_geometry": {
+        "hdmi": [
+          1920,
+          1080
+        ],
+        "left": [
+          960,
+          1080
+        ],
+        "right": [
+          960,
+          1080
+        ],
+        "left_source": "live camera",
+        "right_source": "latest complete full model output"
+      },
+      "completed": true,
+      "xlr": 60669,
+      "ram": 255,
+      "dsp": 53,
+      "setup_slack_ns": 0.012,
+      "hold_slack_ns": 0.026,
+      "numeric_parity": "8x2-hybrid-camera-parity.json"
+    },
+    {
+      "configuration": "cache1024 / 8x2 / Add LITE / hybrid staging / capture overlap",
+      "evidence": "pipeline-hybrid-debug.json",
+      "frames": 20,
+      "median_invoke_seconds": 0.36319802,
+      "display_fps_median": 2.6021173604424392,
+      "hdmi_geometry": {
+        "hdmi": [
+          1920,
+          1080
+        ],
+        "left": [
+          960,
+          1080
+        ],
+        "right": [
+          960,
+          1080
+        ],
+        "left_source": "live camera",
+        "right_source": "latest complete full model output"
+      },
+      "completed": true,
+      "numeric_parity": "pipeline-hybrid-reference-parity.json",
+      "cpu_left_running": true,
+      "latency_reduction_verified": false
+    },
+    {
+      "configuration": "cache1024 / 8x2 / Add LITE / hybrid staging / capture overlap / RGB tensor burst DMA",
+      "evidence": "burst-rgb-live-debug.json",
+      "frames": 60,
+      "median_invoke_seconds": 0.35454544,
+      "median_fresh_frame_interval_seconds": 0.3679434884688817,
+      "numeric_parity": "burst-rgb-reference-parity.json",
+      "xlr": 60328,
+      "ram": 255,
+      "dsp": 53,
+      "setup_slack_ns": 0.016,
+      "hold_slack_ns": 0.026,
+      "cpu_left_running": true,
+      "display_fps_median": 2.7178086617629424,
+      "completed": true,
+      "hdmi_geometry": {
+        "hdmi": [
+          1920,
+          1080
+        ],
+        "left": [
+          960,
+          1080
+        ],
+        "right": [
+          960,
+          1080
+        ],
+        "left_source": "live camera",
+        "right_source": "latest complete full model output"
+      },
+      "latency_reduction_verified": false
+    }
+  ],
+  "rejected_builds": [
+    {
+      "configuration": "cache1024 / 8x2 / Add LITE / register staging",
+      "evidence": "8x2-lite-build.log",
+      "reason": "61190 XLR exceeds 60800; no bitstream programmed"
+    },
+    {
+      "configuration": "cache1024 / 16x4 / Add LITE / hybrid staging",
+      "evidence": "16x4-capacity-build.log",
+      "xlr": 75945,
+      "ram": 281,
+      "reason": "XLR and RAM exceed Ti60 capacity; no valid bitstream programmed"
+    },
+    {
+      "configuration": "8x2 / four-beat tensor DMA",
+      "evidence": "burst-dma-build.log",
+      "xlr": 62575,
+      "ram": 255,
+      "reason": "XLR exceeds Ti60 capacity; candidate not programmed"
+    },
+    {
+      "configuration": "8x2 / compact four-beat tensor DMA",
+      "evidence": "burst-dma-compact-build.log",
+      "xlr": 61448,
+      "ram": 255,
+      "reason": "XLR exceeds Ti60 capacity; candidate not programmed"
+    },
+    {
+      "configuration": "8x2 / compact two-beat tensor DMA",
+      "evidence": "burst-dma-two-build.log",
+      "xlr": 60890,
+      "ram": 255,
+      "reason": "XLR exceeds Ti60 capacity; candidate not programmed"
+    },
+    {
+      "configuration": "8x2 / compact two-beat tensor DMA / bounded configuration",
+      "evidence": "burst-dma-final-build.log",
+      "xlr": 60851,
+      "ram": 255,
+      "reason": "XLR exceeds Ti60 capacity; candidate not programmed"
+    }
+  ],
+  "user_feedback": {
+    "hdmi_dimensions_correct": true,
+    "left_live_camera_smooth": true,
+    "right_ai_stutters": true,
+    "restored_complete_model_color_confirmed": true
+  },
+  "smooth_ai_video_accepted": false,
+  "restoration": {
+    "reason": "remote student/contour image was loaded by mistake; user requires complete Rain Princess",
+    "evidence": "restored-complete-model-debug.json",
+    "numeric_parity": "restored-complete-model-reference-parity.json",
+    "model_changed": false,
+    "flash_written": false,
+    "cpu_left_running": true,
+    "visual_confirmation": true
+  },
+  "target": {
+    "fresh_complete_ai_fps": 30,
+    "achieved": false,
+    "model_macs_per_frame": 148635648,
+    "required_macs_per_second": 4459069440
+  },
+  "current_board": {
+    "bit_file": "firmware/tinyml_style/build/rain_princess_rect_8x2_burst_rgb/iris_ws/outflow/iris_ws.bit",
+    "elf": "firmware/tinyml_style/build/rain_princess_pipeline/tinyml_style.elf",
+    "evidence": "burst-rgb-live-debug.json",
+    "cpu_left_running": true,
+    "model_changed": false,
+    "flash_written": false,
+    "fresh_fps_approx": 2.72,
+    "bit_sha256": "6ee41aeab508f75deff0e38da5e5edfd48798328c4ec71e508cb35ccd82e05b8",
+    "numeric_parity": "burst-rgb-reference-parity.json"
+  }
+}

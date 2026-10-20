@@ -1,0 +1,18 @@
+{
+  "official_revision": "96886fa0c73e25e6218db7d0863f84677cf65138",
+  "generator_sha256": "193da2ed90cc17bf337fd898d501710f0a63be2e9703b41364e95393f14fc9ff",
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "model_bytes": 125336,
+  "in_parallel": 4,
+  "out_parallel": 2,
+  "axi_bits": 128,
+  "cache_override": "ENABLE",
+  "cache_depth_override": 1024,
+  "generated_cache_mode": "ENABLE",
+  "hardware_execution_verified": false,
+  "outputs": {
+    "rain_princess_int8_model_data.cc": "2a8eeb2539db1a521503f492f1bc4c4bb5bae89e08613a7fd862d6af49037297",
+    "rain_princess_int8_model_data.h": "f2ccfe4a42f51fe0b0712a1f91838a013f945fa9373f66dd1914aaa7779fd3f4",
+    "tinyml_core0_define.v": "00dd54f1b4dbe4993e374a0c05bc04ded17fefb35f63c929b7fe6d317e8487ea"
+  }
+}

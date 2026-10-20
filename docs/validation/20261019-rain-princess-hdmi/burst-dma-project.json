@@ -1,0 +1,13 @@
+{
+  "scope": "live camera + complete 128x128 RGB TinyML; 1920x1080 HDMI split",
+  "source_project": "/mnt/mydata/Iris/dev/fastnst/iris_ws",
+  "project": "/mnt/mydata/Iris/dev/fastnst/firmware/tinyml_style/build/rain_princess_rect_8x2_burst/iris_ws",
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "accelerator_sha256": "fcfd9d22df0ae3781dd2cc914886938b0c072be775cf7aea1ea425ad36f0d28d",
+  "in_parallel": 8,
+  "out_parallel": 2,
+  "cache_depth_override": 1024,
+  "add_mode_override": "LITE",
+  "reset_behavior": "OCR JAL x0,0; load ELF at 0x00800000 with OpenOCD",
+  "hardware_execution_verified": false
+}

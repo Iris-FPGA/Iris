@@ -9,6 +9,9 @@ module top #(
     // The style project selects 0 through Efinity top-params and uses the CPU
     // console; retain the legacy implementation for diagnostic builds.
     parameter ENABLE_STYLE_DEMO = 0,
+    parameter ENABLE_TINYML_RGB = 0,
+    parameter ENABLE_TENSOR_BURST = 0,
+    parameter ENABLE_RAIN_BACKEND = 0,
     parameter ENABLE_STREAM_CNN = 0,
     parameter ENABLE_STYLE_VISIBILITY = 0,
     parameter ENABLE_STYLE_CONTOUR = 0,
@@ -617,6 +620,8 @@ wire cam_size_toggle, hdmi_size_toggle;
 wire [7:0] hdmi_fps;
 wire hdmi_upd;
 wire style_frame_commit_pulse;
+wire [11:0] style_centifps;
+wire style_rate_toggle;
 wire [7:0] style_fps;
 wire style_fps_upd;
 video_size_meter #(.PIXELS_PER_CLOCK(4), .USE_HSYNC(1)) u_camera_size (
@@ -642,7 +647,7 @@ fps_counter #(.CLK_FREQ_HZ(100_000_000)) u_fps_style (
     .clk(core_clk), .rst_n(video_rst_n), .frame_pulse(style_frame_commit_pulse),
     .fps(style_fps), .upd_toggle(style_fps_upd)
 );
-osd_video_status #(.ENABLE_STYLE_FPS(ENABLE_STYLE_DEMO)) u_video_status (
+osd_video_status #(.ENABLE_STYLE_FPS(ENABLE_STYLE_DEMO),.STYLE_FRACTIONAL(ENABLE_TINYML_RGB)) u_video_status (
     .clk(hdmi_tx_slow_clk), .rst_n(video_rst_n),
     .i_hs(hs_r), .i_vs(vs_r), .i_de(de_r), .i_rgb(px_r),
     .i_cam_width(cam_width), .i_cam_height(cam_height), .i_cam_toggle(cam_size_toggle),
@@ -651,6 +656,7 @@ osd_video_status #(.ENABLE_STYLE_FPS(ENABLE_STYLE_DEMO)) u_video_status (
     .i_wb_locked(wb_locked), .i_black_g(black_g),
     .i_cam_fps_upd(sens_upd), .i_wr_fps_upd(wr_upd), .i_hdmi_fps_upd(hdmi_upd),
     .i_style_fps(style_fps), .i_style_fps_upd(style_fps_upd),
+    .i_style_centifps(style_centifps),.i_style_rate_upd(style_rate_toggle),
     .o_rgb(px_osd)
 );
 
@@ -734,13 +740,13 @@ clock_frequency_meter u_sensor_byte_meter (
 // line is in progress; the echo FIFO is gated off then and buffered)
 //
 // The physical TX pin is shared: the Sapphire CPU console (100 MHz) is the
-// default during TinyML bring-up; hold KEY3 (active low) to listen to the
-// legacy Iris logger (27 MHz) instead.
+// only TX source in the dedicated RGB TinyML configuration, saving the
+// legacy echo FIFO. Other configurations retain KEY3 console selection.
 // RX fans out to both UARTs always.
 //=====================================================================
 wire iris_uart_txd;
 wire soc_uart_txd;
-assign txd = key_i[3] ? soc_uart_txd : iris_uart_txd;
+assign txd = ENABLE_TINYML_RGB ? soc_uart_txd : key_i[3] ? soc_uart_txd : iris_uart_txd;
 wire        RdEmpty;
 wire        tx_valid;
 wire        rx_valid;
@@ -766,12 +772,16 @@ key_pulse #(.REP_MS(0)) u_capture_key (
  .clk(gpio_clk_27m),.rst_n(video_rst_n),.key_in(key_i[2]),.pulse(capture_key)
 );
 wire [7:0] cal_data;
+generate if (!ENABLE_TINYML_RGB) begin : g_colour_capture
 colour_capture #(.STEP(ENABLE_STYLE_DEMO ? 40 : 20)) u_colour_capture (
  .video_clk(hdmi_tx_half_clk),.uart_clk(gpio_clk_27m),.rst_n(video_rst_n),
  .i_vs(dbg_vs_o),.i_de(dbg_de_o),.i_rgb(dbg_rgb),
  .i_capture(capture_key),.rx_valid(rx_valid),.rx_data(rx_data),.log_active(log_gate),.tx_req(tx_req),
  .tx_valid(cal_dv),.tx_data(cal_data),.tx_gate(cal_gate),.o_ready(cal_ready)
 );
+end else begin : g_no_colour_capture
+ assign cal_dv=0;assign cal_gate=0;assign cal_data=0;assign cal_ready=0;
+end endgenerate
 assign tx_valid  = cal_dv | log_dv | fifo_dv;
 assign tx_data   = cal_dv ? cal_data : log_dv ? log_data : fifo_data;
 assign fifo_pop  = tx_req & (~RdEmpty) & (~log_gate) & (~cal_gate);
@@ -1116,13 +1126,16 @@ wire style_ddr_serial;
 reg [31:0] style_bus_write_dummy_bad;
 always @(posedge core_clk or negedge tinyml_rst_n)begin
  if(!tinyml_rst_n)style_bus_write_dummy_bad<=0;
- else if(mem_wvalid && mem_wready && mem_wid==8'h10)
+ else if(!ENABLE_TINYML_RGB && mem_wvalid && mem_wready && mem_wid==8'h10)
   style_bus_write_dummy_bad<=style_bus_write_dummy_bad+
    {31'd0,mem_wdata[31:24]!=8'h80}+{31'd0,mem_wdata[63:56]!=8'h80}+
    {31'd0,mem_wdata[95:88]!=8'h80}+{31'd0,mem_wdata[127:120]!=8'h80};
 end
 
-tinyml_subsystem #(.ENABLE_STYLE_DEMO(ENABLE_STYLE_DEMO),.ENABLE_STREAM_CNN(ENABLE_STREAM_CNN),.STREAM_DILATION(STREAM_DILATION)) u_tinyml_subsystem (
+tinyml_subsystem #(.ENABLE_STYLE_DEMO(ENABLE_STYLE_DEMO),.ENABLE_STREAM_CNN(ENABLE_STREAM_CNN),
+    .STREAM_DILATION(STREAM_DILATION),.TENSOR_BURST_DMA(ENABLE_TENSOR_BURST),
+    .TENSOR_RGB_ONLY(ENABLE_TINYML_RGB && ENABLE_TENSOR_BURST),
+    .ENABLE_RAIN_BACKEND(ENABLE_RAIN_BACKEND)) u_tinyml_subsystem (
     .style_paddr(style_paddr),.style_psel(style_psel),.style_penable(style_penable),
     .style_pwrite(style_pwrite),.style_pwdata(style_pwdata),.style_prdata(style_prdata),
     .clk              (core_clk),
@@ -1227,12 +1240,13 @@ tinyml_subsystem #(.ENABLE_STYLE_DEMO(ENABLE_STYLE_DEMO),.ENABLE_STREAM_CNN(ENAB
 
 reg [3:0] arb_rst_pipe;
 generate if(ENABLE_STYLE_DEMO)begin : g_style_demo
-iris_style_demo #(.SCALE_Q24(STYLE_SCALE_Q24),.ENABLE_VISIBILITY(ENABLE_STYLE_VISIBILITY),.ENABLE_CONTOUR(ENABLE_STYLE_CONTOUR)) u_style_demo(
+iris_style_demo #(.SCALE_Q24(STYLE_SCALE_Q24),.ENABLE_VISIBILITY(ENABLE_STYLE_VISIBILITY),.ENABLE_CONTOUR(ENABLE_STYLE_CONTOUR),.TINYML_RGB(ENABLE_TINYML_RGB)) u_style_demo(
  .clk(core_clk),.video_clk(hdmi_tx_half_clk),.rst_n(arb_rst_pipe[3]),
  .paddr(style_paddr),.psel(style_psel),.penable(style_penable),.pwrite(style_pwrite),
  .pwdata(style_pwdata),.prdata(style_prdata),
  .bus_write_dummy_bad(style_bus_write_dummy_bad),.ddr_serial_enable(style_ddr_serial),
  .frame_commit_pulse(style_frame_commit_pulse),
+ .ai_centifps(style_centifps),.ai_rate_toggle(style_rate_toggle),
  .i_hs(display_hs),.i_vs(display_vs),.i_de(display_de),.i_rgb(display_rgb),
  .o_hs(style_display_hs),.o_vs(style_display_vs),.o_de(style_display_de),.o_rgb(style_display_rgb),
  .awaddr(style_awaddr),
@@ -1377,6 +1391,7 @@ assign style_prdata=0;
 assign style_ddr_serial=0;
 assign {style_display_hs,style_display_vs,style_display_de,style_display_rgb}={display_hs,display_vs,display_de,display_rgb};
 assign style_frame_commit_pulse=1'b0;
+assign style_centifps=0;assign style_rate_toggle=0;
 end endgenerate
 //=====================================================================
 // Shared-DDR arbiter: video frame buffer + CPU + TinyML accelerator

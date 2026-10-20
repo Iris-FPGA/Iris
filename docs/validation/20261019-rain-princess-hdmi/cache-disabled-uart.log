@@ -1,0 +1,54 @@
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x40 cpuAR=0x0x808300 fbAR=0x0x46000
+arb cpuAW=0x0x70fffc fbAW=0x0x5eb000 rdCnt cpu/fb=2258/20241 rresp=0
+arb ARhand=22762 rdDone=22762 AWhand=40161 wrDone=40160
+lastAR addr=0x0x808380 len=3 size=4 burst=1 | lastAW addr=0x0x2f5800 len=127
+Core 0 Hardware Settings:
+  Accelerator Active: 1
+[FLAG]Override Setting : 1
+  UUID: 0x4923687a
+  AXI DW: 128
+  AXI_DB_W: 16
+  Cache Enabled: 0
+  Cache Depth: 512
+  Conv Depthw Mode: 2
+  Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:2
+  Add Mode: 2
+  FC Mode: 0
+  Mul Mode: 0
+  LR Mode: 0
+  Min-Max Mode: 0
+  Reshape Mode: 0
+IRIS nodes OK: flatbuffer
+IRIS nodes OK: init
+IRIS prepare node 0 @0x0xc4507cIRIS prepare node 1 @0x0xc45098IRIS prepare node 2 @0x0xc450b4IRIS prepare node 3 @0x0xc450d0IRIS prepare node 4 @0x0xc450ecIRIS prepare node 5 @0x0xc45108IRIS prepare node 6 @0x0xc45124IRIS prepare node 7 @0x0xc45140IRIS prepare node 8 @0x0xc4515cIRIS prepare node 9 @0x0xc45178IRIS prepare node 10 @0x0xc45194IRIS prepare node 11 @0x0xc451b0IRIS prepare node 12 @0x0xc451ccIRIS prepare node 13 @0x0xc451e8IRIS prepare node 14 @0x0xc45204IRIS prepare node 15 @0x0xc45220IRIS prepare node 16 @0x0xc4523cIRIS prepare node 17 @0x0xc45258IRIS prepare node 18 @0x0xc45274IRIS prepare node 19 @0x0xc45290IRIS prepare node 20 @0x0xc452acIRIS prepare node 21 @0x0xc452c8IRIS prepare node 22 @0x0xc452e4DDR arena: base=0x0xa45600 capacity=2097152 used=399772
+IRIS LIVE: 128x128x3 paired camera/style; strict hardware; SRAM only
+0; CONV_2D; STANDARD; ticks=24964420 cache_hit_raw=0 cache_miss_raw=0
+1; CONV_2D; STANDARD; ticks=22234297 cache_hit_raw=0 cache_miss_raw=0
+2; CONV_2D; STANDARD; ticks=20959654 cache_hit_raw=0 cache_miss_raw=0
+3; CONV_2D; STANDARD; ticks=41876930 cache_hit_raw=0 cache_miss_raw=0
+4; CONV_2D; STANDARD; ticks=41879839 cache_hit_raw=0 cache_miss_raw=0
+5; ADD; STANDARD; ticks=188895 cache_hit_raw=0 cache_miss_raw=0
+6; CONV_2D; STANDARD; ticks=41885082 cache_hit_raw=0 cache_miss_raw=0
+7; CONV_2D; STANDARD; ticks=41880989 cache_hit_raw=0 cache_miss_raw=0
+8; ADD; STANDARD; ticks=191188 cache_hit_raw=0 cache_miss_raw=0
+9; CONV_2D; STANDARD; ticks=41864677 cache_hit_raw=0 cache_miss_raw=0
+10; CONV_2D; STANDARD; ticks=41870285 cache_hit_raw=0 cache_miss_raw=0
+11; ADD; STANDARD; ticks=185334 cache_hit_raw=0 cache_miss_raw=0
+12; CONV_2D; STANDARD; ticks=41867318 cache_hit_raw=0 cache_miss_raw=0
+13; CONV_2D; STANDARD; ticks=41877456 cache_hit_raw=0 cache_miss_raw=0
+14; ADD; STANDARD; ticks=189358 cache_hit_raw=0 cache_miss_raw=0
+15; CONV_2D; STANDARD; ticks=41871018 cache_hit_raw=0 cache_miss_raw=0
+16; CONV_2D; STANDARD; ticks=41858488 cache_hit_raw=0 cache_miss_raw=0
+17; ADD; STANDARD; ticks=189191 cache_hit_raw=0 cache_miss_raw=0
+18; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=468494 cache_hit_raw=0 cache_miss_raw=0
+19; CONV_2D; STANDARD; ticks=88711945 cache_hit_raw=0 cache_miss_raw=0
+20; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=662152 cache_hit_raw=0 cache_miss_raw=0
+21; CONV_2D; STANDARD; ticks=98808967 cache_hit_raw=0 cache_miss_raw=0
+22; CONV_2D; STANDARD; ticks=24843889 cache_hit_raw=0 cache_miss_raw=0
+IRIS LIVE frame=1 pair=0 Invoke_ticks=701371575 displayed=1 captures=1 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=2 pair=1 Invoke_ticks=736859175 displayed=2 captures=2 underflow=0 readerr=0 rejects=0
+

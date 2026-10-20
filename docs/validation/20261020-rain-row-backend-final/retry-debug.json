@@ -1,0 +1,941 @@
+{
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "model_bytes": 125336,
+  "model_symbol": "rain_princess_int8_model_data",
+  "rain_row_backend": true,
+  "project_manifest": "/mnt/mydata/Iris/dev/fastnst/firmware/tinyml_style/build/rain_row_8x8_final/iris_ws/tinyml-project.json",
+  "elf_sha256": "c474ab2520d49def740fc3f1053c59372423d6c9ba74005d847349dcf4d163f9",
+  "bit_sha256": "b0b6d3be3d609270cee24e3b7b12bf9060ef20f6802fb996769c3e377e2c645b",
+  "reset": "",
+  "load": "376564 bytes written at address 0x00800000\n4 bytes written at address 0x0085bf00\n1844 bytes written at address 0x0085bf10\ndownloaded 378412 bytes in 9.419107s (39.233 KiB/s)\n",
+  "descriptor": [
+    2,
+    60,
+    58720256,
+    60817408,
+    49152,
+    2269398,
+    0,
+    60,
+    61,
+    0,
+    0,
+    0
+  ],
+  "apb_registers": [
+    1230176458,
+    1,
+    52428800,
+    56623104,
+    60,
+    62,
+    0,
+    0,
+    0,
+    196611,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1229980417,
+    7,
+    4,
+    6,
+    1,
+    2,
+    3005
+  ],
+  "frames": [
+    {
+      "sequence": 1,
+      "pair": 0,
+      "invoke_ticks": 3636528,
+      "displayed": 1,
+      "captures": 2,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 2,
+      "pair": 1,
+      "invoke_ticks": 2252353,
+      "displayed": 2,
+      "captures": 3,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 3,
+      "pair": 2,
+      "invoke_ticks": 2271907,
+      "displayed": 3,
+      "captures": 4,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 4,
+      "pair": 0,
+      "invoke_ticks": 2272933,
+      "displayed": 4,
+      "captures": 5,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 5,
+      "pair": 1,
+      "invoke_ticks": 2269099,
+      "displayed": 5,
+      "captures": 6,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 6,
+      "pair": 2,
+      "invoke_ticks": 2276177,
+      "displayed": 6,
+      "captures": 7,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 7,
+      "pair": 0,
+      "invoke_ticks": 2271652,
+      "displayed": 7,
+      "captures": 8,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 8,
+      "pair": 1,
+      "invoke_ticks": 2270150,
+      "displayed": 8,
+      "captures": 9,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 9,
+      "pair": 2,
+      "invoke_ticks": 2269657,
+      "displayed": 9,
+      "captures": 10,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 10,
+      "pair": 0,
+      "invoke_ticks": 2278765,
+      "displayed": 10,
+      "captures": 11,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 11,
+      "pair": 1,
+      "invoke_ticks": 2272947,
+      "displayed": 11,
+      "captures": 12,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 12,
+      "pair": 2,
+      "invoke_ticks": 2270753,
+      "displayed": 12,
+      "captures": 13,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 13,
+      "pair": 0,
+      "invoke_ticks": 2270978,
+      "displayed": 13,
+      "captures": 14,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 14,
+      "pair": 1,
+      "invoke_ticks": 2272533,
+      "displayed": 14,
+      "captures": 15,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 15,
+      "pair": 2,
+      "invoke_ticks": 2272348,
+      "displayed": 15,
+      "captures": 16,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 16,
+      "pair": 0,
+      "invoke_ticks": 2274178,
+      "displayed": 16,
+      "captures": 17,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 17,
+      "pair": 1,
+      "invoke_ticks": 2279742,
+      "displayed": 17,
+      "captures": 18,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 18,
+      "pair": 2,
+      "invoke_ticks": 2271060,
+      "displayed": 18,
+      "captures": 19,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 19,
+      "pair": 0,
+      "invoke_ticks": 2276625,
+      "displayed": 19,
+      "captures": 20,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 20,
+      "pair": 1,
+      "invoke_ticks": 2277695,
+      "displayed": 20,
+      "captures": 21,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 21,
+      "pair": 2,
+      "invoke_ticks": 2280552,
+      "displayed": 21,
+      "captures": 22,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 22,
+      "pair": 0,
+      "invoke_ticks": 2271624,
+      "displayed": 22,
+      "captures": 23,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 23,
+      "pair": 1,
+      "invoke_ticks": 2273272,
+      "displayed": 23,
+      "captures": 24,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 24,
+      "pair": 2,
+      "invoke_ticks": 2275073,
+      "displayed": 24,
+      "captures": 25,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 25,
+      "pair": 0,
+      "invoke_ticks": 2272012,
+      "displayed": 25,
+      "captures": 26,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 26,
+      "pair": 1,
+      "invoke_ticks": 2278168,
+      "displayed": 26,
+      "captures": 27,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 27,
+      "pair": 2,
+      "invoke_ticks": 2280329,
+      "displayed": 27,
+      "captures": 28,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 28,
+      "pair": 0,
+      "invoke_ticks": 2272468,
+      "displayed": 28,
+      "captures": 29,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 29,
+      "pair": 1,
+      "invoke_ticks": 2281351,
+      "displayed": 29,
+      "captures": 30,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 30,
+      "pair": 2,
+      "invoke_ticks": 2275170,
+      "displayed": 30,
+      "captures": 31,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 31,
+      "pair": 0,
+      "invoke_ticks": 2277696,
+      "displayed": 31,
+      "captures": 32,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 32,
+      "pair": 1,
+      "invoke_ticks": 2276153,
+      "displayed": 32,
+      "captures": 33,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 33,
+      "pair": 2,
+      "invoke_ticks": 2282243,
+      "displayed": 33,
+      "captures": 34,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 34,
+      "pair": 0,
+      "invoke_ticks": 2277473,
+      "displayed": 34,
+      "captures": 35,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 35,
+      "pair": 1,
+      "invoke_ticks": 2273736,
+      "displayed": 35,
+      "captures": 36,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 36,
+      "pair": 2,
+      "invoke_ticks": 2270386,
+      "displayed": 36,
+      "captures": 37,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 37,
+      "pair": 0,
+      "invoke_ticks": 2282286,
+      "displayed": 37,
+      "captures": 38,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 38,
+      "pair": 1,
+      "invoke_ticks": 2273143,
+      "displayed": 38,
+      "captures": 39,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 39,
+      "pair": 2,
+      "invoke_ticks": 2280958,
+      "displayed": 39,
+      "captures": 40,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 40,
+      "pair": 0,
+      "invoke_ticks": 2273388,
+      "displayed": 40,
+      "captures": 41,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 41,
+      "pair": 1,
+      "invoke_ticks": 2274693,
+      "displayed": 41,
+      "captures": 42,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 42,
+      "pair": 2,
+      "invoke_ticks": 2277994,
+      "displayed": 42,
+      "captures": 43,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 43,
+      "pair": 0,
+      "invoke_ticks": 2271913,
+      "displayed": 43,
+      "captures": 44,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 44,
+      "pair": 1,
+      "invoke_ticks": 2280155,
+      "displayed": 44,
+      "captures": 45,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 45,
+      "pair": 2,
+      "invoke_ticks": 2273982,
+      "displayed": 45,
+      "captures": 46,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 46,
+      "pair": 0,
+      "invoke_ticks": 2273342,
+      "displayed": 46,
+      "captures": 47,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 47,
+      "pair": 1,
+      "invoke_ticks": 2273128,
+      "displayed": 47,
+      "captures": 48,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 48,
+      "pair": 2,
+      "invoke_ticks": 2278130,
+      "displayed": 48,
+      "captures": 49,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 49,
+      "pair": 0,
+      "invoke_ticks": 2274838,
+      "displayed": 49,
+      "captures": 50,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 50,
+      "pair": 1,
+      "invoke_ticks": 2277266,
+      "displayed": 50,
+      "captures": 51,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 51,
+      "pair": 2,
+      "invoke_ticks": 2275014,
+      "displayed": 51,
+      "captures": 52,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 52,
+      "pair": 0,
+      "invoke_ticks": 2272840,
+      "displayed": 52,
+      "captures": 53,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 53,
+      "pair": 1,
+      "invoke_ticks": 2273875,
+      "displayed": 53,
+      "captures": 54,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 54,
+      "pair": 2,
+      "invoke_ticks": 2270567,
+      "displayed": 54,
+      "captures": 55,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 55,
+      "pair": 0,
+      "invoke_ticks": 2280168,
+      "displayed": 55,
+      "captures": 56,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 56,
+      "pair": 1,
+      "invoke_ticks": 2277149,
+      "displayed": 56,
+      "captures": 57,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 57,
+      "pair": 2,
+      "invoke_ticks": 2272120,
+      "displayed": 57,
+      "captures": 58,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 58,
+      "pair": 0,
+      "invoke_ticks": 2270962,
+      "displayed": 58,
+      "captures": 59,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 59,
+      "pair": 1,
+      "invoke_ticks": 2276243,
+      "displayed": 59,
+      "captures": 60,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 60,
+      "pair": 2,
+      "invoke_ticks": 2269398,
+      "displayed": 60,
+      "captures": 61,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    }
+  ],
+  "elapsed_seconds": 2.3362297519342974,
+  "frame_receipt_seconds": [
+    0.3468441079603508,
+    0.3626852079760283,
+    0.39478831400629133,
+    0.4267002419801429,
+    0.45869869203306735,
+    0.5068228839663789,
+    0.538682802929543,
+    0.5705486679216847,
+    0.6027821809984744,
+    0.6346946730045602,
+    0.6668002569349483,
+    0.6986734749516472,
+    0.7307480219751596,
+    0.7629368579946458,
+    0.7948978339554742,
+    0.8268409610027447,
+    0.8587610939284787,
+    0.9066761919530109,
+    0.9388063399819657,
+    0.9706514979479834,
+    1.002783261006698,
+    1.0347769209183753,
+    1.0668049979722127,
+    1.0988743349444121,
+    1.1308618739712983,
+    1.162879007984884,
+    1.1949072289280593,
+    1.2268944749375805,
+    1.2588773859897628,
+    1.2906813309527934,
+    1.3388308979338035,
+    1.3708634389331564,
+    1.402840847033076,
+    1.4349193619564176,
+    1.4666470389347523,
+    1.4988249120069668,
+    1.530596882919781,
+    1.5626638639951125,
+    1.5947782290168107,
+    1.6266155110206455,
+    1.6587415609974414,
+    1.6908860899275169,
+    1.7388926879502833,
+    1.7706644820282236,
+    1.802781141945161,
+    1.8348540569422767,
+    1.8666925099678338,
+    1.8988730569835752,
+    1.9308716059895232,
+    1.9629001109860837,
+    1.9948433230165392,
+    2.026844496023841,
+    2.0587089179316536,
+    2.0907782620051876,
+    2.1228301259689033,
+    2.170701769995503,
+    2.202851773938164,
+    2.234633430955,
+    2.266818195930682,
+    2.2988120099762455
+  ],
+  "steady_intervals_seconds": [
+    0.03210310603026301,
+    0.03191192797385156,
+    0.031998450052924454,
+    0.04812419193331152,
+    0.03185991896316409,
+    0.031865864992141724,
+    0.03223351307678968,
+    0.03191249200608581,
+    0.03210558393038809,
+    0.031873218016698956,
+    0.03207454702351242,
+    0.03218883601948619,
+    0.031960975960828364,
+    0.031943127047270536,
+    0.031920132925733924,
+    0.0479150980245322,
+    0.032130148028954864,
+    0.03184515796601772,
+    0.03213176305871457,
+    0.03199365991167724,
+    0.03202807705383748,
+    0.03206933697219938,
+    0.031987539026886225,
+    0.032017134013585746,
+    0.032028220943175256,
+    0.031987246009521186,
+    0.03198291105218232,
+    0.03180394496303052,
+    0.04814956698101014,
+    0.03203254099935293,
+    0.03197740809991956,
+    0.03207851492334157,
+    0.031727676978334785,
+    0.032177873072214425,
+    0.03177197091281414,
+    0.03206698107533157,
+    0.03211436502169818,
+    0.031837282003834844,
+    0.03212604997679591,
+    0.03214452893007547,
+    0.04800659802276641,
+    0.031771794077940285,
+    0.03211665991693735,
+    0.03207291499711573,
+    0.0318384530255571,
+    0.03218054701574147,
+    0.03199854900594801,
+    0.032028504996560514,
+    0.03194321203045547,
+    0.032001173007301986,
+    0.03186442190781236,
+    0.03206934407353401,
+    0.03205186396371573,
+    0.047871644026599824,
+    0.03215000394266099,
+    0.03178165701683611,
+    0.0321847649756819,
+    0.03199381404556334
+  ],
+  "profile": [
+    {
+      "node": 0,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=198140 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 1,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=27861 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 2,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=167249 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 3,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=133317 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 4,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=288528 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 5,
+      "op": "ADD",
+      "mode": "IRIS_ROW_ADD",
+      "duration": "ticks=69657 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 6,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=135490 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 7,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=288420 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 8,
+      "op": "ADD",
+      "mode": "IRIS_ROW_ADD",
+      "duration": "ticks=68447 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 9,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=133974 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 10,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=289322 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 11,
+      "op": "ADD",
+      "mode": "IRIS_ROW_ADD",
+      "duration": "ticks=67707 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 12,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=133118 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 13,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=291306 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 14,
+      "op": "ADD",
+      "mode": "IRIS_ROW_ADD",
+      "duration": "ticks=68838 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 15,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=133793 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 16,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=289384 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 17,
+      "op": "ADD",
+      "mode": "IRIS_ROW_ADD",
+      "duration": "ticks=67665 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 18,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "mode": "IRIS_RESIZE_HW",
+      "duration": "ticks=99705 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 19,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=71375 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 20,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "mode": "IRIS_RESIZE_HW",
+      "duration": "ticks=198149 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 21,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=350810 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 22,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=13481 cache_hit_raw=0 cache_miss_raw=0"
+    }
+  ],
+  "strict_dispatch": true,
+  "registers": {
+    "pc": "pc (/32): 0x00816768\n",
+    "mcause": "mcause (/32): 0x00000000\n",
+    "mepc": "mepc (/32): 0x00000000\n",
+    "mtval": "mtval (/32): 0x00000000\n"
+  },
+  "camera_output_numeric_parity_verified": false,
+  "visual_confirmation": false,
+  "completed": true,
+  "dump_pair": 2,
+  "files": {
+    "input": {
+      "path": "/mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-backend-final/retry-input.bin",
+      "address": "0x3800000",
+      "bytes": 49152,
+      "sha256": "183d088b3efe5f96887375985a9c99c45cbb169836abf314ed9bb8b324e85c4d"
+    },
+    "output": {
+      "path": "/mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-backend-final/retry-output.bin",
+      "address": "0x3a00000",
+      "bytes": 49152,
+      "sha256": "b795d98bcda9eee7a81ab39564fe447fcd511e4ce7b607c8abbe70284b45a429"
+    }
+  },
+  "cpu_left_running": true
+}

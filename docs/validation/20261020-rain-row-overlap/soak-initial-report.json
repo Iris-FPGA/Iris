@@ -1,0 +1,59 @@
+{
+  "frames": 3600,
+  "first_sequence": 4725,
+  "last_sequence": 8602,
+  "consecutive_sequences": false,
+  "fresh_fps": 30.050505155289745,
+  "period_ticks_min": 3327607,
+  "period_ticks_max": 3327855,
+  "period_ticks_mean": 3327731.0808333335,
+  "invoke_ticks_median": 3177901.5,
+  "invoke_ticks_max": 3186062,
+  "underflow": 0,
+  "readerr": 0,
+  "rejects": 0,
+  "elapsed_seconds": 119.34546309802681,
+  "measurement": "100 MHz CLINT between VS-acknowledged new complete frame commits; UART receipt timing unused",
+  "cpu_reloaded": false,
+  "flash_written": false,
+  "dump_pair": 1,
+  "apb_registers": [
+    1230176346,
+    1,
+    52428800,
+    56623104,
+    8603,
+    8604,
+    0,
+    0,
+    0,
+    196611,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1229980417,
+    7,
+    1,
+    5,
+    2,
+    1,
+    3005
+  ],
+  "files": {
+    "input": {
+      "path": "/mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/soak-input.bin",
+      "bytes": 49152,
+      "sha256": "42433444ea7bda5e5897ab2fa8cc57342548eed9157f7607118d1e4982a9cbde"
+    },
+    "output": {
+      "path": "/mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-overlap/soak-output.bin",
+      "bytes": 49152,
+      "sha256": "547eed8d71f07ca27b2ae143c168ca9fb150aa6cab2b19049554ffdf1c192272"
+    }
+  },
+  "cpu_left_running": true,
+  "passed": false
+}

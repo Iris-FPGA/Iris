@@ -21,6 +21,9 @@ limitations under the License.
 /********************************* Function **********************************/
 
 #include "dispatch_guard.h"
+#if IRIS_RAIN_BACKEND
+#include "iris_rain_backend.h"
+#endif
 
 namespace tflite {
 namespace reference_integer_ops {
@@ -34,6 +37,13 @@ static inline __attribute__((noinline)) void ConvPerChannel(
 	const int8_t* filter_data, const RuntimeShape& bias_shape,
 	const int32_t* bias_data, const RuntimeShape& output_shape,
 	int8_t* output_data) {
+
+#if IRIS_RAIN_BACKEND
+  if(!IrisRainConv(params,output_multiplier,output_shift,input_shape,input_data,
+                   filter_shape,filter_data,bias_data,output_shape,output_data))
+    IrisDispatchStop("row Conv failed");
+  return;
+#endif
 
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
   const int stride_width = params.stride_width;

@@ -1,0 +1,181 @@
+{
+  "elf": "/mnt/mydata/Iris/dev/fastnst/firmware/tinyml_style/build/rain_princess/tinyml_style.elf",
+  "elf_sha256": "fbf8dd5b36e651478465b77481508df6561ece4f4371c13aa2311fb15bc50b56",
+  "reset": "",
+  "load": "279268 bytes written at address 0x00800000\n4 bytes written at address 0x008442f0\n2108 bytes written at address 0x00844300\ndownloaded 281380 bytes in 7.125200s (38.565 KiB/s)\n",
+  "bit_file_sha256": "609b932b3e17483b52886be73136caabb301cbb3044d2046b186457e6c180df5",
+  "descriptor_address": "0x844be8",
+  "descriptor": [
+    2,
+    3,
+    10768192,
+    49152,
+    3006554940,
+    440087053,
+    0,
+    0
+  ],
+  "raw_descriptor": "0x00844be8: 00000002 00000003 00a44f40 0000c000 b334633c 1a3b320d 00000000 00000000 \n",
+  "elapsed_seconds": 5.763479186920449,
+  "registers": {
+    "pc": "pc (/32): 0x008001d0\n",
+    "mcause": "mcause (/32): 0x8000000b\n",
+    "mepc": "mepc (/32): 0x008177bc\n",
+    "mtval": "mtval (/32): 0x00000000\n"
+  },
+  "invoke_completed": true,
+  "profile": [
+    {
+      "node": 0,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=2316768 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 1,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=18933493 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 2,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=19601540 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 3,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=23946446 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 4,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=23974185 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 5,
+      "op": "ADD",
+      "mode": "STANDARD",
+      "duration": "ticks=80569 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 6,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=23930247 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 7,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=23972611 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 8,
+      "op": "ADD",
+      "mode": "STANDARD",
+      "duration": "ticks=80517 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 9,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=23922767 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 10,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=23965552 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 11,
+      "op": "ADD",
+      "mode": "STANDARD",
+      "duration": "ticks=80654 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 12,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=23941763 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 13,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=23961716 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 14,
+      "op": "ADD",
+      "mode": "STANDARD",
+      "duration": "ticks=80237 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 15,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=23942717 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 16,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=23966733 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 17,
+      "op": "ADD",
+      "mode": "STANDARD",
+      "duration": "ticks=80107 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 18,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "mode": "IRIS_RESIZE_HW",
+      "duration": "ticks=472750 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 19,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=78713914 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 20,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "mode": "IRIS_RESIZE_HW",
+      "duration": "ticks=662603 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 21,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=77171765 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 22,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=2231551 cache_hit_raw=0 cache_miss_raw=0"
+    }
+  ],
+  "strict_dispatch_evidence": true,
+  "clint_hz": 100000000,
+  "invoke_seconds": 4.40087053,
+  "excludes_profile_uart": true,
+  "fresh_frame_fps": null,
+  "output_sha256": "818a4c3d7b1cd2850f4276b2dab594360fe971aae983b7b390910fc55b1e35e7",
+  "parity": {
+    "golden": "docs/validation/20261018-rain-princess-tinyml/static-golden.bin",
+    "golden_sha256": "818a4c3d7b1cd2850f4276b2dab594360fe971aae983b7b390910fc55b1e35e7",
+    "exact": true,
+    "max_abs_lsb": 0,
+    "mae_lsb": 0.0,
+    "different_bytes": 0
+  }
+}

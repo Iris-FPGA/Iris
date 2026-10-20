@@ -1,0 +1,3 @@
+PASS Rain DMA Conv docs/validation/20261020-rain-row-overlap/fixtures/0 cycles=161992 AR=197 AW=544
+PASS Rain DMA consecutive Conv restart docs/validation/20261020-rain-row-overlap/fixtures/0
+tests/video/tb_rain_backend.sv:212: $finish called at 3136610000 (1ps)

@@ -1,5 +1,70 @@
 # Iris TinyML Style Firmware
 
+The optional `RAIN_BACKEND=1` / `--rain-backend --burst-dma --live-rgb`
+backend now runs the **unchanged complete Rain Princess model at 30.05 fresh
+HDMI AI frames/s** on Ti60. The 180-frame board run measured a 31.775 ms median
+Invoke, exact 49,152-byte equality to BUILTIN_REF, and zero underflow, read
+errors or rejected commands. It uses an 8x8 row-cached Conv engine, four Add
+lanes, overlapped row writes, eight-beat Resize DMA and direct camera/display
+tensor binding. The verified SRAM project is `build/rain_row_overlap/iris_ws`
+with `build/rain_row_direct_live/tinyml_style.elf`.
+See [reproduction and validation](../../docs/validation/20261020-rain-row-overlap/README.md).
+This backend is disabled by default; only SRAM was programmed.
+
+The following measurements describe the earlier vendor backend.
+
+The complete Rain Princess camera/HDMI path uses `MODEL_PROFILE=rain_princess LIVE_DEMO=1`
+and the matching `prepare-tinyml-project.py --live-rgb` project. No model distillation
+is used. See [build and validation notes](../../docs/validation/20261019-rain-princess-hdmi/README.md).
+HDMI is 1920x1080 with two 960x1080 panels: a live camera on the left and the
+latest complete AI output on the right. The original validated 8x2/cache1024/Add-LITE
+backend produces approximately 2.40 fresh AI frames/s (0.3636 s per Invoke).
+The four-beat capture staging uses 96 bits of RAM and 32 bits of registers.
+The camera
+and HDMI refresh counters are separate from the fractional AI frame counter.
+The user confirmed the left panel is smooth while the AI panel still stutters.
+This backend does not meet the required 30 fresh AI frames/s. The remote
+micro4_d2 student/contour image is a different network and must not be loaded
+as an optimization of Rain Princess. The complete-model color image was
+restored and its camera output matched BUILTIN_REF byte for byte.
+`LIVE_PIPELINE=1 OBJDIR=build/rain_princess_pipeline` overlaps next-frame
+capture with inference in the third bank. On the same bitstream, 20 complete
+outputs passed at about 2.60 fresh frames/s, with exact camera-output parity
+and zero errors. Prefetch queues an input while the previous Invoke runs;
+end-to-end latency reduction has not been established.
+
+The earlier vendor SRAM image adds optional RGB tensor burst DMA, selected by
+`prepare-tinyml-project.py --live-rgb --burst-dma`. On 2026-10-20,
+`rain_princess_rect_8x2_burst_rgb` plus the pipeline ELF completed 60 fresh
+outputs at approximately **2.72 frames/s**, with a median Invoke of 354.545 ms.
+The 49,152-byte output matched the complete model's BUILTIN_REF exactly;
+underflow/readerr/rejects stayed zero. The design uses 60,328/60,800 XLRs,
+255/256 RAM blocks and 53/160 DSPs, with minimum setup +0.016 ns and hold
++0.026 ns. The model, its 128x128 RGB tensor size, and the HDMI geometry are
+unchanged. See `burst-rgb-live-debug.json`, `burst-rgb-reference-parity.json`
+and `burst-rgb-performance.json` in the validation directory linked above.
+The burst backend remains disabled by default in the source project. It
+specializes copy to C3/C16/C32 and Resize to C16/C32, the channels required
+by this unchanged model. Generic/default DMA parameter combinations are
+also tested. Four earlier generic burst candidates exceeded XLR capacity
+and were never programmed.
+
+This still does **not** meet 30 fresh frames/s. The first-frame profile records
+328.392 ms in Conv, 22.556 ms in Add and 2.958 ms in Resize. The existing 8x2
+Conv arithmetic alone has an optimistic lower bound of 97.321 ms at 100 MHz.
+Reaching 33.333 ms per complete frame requires a different Conv computation
+and data-reuse structure as well as faster Add; the DMA result does not prove
+that the Ti60 can fit or sustain such a backend. Only SRAM was programmed.
+
+Rain Princess static inference is available with `MODEL_PROFILE=rain_princess`.
+It uses the complete 128x128 RGB network, strict hardware dispatch by default,
+and an independent `build/rain_princess` output directory. The matching FPGA
+project and software reference have been built. On 2026-10-19, all 23 hardware
+operations completed on Ti60 and the 49,152-byte static output matched the
+reference exactly. Invoke took 4.40087053 seconds, excluding profile UART output;
+this does not meet real-time video requirements.
+See [the Rain Princess validation and reproduction instructions](../../docs/validation/20261018-rain-princess-tinyml/README.md).
+
 Static-input bring-up for the official Ti60 TFLM runtime. The strict build now
 contains a real Iris INT8 nearest-neighbor 2x DMA accelerator. Conv/Add dispatch
 must return `OP_OK` with `STANDARD` or `LITE`; unsupported hardware dispatch
@@ -79,7 +144,7 @@ function IDs, not bit positions in the RISC-V instruction word.
 | 0x200 | Capability | returns 0x49520101 |
 | 0x201 | Addresses | rs1=source, rs2=destination |
 | 0x202 | Shape | rs1=input height, rs2=input width |
-| 0x203 | Channels | rs1=4, 8, 16, or 32 |
+| 0x203 | Channels | rs1=4, 8, 16, or 32; 3 for unchanged copy/stream only |
 | 0x204 | Start | 0=accepted, FFFFFFFE=busy, FFFFFFFF=invalid |
 | 0x205 | Status | bit 0=busy, bit 1=done, bit 2=error, bit 3=stream word ready, bits 8+=error code |
 | 0x206 | Abort | drains outstanding AXI response before idle |

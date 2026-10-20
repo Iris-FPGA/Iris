@@ -1,0 +1,3 @@
+PASS Rain Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-backend/fixtures/22 round=0 words=16384 cycles=150153
+PASS Rain Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-backend/fixtures/22 round=1 words=16384 cycles=150165
+tests/video/tb_rain_conv.sv:73: $finish called at 3004600 (1s)

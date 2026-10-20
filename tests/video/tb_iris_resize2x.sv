@@ -1,22 +1,24 @@
 `timescale 1ns/1ps
-module tb_iris_resize2x;
+module tb_iris_resize2x #(parameter BURST_DMA=0,RGB_MODEL_ONLY=0,CHUNK_BEATS=2);
     reg clk=0; always #5 clk=~clk;
     reg rst_n=0, vendor_idle=1, cmd_valid=0, rsp_ready=1;
     reg [9:0] cmd_function_id=0;
     reg [31:0] cmd_inputs_0=0, cmd_inputs_1=0;
     wire cmd_ready, rsp_valid, busy;
     wire [31:0] rsp_outputs_0, araddr, awaddr;
-    wire arvalid, rready, awvalid, wvalid, bready;
+    wire arvalid, rready, awvalid, wvalid, wlast, bready;
+    wire [7:0] arlen,awlen;
     wire [127:0] wdata;
     reg arready=0, awready=0, wready=0, rvalid=0, bvalid=0;
     reg [127:0] rdata=0;
     reg [1:0] rresp=0, bresp=0;
     reg rlast=1;
-    iris_resize2x dut(.*);
+    iris_resize2x #(.BURST_DMA(BURST_DMA),.RGB_MODEL_ONLY(RGB_MODEL_ONLY),.CHUNK_BEATS(CHUNK_BEATS)) dut(.*);
     reg [7:0] mem[0:1048575];
     reg rd_pending=0, wr_pending=0;
     reg [31:0] rd_addr=0, wr_addr=0;
     integer rd_delay=0, wr_delay=0, writes=0, reads=0;
+    integer rd_beats=0,wr_beats=0,read_requests=0,write_requests=0,cycles=0;
     reg fail_read=0, fail_write=0, hold_write=0, hold_response=0;
     integer j;
     // Independent byte-addressed AXI slave; randomized command, data and
@@ -29,23 +31,36 @@ module tb_iris_resize2x;
     always @(posedge clk) begin
         if (!rst_n) begin rd_pending<=0; wr_pending<=0; rvalid<=0; bvalid<=0; end
         else begin
+            cycles<=cycles+1;
             if (arvalid && arready) begin
                 if (araddr[3:0]!=0) $fatal(1,"unaligned AR");
-                rd_pending<=1; rd_addr<=araddr; rd_delay<=$urandom_range(0,4); reads<=reads+1;
+                if({1'b0,araddr[11:0]}+((arlen+1)*16)>4096)$fatal(1,"AR crossed 4K");
+                rd_pending<=1; rd_addr<=araddr; rd_delay<=$urandom_range(0,4);
+                rd_beats<=arlen+1;read_requests<=read_requests+1;
             end
             if (rd_pending && !rvalid) begin
                 if (rd_delay!=0) rd_delay<=rd_delay-1;
                 else begin
                     for (j=0;j<16;j=j+1) rdata[j*8+:8]<=mem[rd_addr+j];
-                    rvalid<=1; rresp<=fail_read ? 2'b10 : 0;
+                    rvalid<=1; rresp<=fail_read ? 2'b10 : 0;rlast<=rd_beats==1;
                 end
             end
-            if (rvalid && rready) begin rvalid<=0; rd_pending<=0; end
-            if (awvalid && awready) begin wr_pending<=1; wr_addr<=awaddr; end
+            if (rvalid && rready) begin
+                rvalid<=0;reads<=reads+1;rd_beats<=rd_beats-1;rd_addr<=rd_addr+16;
+                rd_delay<=$urandom_range(0,4);
+                if(rlast)rd_pending<=0;
+            end
+            if (awvalid && awready) begin
+                if(awaddr[3:0]!=0)$fatal(1,"unaligned AW");
+                if({1'b0,awaddr[11:0]}+((awlen+1)*16)>4096)$fatal(1,"AW crossed 4K");
+                wr_pending<=1;wr_addr<=awaddr;wr_beats<=awlen+1;write_requests<=write_requests+1;
+            end
             if (wvalid && wready) begin
                 if (!wr_pending) $fatal(1,"W before AW");
                 for (j=0;j<16;j=j+1) mem[wr_addr+j]<=wdata[j*8+:8];
-                wr_pending<=0; wr_delay<=$urandom_range(1,4); writes<=writes+1;
+                if(wlast!=(wr_beats==1))$fatal(1,"incorrect WLAST");
+                wr_addr<=wr_addr+16;wr_beats<=wr_beats-1;writes<=writes+1;
+                if(wlast)begin wr_pending<=0;wr_delay<=$urandom_range(1,4);end
             end
             if (wr_delay>0) begin
                 if (wr_delay==1 && !hold_response) begin bvalid<=1; bresp<=fail_write ? 2'b10 : 0; wr_delay<=0; end
@@ -76,45 +91,51 @@ module tb_iris_resize2x;
             if (busy) $fatal(1,"DMA did not terminate");
         end
     endtask
-    task check_shape(input integer h,input integer w,input integer c);
-        integer y,x,ch,k;
+    task check_shape(input integer h,input integer w,input integer c,
+                     input integer src='h10000,input integer dst='h30000);
+        integer y,x,ch,k,start_cycles,start_ar,start_aw;
         begin
-            for(k=0;k<h*w*c;k=k+1) mem['h10000+k]=(k*73+17) & 255;
-            for(k=0;k<h*w*c*4+16;k=k+1) mem['h30000+k]=8'hcc;
-            configure(h,w,c,'h30000);command('h204,0,0);
+            for(k=0;k<h*w*c;k=k+1) mem[src+k]=(k*73+17) & 255;
+            for(k=0;k<h*w*c*4+16;k=k+1) mem[dst+k]=8'hcc;
+            configure(h,w,c,dst);command('h201,src,dst);
+            start_cycles=cycles;start_ar=read_requests;start_aw=write_requests;
+            command('h204,0,0);
             if (response!=0) $fatal(1,"valid shape rejected");
             await_idle();command('h205,0,0);
             if (response!=2) $fatal(1,"bad success status %h",response);
             for(y=0;y<2*h;y=y+1) for(x=0;x<2*w;x=x+1) for(ch=0;ch<c;ch=ch+1)
-                if(mem['h30000+(y*2*w+x)*c+ch] !== mem['h10000+((y/2)*w+x/2)*c+ch])
+                if(mem[dst+(y*2*w+x)*c+ch] !== mem[src+((y/2)*w+x/2)*c+ch])
                     $fatal(1,"pixel mismatch shape=%0d,%0d,%0d at %0d,%0d,%0d",h,w,c,y,x,ch);
-            for(k=0;k<16;k=k+1) if(mem['h30000+h*w*c*4+k]!==8'hcc) $fatal(1,"wrote past tensor");
-            $display("PASS resize %0dx%0dx%0d",h,w,c);
+            for(k=0;k<16;k=k+1) if(mem[dst+h*w*c*4+k]!==8'hcc) $fatal(1,"wrote past tensor");
+            $display("PASS resize %0dx%0dx%0d burst=%0d cycles=%0d AR=%0d AW=%0d",h,w,c,
+                BURST_DMA,cycles-start_cycles,read_requests-start_ar,write_requests-start_aw);
         end
     endtask
-    task check_copy(input integer h,input integer w,input integer c);
+    task check_copy(input integer h,input integer w,input integer c,
+                    input integer src='h10000,input integer dst='h30000);
         integer k, old_reads, old_writes;
         begin
-            for(k=0;k<h*w*c;k=k+1) mem['h10000+k]=(k*113+41)&255;
-            for(k=0;k<h*w*c+16;k=k+1) mem['h30000+k]=8'hcc;
-            configure(h,w,c,'h30000);old_reads=reads;old_writes=writes;
+            for(k=0;k<h*w*c;k=k+1) mem[src+k]=(k*113+41)&255;
+            for(k=0;k<h*w*c+16;k=k+1) mem[dst+k]=8'hcc;
+            configure(h,w,c,dst);command('h201,src,dst);old_reads=reads;old_writes=writes;
             command('h208,0,0);if(response!=0)$fatal(1,"copy rejected");
             await_idle();command('h205,0,0);if(response!=2)$fatal(1,"copy status");
             for(k=0;k<h*w*c;k=k+1)
-                if(mem['h10000+k]!==mem['h30000+k])$fatal(1,"copy byte mismatch %0d",k);
-            for(k=0;k<16;k=k+1)if(mem['h30000+h*w*c+k]!==8'hcc)$fatal(1,"copy overrun");
+                if(mem[src+k]!==mem[dst+k])$fatal(1,"copy byte mismatch %0d",k);
+            for(k=0;k<16;k=k+1)if(mem[dst+h*w*c+k]!==8'hcc)$fatal(1,"copy overrun");
             if(reads-old_reads!=h*w*c/16 || writes-old_writes!=h*w*c/16)$fatal(1,"copy beat count");
             $display("PASS DMA copy %0dx%0dx%0d",h,w,c);
         end
     endtask
     task check_stream;
-        integer k,w,b,old_writes;
+        integer k,w,b,old_writes,stream_bytes;
         reg [31:0] got;
         begin
-            for(k=0;k<48;k=k+1)mem['h10000+k]=(k%4==3) ? 8'h80 : (k*19+5)&255;
-            old_writes=writes;configure(3,4,4,0);command('h20f,0,0);
+            stream_bytes=RGB_MODEL_ONLY ? 144 : 96;
+            for(k=0;k<stream_bytes;k=k+1)mem['h10000+k]=(!RGB_MODEL_ONLY && k%4==3) ? 8'h80 : (k*19+5)&255;
+            old_writes=writes;configure(3,RGB_MODEL_ONLY ? 16 : 8,RGB_MODEL_ONLY ? 3 : 4,0);command('h20f,0,0);
             if(response!=0)$fatal(1,"stream start rejected");
-            for(k=0;k<48;k=k+16)begin
+            for(k=0;k<stream_bytes;k=k+16)begin
                 command('h205,0,0);
                 while(!response[3])begin
                     if(!response[0])$fatal(1,"stream finished early");
@@ -129,9 +150,9 @@ module tb_iris_resize2x;
             command('h205,0,0);if(response!=2)$fatal(1,"stream did not complete");
             command('h209,0,0);if(response!=0)$fatal(1,"dummy audit false positive");
             if(writes!=old_writes)$fatal(1,"read-only stream wrote DDR");
-            mem['h10003]=8'h81;configure(1,4,4,0);command('h20f,0,0);
+            mem['h10003]=8'h81;configure(1,RGB_MODEL_ONLY ? 16 : 4,RGB_MODEL_ONLY ? 3 : 4,0);command('h20f,0,0);
             command('h205,0,0);while(!response[3])command('h205,0,0);
-            command('h209,0,0);if(response!=1)$fatal(1,"dummy violation missed");
+            command('h209,0,0);if(response!=(RGB_MODEL_ONLY ? 0 : 1))$fatal(1,"dummy audit or C3 byte preservation failed");
             command('h206,0,0);await_idle();command('h205,0,0);
             if(!response[2] || response[1])$fatal(1,"stream abort status");
             $display("PASS read-only CI tensor stream: samples, audit, no writes, abort");
@@ -143,14 +164,43 @@ module tb_iris_resize2x;
         command('h200,0,0);if(response!='h49520101)$fatal(1,"capability");
         command('h2ff,0,0);if(response!='hffffffff)$fatal(1,"unknown command hangs");
         check_shape(32,32,32);check_shape(64,64,16);
-        check_shape(3,4,4);check_shape(3,2,8);check_shape(3,1,16);check_shape(3,1,32);
+        check_shape(2,8,16,'h10ff0,'h30ff0);check_shape(2,4,32,'h10ff0,'h30ff0);
+        if(!RGB_MODEL_ONLY)begin check_shape(3,4,4);check_shape(3,2,8);end
+        else begin
+            configure(3,4,4,'h30000);before_writes=writes;command('h204,0,0);
+            if(response!='hffffffff || busy || writes!=before_writes)$fatal(1,"RGB-only C4 resize accepted");
+            configure(3,2,8,'h30000);command('h204,0,0);
+            if(response!='hffffffff || busy || writes!=before_writes)$fatal(1,"RGB-only C8 resize accepted");
+        end
+        check_shape(3,1,16);check_shape(3,1,32);
         check_stream();
-        check_copy(3,4,4);check_copy(3,2,8);check_copy(3,1,16);check_copy(3,1,32);
-        check_copy(48,640,4);check_shape(2,4,4);
+        check_copy(128,128,3);
+        command('h209,0,0);if(response!=0)$fatal(1,"C3 bytes incorrectly audited as RGBA padding");
+        check_copy(3,16,3,'h10ff0,'h30ff0);
+        configure(128,128,3,'h30000);before_writes=writes;command('h204,0,0);
+        if(response!='hffffffff || busy || writes!=before_writes)$fatal(1,"C3 resize must be rejected");
+        configure(1,127,3,'h30000);command('h208,0,0);
+        if(response!='hffffffff || busy)$fatal(1,"partial C3 beat must be rejected");
+        configure(1,16,3,'h30000);before_writes=writes;
+        command('h202,1,'h40000010);command('h208,0,0);
+        if(response!='hffffffff || busy || writes!=before_writes)$fatal(1,"width truncated into legal shape");
+        command('h202,'h40000001,16);command('h208,0,0);
+        if(response!='hffffffff || busy || writes!=before_writes)$fatal(1,"height truncated into legal shape");
+        command('h202,1,16);command('h203,'h40000003,0);command('h208,0,0);
+        if(response!='hffffffff || busy || writes!=before_writes)$fatal(1,"channels truncated into legal shape");
+        if(!RGB_MODEL_ONLY)begin check_copy(3,4,4);check_copy(3,2,8);check_copy(48,640,4);end
+        check_copy(3,1,16);check_copy(3,1,32);check_shape(2,1,16);
         configure(1,1,4,'h30000);before_writes=writes;command('h204,0,0);
         if(response!='hffffffff || busy || writes!=before_writes)$fatal(1,"invalid row accepted");
-        configure(1,4,4,'h10000);command('h204,0,0);if(response!='hffffffff)$fatal(1,"overlap accepted");
-        configure(1,4,4,'h30000);vendor_idle=0;command('h204,0,0);
+        configure(1,1,16,'h10000);command('h204,0,0);if(response!='hffffffff)$fatal(1,"overlap accepted");
+        configure(1,2,16,'h30000);before_writes=writes;
+        command('h201,'h0ffffff0,'h30000);command('h208,0,0);
+        if(response!='hffffffff || busy || writes!=before_writes)$fatal(1,"256 MiB input boundary accepted");
+        command('h201,'h10000,'h0ffffff0);command('h208,0,0);
+        if(response!='hffffffff || busy || writes!=before_writes)$fatal(1,"256 MiB output boundary accepted");
+        command('h201,'hfffffff0,'h30000);command('h208,0,0);
+        if(response!='hffffffff || busy || writes!=before_writes)$fatal(1,"32-bit address wrap accepted");
+        configure(1,1,16,'h30000);vendor_idle=0;command('h204,0,0);
         if(response!='hfffffffe || busy)$fatal(1,"vendor not idle");vendor_idle=1;
         fail_read=1;command('h204,0,0);await_idle();command('h205,0,0);
         if(!response[2] || response[1])$fatal(1,"read error reported done");fail_read=0;
@@ -162,7 +212,7 @@ module tb_iris_resize2x;
         hold_response=1;hold_write=0;wait(bready);repeat(10)@(negedge clk);
         if(!busy)$fatal(1,"abort reused memory before B");hold_response=0;await_idle();
         command('h205,0,0);if(!response[2] || response[1])$fatal(1,"abort status");
-        check_shape(2,4,4);
+        check_shape(2,1,16);
         $display("PASS: tb_iris_resize2x reads=%0d writes=%0d",reads,writes);$finish;
     end
     initial begin #100000000;$fatal(1,"test timeout");end

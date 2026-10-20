@@ -1,0 +1,8 @@
+PASS contour: 10240 vectors, 5x5 convolution, grey neural + colour camera, borders, modes, saturation and pipeline
+tests/video/tb_style_contour.sv:34: $finish called at 102501000 (1ps)
+PASS contour: 10240 vectors, 5x5 convolution, grey neural + colour camera, borders, modes, saturation and pipeline
+tests/video/tb_style_contour.sv:34: $finish called at 102501000 (1ps)
+PASS contour: 10240 vectors, 5x5 convolution, grey neural + colour camera, borders, modes, saturation and pipeline
+tests/video/tb_style_contour.sv:34: $finish called at 102501000 (1ps)
+PASS single split image     2074559 samples, pixel oracle, source seam, pairing
+tests/video/tb_style_panels.sv:153: $finish called at 34663804000 (1ps)

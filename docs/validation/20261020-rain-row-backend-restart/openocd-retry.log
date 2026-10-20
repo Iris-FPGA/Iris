@@ -1,0 +1,12 @@
+Open On-Chip Debugger 0.11.0+dev-04060-g967f8f6f0-dirty (2026-03-24-19:53)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+cpu.yaml not found within 3 levels
+Info : auto-selecting first available session transport "jtag". To override use 'transport select <transport>'.
+Info : Simple Register based Bscan Tunnel Selected
+Info : Bscan tunnel IR 0x8 selected
+Info : set servers polling period to 50ms
+Error: failed to reset FTDI device: LIBUSB_ERROR_TIMEOUT
+Error: unable to open ftdi device with vid 0403, pid 6011, description '*', serial '*' at bus location '*' or bus:address *:*
+

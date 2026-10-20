@@ -1,0 +1,13 @@
+{
+  "map": "PASS",
+  "interface": "PASS",
+  "pnr": "PASS",
+  "pgm": "PASS",
+  "exit_code": 0,
+  "minimum_setup_slack_ns": 0.016,
+  "minimum_hold_slack_ns": 0.022,
+  "bitstream": "iris_ws/outflow/iris_ws.bit",
+  "bitstream_sha256": "65822b6492d136f0f60932f6a4656ba4d02ac81c01e489d2feec83af85db9d8e",
+  "ram10_used": 256,
+  "dsp48_used": 114
+}
