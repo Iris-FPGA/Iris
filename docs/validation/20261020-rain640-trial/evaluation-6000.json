@@ -1,0 +1,592 @@
+{
+  "scope": "CPU pilot; teacher fidelity is not subjective style quality or HDMI acceptance",
+  "candidate": "c448_lowdec_skip_r0",
+  "training_steps": 6000,
+  "patch": 256,
+  "training_seconds": 276.5494499299675,
+  "validation_images": 32,
+  "teacher_vs_student_mean_psnr_db": 16.297509616505142,
+  "teacher_vs_student_mean_local_ssim": 0.4669825850560802,
+  "student_float_vs_int8_mean_psnr_db": 47.967679895344304,
+  "model_sha256": "6ea1b519faf2a408ec0d4680f4b3e1a0ae6044834d72ba1f8add7249a2269b7b",
+  "teacher_sha256": "6a2fd90bf5357698b0b21e6fc372faf1b129f11d9e0705ff4e47dd92d8e3f61e",
+  "hardware_proven": false,
+  "per_image": [
+    {
+      "image": "000000000110.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 28.05087423231401,
+        "psnr_255_db": 16.681935907076777,
+        "local_gaussian_ssim": 0.5377162663530518,
+        "global_channel_ssim": 0.7083541440064046,
+        "max_abs": 255.0
+      },
+      "student_float_vs_int8": {
+        "mae": 0.769640872438815,
+        "psnr_255_db": 48.349624697350606,
+        "local_gaussian_ssim": 0.9979881996054109,
+        "global_channel_ssim": 0.999729148480562,
+        "max_abs": 5.6912384033203125
+      },
+      "cpu_reference_seconds": 0.10968081501778215
+    },
+    {
+      "image": "000000000394.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 31.08155508820718,
+        "psnr_255_db": 16.01379432996094,
+        "local_gaussian_ssim": 0.46529281642935855,
+        "global_channel_ssim": 0.5423028884033679,
+        "max_abs": 255.0
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8099345676499393,
+        "psnr_255_db": 47.94376821340245,
+        "local_gaussian_ssim": 0.9970706642285047,
+        "global_channel_ssim": 0.9995225106241744,
+        "max_abs": 5.8977203369140625
+      },
+      "cpu_reference_seconds": 0.12036142102442682
+    },
+    {
+      "image": "000000000081.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 32.06778548442603,
+        "psnr_255_db": 15.651925849216282,
+        "local_gaussian_ssim": 0.2965136571606475,
+        "global_channel_ssim": 0.4581547081195327,
+        "max_abs": 253.01544189453125
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8961951140828832,
+        "psnr_255_db": 47.053693300725286,
+        "local_gaussian_ssim": 0.9936237056833953,
+        "global_channel_ssim": 0.9991977361892491,
+        "max_abs": 8.246543884277344
+      },
+      "cpu_reference_seconds": 0.10724452696740627
+    },
+    {
+      "image": "000000000508.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 31.41229175549052,
+        "psnr_255_db": 15.83294297987907,
+        "local_gaussian_ssim": 0.3258278335962889,
+        "global_channel_ssim": 0.4923072150371169,
+        "max_abs": 245.86625003814697
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8690586247626116,
+        "psnr_255_db": 47.34263738138348,
+        "local_gaussian_ssim": 0.9945560841232881,
+        "global_channel_ssim": 0.999374245882147,
+        "max_abs": 7.1937103271484375
+      },
+      "cpu_reference_seconds": 0.10753568192012608
+    },
+    {
+      "image": "000000000133.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 30.705232690971137,
+        "psnr_255_db": 16.053783776847734,
+        "local_gaussian_ssim": 0.3662360913455533,
+        "global_channel_ssim": 0.49322567168760384,
+        "max_abs": 229.49944972991943
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8231472476265884,
+        "psnr_255_db": 47.73139762946408,
+        "local_gaussian_ssim": 0.9960407319933521,
+        "global_channel_ssim": 0.9994391080640194,
+        "max_abs": 6.847198486328125
+      },
+      "cpu_reference_seconds": 0.10546546208206564
+    },
+    {
+      "image": "000000000443.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 30.064443734686872,
+        "psnr_255_db": 16.313566940020184,
+        "local_gaussian_ssim": 0.4243981744579761,
+        "global_channel_ssim": 0.5751939076351359,
+        "max_abs": 212.5782470703125
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8215679891332467,
+        "psnr_255_db": 47.786978127906636,
+        "local_gaussian_ssim": 0.9964787174110574,
+        "global_channel_ssim": 0.9994605471537791,
+        "max_abs": 6.650360107421875
+      },
+      "cpu_reference_seconds": 0.10538721003104001
+    },
+    {
+      "image": "000000000009.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 29.94388122816001,
+        "psnr_255_db": 16.282318530219865,
+        "local_gaussian_ssim": 0.5019054340203911,
+        "global_channel_ssim": 0.6533648049556565,
+        "max_abs": 250.732004404068
+      },
+      "student_float_vs_int8": {
+        "mae": 0.7882164740259233,
+        "psnr_255_db": 48.12515147856609,
+        "local_gaussian_ssim": 0.997259353526557,
+        "global_channel_ssim": 0.999701185124175,
+        "max_abs": 10.127853393554688
+      },
+      "cpu_reference_seconds": 0.10544636810664088
+    },
+    {
+      "image": "000000000357.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 30.514296206728194,
+        "psnr_255_db": 16.19842619853722,
+        "local_gaussian_ssim": 0.3787342006001901,
+        "global_channel_ssim": 0.47695296778224966,
+        "max_abs": 221.1991424560547
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8523815662819996,
+        "psnr_255_db": 47.44407979097361,
+        "local_gaussian_ssim": 0.9959744207236465,
+        "global_channel_ssim": 0.9990760214546377,
+        "max_abs": 11.403823852539062
+      },
+      "cpu_reference_seconds": 0.10753410507459193
+    },
+    {
+      "image": "000000000569.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 29.20075942292111,
+        "psnr_255_db": 16.430645909746264,
+        "local_gaussian_ssim": 0.46326462761782533,
+        "global_channel_ssim": 0.5217835552026179,
+        "max_abs": 199.9665722846985
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8054802853462752,
+        "psnr_255_db": 47.98806114368125,
+        "local_gaussian_ssim": 0.9970300733223466,
+        "global_channel_ssim": 0.9993980699288972,
+        "max_abs": 5.2067718505859375
+      },
+      "cpu_reference_seconds": 0.10746575193479657
+    },
+    {
+      "image": "000000000575.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 29.34209862808671,
+        "psnr_255_db": 16.340384169968477,
+        "local_gaussian_ssim": 0.5942450668612911,
+        "global_channel_ssim": 0.6247020467921564,
+        "max_abs": 246.9552001953125
+      },
+      "student_float_vs_int8": {
+        "mae": 0.7178041631539362,
+        "psnr_255_db": 48.9340335639703,
+        "local_gaussian_ssim": 0.9995140977496332,
+        "global_channel_ssim": 0.9997985450985581,
+        "max_abs": 11.616012573242188
+      },
+      "cpu_reference_seconds": 0.10741214000154287
+    },
+    {
+      "image": "000000000077.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 28.16893331804054,
+        "psnr_255_db": 16.525447568111773,
+        "local_gaussian_ssim": 0.5754675802389556,
+        "global_channel_ssim": 0.6578853284392131,
+        "max_abs": 255.0
+      },
+      "student_float_vs_int8": {
+        "mae": 0.7724074604062723,
+        "psnr_255_db": 48.33978879877233,
+        "local_gaussian_ssim": 0.997911532057887,
+        "global_channel_ssim": 0.9996982631300688,
+        "max_abs": 5.7870025634765625
+      },
+      "cpu_reference_seconds": 0.10679626802448183
+    },
+    {
+      "image": "000000000529.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 29.283740015927858,
+        "psnr_255_db": 16.29709866074545,
+        "local_gaussian_ssim": 0.5510146232818439,
+        "global_channel_ssim": 0.6705156295034221,
+        "max_abs": 241.64164185523987
+      },
+      "student_float_vs_int8": {
+        "mae": 0.759091148275895,
+        "psnr_255_db": 48.48236248853323,
+        "local_gaussian_ssim": 0.9974283454177048,
+        "global_channel_ssim": 0.9997505697697275,
+        "max_abs": 5.13201904296875
+      },
+      "cpu_reference_seconds": 0.10654993494972587
+    },
+    {
+      "image": "000000000641.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 29.424624734723217,
+        "psnr_255_db": 16.16612611780429,
+        "local_gaussian_ssim": 0.5339818312356851,
+        "global_channel_ssim": 0.6246172105626282,
+        "max_abs": 255.0
+      },
+      "student_float_vs_int8": {
+        "mae": 0.7919922429187702,
+        "psnr_255_db": 48.0613266386301,
+        "local_gaussian_ssim": 0.9974440812412774,
+        "global_channel_ssim": 0.9996732824561679,
+        "max_abs": 6.93389892578125
+      },
+      "cpu_reference_seconds": 0.1062277730088681
+    },
+    {
+      "image": "000000000397.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 29.648007921167494,
+        "psnr_255_db": 16.465039503354973,
+        "local_gaussian_ssim": 0.5185268777521085,
+        "global_channel_ssim": 0.652271101633934,
+        "max_abs": 255.0
+      },
+      "student_float_vs_int8": {
+        "mae": 0.792930080924028,
+        "psnr_255_db": 48.10252363903483,
+        "local_gaussian_ssim": 0.99781534565588,
+        "global_channel_ssim": 0.9996393354804037,
+        "max_abs": 7.916343688964844
+      },
+      "cpu_reference_seconds": 0.10643151099793613
+    },
+    {
+      "image": "000000000370.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 30.390153244788657,
+        "psnr_255_db": 16.262465454487742,
+        "local_gaussian_ssim": 0.45291025494972664,
+        "global_channel_ssim": 0.6404388556612336,
+        "max_abs": 255.0
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8033390665494112,
+        "psnr_255_db": 47.97701452860757,
+        "local_gaussian_ssim": 0.9971550671514254,
+        "global_channel_ssim": 0.9996116324945085,
+        "max_abs": 6.420936584472656
+      },
+      "cpu_reference_seconds": 0.1065979179693386
+    },
+    {
+      "image": "000000000086.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 25.336945583401764,
+        "psnr_255_db": 17.239637419756985,
+        "local_gaussian_ssim": 0.6846931685147576,
+        "global_channel_ssim": 0.7581255160516567,
+        "max_abs": 227.23770570755005
+      },
+      "student_float_vs_int8": {
+        "mae": 0.7194637731052514,
+        "psnr_255_db": 48.97480035129738,
+        "local_gaussian_ssim": 0.9990037320162909,
+        "global_channel_ssim": 0.999814944372777,
+        "max_abs": 6.574687957763672
+      },
+      "cpu_reference_seconds": 0.10828342195600271
+    },
+    {
+      "image": "000000000620.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 30.630671233833613,
+        "psnr_255_db": 15.900675279190157,
+        "local_gaussian_ssim": 0.4566041248201042,
+        "global_channel_ssim": 0.5723341205360768,
+        "max_abs": 255.0
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8274198600561875,
+        "psnr_255_db": 47.71220798690075,
+        "local_gaussian_ssim": 0.9969277941868273,
+        "global_channel_ssim": 0.9995815579858126,
+        "max_abs": 6.226348876953125
+      },
+      "cpu_reference_seconds": 0.10628749907482415
+    },
+    {
+      "image": "000000000584.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 30.03566863151707,
+        "psnr_255_db": 16.190591355410263,
+        "local_gaussian_ssim": 0.47673614866155173,
+        "global_channel_ssim": 0.6435645241613598,
+        "max_abs": 248.4702606201172
+      },
+      "student_float_vs_int8": {
+        "mae": 0.7890596452719506,
+        "psnr_255_db": 48.15422190869999,
+        "local_gaussian_ssim": 0.9970370519060455,
+        "global_channel_ssim": 0.9996836783460359,
+        "max_abs": 8.617538452148438
+      },
+      "cpu_reference_seconds": 0.10797693906351924
+    },
+    {
+      "image": "000000000192.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 27.16179978102109,
+        "psnr_255_db": 16.85591373545043,
+        "local_gaussian_ssim": 0.5500032438249202,
+        "global_channel_ssim": 0.5604615627022177,
+        "max_abs": 250.4331250190735
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8181439267193976,
+        "psnr_255_db": 47.780251006531884,
+        "local_gaussian_ssim": 0.9980667172403419,
+        "global_channel_ssim": 0.9993892268594357,
+        "max_abs": 6.4464569091796875
+      },
+      "cpu_reference_seconds": 0.17924221197608858
+    },
+    {
+      "image": "000000000074.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 29.66089342986337,
+        "psnr_255_db": 16.188936205342102,
+        "local_gaussian_ssim": 0.4989630721156307,
+        "global_channel_ssim": 0.6203757057953679,
+        "max_abs": 232.55126404762268
+      },
+      "student_float_vs_int8": {
+        "mae": 0.7812614338495769,
+        "psnr_255_db": 48.232571577754655,
+        "local_gaussian_ssim": 0.9977461186805966,
+        "global_channel_ssim": 0.9996635543102187,
+        "max_abs": 8.263740539550781
+      },
+      "cpu_reference_seconds": 0.10789217101410031
+    },
+    {
+      "image": "000000000520.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 30.663887538512547,
+        "psnr_255_db": 16.019887702671582,
+        "local_gaussian_ssim": 0.44684990834327887,
+        "global_channel_ssim": 0.585422598790839,
+        "max_abs": 248.1496877670288
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8067714327218871,
+        "psnr_255_db": 47.93245199814685,
+        "local_gaussian_ssim": 0.9969917745661115,
+        "global_channel_ssim": 0.9996143852057787,
+        "max_abs": 6.934844970703125
+      },
+      "cpu_reference_seconds": 0.10787445795722306
+    },
+    {
+      "image": "000000000400.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 30.937387914300327,
+        "psnr_255_db": 15.923949017582995,
+        "local_gaussian_ssim": 0.40910542820624823,
+        "global_channel_ssim": 0.541218953102249,
+        "max_abs": 255.0
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8343693385774774,
+        "psnr_255_db": 47.67341869029288,
+        "local_gaussian_ssim": 0.9964436332778854,
+        "global_channel_ssim": 0.9995557125059463,
+        "max_abs": 6.5118865966796875
+      },
+      "cpu_reference_seconds": 0.10681095696054399
+    },
+    {
+      "image": "000000000643.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 30.751521169214456,
+        "psnr_255_db": 16.11912777261441,
+        "local_gaussian_ssim": 0.41244664264100755,
+        "global_channel_ssim": 0.5868917908397561,
+        "max_abs": 255.0
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8233081833784753,
+        "psnr_255_db": 47.73402427938591,
+        "local_gaussian_ssim": 0.9957146179801165,
+        "global_channel_ssim": 0.9995249738087232,
+        "max_abs": 6.293174743652344
+      },
+      "cpu_reference_seconds": 0.11697560001630336
+    },
+    {
+      "image": "000000000491.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 30.4416011408807,
+        "psnr_255_db": 16.08910614848505,
+        "local_gaussian_ssim": 0.4275713407932445,
+        "global_channel_ssim": 0.5610878715585947,
+        "max_abs": 255.0
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8158381870637732,
+        "psnr_255_db": 47.84881742459093,
+        "local_gaussian_ssim": 0.996685942968837,
+        "global_channel_ssim": 0.999500308490131,
+        "max_abs": 6.90924072265625
+      },
+      "cpu_reference_seconds": 0.10717551899142563
+    },
+    {
+      "image": "000000000438.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 28.750713525259762,
+        "psnr_255_db": 16.6289571135895,
+        "local_gaussian_ssim": 0.5043018351715987,
+        "global_channel_ssim": 0.6580811629520408,
+        "max_abs": 224.69874954223633
+      },
+      "student_float_vs_int8": {
+        "mae": 0.7903806278818795,
+        "psnr_255_db": 48.13017746753873,
+        "local_gaussian_ssim": 0.9975383371463785,
+        "global_channel_ssim": 0.9996504889694244,
+        "max_abs": 5.272941589355469
+      },
+      "cpu_reference_seconds": 0.10571992699988186
+    },
+    {
+      "image": "000000000431.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 28.147911353551574,
+        "psnr_255_db": 16.82649857286458,
+        "local_gaussian_ssim": 0.5142319485523653,
+        "global_channel_ssim": 0.5701307199554151,
+        "max_abs": 217.1234359741211
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8208618469391432,
+        "psnr_255_db": 47.82081521486579,
+        "local_gaussian_ssim": 0.997780429763994,
+        "global_channel_ssim": 0.9993820089857373,
+        "max_abs": 6.4096221923828125
+      },
+      "cpu_reference_seconds": 0.10541806207038462
+    },
+    {
+      "image": "000000000196.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 27.863323425652407,
+        "psnr_255_db": 16.77523268693989,
+        "local_gaussian_ssim": 0.5605162381234331,
+        "global_channel_ssim": 0.676362163931918,
+        "max_abs": 224.22926330566406
+      },
+      "student_float_vs_int8": {
+        "mae": 0.7481590026678653,
+        "psnr_255_db": 48.61209690356698,
+        "local_gaussian_ssim": 0.9978330251943798,
+        "global_channel_ssim": 0.9997273608186518,
+        "max_abs": 5.624946594238281
+      },
+      "cpu_reference_seconds": 0.10950735199730843
+    },
+    {
+      "image": "000000000071.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 28.457789226731595,
+        "psnr_255_db": 16.56047836643529,
+        "local_gaussian_ssim": 0.4786042296558255,
+        "global_channel_ssim": 0.5593195801934868,
+        "max_abs": 216.65394592285156
+      },
+      "student_float_vs_int8": {
+        "mae": 0.7819759760931548,
+        "psnr_255_db": 48.23421043951249,
+        "local_gaussian_ssim": 0.9965336003585173,
+        "global_channel_ssim": 0.9995215048760336,
+        "max_abs": 6.539581298828125
+      },
+      "cpu_reference_seconds": 0.10787158203311265
+    },
+    {
+      "image": "000000000263.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 29.880233276526237,
+        "psnr_255_db": 16.290130124507108,
+        "local_gaussian_ssim": 0.477303139233358,
+        "global_channel_ssim": 0.618474584830126,
+        "max_abs": 249.98532104492188
+      },
+      "student_float_vs_int8": {
+        "mae": 0.7997573715282811,
+        "psnr_255_db": 48.011931899990614,
+        "local_gaussian_ssim": 0.9974802049487982,
+        "global_channel_ssim": 0.9995616782423,
+        "max_abs": 7.4560546875
+      },
+      "cpu_reference_seconds": 0.1067641091067344
+    },
+    {
+      "image": "000000000564.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 29.38982692698819,
+        "psnr_255_db": 16.48727793593071,
+        "local_gaussian_ssim": 0.432446738213956,
+        "global_channel_ssim": 0.6036844076661155,
+        "max_abs": 243.58281230926514
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8276687306727075,
+        "psnr_255_db": 47.81275537592339,
+        "local_gaussian_ssim": 0.996911716142843,
+        "global_channel_ssim": 0.999580592682836,
+        "max_abs": 5.592002868652344
+      },
+      "cpu_reference_seconds": 0.10591594700235873
+    },
+    {
+      "image": "000000000562.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 32.72965420252385,
+        "psnr_255_db": 15.748431764423401,
+        "local_gaussian_ssim": 0.1807295278239824,
+        "global_channel_ssim": 0.2267237088050428,
+        "max_abs": 199.94487857818604
+      },
+      "student_float_vs_int8": {
+        "mae": 0.9268475810231434,
+        "psnr_255_db": 46.66264299962695,
+        "local_gaussian_ssim": 0.990388269588733,
+        "global_channel_ssim": 0.9972324130389093,
+        "max_abs": 8.190750122070312
+      },
+      "cpu_reference_seconds": 0.10627290699630976
+    },
+    {
+      "image": "000000000338.jpg",
+      "teacher_vs_student_int8": {
+        "mae": 29.86041384322362,
+        "psnr_255_db": 16.159574630993067,
+        "local_gaussian_ssim": 0.44630065119841106,
+        "global_channel_ssim": 0.6269895244073569,
+        "max_abs": 246.9552001953125
+      },
+      "student_float_vs_int8": {
+        "mae": 0.8024025477229831,
+        "psnr_255_db": 47.975919705389664,
+        "local_gaussian_ssim": 0.9965233900965952,
+        "global_channel_ssim": 0.9996718600260541,
+        "max_abs": 6.0962982177734375
+      },
+      "cpu_reference_seconds": 0.1068242279579863
+    }
+  ]
+}

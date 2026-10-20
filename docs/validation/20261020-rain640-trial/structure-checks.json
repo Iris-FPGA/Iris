@@ -1,0 +1,158 @@
+{
+  "teacher": {
+    "conv_macs_per_frame": 2786918400,
+    "operator_counts": {
+      "3": 16,
+      "0": 5,
+      "97": 2
+    },
+    "conv_weight_shapes": [
+      [
+        8,
+        3,
+        3,
+        3
+      ],
+      [
+        16,
+        3,
+        3,
+        8
+      ],
+      [
+        32,
+        3,
+        3,
+        16
+      ],
+      [
+        32,
+        3,
+        3,
+        32
+      ],
+      [
+        32,
+        3,
+        3,
+        32
+      ],
+      [
+        32,
+        3,
+        3,
+        32
+      ],
+      [
+        32,
+        3,
+        3,
+        32
+      ],
+      [
+        32,
+        3,
+        3,
+        32
+      ],
+      [
+        32,
+        3,
+        3,
+        32
+      ],
+      [
+        32,
+        3,
+        3,
+        32
+      ],
+      [
+        32,
+        3,
+        3,
+        32
+      ],
+      [
+        32,
+        3,
+        3,
+        32
+      ],
+      [
+        32,
+        3,
+        3,
+        32
+      ],
+      [
+        16,
+        3,
+        3,
+        32
+      ],
+      [
+        8,
+        3,
+        3,
+        16
+      ],
+      [
+        3,
+        3,
+        3,
+        8
+      ]
+    ],
+    "current_rain_backend_supported": false,
+    "rejection_reason": "unsupported Conv shape/options at 0"
+  },
+  "student": {
+    "conv_macs_per_frame": 70041600,
+    "operator_counts": {
+      "3": 6,
+      "97": 2,
+      "0": 2
+    },
+    "conv_weight_shapes": [
+      [
+        4,
+        3,
+        3,
+        3
+      ],
+      [
+        4,
+        3,
+        3,
+        4
+      ],
+      [
+        8,
+        3,
+        3,
+        4
+      ],
+      [
+        4,
+        3,
+        3,
+        8
+      ],
+      [
+        4,
+        3,
+        3,
+        4
+      ],
+      [
+        3,
+        1,
+        1,
+        4
+      ]
+    ],
+    "current_rain_backend_supported": false,
+    "rejection_reason": "unsupported Conv shape/options at 0"
+  }
+}

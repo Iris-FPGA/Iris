@@ -1,0 +1,63 @@
+{
+  "status": "completed_host_trial; visual_quality_insufficient_for_replacement",
+  "scheme": "640x480 full-frame exact INT8 teacher targets; aligned 256x256 patches; independent student; static 640x480 INT8 export",
+  "teacher_original_preserved": true,
+  "original_rain_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "teacher_resize_roundtrip_byte_identical": true,
+  "student_architecture": "c448_lowdec_skip_r0; 6 Conv, 2 Add, 2 Resize; channels 4/4/8",
+  "split_counts": {
+    "train": 80,
+    "calibration": 16,
+    "validation": 32
+  },
+  "split_file_hashes_disjoint": true,
+  "runs": {
+    "1200": {
+      "training_steps": 1200,
+      "patch": 256,
+      "training_seconds": 55.51775381201878,
+      "validation_images": 32,
+      "teacher_vs_student_mean_psnr_db": 15.746066869610416,
+      "teacher_vs_student_mean_local_ssim": 0.3828781403661087,
+      "student_float_vs_int8_mean_psnr_db": 42.04629993644319,
+      "model_sha256": "b6bce2e17086dc85b47397ef25a7ff7990c6e55512a47ddc62a5a4570269e9ba"
+    },
+    "6000": {
+      "training_steps": 6000,
+      "patch": 256,
+      "training_seconds": 276.5494499299675,
+      "validation_images": 32,
+      "teacher_vs_student_mean_psnr_db": 16.297509616505142,
+      "teacher_vs_student_mean_local_ssim": 0.4669825850560802,
+      "student_float_vs_int8_mean_psnr_db": 47.967679895344304,
+      "model_sha256": "6ea1b519faf2a408ec0d4680f4b3e1a0ae6044834d72ba1f8add7249a2269b7b"
+    }
+  },
+  "hardware_supported": false,
+  "hardware_tested": false,
+  "board_modified_by_trial": false,
+  "observations": [
+    "640x480 same-weight teacher retains more content but retains colored boundary artifacts on constant inputs",
+    "6000-step student still loses most teacher colors and fine style texture",
+    "Quantized student closely matches floating-point student; teacher-to-student mismatch dominates"
+  ],
+  "artifact_sha256": {
+    "black.png": "2714ac0e6e050b22c3d7b1f6a717a32c794a83d229f119a0ec23b903b5f48f24",
+    "data-manifest.json": "3561b6230d6431fbc74ee3249946e393553e0068622c5fc58df0310d25e15fa7",
+    "evaluation-1200.json": "7525ae00aeefb36e7784b1f19d2e4cdd2cc59793e541b9b4615560dcd75cb307",
+    "evaluation-6000.json": "2a4c1bb3b13573a8198ab887c6881c93d6d649000b2a9347ec4ac8431fa6d2ec",
+    "export-6000.json": "13198d51365ff776d74c93fa45789af4c52bb64d758da4afcc914f9de28d061a",
+    "rain_princess_same_weights_640x480_int8.tflite": "6a2fd90bf5357698b0b21e6fc372faf1b129f11d9e0705ff4e47dd92d8e3f61e",
+    "rain_student_c448_6000_640x480_int8.tflite": "6ea1b519faf2a408ec0d4680f4b3e1a0ae6044834d72ba1f8add7249a2269b7b",
+    "requirements.lock": "cf84e10a9907dcae5c5dc37c6cf104dc275edfaa534c9646cff74c0880e094d1",
+    "structure-checks.json": "190859e2bf318a7a1c83f489d38b8cad9609107c4e325a018946b5e6e0bb0640",
+    "student-6000.pt": "e1633fcd7496865e929d266bed6529c4d6b89966ec4c42b2b6f099c2a4dd7936",
+    "teacher-resize.json": "7e867274cfa52494b239252f14d78cdac4d992e1b7349f124e36938e24d15f0e",
+    "training-1200.jsonl": "74359869c8310b8ef6c505852cc1352895534cb4500a80f9c8286dd54cd063a1",
+    "training-6000.jsonl": "fb6c31f1161f47468c0341ce60be11661bfd229e20cb099ca801ddfca3342ae0",
+    "validation-0.png": "f80b7d079d278e01f68a01dea5025014c35e657519d582694192b885841c5ee9",
+    "validation-1.png": "6ac3388c00828246cbd8a7c920ea538b0ef81771883618d314205cfead164715",
+    "validation-2.png": "2c7ae1b2a018a9f82d9ac88915d67dba15e13d1015d2dc0b3da40ee3de209bfd",
+    "white.png": "633edccd549dbae6af997fae4736b6a67877fb0c3a8d717d1f10e1f9330ce8d1"
+  }
+}
