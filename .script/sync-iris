@@ -49,7 +49,7 @@ if ! efx_run --prj iris_ws -f program --pgm_opts "mode=$MODE" | tee "$program_lo
 fi
 
 if [[ "$MODE" == "jtag_bridge" || "$MODE" == "jtag_bridge_x8" ]]; then
-    if ! rg -q 'Flash verify successful' "$program_log"; then
+    if ! grep -Fq 'Flash verify successful' "$program_log"; then
         echo "❌ 未确认 Flash 回读校验成功，不能报告烧录完成；日志：$program_log" >&2
         exit 1
     fi
