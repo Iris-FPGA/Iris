@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-24",
+  "combined_flash_file_sha256": "3017682dc0389f7b8604fd5c83e86b2be8565e960e3759e0d8613ad76eb3582b",
+  "combined_flash_bytes": 6670180,
+  "default": "One Last Kiss 640x480 contour",
+  "alternate": "Rain Princess 128x128 RGB",
+  "stream_firmware_sha256": "48d70e1c572711db7c135729c978a37fddd6a46ae19a4bf5788dd7faf91c189b",
+  "rain_firmware_sha256": "1f3dd555fc208727acc8311780ab059590da375408715d7bbee1f167651abbe8",
+  "rain_model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "flash_readback_verified": true,
+  "timing": {
+    "stream": {
+      "setup_min_ns": 0.03,
+      "hold_min_ns": 0.004
+    },
+    "rain": {
+      "setup_min_ns": 0.006,
+      "hold_min_ns": 0.026
+    }
+  },
+  "rain_sram_numeric_parity": {
+    "exact": true,
+    "bytes": 49152,
+    "max_abs_lsb": 0,
+    "receipt": "rain-sram-reference-parity.json"
+  },
+  "flash_cold_boot_verified": false,
+  "flash_reconfigurations_verified": 8,
+  "physical_key_verified": false,
+  "physical_hdmi_verified": false,
+  "pending": "Dual-style task cancelled; only original single-style display confirmation remains.",
+  "excluded": "The stalled request after passive JTAG startup is not a successful reconfiguration; SRAM ELF injection is not Flash boot proof.",
+  "physical_hdmi_result": "failed",
+  "physical_hdmi_reports": {
+    "rain_sram": "Same image continuously shakes; no real-time update.",
+    "preserved_controller_stream_flash": "Same image does not update and continuously shakes.",
+    "original_control_reloaded": "User confirmed original image is normal again.",
+    "original_control_followup": "User later reported colored stripes while the image updates; same original FPGA image was still loaded. A JTAG DDR firmware read had occurred after initial normal confirmation. Cause not established.",
+    "original_uart_only_control": "After reloading the same original FPGA image and doing no JTAG memory reads, user reported no updates and colored stripes."
+  },
+  "current_running": "Original pre-test One Last Kiss contour single-style FPGA loaded into SRAM; Flash also fully restored to original.",
+  "flash_contents": "Complete pre-test original 8 MiB Flash backup restored; vendor readback verification successful.",
+  "initial_power_cycle_provenance": "Not verified. User was unable to power-cycle; later board restarts were observed before automated tests.",
+  "task_status": "cancelled_by_user",
+  "user_request": "Stop style switching and restore the original working single-style Flash image.",
+  "diagnostic_video_probe": {
+    "scope": "SRAM diagnostic only; stopped at user cancellation",
+    "hdmi_fps": 60,
+    "width": 1920,
+    "height": 1080,
+    "camera_fps": 0,
+    "ddr_write_fps": 0,
+    "expansion_overflow": 0,
+    "expansion_underflow": 0,
+    "cause_confirmed": false
+  }
+}

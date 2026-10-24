@@ -1,0 +1,2 @@
+internal_float: exit=1 FAIL: model does not meet the firmware contract
+broadcast_add: exit=1 FAIL: model does not meet the firmware contract

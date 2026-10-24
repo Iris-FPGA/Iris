@@ -1,0 +1,19 @@
+input type: 9, shape: 1x480x640x4
+output(0) size: 4, type: 9, shape: 1x480x640x4
+done...
+{
+  "official_revision": "96886fa0c73e25e6218db7d0863f84677cf65138",
+  "generator_sha256": "193da2ed90cc17bf337fd898d501710f0a63be2e9703b41364e95393f14fc9ff",
+  "model_sha256": "21ad447851ae878b135dee2480c33c41862e7fcc4c5889878f4fefbcb26aea47",
+  "model_bytes": 5960,
+  "in_parallel": 4,
+  "out_parallel": 2,
+  "axi_bits": 128,
+  "cache_override": "DISABLE",
+  "hardware_execution_verified": false,
+  "outputs": {
+    "c448_lowdec_skip_r0_refined_rgba_640_int8_model_data.cc": "854082c0a86cc8e6e04d4fdd4e7a0a86a48db05f8f6cd7aea0766d1c1b855fde",
+    "c448_lowdec_skip_r0_refined_rgba_640_int8_model_data.h": "87609e7c6886ac7794b8fda17aadedb6ab6572a7f65b8306f63d15c16046cc3a",
+    "tinyml_core0_define.v": "adda9314c80d7a402cd5d9aba305dc0f399f93eed3135604e4a70afa8bc6a505"
+  }
+}

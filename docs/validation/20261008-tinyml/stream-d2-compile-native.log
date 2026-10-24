@@ -1,0 +1,40 @@
+2026-10-08 08:52:43.937581: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-08 08:52:43.956467: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-10-08 08:52:44.769302: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+/home/noir/.config/matplotlib is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-zyifb_vh because there was an issue with the default path (/home/noir/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+/home/noir/Documents/workspace/Iris/.venv-style/lib/python3.11/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+{
+  "model_sha256": "e4a45f1d9314654565f3300978d8a7b8843fc0c0687c454c4b6e3b47e0f05386",
+  "input_sha256": "3ffdbb0e10418a89232e6e324133c2bf2c5935a2fe9c7b20e41cd78f72b72a59",
+  "reference_sha256": "b465203ba4dbc20d7c006e8e0bba6ece87fabec7ccb8bad59ec8b61f72e8577b",
+  "shape": [
+    480,
+    640,
+    4
+  ],
+  "tflite_layer_parity": [
+    {
+      "node": 0,
+      "different_bytes": 0,
+      "max_lsb": 0
+    },
+    {
+      "node": 1,
+      "different_bytes": 0,
+      "max_lsb": 0
+    },
+    {
+      "node": 2,
+      "different_bytes": 0,
+      "max_lsb": 0
+    }
+  ],
+  "hardware_proven": false
+}

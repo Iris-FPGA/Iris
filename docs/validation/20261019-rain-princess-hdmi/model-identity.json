@@ -1,0 +1,8 @@
+{
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "model_bytes": 125336,
+  "model_occurrences_in_elf": 1,
+  "elf_sha256": "9f471fbcb4711ef6e07fdccf46a8aaba12f2c8e3290f42bdf5dce10177be0fe8",
+  "complete_model_preserved": true,
+  "distillation_used": false
+}

@@ -1,0 +1,100 @@
+Open On-Chip Debugger 0.11.0+dev-04060-g967f8f6f0-dirty (2026-03-24-19:53)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+cpu.yaml not found within 3 levels
+Info : auto-selecting first available session transport "jtag". To override use 'transport select <transport>'.
+Info : Simple Register based Bscan Tunnel Selected
+Info : Bscan tunnel IR 0x8 selected
+Info : set servers polling period to 50ms
+Info : clock speed 800 kHz
+Info : JTAG tap: fpga_spinal.bridge tap/device found: 0x10660a79 (mfg: 0x53c (Efinix Inc), part: 0x0660, ver: 0x1)
+Info : [fpga_spinal.cpu0] datacount=1 progbufsize=2
+Info : Disabling abstract command reads from CSRs.
+Info : [fpga_spinal.cpu0] Examined RISC-V core; found 1 harts
+Info : [fpga_spinal.cpu0]  XLEN=32, misa=0x40001101
+[fpga_spinal.cpu0] Target successfully examined.
+Info : starting gdb server for fpga_spinal.cpu0 on 3333
+Info : Listening on port 3333 for gdb connections
+Info : Listening on port 6666 for tcl connections
+Info : Listening on port 4444 for telnet connections
+Info : accepting 'tcl' connection on tcp/6666
+Info : JTAG tap: fpga_spinal.bridge tap/device found: 0x10660a79 (mfg: 0x53c (Efinix Inc), part: 0x0660, ver: 0x1)
+376632 bytes written at address 0x00800000
+4 bytes written at address 0x0085bf40
+1844 bytes written at address 0x0085bf50
+downloaded 378480 bytes in 9.615522s (38.439 KiB/s)
+
+Info : Disabling abstract command writes to CSRs.
+0xf9001470: 00000002 00000078 03800000 03a00000 0000c000 003787aa 00000000 00000078 
+0xf9001490: 00000079 00000000 00000000 00000000 
+
+0xf8100000: 495300ca 00000001 03200000 03600000 00000078 0000007a 00000000 00000000 
+0xf8100020: 00000000 00030003 00000000 00000000 00000000 00000000 00000000 00000000 
+0xf8100040: 49500301 00000007 00000004 00000006 00000001 00000002 000007d3 
+
+pc (/32): 0x00816784
+
+mcause (/32): 0x00000000
+
+mepc (/32): 0x00000000
+
+mtval (/32): 0x00000000
+
+dumped 49152 bytes in 1.411620s (34.003 KiB/s)
+
+dumped 49152 bytes in 1.393150s (34.454 KiB/s)
+
+Info : dropped 'tcl' connection
+Info : accepting 'tcl' connection on tcp/6666
+Info : JTAG tap: fpga_spinal.bridge tap/device found: 0x10660a79 (mfg: 0x53c (Efinix Inc), part: 0x0660, ver: 0x1)
+376632 bytes written at address 0x00800000
+4 bytes written at address 0x0085bf40
+1844 bytes written at address 0x0085bf50
+downloaded 378480 bytes in 9.298303s (39.750 KiB/s)
+
+0xf9001470: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+0xf9001490: 00000000 00000000 00000000 00000000 
+
+0xf8100000: 4953010a 00000002 03800000 03a00000 00004558 0000455a 00000000 00000000 
+0xf8100020: 00000000 00030003 00000000 00000000 00000000 00000000 00000000 00000000 
+0xf8100040: 49500301 00000007 00000005 00000004 00000002 00000000 000007d3 
+
+pc (/32): 0x008001d0
+
+mcause (/32): 0x00000000
+
+mepc (/32): 0x00000000
+
+mtval (/32): 0x00000000
+
+Info : dropped 'tcl' connection
+Info : accepting 'tcl' connection on tcp/6666
+Info : JTAG tap: fpga_spinal.bridge tap/device found: 0x10660a79 (mfg: 0x53c (Efinix Inc), part: 0x0660, ver: 0x1)
+376792 bytes written at address 0x00800000
+4 bytes written at address 0x0085bfe0
+1844 bytes written at address 0x0085bff0
+downloaded 378640 bytes in 9.296619s (39.774 KiB/s)
+
+0xf9001470: 00000002 0000000c 03000000 03400000 0000c000 0037d84f 00000000 00004564 
+0xf9001490: 00004567 00000000 00000000 00000000 
+
+0xf8100000: 4953010a 00000002 03800000 03a00000 00004564 00004568 00000000 00000000 
+0xf8100020: 00000000 00030003 00000000 00000000 00000000 00000000 00000000 00000000 
+0xf8100040: 49500301 00000007 00000005 00000004 00000002 00000000 000007d3 
+
+pc (/32): 0x00816808
+
+mcause (/32): 0x00000000
+
+mepc (/32): 0x00000000
+
+mtval (/32): 0x00000000
+
+dumped 49152 bytes in 1.329692s (36.099 KiB/s)
+
+dumped 49152 bytes in 1.327823s (36.149 KiB/s)
+
+Info : dropped 'tcl' connection
+Info : accepting 'tcl' connection on tcp/6666
+shutdown command invoked

@@ -1,0 +1,21 @@
+PASS resize 32x32x32
+PASS resize 64x64x16
+PASS resize 3x4x4
+PASS resize 3x2x8
+PASS resize 3x1x16
+PASS resize 3x1x32
+PASS read-only CI tensor stream: samples, audit, no writes, abort
+PASS DMA copy 128x128x3
+PASS DMA copy 3x4x4
+PASS DMA copy 3x2x8
+PASS DMA copy 3x1x16
+PASS DMA copy 3x1x32
+PASS DMA copy 48x640x4
+PASS resize 2x4x4
+PASS resize 2x4x4
+PASS: tb_iris_resize2x reads=27195 writes=35421
+tests/video/tb_iris_resize2x.sv:172: $finish called at 4263800000 (1ps)
+PASS TinyML capture: all 49152 C3 bytes, full 1920x1080 raster, RGB order, stalls, final B, 768 bursts
+tests/video/tb_tinyml_capture.sv:62: $finish called at 14722340000 (1ps)
+PASS TinyML HDMI: full split raster, all RGB codes, full 1920x1080, live left, exact 15x/1080 scaling, sync, bank 0/2, stalls and read failure
+tests/video/tb_tinyml_panels.sv:120: $finish called at 64175594000 (1ps)

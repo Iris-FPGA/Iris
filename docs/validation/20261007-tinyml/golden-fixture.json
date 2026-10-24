@@ -1,0 +1,17 @@
+{
+  "model": "one_last_kiss_style/one_last_kiss_0_int8.tflite",
+  "model_sha256": "a1715294f53ab3c23db22a283fd5320ae473c6a10e9dc92d8ef274b0953831f3",
+  "fixture": "128x128 RGB: R=2*x, G=2*y, B=255 when ((x//16) XOR (y//16)) & 1 else 0",
+  "input_quantization": [
+    1,
+    -128
+  ],
+  "oracle": "TensorFlow 2.20.0 BUILTIN_REF, exact original TFLite model",
+  "golden_sha256": "eb1b0624270391f6c627278100817aca99587a82fe594527efb3646fee3919e8",
+  "output_bytes": 49152,
+  "fnv1a": "0x8d500404",
+  "board_parity_verified": false,
+  "board_parity": true,
+  "board_evidence": "cache-restored-static-strict-debug.json",
+  "scope": "original model; one synthetic fixture; 23 hardware operations"
+}

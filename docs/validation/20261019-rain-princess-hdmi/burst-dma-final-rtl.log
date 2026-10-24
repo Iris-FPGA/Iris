@@ -1,0 +1,40 @@
+PASS resize 32x32x32 burst=0 cycles=110818 AR=8192 AW=8192
+PASS resize 64x64x16 burst=0 cycles=169014 AR=8192 AW=16384
+PASS resize 2x8x16 burst=0 cycles=655 AR=32 AW=64
+PASS resize 2x4x32 burst=0 cycles=878 AR=64 AW=64
+PASS resize 3x4x4 burst=0 cycles=116 AR=3 AW=12
+PASS resize 3x2x8 burst=0 cycles=108 AR=3 AW=12
+PASS resize 3x1x16 burst=0 cycles=115 AR=3 AW=12
+PASS resize 3x1x32 burst=0 cycles=321 AR=24 AW=24
+PASS read-only CI tensor stream: samples, audit, no writes, abort
+PASS DMA copy 128x128x3
+PASS DMA copy 3x16x3
+PASS DMA copy 3x4x4
+PASS DMA copy 3x2x8
+PASS DMA copy 3x1x16
+PASS DMA copy 3x1x32
+PASS DMA copy 48x640x4
+PASS resize 2x4x4 burst=0 cycles=83 AR=2 AW=8
+PASS resize 2x4x4 burst=0 cycles=81 AR=2 AW=8
+PASS: tb_iris_resize2x reads=27303 writes=35558
+tests/video/tb_iris_resize2x.sv:208: $finish called at 4287510000 (1ps)
+PASS resize 32x32x32 burst=1 cycles=34548 AR=1024 AW=2048
+PASS resize 64x64x16 burst=1 cycles=69005 AR=2048 AW=4096
+PASS resize 2x8x16 burst=1 cycles=294 AR=9 AW=17
+PASS resize 2x4x32 burst=1 cycles=296 AR=9 AW=17
+PASS resize 3x4x4 burst=1 cycles=88 AR=3 AW=6
+PASS resize 3x2x8 burst=1 cycles=80 AR=3 AW=6
+PASS resize 3x1x16 burst=1 cycles=87 AR=3 AW=6
+PASS resize 3x1x32 burst=1 cycles=120 AR=3 AW=6
+PASS read-only CI tensor stream: samples, audit, no writes, abort
+PASS DMA copy 128x128x3
+PASS DMA copy 3x16x3
+PASS DMA copy 3x4x4
+PASS DMA copy 3x2x8
+PASS DMA copy 3x1x16
+PASS DMA copy 3x1x32
+PASS DMA copy 48x640x4
+PASS resize 2x4x4 burst=1 cycles=60 AR=2 AW=4
+PASS resize 2x4x4 burst=1 cycles=55 AR=2 AW=4
+PASS: tb_iris_resize2x reads=16981 writes=35560
+tests/video/tb_iris_resize2x.sv:208: $finish called at 2119750000 (1ps)

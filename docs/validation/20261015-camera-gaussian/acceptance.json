@@ -1,0 +1,35 @@
+{
+  "scope": "3x3 Gaussian before 1080p RGB subsampling; SRAM-only board validation",
+  "bit_sha256": "80b8119c7bfb71f43f0c37d3782dba9c20480fd315695c9dea12dd47a77a7063",
+  "hex_sha256": "fec18c5b9a87fce9dd7ce704cd42e6707ab84c62d45ac48b2fce4548f99923c6",
+  "rtl": {
+    "point_and_gaussian_2d_oracle": "pass",
+    "capture_backpressure_errors_recovery": "pass",
+    "triple_bank_leases": "pass",
+    "dma_banks_0_1_2": "pass"
+  },
+  "build": {
+    "map": "pass",
+    "interface": "pass",
+    "pnr": "pass",
+    "pgm": "pass",
+    "xlr": 56854,
+    "xlr_available": 60800,
+    "ram": 255,
+    "ram_available": 256,
+    "dsp": 113,
+    "dsp_available": 160,
+    "min_setup_ns": 0.011,
+    "min_hold_ns": 0.026
+  },
+  "baseline_committed_hz": 30.059281992930337,
+  "gaussian_committed_hz": 30.05463545947747,
+  "gaussian_observation_seconds": 120.09304899995914,
+  "live_ok": true,
+  "max_underflows": 0,
+  "max_read_errors": 0,
+  "max_rejects": 0,
+  "visual_quality_accepted": false,
+  "user_feedback": "仍有较多噪点；希望了解 HDMI 改为 640×480 的方式",
+  "flash_modified": false
+}

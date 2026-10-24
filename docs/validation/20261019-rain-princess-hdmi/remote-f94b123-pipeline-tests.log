@@ -1,0 +1,55 @@
+PASS 640x480 RGBA preprocessing Gaussian=0 Median=0 Smooth=0: 2D oracle, noise/impulse/edges/black/white, crop phases, INT8 order, markers, short frame, disable/restart
+tests/video/tb_style_preprocess.sv:102: $finish called at 83743596000 (1ps)
+PASS 640x480 RGBA preprocessing Gaussian=1 Median=0 Smooth=0: 2D oracle, noise/impulse/edges/black/white, crop phases, INT8 order, markers, short frame, disable/restart
+tests/video/tb_style_preprocess.sv:102: $finish called at 83743596000 (1ps)
+median frame rows=1080 pattern=0 checked=307200 complete=1
+median frame rows=1080 pattern=1 checked=614400 complete=2
+median frame rows=10 pattern=1 checked=616960 complete=2
+median frame rows=1080 pattern=1 checked=0 complete=2
+median frame rows=1080 pattern=1 checked=307200 complete=3
+median frame rows=1080 pattern=2 checked=307200 complete=4
+median frame rows=1080 pattern=3 checked=307200 complete=5
+median frame rows=1080 pattern=4 checked=307200 complete=6
+median frame rows=1080 pattern=5 checked=307200 complete=7
+median frame rows=1080 pattern=6 checked=307200 complete=8
+median frame rows=1080 pattern=7 checked=307200 complete=9
+PASS 640x480 RGBA preprocessing Gaussian=0 Median=1 Smooth=0: 2D oracle, noise/impulse/edges/black/white, crop phases, INT8 order, markers, short frame, disable/restart
+tests/video/tb_style_preprocess.sv:102: $finish called at 104652816000 (1ps)
+median frame rows=1080 pattern=0 checked=307200 complete=1
+median frame rows=1080 pattern=1 checked=614400 complete=2
+median frame rows=10 pattern=1 checked=615680 complete=2
+median frame rows=1080 pattern=1 checked=0 complete=2
+median frame rows=1080 pattern=1 checked=307200 complete=3
+median frame rows=1080 pattern=2 checked=307200 complete=4
+median frame rows=1080 pattern=3 checked=307200 complete=5
+median frame rows=1080 pattern=4 checked=307200 complete=6
+median frame rows=1080 pattern=5 checked=307200 complete=7
+median frame rows=1080 pattern=6 checked=307200 complete=8
+median frame rows=1080 pattern=7 checked=307200 complete=9
+PASS 640x480 RGBA preprocessing Gaussian=0 Median=1 Smooth=1: 2D oracle, noise/impulse/edges/black/white, crop phases, INT8 order, markers, short frame, disable/restart
+tests/video/tb_style_preprocess.sv:102: $finish called at 104652816000 (1ps)
+PASS triple-bank leases: concurrent capture/inference/display, stable mailboxes, VS release, bank 2, rejection guards
+tests/video/tb_style_pipeline.sv:70: $finish called at 1070000 (1ps)
+PASS style capture: staged continuous W, order, backpressure, final B, B errors, short frame, overflow, recovery, dummy audit
+tests/video/tb_style_capture.sv:86: $finish called at 50785000 (1ps)
+DMA bit-exact W=16 H=12 D=2 cycles=1742
+DMA bit-exact W=16 H=12 D=2 cycles=1727
+DMA bit-exact W=16 H=12 D=2 cycles=1719
+DMA bit-exact W=16 H=12 D=2 cycles=1726
+DMA bit-exact W=16 H=12 D=2 cycles=1742
+PASS CNN DMA exact pixels, burst stability, final B, errors, abort drain, restart
+tests/video/tb_stream_cnn_dma.sv:113: $finish called at 105740000 (1ps)
+DMA bit-exact W=16 H=12 D=2 cycles=1742
+DMA bit-exact W=16 H=12 D=2 cycles=1727
+DMA bit-exact W=16 H=12 D=2 cycles=1719
+DMA bit-exact W=16 H=12 D=2 cycles=1726
+DMA bit-exact W=16 H=12 D=2 cycles=1742
+PASS CNN DMA exact pixels, burst stability, final B, errors, abort drain, restart
+tests/video/tb_stream_cnn_dma.sv:113: $finish called at 105740000 (1ps)
+DMA bit-exact W=16 H=12 D=2 cycles=1742
+DMA bit-exact W=16 H=12 D=2 cycles=1727
+DMA bit-exact W=16 H=12 D=2 cycles=1719
+DMA bit-exact W=16 H=12 D=2 cycles=1726
+DMA bit-exact W=16 H=12 D=2 cycles=1742
+PASS CNN DMA exact pixels, burst stability, final B, errors, abort drain, restart
+tests/video/tb_stream_cnn_dma.sv:113: $finish called at 105740000 (1ps)

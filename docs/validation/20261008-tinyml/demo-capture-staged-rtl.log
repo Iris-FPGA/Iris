@@ -1,0 +1,2 @@
+PASS style capture: staged continuous W, order, backpressure, final B, B errors, short frame, overflow, recovery, dummy audit
+tests/video/tb_style_capture.sv:83: $finish called at 42805000 (1ps)

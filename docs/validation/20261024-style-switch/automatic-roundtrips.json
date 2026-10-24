@@ -1,0 +1,115 @@
+{
+  "scope": "debug service triggers the same RTL sequencer as KEY3; initial power-cycle provenance and physical key/HDMI confirmation are separate",
+  "records": [
+    {
+      "phase": "live-initial-image0",
+      "image": 0,
+      "displayed": 2227,
+      "captured": 2229,
+      "underflow": 0,
+      "read_error": 0,
+      "rejects": 0,
+      "trigger": false
+    },
+    {
+      "phase": "live-auto-switch-01-image0",
+      "image": 0,
+      "displayed": 2307,
+      "captured": 2309,
+      "underflow": 0,
+      "read_error": 0,
+      "rejects": 0,
+      "trigger": true
+    },
+    {
+      "phase": "live-auto-switch-02-image1",
+      "image": 1,
+      "displayed": 219,
+      "captured": 221,
+      "underflow": 0,
+      "read_error": 0,
+      "rejects": 0,
+      "trigger": true
+    },
+    {
+      "phase": "live-auto-switch-03-image0",
+      "image": 0,
+      "displayed": 263,
+      "captured": 264,
+      "underflow": 0,
+      "read_error": 0,
+      "rejects": 0,
+      "trigger": true
+    },
+    {
+      "phase": "live-auto-switch-04-image1",
+      "image": 1,
+      "displayed": 219,
+      "captured": 221,
+      "underflow": 0,
+      "read_error": 0,
+      "rejects": 0,
+      "trigger": true
+    },
+    {
+      "phase": "live-auto-switch-05-image0",
+      "image": 0,
+      "displayed": 262,
+      "captured": 263,
+      "underflow": 0,
+      "read_error": 0,
+      "rejects": 0,
+      "trigger": true
+    },
+    {
+      "phase": "live-auto-switch-06-image1",
+      "image": 1,
+      "displayed": 218,
+      "captured": 219,
+      "underflow": 0,
+      "read_error": 0,
+      "rejects": 0,
+      "trigger": true
+    },
+    {
+      "phase": "live-auto-switch-07-image0",
+      "image": 0,
+      "displayed": 261,
+      "captured": 263,
+      "underflow": 0,
+      "read_error": 0,
+      "rejects": 0,
+      "trigger": true
+    },
+    {
+      "phase": "live-auto-switch-08-image1",
+      "image": 1,
+      "displayed": 219,
+      "captured": 221,
+      "underflow": 0,
+      "read_error": 0,
+      "rejects": 0,
+      "trigger": true
+    },
+    {
+      "phase": "live-auto-switch-end-image0",
+      "image": 0,
+      "displayed": 263,
+      "captured": 264,
+      "underflow": 0,
+      "read_error": 0,
+      "rejects": 0,
+      "trigger": false
+    },
+    {
+      "phase": "live-auto-switch-fresh-image0",
+      "image": 0,
+      "displayed": 343,
+      "captured": 344,
+      "underflow": 0,
+      "read_error": 0,
+      "rejects": 0,
+      "trigger": false
+    }
+  ]
+}

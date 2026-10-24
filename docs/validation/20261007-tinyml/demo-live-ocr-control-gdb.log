@@ -1,0 +1,14 @@
+0x00819088 in ops_drv_intr () at platform/tinyml/ops/ops_api.cc:35
+35	platform/tinyml/ops/ops_api.cc: No such file or directory.
+pc             0x819088	0x819088 <ops_drv_intr()+20>
+Invalid register `mepc'
+#0  0x00819088 in ops_drv_intr () at platform/tinyml/ops/ops_api.cc:35
+#1  0x0080b1e8 in userInterrupt () at /home/noir/Documents/workspace/tinyml/tinyml_hello_world/Ti60F225_tinyml_hello_world/embedded_sw/SapphireSoc/software/standalone/tinyml_ypd/src/platform/interrupt/intc.c:31
+#2  trap () at /home/noir/Documents/workspace/tinyml/tinyml_hello_world/Ti60F225_tinyml_hello_world/embedded_sw/SapphireSoc/software/standalone/tinyml_ypd/src/platform/interrupt/intc.c:46
+#3  0x008167b8 in trap_entry () at /home/noir/Documents/workspace/Iris/iris_ws/embedded_sw/SapphireSoc/software/standalone/common/trap.S:66
+Backtrace stopped: frame did not save the PC
+$1 = {0x2, 0x0 <repeats 11 times>}
+0xf8100000:	0x49530002	0x00000000	0x03000000	0x03400000
+0xf8100010:	0x00000000	0x00000001	0x00000000	0x00000000
+0xf8100020:	0x00000000	0x000a0001
+[Inferior 1 (Remote target) detached]

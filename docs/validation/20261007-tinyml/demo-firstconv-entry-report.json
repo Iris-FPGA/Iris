@@ -1,0 +1,11 @@
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "835be0aa2b372e74cbf15d5b8144a7ee928af71f8d58f7be5e2628b2e173f396",
+  "bit_sha256": "05a3e14c917c15014f474aeea43dc918f64d61d7950a0890ac47936cbb93ccde",
+  "attached": false,
+  "frames": [],
+  "reset": "",
+  "load": "163204 bytes written at address 0x00800000\ndownloaded 163204 bytes in 3.881541s (41.061 KiB/s)\n",
+  "observation_seconds": 3.1901612950023264,
+  "live_ok": false
+}

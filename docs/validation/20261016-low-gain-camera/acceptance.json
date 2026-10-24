@@ -1,0 +1,15 @@
+{
+  "bit_sha256": "ccb58bd6b197a5d5d6c56a74340d799925ee9a11c7015e3fb8e78a4ddd0b4c00",
+  "observation_seconds": 120.04264509404311,
+  "observed_committed_pair_hz": 30.051788885949566,
+  "live_ok": true,
+  "errors": {
+    "underflows": 0,
+    "read_errors": 0,
+    "rejects": 0
+  },
+  "visual_quality_accepted": null,
+  "visual_feedback": "待用户反馈新版本 E/G、左侧彩色雪花与运动拖影",
+  "flash_modified": false,
+  "cpu_debug_halted": false
+}

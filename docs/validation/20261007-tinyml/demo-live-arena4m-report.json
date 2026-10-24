@@ -1,0 +1,12 @@
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "6a15a8d60f48bb6239c03be5091284e4b274d3cc5cfb036607ea34c286c52e6b",
+  "bit_sha256": "05a3e14c917c15014f474aeea43dc918f64d61d7950a0890ac47936cbb93ccde",
+  "attached": false,
+  "frames": [],
+  "reset": "",
+  "load": "163364 bytes written at address 0x00800000\ndownloaded 163364 bytes in 3.885945s (41.054 KiB/s)\n",
+  "stop_reason": "IRIS STOP: live intermediate DMA points outside tensor arena",
+  "observation_seconds": 10.005305958999088,
+  "live_ok": false
+}

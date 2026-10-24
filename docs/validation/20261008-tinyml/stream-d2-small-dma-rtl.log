@@ -1,0 +1,7 @@
+DMA bit-exact W=16 H=12 D=2 cycles=1742
+DMA bit-exact W=16 H=12 D=2 cycles=1727
+DMA bit-exact W=16 H=12 D=2 cycles=1719
+DMA bit-exact W=16 H=12 D=2 cycles=1726
+DMA bit-exact W=16 H=12 D=2 cycles=1742
+PASS CNN DMA exact pixels, burst stability, final B, errors, abort drain, restart
+tests/video/tb_stream_cnn_dma.sv:111: $finish called at 105740000 (1ps)

@@ -1,0 +1,22 @@
+{
+  "iris_ws/src/top.v": "835bac018923787f81704b98117398a2c2117595c891934a9170f17db8001923",
+  "iris_ws/iris_ws.xml": "5e19b27830471815ced96ee9124bf63250de10c13808e203fed48f78b567b74b",
+  "iris_ws/iris_ws.peri.xml": "56de8f279a0352c0e32eba91dc0016e35b0ec75c984fc43da291acd7e372d7dc",
+  "iris_ws/src/video/debayer/camera_raw_denoise_2px.v": "3c5042abe57e085a5fbac204bcfda6a86e16e269b9b70873f0b6e0cb433ee64f",
+  "iris_ws/src/video/debayer/camera_denoise_2px.v": "d72a31f7ab4effba19b520a380e395e11d4c28a2e8a13b739a652008c5e6a28a",
+  "iris_ws/src/video/debayer/debayer_top_2to1.v": "f8037d13e9c726c150efc08fbc7e502863b32bcdcda630e16c10bd8844f5a503",
+  "iris_ws/src/video/debayer/rgb_display_2px.v": "f7d59acc40a5d39601913108ec7edea299d271410fb6955af7edbc7fccce3650",
+  "iris_ws/src/video/debayer/camera_colour_profile.v": "8bae05a64b0dbddd4e74c4883c6948b7f077685d314ca7a1b67f23e3f3ea9d3e",
+  "iris_ws/src/mipi/ae_ctrl.v": "e86687d834317849861106c5f32886e3d03db3f53a04720b243622c0b8845e3a",
+  "iris_ws/src/cnn/iris_style_preprocess.v": "b3d2fded7f9fb3cd72d7e6b8207f3a90aba400f020e120725d2378c50cd6f22c",
+  "iris_ws/src/cnn/iris_style_contour.v": "5f34f99021801356e32f1ca642baa582445b216d37a3926fe9754b93fd311be0",
+  "iris_ws/src/cnn/iris_style_contour_panels.v": "50eaa0cb108fc9468b767bc3e309b44df991bc09e6efc9abd4fd0e82a3ac5e08",
+  "iris_ws/src/cnn/iris_style_demo.v": "243085c5c0b3158480d3ed92f8dcaebdf420e07d2269857cb600e38255d74807",
+  "iris_ws/src/cnn/iris_stream_conv.v": "c5c211e3e79a30497e824faf0e1269264f5bb134a54061a77ff32107e9b01976",
+  "iris_ws/src/cnn/iris_stream_cnn.v": "848f9e15ccb731cca0cf1c44b371f5f8c72e31c89afe993d5344652f3453bd5f",
+  "firmware/stream_style/README.md": "c7b0c128afc847fef2ba6cd4b518b571f05874b15daffc2e4a0492f23d8c9eb5",
+  "firmware/stream_style/build/stream_style-live.elf": "59da1b8347866b87694e2a9b6b853004b84e8bd0715b6886a54801f4b30bf087",
+  "one_last_kiss_style/models/micro4_d2_rgba_640_int8.tflite": "e4a45f1d9314654565f3300978d8a7b8843fc0c0687c454c4b6e3b47e0f05386",
+  "tests/video/tb_camera_raw_denoise.sv": "20d4996d3f1189324d9d3f251143a1cf23bc5fd4db238b3e30e2aabce9db9d80",
+  "tests/video/run_camera_raw_denoise_tests.py": "a5641c04e212b222724380878942b84fd2a4bf3004c153e17efd3dea099fb604"
+}

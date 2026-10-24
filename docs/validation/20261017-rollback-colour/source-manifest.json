@@ -1,0 +1,13 @@
+{
+  ".script/render-style-visibility.py": "dfe57f87d8b36734ed1387a3430485967a8d0db4469ce8e477f40bddc11f565b",
+  "docs/风格彩色与调参.md": "40b74146c2d390e7599d67ac20b30d80b3c32ece5a2a77252740b5cb30b9b8f8",
+  "firmware/stream_style/README.md": "61da2b24057e2778d04a5c37b65f3fdb02cef42a43796211eaf6be4ee8cf01ca",
+  "iris_ws/src/cnn/iris_style_contour.v": "53fd4be9411d9916a9c67d35f82f1d8837041ac850540988764e6b10d5618465",
+  "iris_ws/src/cnn/iris_style_contour_panels.v": "cdb58d2a3aa0ac295838b9597774c7f5549e4bc0e1ab2b76b706abfab419b3e2",
+  "tests/video/run_style_contour_tests.py": "f35917850dde3b938305f969de3d4786d07f9bea804bc9005d155eb76c83d84e",
+  "tests/video/tb_style_contour.sv": "1e9d7161f5d6fb3e44e44b9f57df884a2a2de52a53f538b886964a6d02f6d9b3",
+  "tests/video/tb_style_panels.sv": "e72b7a0fbfb874bf17c87ae4243c4e78af4ea2178634bc4b1d0dc3ea9a8e907a",
+  "iris_ws/src/cnn/iris_style_dequant.v": "2d41f78c5cbcd85e7d386239ccb2218ad858896dc283c2c015bee17816a5eb5a",
+  "iris_ws/src/cnn/iris_style_split_scaler.v": "c3e9d2439d1c847cef46577be408976897555d7e1623780c253c85a600c09ddb",
+  "iris_ws/iris_ws.xml": "5e19b27830471815ced96ee9124bf63250de10c13808e203fed48f78b567b74b"
+}

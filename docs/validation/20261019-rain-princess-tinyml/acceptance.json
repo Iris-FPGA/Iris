@@ -1,0 +1,86 @@
+{
+  "status": "single_static_fixture_hardware_parity_passed",
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "scope": "complete 128x128 model; static fixture; debugger-loaded ELF; no styled HDMI output",
+  "tinyml_revision": "96886fa0c73e25e6218db7d0863f84677cf65138",
+  "strict_dispatch": true,
+  "input_shape": [
+    1,
+    128,
+    128,
+    3
+  ],
+  "output_scale": 2.283437490463257,
+  "output_zero_point": -89,
+  "fpga_stages_passed": [
+    "map",
+    "interface",
+    "pnr",
+    "pgm"
+  ],
+  "timing_minimum_ns": {
+    "setup": 0.016,
+    "hold": 0.019
+  },
+  "resources": {
+    "xlr": 57510,
+    "xlr_capacity": 60800,
+    "ram": 253,
+    "ram_capacity": 256,
+    "dsp": 39,
+    "dsp_capacity": 160
+  },
+  "elf_entry": "0x00800000",
+  "reset_ram_verified": true,
+  "elf_original_model_bytes_verified": true,
+  "firmware_build_passed": true,
+  "hardware_execution_verified": true,
+  "hardware_throughput_verified": false,
+  "blocking_condition": null,
+  "toolchain_archive_sha256": "9921d63c04611954af016b9ca74cd52c1ccb832800d321d67e4e651f16146d16",
+  "files": {
+    "iris_ws.bit": {
+      "bytes": 2954748,
+      "sha256": "609b932b3e17483b52886be73136caabb301cbb3044d2046b186457e6c180df5"
+    },
+    "iris_ws.hex": {
+      "bytes": 2954808,
+      "sha256": "4e0419ccd7cd31e16c9ceb9d14f09c0c2c16c3815ec0c557b4ab095165743d0b"
+    },
+    "static-golden.bin": {
+      "bytes": 49152,
+      "sha256": "818a4c3d7b1cd2850f4276b2dab594360fe971aae983b7b390910fc55b1e35e7"
+    },
+    "static-input.bin": {
+      "bytes": 49152,
+      "sha256": "0d4f62fda65e8439a98344751bdd6d04810120abeb04c941d503786d944cb73a"
+    },
+    "tinyml_style.bin": {
+      "bytes": 281404,
+      "sha256": "63eacf03828540f0606da5b1fe40db5e33c247167324d18e2acf6a4ec16d62e6"
+    },
+    "tinyml_style.elf": {
+      "bytes": 4214580,
+      "sha256": "fbf8dd5b36e651478465b77481508df6561ece4f4371c13aa2311fb15bc50b56"
+    }
+  },
+  "validation_date": "2026-10-19",
+  "board_validation": {
+    "report": "docs/validation/20261019-rain-princess-tinyml/board-static-debug.json",
+    "programming": "SRAM JTAG; no Flash write",
+    "invoke_seconds": 4.40087053,
+    "excludes_profile_uart": true,
+    "operators": 23,
+    "execution_modes": {
+      "STANDARD": 21,
+      "IRIS_RESIZE_HW": 2
+    },
+    "output_bytes": 49152,
+    "output_sha256": "818a4c3d7b1cd2850f4276b2dab594360fe971aae983b7b390910fc55b1e35e7",
+    "different_bytes": 0,
+    "max_abs_lsb": 0,
+    "exact": true,
+    "fresh_frame_fps": null,
+    "limit": "One deterministic static input; camera input, styled HDMI, continuous throughput and cold boot not validated."
+  }
+}

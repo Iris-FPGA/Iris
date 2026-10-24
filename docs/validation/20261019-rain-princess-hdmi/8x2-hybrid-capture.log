@@ -1,0 +1,2 @@
+PASS TinyML capture: all 49152 C3 bytes, full 1920x1080 raster, RGB order, stalls, final B, 768 bursts
+tests/video/tb_tinyml_capture.sv:62: $finish called at 14722340000 (1ps)

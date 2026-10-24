@@ -1,0 +1,16 @@
+{
+  "model_array_byte_identical": true,
+  "model_bytes": 125336,
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "host_contract_profiles_passed": [
+    "rain_princess",
+    "original",
+    "rgba640"
+  ],
+  "reference_original_matches_historical_board": true,
+  "hardware_execution_verified": false,
+  "mismatched_profile_rejected": true,
+  "artifact_checksums_verified": true,
+  "elf_contains_exact_model_bytes": true,
+  "independent_project_reset_ram_verified": true
+}

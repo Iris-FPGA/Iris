@@ -1,0 +1,32 @@
+161604 bytes written at address 0x00800000
+downloaded 161604 bytes in 3.840448s (41.093 KiB/s)
+
+{
+  "elf": "/home/noir/Documents/workspace/Iris/firmware/tinyml_style/build/rgba640-static4x4.elf",
+  "elf_sha256": "f401788c351982363f7265f0b43c609e1d126a9cbc85482eb36da4c3b8dd3556",
+  "reset": "",
+  "load": "161604 bytes written at address 0x00800000\ndownloaded 161604 bytes in 3.840448s (41.093 KiB/s)\n",
+  "bit_file_sha256": "05a3e14c917c15014f474aeea43dc918f64d61d7950a0890ac47936cbb93ccde",
+  "descriptor_address": "0x82aae8",
+  "descriptor": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "raw_descriptor": "0x0082aae8: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 \n",
+  "elapsed_seconds": 12.03390567500901,
+  "registers": {
+    "pc": "pc (/32): 0x008164f8\n",
+    "mcause": "mcause (/32): 0x00000002\n",
+    "mepc": "mepc (/32): 0x008164f8\n",
+    "mtval": "mtval (/32): 0x20491e46\n"
+  },
+  "invoke_completed": false,
+  "profile": [],
+  "strict_dispatch_evidence": false
+}

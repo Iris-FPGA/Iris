@@ -1,0 +1,410 @@
+{
+  "source_shape": [
+    1,
+    128,
+    128,
+    3
+  ],
+  "target_shape": [
+    1,
+    480,
+    640,
+    3
+  ],
+  "activation_shapes": [
+    {
+      "tensor": 0,
+      "before": [
+        1,
+        128,
+        128,
+        3
+      ],
+      "after": [
+        1,
+        480,
+        640,
+        3
+      ]
+    },
+    {
+      "tensor": 35,
+      "before": [
+        1,
+        128,
+        128,
+        8
+      ],
+      "after": [
+        1,
+        480,
+        640,
+        8
+      ]
+    },
+    {
+      "tensor": 36,
+      "before": [
+        1,
+        64,
+        64,
+        16
+      ],
+      "after": [
+        1,
+        240,
+        320,
+        16
+      ]
+    },
+    {
+      "tensor": 37,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 38,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 39,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 40,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 41,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 42,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 43,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 44,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 45,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 46,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 47,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 48,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 49,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 50,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 51,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 52,
+      "before": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "after": [
+        1,
+        120,
+        160,
+        32
+      ]
+    },
+    {
+      "tensor": 53,
+      "before": [
+        1,
+        64,
+        64,
+        32
+      ],
+      "after": [
+        1,
+        240,
+        320,
+        32
+      ]
+    },
+    {
+      "tensor": 54,
+      "before": [
+        1,
+        64,
+        64,
+        16
+      ],
+      "after": [
+        1,
+        240,
+        320,
+        16
+      ]
+    },
+    {
+      "tensor": 55,
+      "before": [
+        1,
+        128,
+        128,
+        16
+      ],
+      "after": [
+        1,
+        480,
+        640,
+        16
+      ]
+    },
+    {
+      "tensor": 56,
+      "before": [
+        1,
+        128,
+        128,
+        8
+      ],
+      "after": [
+        1,
+        480,
+        640,
+        8
+      ]
+    },
+    {
+      "tensor": 57,
+      "before": [
+        1,
+        128,
+        128,
+        3
+      ],
+      "after": [
+        1,
+        480,
+        640,
+        3
+      ]
+    }
+  ],
+  "resize_sizes": [
+    {
+      "node": 18,
+      "buffer": 2,
+      "before": [
+        64,
+        64
+      ],
+      "after": [
+        240,
+        320
+      ]
+    },
+    {
+      "node": 20,
+      "buffer": 3,
+      "before": [
+        128,
+        128
+      ],
+      "after": [
+        480,
+        640
+      ]
+    }
+  ],
+  "unchanged_non_size_buffers": 60,
+  "source": "/mnt/mydata/Iris/dev/fastnst/one_last_kiss_style/models/rain-princess-cropped_style_int8.tflite",
+  "source_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "output_sha256": "6a2fd90bf5357698b0b21e6fc372faf1b129f11d9e0705ff4e47dd92d8e3f61e",
+  "round_trip_byte_identical": true,
+  "weights_biases_quantization_unchanged": true,
+  "trained": false,
+  "hardware_proven": false
+}

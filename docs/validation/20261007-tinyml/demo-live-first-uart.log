@@ -1,0 +1,28 @@
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x40 cpuAR=0x0x808040 fbAR=0x0xe5800
+arb cpuAW=0x0x70fffc fbAW=0x0x29b800 rdCnt cpu/fb=2251/46522 rresp=0
+arb ARhand=49048 rdDone=49048 AWhand=44174 wrDone=44173
+lastAR addr=0x0x808080 len=3 size=4 burst=1 | lastAW addr=0x0x3c2000 len=127
+Core 0 Hardware Settings:
+  Accelerator Active: 1
+  UUID: 0x4923687a
+  AXI DW: 128
+  AXI_DB_W: 16
+  Cache Enabled: 1
+  Cache Depth: 512
+  Conv Depthw Mode: 2
+  Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:2
+  Add Mode: 2
+  FC Mode: 0
+  Mul Mode: 0
+  LR Mode: 0
+  Min-Max Mode: 0
+  Reshape Mode: 0
+IRIS nodes OK: flatbuffer
+IRIS nodes OK: init
+IRIS prepare node 0 @0x0x1a2b0f4IRIS prepare node 1 @0x0x1a2b110IRIS prepare node 2 @0x0x1a2b12cIRIS prepare node 3 @0x0x1a2b148IRIS prepare node 4 @0x0x1a2b164IRIS prepare node 5 @0x0x1a2b180IRIS prepare node 6 @0x0x1a2b19cIRIS prepare node 7 @0x0x1a2b1b8IRIS prepare node 8 @0x0x1a2b1d4IRIS prepare node 9 @0x0x1a2b1f0DDR arena: base=0x0xa2b380 capacity=16777216 used=3688092
+IRIS LIVE: 640x480 paired camera/style; no CPU image processing; SRAM only
+

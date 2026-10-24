@@ -1,0 +1,9 @@
+PASS resize 32x32x32
+PASS resize 64x64x16
+PASS resize 3x4x4
+PASS resize 3x2x8
+PASS resize 3x1x16
+PASS resize 3x1x32
+PASS resize 2x4x4
+PASS: tb_iris_resize2x reads=16422 writes=24646
+tests/video/tb_iris_resize2x.sv:118: $finish called at 2806260000 (1ps)

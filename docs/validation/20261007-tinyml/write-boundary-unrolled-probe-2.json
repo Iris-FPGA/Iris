@@ -1,0 +1,63 @@
+{
+  "base": "0xc4d000",
+  "code_in_ddr": true,
+  "compile_command": [
+    "/home/noir/Applications/riscv-none-elf/bin/riscv-none-elf-gcc",
+    "-O3",
+    "-march=rv32im_zicsr_zifencei",
+    "-mabi=ilp32",
+    "-msmall-data-limit=0",
+    "-nostdlib",
+    "-DIRIS_PROBE_BASE=0xc4d000",
+    "-I/home/noir/Documents/workspace/Iris/iris_ws/embedded_sw/SapphireSoc/bsp/efinix/EfxSapphireSoc/include",
+    "-I/home/noir/Documents/workspace/Iris/iris_ws/embedded_sw/SapphireSoc/software/standalone/driver",
+    "-T/home/noir/Documents/workspace/Iris/firmware/tinyml_style/probe/ddr_code.ld",
+    "/home/noir/Documents/workspace/Iris/firmware/tinyml_style/probe/start.S",
+    "/home/noir/Documents/workspace/Iris/firmware/tinyml_style/probe/main.c",
+    "-o",
+    "/home/noir/Documents/workspace/Iris/firmware/tinyml_style/build/ddr_code_probe.elf",
+    "-funroll-loops"
+  ],
+  "elf_sha256": "785b9e4c6691910f98f21ee25177fcb984ca4fed7a66b97f3bd87778cafaf99a",
+  "load": "4071 bytes written at address 0x00800000\n88 bytes written at address 0xf9000000\ndownloaded 4159 bytes in 0.122324s (33.203 KiB/s)\n",
+  "words": [
+    1611464705,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    305419897,
+    0,
+    0,
+    0,
+    0
+  ],
+  "raw": "0xf9000e00: 600d0001 00000000 00000000 00000000 00000000 00000000 00000000 00000000 \n0xf9000e20: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 12345679 \n0xf9000e40: 00000000 00000000 00000000 00000000 \n",
+  "registers": {
+    "pc": "pc (/32): 0x00800ecc\n",
+    "mcause": "mcause (/32): 0x00000000\n",
+    "mepc": "mepc (/32): 0x00000000\n",
+    "mtval": "mtval (/32): 0x00000000\n"
+  },
+  "bit_file_sha256": "94a986b5dc0401baf76f362f502b5a758779ddc56b8795a01f0e6533aea13d2f",
+  "source_sha256": {
+    "firmware/tinyml_style/probe/main.c": "7f737b7bc7c442aa185cb67ca2f794441b2a5d0bdc9482788ba42e44abe4062d",
+    "firmware/tinyml_style/probe/start.S": "49da299783961edd17df35094490267518382ab36f044453989481f8cb879ff5",
+    "firmware/tinyml_style/probe/bram.ld": "efeeb442166ec8ec75b7967a7c2690324a072d2ebef30b39b5f6c2f2f18c0f3d",
+    "firmware/tinyml_style/probe/ddr_code.ld": "f7bec827238948fe1dd99e1ffd974565badbee3777460c046e69893338ed1639",
+    "iris_ws/src/ddr/axi_atype_bridge.v": "233c7d4e9a84e666a5ce8362a45a215410e71038b29481caa0637923177fc9f5",
+    "iris_ws/src/ddr/axi_ddr_arbiter.v": "052ad8726a1f0978edded3ad482ed0839e96c7f35b3bab9a614729f0438281f2",
+    "iris_ws/src/cnn/tinyml_subsystem.v": "aaff7974d4ed9c9a128f7b98ce1c891603c533fea005114347dbf5cb232c940a"
+  },
+  "passed": true
+}

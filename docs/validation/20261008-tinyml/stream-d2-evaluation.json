@@ -1,0 +1,568 @@
+{
+  "candidate": "micro4_d2",
+  "steps": 6000,
+  "model_sha256": "e4a45f1d9314654565f3300978d8a7b8843fc0c0687c454c4b6e3b47e0f05386",
+  "model_bytes": 2968,
+  "model_path": "/home/noir/Documents/workspace/Iris/one_last_kiss_style/build/stream/micro4_d2_rgba_640_int8.tflite",
+  "checkpoint_sha256": "095e88c8f4763656462cc9c4e96bd7fb5abbb8322af551604bae2c16b9b8b60d",
+  "teacher_sha256": "a1715294f53ab3c23db22a283fd5320ae473c6a10e9dc92d8ef274b0953831f3",
+  "data_manifest_sha256": "4e1691c7ba699dcf998865e9e147703ed4a66d9918705fb3192ff12a2a99899c",
+  "bn_fold_max_abs": 0.0002899169921875,
+  "input_quantization": [
+    1.0,
+    -128
+  ],
+  "output_quantization": [
+    1.2276244163513184,
+    -128
+  ],
+  "mean_psnr_db": 25.067275661454094,
+  "mean_local_ssim": 0.6101768269865855,
+  "per_image": [
+    {
+      "image": "000000000110.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.643154206184878,
+        "psnr_255_db": 24.919041860760007,
+        "local_gaussian_ssim": 0.6284725611075472,
+        "global_channel_ssim": 0.5601461817161097,
+        "max_abs": 198.11647033691406
+      },
+      "float_vs_int8": {
+        "mae": 0.6936642502413856,
+        "psnr_255_db": 49.289851912563975,
+        "local_gaussian_ssim": 0.9942096195712887,
+        "global_channel_ssim": 0.9944816731038433,
+        "max_abs": 3.965240478515625
+      }
+    },
+    {
+      "image": "000000000394.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.58050589185622,
+        "psnr_255_db": 24.82601008273876,
+        "local_gaussian_ssim": 0.6041829224219236,
+        "global_channel_ssim": 0.4962989452501179,
+        "max_abs": 187.6209373474121
+      },
+      "float_vs_int8": {
+        "mae": 0.7578172447946336,
+        "psnr_255_db": 48.49500240088416,
+        "local_gaussian_ssim": 0.9945996846030117,
+        "global_channel_ssim": 0.9934800361449264,
+        "max_abs": 4.1219635009765625
+      }
+    },
+    {
+      "image": "000000000081.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.60965882692486,
+        "psnr_255_db": 24.465980613503074,
+        "local_gaussian_ssim": 0.5624324155119883,
+        "global_channel_ssim": 0.5070439819109253,
+        "max_abs": 214.02308654785156
+      },
+      "float_vs_int8": {
+        "mae": 0.8579346895217895,
+        "psnr_255_db": 47.57262282301748,
+        "local_gaussian_ssim": 0.9944369481566344,
+        "global_channel_ssim": 0.9940652865726101,
+        "max_abs": 3.8585662841796875
+      }
+    },
+    {
+      "image": "000000000508.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.395111650899052,
+        "psnr_255_db": 24.806122538943143,
+        "local_gaussian_ssim": 0.5743548932064466,
+        "global_channel_ssim": 0.4976702014673029,
+        "max_abs": 205.82770156860352
+      },
+      "float_vs_int8": {
+        "mae": 0.8861984860234791,
+        "psnr_255_db": 47.34067119992182,
+        "local_gaussian_ssim": 0.9943209925003947,
+        "global_channel_ssim": 0.9933098034756315,
+        "max_abs": 4.1061859130859375
+      }
+    },
+    {
+      "image": "000000000133.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.269455761015415,
+        "psnr_255_db": 24.99268556335995,
+        "local_gaussian_ssim": 0.6099612849149443,
+        "global_channel_ssim": 0.5405133211977876,
+        "max_abs": 205.08422470092773
+      },
+      "float_vs_int8": {
+        "mae": 0.6965420591831207,
+        "psnr_255_db": 49.29078661551933,
+        "local_gaussian_ssim": 0.9942422986681153,
+        "global_channel_ssim": 0.9942784958059289,
+        "max_abs": 3.801910400390625
+      }
+    },
+    {
+      "image": "000000000443.jpg",
+      "teacher_vs_int8": {
+        "mae": 10.326702253189351,
+        "psnr_255_db": 24.71535913253976,
+        "local_gaussian_ssim": 0.5996476715428857,
+        "global_channel_ssim": 0.4829173105552423,
+        "max_abs": 179.5806655883789
+      },
+      "float_vs_int8": {
+        "mae": 0.6954815160565906,
+        "psnr_255_db": 49.456651627948965,
+        "local_gaussian_ssim": 0.9939096350560316,
+        "global_channel_ssim": 0.993155249625719,
+        "max_abs": 3.886383056640625
+      }
+    },
+    {
+      "image": "000000000009.jpg",
+      "teacher_vs_int8": {
+        "mae": 8.97225901192675,
+        "psnr_255_db": 25.450371103446617,
+        "local_gaussian_ssim": 0.6550822852391889,
+        "global_channel_ssim": 0.5805756917911785,
+        "max_abs": 186.68668365478516
+      },
+      "float_vs_int8": {
+        "mae": 0.6902020490169525,
+        "psnr_255_db": 49.173392806319924,
+        "local_gaussian_ssim": 0.994872973715331,
+        "global_channel_ssim": 0.9951310475254775,
+        "max_abs": 4.0184173583984375
+      }
+    },
+    {
+      "image": "000000000357.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.503850596042144,
+        "psnr_255_db": 24.980094626012665,
+        "local_gaussian_ssim": 0.5575879481621366,
+        "global_channel_ssim": 0.4665993416908471,
+        "max_abs": 195.12495803833008
+      },
+      "float_vs_int8": {
+        "mae": 0.6807039956914054,
+        "psnr_255_db": 49.56215817386256,
+        "local_gaussian_ssim": 0.9937384900414233,
+        "global_channel_ssim": 0.9940787270973251,
+        "max_abs": 3.636932373046875
+      }
+    },
+    {
+      "image": "000000000569.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.109724238196181,
+        "psnr_255_db": 25.339154135319365,
+        "local_gaussian_ssim": 0.6180910620946339,
+        "global_channel_ssim": 0.5266968183822842,
+        "max_abs": 191.99517822265625
+      },
+      "float_vs_int8": {
+        "mae": 0.7334328985214233,
+        "psnr_255_db": 48.90929418736194,
+        "local_gaussian_ssim": 0.9940458979390242,
+        "global_channel_ssim": 0.9936985980050287,
+        "max_abs": 3.549835205078125
+      }
+    },
+    {
+      "image": "000000000575.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.11107058543298,
+        "psnr_255_db": 25.51228454376868,
+        "local_gaussian_ssim": 0.6335225953297438,
+        "global_channel_ssim": 0.6002561094118497,
+        "max_abs": 183.92123413085938
+      },
+      "float_vs_int8": {
+        "mae": 0.5771573877996868,
+        "psnr_255_db": 50.27390165708859,
+        "local_gaussian_ssim": 0.9964352841511482,
+        "global_channel_ssim": 0.9964869209002533,
+        "max_abs": 3.7595977783203125
+      }
+    },
+    {
+      "image": "000000000077.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.14975367580851,
+        "psnr_255_db": 25.15459515624454,
+        "local_gaussian_ssim": 0.6444931727116013,
+        "global_channel_ssim": 0.5722675737871148,
+        "max_abs": 196.26642227172852
+      },
+      "float_vs_int8": {
+        "mae": 0.7503250316778819,
+        "psnr_255_db": 48.46391897654475,
+        "local_gaussian_ssim": 0.994907018489395,
+        "global_channel_ssim": 0.9939886685023205,
+        "max_abs": 4.5388641357421875
+      }
+    },
+    {
+      "image": "000000000529.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.184402259782784,
+        "psnr_255_db": 25.056096667469667,
+        "local_gaussian_ssim": 0.6460587580594702,
+        "global_channel_ssim": 0.6106902486327385,
+        "max_abs": 186.66985702514648
+      },
+      "float_vs_int8": {
+        "mae": 0.7253474068641662,
+        "psnr_255_db": 48.805048208101354,
+        "local_gaussian_ssim": 0.9952592205878709,
+        "global_channel_ssim": 0.9954346728072064,
+        "max_abs": 4.1640472412109375
+      }
+    },
+    {
+      "image": "000000000641.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.188184651095007,
+        "psnr_255_db": 24.943685668443074,
+        "local_gaussian_ssim": 0.623270936424996,
+        "global_channel_ssim": 0.5719360728527074,
+        "max_abs": 201.67789459228516
+      },
+      "float_vs_int8": {
+        "mae": 0.7289736343092389,
+        "psnr_255_db": 48.65877757471664,
+        "local_gaussian_ssim": 0.9944744855584027,
+        "global_channel_ssim": 0.9945082110766817,
+        "max_abs": 4.3144989013671875
+      }
+    },
+    {
+      "image": "000000000397.jpg",
+      "teacher_vs_int8": {
+        "mae": 8.94866289832112,
+        "psnr_255_db": 25.89929160920452,
+        "local_gaussian_ssim": 0.6563834696583806,
+        "global_channel_ssim": 0.5866958015235496,
+        "max_abs": 185.71878814697266
+      },
+      "float_vs_int8": {
+        "mae": 0.6482690994607078,
+        "psnr_255_db": 49.82513428304124,
+        "local_gaussian_ssim": 0.9943070813989587,
+        "global_channel_ssim": 0.9949388527519384,
+        "max_abs": 3.6377716064453125
+      }
+    },
+    {
+      "image": "000000000370.jpg",
+      "teacher_vs_int8": {
+        "mae": 10.508058584932652,
+        "psnr_255_db": 24.512960150412695,
+        "local_gaussian_ssim": 0.5760455112370945,
+        "global_channel_ssim": 0.47829307811668204,
+        "max_abs": 194.0356101989746
+      },
+      "float_vs_int8": {
+        "mae": 0.6936384303702249,
+        "psnr_255_db": 49.374157373658335,
+        "local_gaussian_ssim": 0.9939052310252157,
+        "global_channel_ssim": 0.9931163650083104,
+        "max_abs": 3.819793701171875
+      }
+    },
+    {
+      "image": "000000000086.jpg",
+      "teacher_vs_int8": {
+        "mae": 8.822169815376402,
+        "psnr_255_db": 25.32707344073883,
+        "local_gaussian_ssim": 0.6805908275735743,
+        "global_channel_ssim": 0.6604674118736268,
+        "max_abs": 182.01908111572266
+      },
+      "float_vs_int8": {
+        "mae": 0.6931528002023697,
+        "psnr_255_db": 49.07115586860516,
+        "local_gaussian_ssim": 0.9953994991038169,
+        "global_channel_ssim": 0.9952713898227487,
+        "max_abs": 4.0599212646484375
+      }
+    },
+    {
+      "image": "000000000620.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.265772514703373,
+        "psnr_255_db": 25.398653560657934,
+        "local_gaussian_ssim": 0.5919768664203297,
+        "global_channel_ssim": 0.5560771099487307,
+        "max_abs": 186.66985702514648
+      },
+      "float_vs_int8": {
+        "mae": 0.6809939478503333,
+        "psnr_255_db": 49.286318649238964,
+        "local_gaussian_ssim": 0.9942207296040185,
+        "global_channel_ssim": 0.993740454661614,
+        "max_abs": 3.9835968017578125
+      }
+    },
+    {
+      "image": "000000000584.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.372562570758165,
+        "psnr_255_db": 25.178268674084944,
+        "local_gaussian_ssim": 0.6312951444918312,
+        "global_channel_ssim": 0.5666642141781639,
+        "max_abs": 193.48251342773438
+      },
+      "float_vs_int8": {
+        "mae": 0.7260128731860055,
+        "psnr_255_db": 48.98935922749367,
+        "local_gaussian_ssim": 0.9945233808042652,
+        "global_channel_ssim": 0.9947024425650924,
+        "max_abs": 4.1237030029296875
+      }
+    },
+    {
+      "image": "000000000192.jpg",
+      "teacher_vs_int8": {
+        "mae": 8.627906825178199,
+        "psnr_255_db": 25.727056718013,
+        "local_gaussian_ssim": 0.5997020379196863,
+        "global_channel_ssim": 0.5312898865360899,
+        "max_abs": 200.17373275756836
+      },
+      "float_vs_int8": {
+        "mae": 0.6613221406274372,
+        "psnr_255_db": 49.66874009478127,
+        "local_gaussian_ssim": 0.9937693685446902,
+        "global_channel_ssim": 0.9938071404989367,
+        "max_abs": 3.660614013671875
+      }
+    },
+    {
+      "image": "000000000074.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.829461292442348,
+        "psnr_255_db": 24.29438338104275,
+        "local_gaussian_ssim": 0.6096093215101539,
+        "global_channel_ssim": 0.5492854590220623,
+        "max_abs": 199.49919891357422
+      },
+      "float_vs_int8": {
+        "mae": 0.8377141734626559,
+        "psnr_255_db": 47.781161312992324,
+        "local_gaussian_ssim": 0.9949252189659469,
+        "global_channel_ssim": 0.9948606611163257,
+        "max_abs": 4.0799102783203125
+      }
+    },
+    {
+      "image": "000000000520.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.275812064438231,
+        "psnr_255_db": 25.12292781414945,
+        "local_gaussian_ssim": 0.6084369752363572,
+        "global_channel_ssim": 0.5233012868683041,
+        "max_abs": 198.9982147216797
+      },
+      "float_vs_int8": {
+        "mae": 0.7405165690183639,
+        "psnr_255_db": 48.75756760389653,
+        "local_gaussian_ssim": 0.9944899935084727,
+        "global_channel_ssim": 0.9941740828229252,
+        "max_abs": 3.941925048828125
+      }
+    },
+    {
+      "image": "000000000400.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.31344879978647,
+        "psnr_255_db": 25.029138385682465,
+        "local_gaussian_ssim": 0.6027520057293138,
+        "global_channel_ssim": 0.5496272505905367,
+        "max_abs": 192.1334457397461
+      },
+      "float_vs_int8": {
+        "mae": 0.7678066802687115,
+        "psnr_255_db": 48.46638093303938,
+        "local_gaussian_ssim": 0.9941152280409558,
+        "global_channel_ssim": 0.9938815318748233,
+        "max_abs": 4.015106201171875
+      }
+    },
+    {
+      "image": "000000000643.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.9725279250741,
+        "psnr_255_db": 24.618495984527318,
+        "local_gaussian_ssim": 0.5910978770529993,
+        "global_channel_ssim": 0.5147610167385946,
+        "max_abs": 189.2633819580078
+      },
+      "float_vs_int8": {
+        "mae": 0.6763357412152821,
+        "psnr_255_db": 49.46522264452209,
+        "local_gaussian_ssim": 0.9941447849653954,
+        "global_channel_ssim": 0.993665998249397,
+        "max_abs": 3.913482666015625
+      }
+    },
+    {
+      "image": "000000000491.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.924222633557187,
+        "psnr_255_db": 24.537565736952473,
+        "local_gaussian_ssim": 0.571925101123778,
+        "global_channel_ssim": 0.5064410881382165,
+        "max_abs": 179.02756881713867
+      },
+      "float_vs_int8": {
+        "mae": 0.7306756636831495,
+        "psnr_255_db": 48.82689681885268,
+        "local_gaussian_ssim": 0.9936541679837264,
+        "global_channel_ssim": 0.9931973430527693,
+        "max_abs": 4.0923004150390625
+      }
+    },
+    {
+      "image": "000000000438.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.62672924661802,
+        "psnr_255_db": 25.01501128292344,
+        "local_gaussian_ssim": 0.6443222950213195,
+        "global_channel_ssim": 0.554831201149757,
+        "max_abs": 181.8976287841797
+      },
+      "float_vs_int8": {
+        "mae": 0.677430987490548,
+        "psnr_255_db": 49.55630971685857,
+        "local_gaussian_ssim": 0.9944079518012862,
+        "global_channel_ssim": 0.9943200171030514,
+        "max_abs": 4.0267333984375
+      }
+    },
+    {
+      "image": "000000000431.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.184692473738558,
+        "psnr_255_db": 25.57155939420534,
+        "local_gaussian_ssim": 0.5964793948769291,
+        "global_channel_ssim": 0.5257163963636952,
+        "max_abs": 188.572021484375
+      },
+      "float_vs_int8": {
+        "mae": 0.5559960158665975,
+        "psnr_255_db": 51.03744007820105,
+        "local_gaussian_ssim": 0.9948228529310036,
+        "global_channel_ssim": 0.9947763345255467,
+        "max_abs": 3.789520263671875
+      }
+    },
+    {
+      "image": "000000000196.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.314714741880694,
+        "psnr_255_db": 25.396771004291576,
+        "local_gaussian_ssim": 0.6529492435016065,
+        "global_channel_ssim": 0.5937790022237884,
+        "max_abs": 180.9297332763672
+      },
+      "float_vs_int8": {
+        "mae": 0.6192756023009618,
+        "psnr_255_db": 50.200159564698446,
+        "local_gaussian_ssim": 0.9949815876056345,
+        "global_channel_ssim": 0.9956477214287611,
+        "max_abs": 3.8059539794921875
+      }
+    },
+    {
+      "image": "000000000071.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.170881146685117,
+        "psnr_255_db": 25.487515042587706,
+        "local_gaussian_ssim": 0.6286435555338746,
+        "global_channel_ssim": 0.5397375132475251,
+        "max_abs": 197.58020401000977
+      },
+      "float_vs_int8": {
+        "mae": 0.67490287191338,
+        "psnr_255_db": 49.152171918716775,
+        "local_gaussian_ssim": 0.9940524576855035,
+        "global_channel_ssim": 0.9934494598240423,
+        "max_abs": 3.733734130859375
+      }
+    },
+    {
+      "image": "000000000263.jpg",
+      "teacher_vs_int8": {
+        "mae": 10.082745486696561,
+        "psnr_255_db": 24.759788185680762,
+        "local_gaussian_ssim": 0.5701309203680871,
+        "global_channel_ssim": 0.4854300095992159,
+        "max_abs": 183.93806076049805
+      },
+      "float_vs_int8": {
+        "mae": 0.6599943121936587,
+        "psnr_255_db": 49.68460951772638,
+        "local_gaussian_ssim": 0.9935725597456558,
+        "global_channel_ssim": 0.9931303740191963,
+        "max_abs": 3.8831787109375
+      }
+    },
+    {
+      "image": "000000000564.jpg",
+      "teacher_vs_int8": {
+        "mae": 10.493704198213916,
+        "psnr_255_db": 25.01020791607457,
+        "local_gaussian_ssim": 0.6237490321780961,
+        "global_channel_ssim": 0.4528909318636514,
+        "max_abs": 188.58885192871094
+      },
+      "float_vs_int8": {
+        "mae": 0.7130750743548075,
+        "psnr_255_db": 49.386763198228934,
+        "local_gaussian_ssim": 0.9943617141543742,
+        "global_channel_ssim": 0.9939946706453128,
+        "max_abs": 4.37799072265625
+      }
+    },
+    {
+      "image": "000000000562.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.557195150165095,
+        "psnr_255_db": 25.201539020481476,
+        "local_gaussian_ssim": 0.5156215580959076,
+        "global_channel_ssim": 0.3945905610871136,
+        "max_abs": 197.85675048828125
+      },
+      "float_vs_int8": {
+        "mae": 0.6480394973357518,
+        "psnr_255_db": 49.873778625489685,
+        "local_gaussian_ssim": 0.9929001867345141,
+        "global_channel_ssim": 0.991215810019283,
+        "max_abs": 3.3419952392578125
+      }
+    },
+    {
+      "image": "000000000338.jpg",
+      "teacher_vs_int8": {
+        "mae": 9.527709646059407,
+        "psnr_255_db": 24.903132172270457,
+        "local_gaussian_ssim": 0.6167888193139087,
+        "global_channel_ssim": 0.5672368733680182,
+        "max_abs": 186.94640350341797
+      },
+      "float_vs_int8": {
+        "mae": 0.6964778706762526,
+        "psnr_255_db": 49.135487272462115,
+        "local_gaussian_ssim": 0.9944061285346116,
+        "global_channel_ssim": 0.9943612150751465,
+        "max_abs": 4.1264190673828125
+      }
+    }
+  ],
+  "hardware_proven": false
+}

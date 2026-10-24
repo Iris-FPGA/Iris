@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+"""Run the SRAM-only paired camera/HDMI demo and record actual committed frames.
+
+Requires official OpenOCD Tcl6666 and an already programmed, timing-passed demo
+bitstream. --snapshot halts the CPU, waits for any pending VS commit, dumps the
+active input/output pair, then resumes; this pause is excluded from throughput.
+"""
+import argparse,contextlib,hashlib,json,os,re,select,socket,subprocess,termios,time
+from pathlib import Path
+root=Path(__file__).resolve().parents[1]
+p=argparse.ArgumentParser(description=__doc__)
+p.add_argument('--elf',type=Path,default=root/'firmware/tinyml_style/build/tinyml_style.elf')
+p.add_argument('--bit-file',type=Path,default=root/'iris_ws/outflow/iris_ws.bit')
+p.add_argument('--output',type=Path,required=True)
+p.add_argument('--seconds',type=float,default=25)
+p.add_argument('--stall-seconds',type=float,default=15,help='fail and save halted CPU/APB state after this long without a new pair')
+p.add_argument('--snapshot',action='store_true')
+p.add_argument('--attach',action='store_true',help='observe existing firmware without reset/reload')
+p.add_argument('--entry',type=lambda s:int(s,0),default=0x00800000,help='entry address for a loaded ELF; use 0xf9000000 to test OCR self-loader')
+p.add_argument('--uart-only',action='store_true',help='observe automatic boot without any JTAG connection, reset or ELF load')
+p.add_argument('--await-boot',action='store_true',help='ignore old UART frames until a fresh streaming-firmware boot banner')
+p.add_argument('--uart',default='/dev/ttyUSB2')
+a=p.parse_args();a.output.parent.mkdir(parents=True,exist_ok=True)
+if a.seconds<=0:p.error('--seconds must be positive')
+if a.stall_seconds<=0:p.error('--stall-seconds must be positive')
+if a.entry not in (0x00800000,0xf9000000):p.error('entry must be the DDR controller or OCR boot address')
+if a.uart_only:
+ if a.snapshot:p.error('UART-only observation cannot take a JTAG snapshot')
+ a.attach=True
+if a.await_boot and not a.uart_only:p.error('--await-boot requires --uart-only')
+for f in [a.elf,a.output]:
+ if any(c in str(f.resolve()) for c in '{}\n\r'):p.error('unsupported Tcl path')
+def digest(f):return hashlib.sha256(f.read_bytes()).hexdigest()
+def words(raw):
+ return [int(v,16) for l in raw.splitlines() if re.match(r'^0x[0-9a-f]+:',l) for v in l.split(':',1)[1].split()]
+report={'scope':'SRAM live camera/style demo; no Flash boot acceptance','elf_sha256':digest(a.elf),
+        'bit_sha256':digest(a.bit_file),'attached':a.attach,'uart_only':a.uart_only,
+        'entry':None if a.uart_only else hex(a.entry),'frames':[],
+        'performance':[],'performance_clock_hz':100000000}
+with (contextlib.nullcontext(None) if a.uart_only else socket.create_connection(('localhost',6666),timeout=120)) as s:
+ def tcl(c):
+  s.sendall(c.encode()+b'\x1a');d=bytearray()
+  while b'\x1a' not in d:
+   chunk=s.recv(65536)
+   if not chunk:raise RuntimeError('OpenOCD disconnected')
+   d.extend(chunk)
+  return d.decode(errors='replace').rstrip('\x1a')
+ fd=os.open(a.uart,os.O_RDWR|os.O_NOCTTY|os.O_NONBLOCK)
+ attr=termios.tcgetattr(fd);attr[0]=attr[1]=attr[3]=0;attr[2]=termios.CS8|termios.CLOCAL|termios.CREAD
+ attr[4]=attr[5]=termios.B115200;attr[6][termios.VMIN]=attr[6][termios.VTIME]=0
+ termios.tcsetattr(fd,termios.TCSANOW,attr);termios.tcflush(fd,termios.TCIFLUSH)
+ raw=bytearray();partial=b''
+ try:
+  if not a.attach:
+   tcl('halt');report['reset']=tcl('reset halt')
+   report['load']=tcl('load_image {'+str(a.elf.resolve())+'}')
+   if 'downloaded' not in report['load']:raise RuntimeError('ELF load not confirmed')
+   print(report['load'],flush=True);tcl(f'resume 0x{a.entry:08x}')
+  begin=time.monotonic();last_progress=begin;waiting_boot=a.await_boot
+  while time.monotonic()-begin<a.seconds:
+   if time.monotonic()-last_progress>a.stall_seconds:
+    report['stall_seconds']=time.monotonic()-last_progress
+    if not a.uart_only:
+     tcl('halt')
+     try:
+      report['stall_cpu']={r:tcl('reg '+r+' force') for r in ['pc','mcause','mepc','mtval','mstatus','mie','mip']}
+      report['stall_style_words']=words(tcl('mdw 0xf8100000 13'))
+      report['stall_arbiter_accel_words']=words(tcl('mdw 0xf8110000 28'))
+      w=report['stall_arbiter_accel_words']
+      if len(w)==28 and w[19]!=0xdead0013:
+       report['stall_accel']={
+        'completion_rises_mod65536':w[19]>>16,'irq_level':(w[19]>>10)&1,
+        'last_function_id':w[19]&1023,'starts_mod65536':w[24]>>16,
+        'ack_counter_raw':w[24]&65535,'pending_reads_mod65536':w[20]>>16,
+        'pending_writes_mod65536':w[20]&65535,'last_vendor_araddr':w[21],
+        'last_vendor_awaddr':w[22],'last_ci_input0':w[25],'last_ci_input1':w[26],
+        'dma_handshake_flags':w[27]}
+      report['stall_plic']={c:tcl(c) for c in ['mdw 0xf8c01000 1','mdw 0xf8c02000 1']}
+     finally:tcl('resume')
+    print('IRIS HOST STALL: no new pair; '+('UART evidence saved' if a.uart_only else 'CPU/APB evidence saved'),flush=True)
+    break
+   if not select.select([fd],[],[],.2)[0]:continue
+   try:chunk=os.read(fd,65536)
+   except BlockingIOError:continue
+   raw.extend(chunk);partial+=chunk
+   while b'\n' in partial:
+    line,partial=partial.split(b'\n',1);line=line.decode(errors='replace').strip()
+    if not line:continue
+    print(line,flush=True)
+    if waiting_boot and line.startswith('IRIS STREAM CNN:'):
+     report['fresh_boot_host_elapsed']=time.monotonic()-begin
+     waiting_boot=False;last_progress=time.monotonic()
+    match=re.search(r'IRIS LIVE frame=(\d+) pair=(\d+) Invoke_ticks=(\d+) displayed=(\d+) captures=(\d+) underflow=(\d+) readerr=(\d+) rejects=(\d+)$',line)
+    if match:
+     if waiting_boot:
+      report['ignored_preboot_log_samples']=report.get('ignored_preboot_log_samples',0)+1
+      continue
+     values=list(map(int,match.groups()))
+     report['frames'].append(dict(zip(['sequence','pair','invoke_ticks','displayed','captures','underflows','read_errors','rejects'],values),host_elapsed=time.monotonic()-begin))
+     last_progress=time.monotonic()
+    perf=re.fullmatch(r'IRIS PERF frame=(\d+) capture_ticks=(\d+) invoke_ticks=(\d+) commit_ticks=(\d+) period_ticks=(\d+) overlap_ticks=(\d+)',line)
+    if perf and not waiting_boot:
+     report['performance'].append(dict(zip(
+      ['sequence','capture_ticks','invoke_ticks','commit_ticks','period_ticks','overlap_ticks'],
+      map(int,perf.groups()))))
+    if line.startswith('IRIS STOP:'):report['stop_reason']=line
+  frames=report['frames'];report['observation_seconds']=time.monotonic()-begin
+  if len(frames)>=2:
+   report['observed_committed_pair_hz']=(frames[-1]['displayed']-frames[0]['displayed'])/(frames[-1]['host_elapsed']-frames[0]['host_elapsed'])
+  if report['performance']:
+   report['stage_ms']={}
+   for name in ['capture','invoke','commit','period','overlap']:
+    values=[f[name+'_ticks']/100000 for f in report['performance']
+            if f['sequence']>1 and f[name+'_ticks']>0]
+    if values:report['stage_ms'][name]={'min':min(values),'max':max(values),'mean':sum(values)/len(values)}
+  if a.snapshot:
+   tcl('halt');time.sleep(.05)
+   status=words(tcl('mdw 0xf8100000 10'));report['snapshot_status']=status
+   if len(status)!=10 or status[0]>>16!=0x4953 or not(status[0]&8):
+    raise RuntimeError('no complete displayed pair')
+   ownership=words(tcl('mdw 0xf810004c 1'))[0] if status[9]==0x00030002 else None
+   pair=ownership&3 if ownership is not None else (status[0]>>4)&1
+   if pair>2:raise RuntimeError('invalid displayed bank')
+   report['snapshot_pair']=pair;report['snapshot_displayed_count']=status[4]
+   report['snapshot_files']={}
+   for kind,base in [('input',[0x03000000,0x03200000,0x03800000][pair]),
+                    ('output',[0x03400000,0x03600000,0x03a00000][pair])]:
+    dest=Path(str(a.output)+'-'+kind+'.bin').resolve()
+    result=tcl(f'dump_image {{{dest}}} 0x{base:x} 1228800')
+    if not dest.is_file() or dest.stat().st_size!=1228800:raise RuntimeError('incomplete pair dump: '+result)
+    report['snapshot_files'][kind]={'path':str(dest),'sha256':digest(dest)}
+   if ownership is not None:
+    if words(tcl('mdw 0xf810004c 1'))[0]!=ownership or words(tcl('mdw 0xf8100010 1'))[0]!=status[4]:
+     raise RuntimeError('display ownership changed during snapshot')
+   elif words(tcl('mdw 0xf8100000 1'))[0]!=status[0]:raise RuntimeError('display ownership changed during snapshot')
+   # CPU resumes even if a snapshot/check fails; no Flash changes occur.
+  report['live_ok']=len(frames)>=2 and not report.get('stop_reason') and not report.get('stall_seconds') and all(f['underflows']==0 and f['read_errors']==0 and f['rejects']==0 for f in frames)
+ finally:
+  if a.snapshot:tcl('resume')
+  os.close(fd)
+  Path(str(a.output)+'-uart.log').write_bytes(raw)
+  Path(str(a.output)+'-report.json').write_text(json.dumps(report,indent=2)+'\n')
+print(json.dumps(report,indent=2),flush=True)
+raise SystemExit(0 if report.get('live_ok') else 1)

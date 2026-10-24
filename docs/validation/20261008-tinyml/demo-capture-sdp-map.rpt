@@ -1,0 +1,131 @@
+Efinity Synthesis report for project capture
+Version: 2026.1.132.4.5
+Generated at: Oct 08, 2026 07:17:14
+Copyright (C) 2013 - 2026  All rights reserved.
+
+Top-level Entity Name : iris_style_capture
+
+family : Titanium
+device : Ti60F225
+project : capture
+root : iris_style_capture
+insert-ios : 0
+insert-gclk : 0
+max-carry-cascade : 320
+max-dsp-cascade : 16
+max_mult : -1
+max_ram : -1
+mode : speed
+num_srl : -1
+output-dir : /tmp/iris-capture-synthesis/out
+project : capture
+root : iris_style_capture
+work-dir : /tmp/iris-capture-synthesis/work
+
+File List:
+
+/home/noir/Documents/workspace/Iris/iris_ws/src/cnn/iris_style_capture.v
+/home/noir/Documents/workspace/Iris/iris_ws/src/video/afifo_simple.v
+
+### ### Report Section Start ### ###
+
+"MEM|SYN-0677" : ... Memory 'mem' is not initialized, assuming empty initial contents. (/home/noir/Documents/workspace/Iris/iris_ws/src/video/afifo_simple.v:25)
+"MEM|SYN-0677" : ... Memory 'burst_data' is not initialized, assuming empty initial contents. (/home/noir/Documents/workspace/Iris/iris_ws/src/cnn/iris_style_capture.v:76)
+
+### ### EFX_FF CE enables (begin) ### ### ###
+
+Total number of enable signals: 18
+Total number of FFs with enable signals: 226
++---------+------------------+
+|CE Signal|Number of FF loads|
++---------+------------------+
+|ceg_net83|               50 |
+|ceg_net38|               32 |
+|ceg_net53|               32 |
+|ceg_net30|               32 |
+|ceg_net71|               24 |
+|fifo_push|               17 |
+|fifo_pop |               17 |
+|ceg_net82|                4 |
+|ceg_net84|                4 |
+|ceg_net86|                3 |
+|ceg_net85|                3 |
+|ceg_net25|                2 |
+|ceg_net52|                1 |
+|ceg_net9 |                1 |
+|ceg_net31|                1 |
+|ceg_net6 |                1 |
+|ceg_net4 |                1 |
+|ceg_net2 |                1 |
++---------+------------------+
+
+### ### EFX_FF CE enables (end) ### ### ###
+
+### ### EFX_FF SR set/reset (begin) ### ### ###
+
+Total number of set/reset signals: 1
+Total number of FFs with set/reset signals: 277
++---------+------------------+
+|SR Signal|Number of FF loads|
++---------+------------------+
+|rst_n    |              277 |
++---------+------------------+
+
+### ### EFX_FF SR set/reset (end) ### ### ###
+
+### ### Sequential Elements/Signals Trimming Report (begin) ### ### ### 
+'awaddr[0]' (/home/noir/Documents/workspace/Iris/iris_ws/src/cnn/iris_style_capture.v:15) (optimized to 0)
+'awaddr[1]' (/home/noir/Documents/workspace/Iris/iris_ws/src/cnn/iris_style_capture.v:15) (optimized to 0)
+'awaddr[2]' (/home/noir/Documents/workspace/Iris/iris_ws/src/cnn/iris_style_capture.v:15) (optimized to 0)
+'awaddr[3]' (/home/noir/Documents/workspace/Iris/iris_ws/src/cnn/iris_style_capture.v:15) (optimized to 0)
+'awaddr[4]' (/home/noir/Documents/workspace/Iris/iris_ws/src/cnn/iris_style_capture.v:15) (optimized to 0)
+'awaddr[5]' (/home/noir/Documents/workspace/Iris/iris_ws/src/cnn/iris_style_capture.v:15) (optimized to 0)
+'awaddr[6]' (/home/noir/Documents/workspace/Iris/iris_ws/src/cnn/iris_style_capture.v:15) (optimized to 0)
+'awaddr[7]' (/home/noir/Documents/workspace/Iris/iris_ws/src/cnn/iris_style_capture.v:15) (optimized to 0)
+'u_fifo/rgray[8]' (/home/noir/Documents/workspace/Iris/iris_ws/src/video/afifo_simple.v:26) (merged to equivalence)
+'u_fifo/wgray[8]' (/home/noir/Documents/workspace/Iris/iris_ws/src/video/afifo_simple.v:26) (merged to equivalence)
+### ### Sequential Elements Trimming Report (end) ### ### ### 
+
+### ### Module Resource Usage Distribution Estimates (begin) ### ###
+
+**Note: some resources maybe grouped under different hierarchy due to optimization and LUT mapping
+
+Module                                        FFs      SRLs      ADDs      LUTs    COMB4s      RAMs DSP/MULTs
+---------------------------------------       ---      ----      ----      ----      ----      ---- ---------
+iris_style_capture:iris_style_capture    277(199)      0(0)    93(83)  539(497)      0(0)     14(7)      0(0)
+ +u_fifo:afifo_simple(DW=130,AW=8)         78(78)      0(0)    10(10)    42(42)      0(0)      7(7)      0(0)
+
+### ### Module Resource Usage Distribution Estimates (end) ### ###
+
+
+### ### DSP Usage Report (begin) ### ### ### 
+
+ No DSP in design
+
+### ### Clock Load Distribution Report (begin) ### ###
+
++---------+----------+----------+------------+----------------+
+|Clock    |Flip-Flops|Shift-Regs|Memory Ports|Multipliers/DSPs|
++---------+----------+----------+------------+----------------+
+|video_clk|      141 |        0 |          7 |              0 |
+|clk      |      136 |        0 |         21 |              0 |
++---------+----------+----------+------------+----------------+
+
+### ### Clock Load Distribution Report (end) ### ###
+
+### ### Resource Summary (begin) ### ### ### 
+
+INPUT  PORTS    : 	46
+OUTPUT PORTS    : 	208
+
+EFX_ADD                 : 	93
+EFX_LUT4                : 	539
+   1-2  Inputs          : 	351
+   3    Inputs          : 	66
+   4    Inputs          : 	122
+EFX_FF                  : 	277
+EFX_RAM10               : 	14
+### ### Resource Summary (end) ### ### ###
+
+Plain synthesis (without verilog dump and post-map checks) time : 2s
+Elapsed synthesis time : 2s

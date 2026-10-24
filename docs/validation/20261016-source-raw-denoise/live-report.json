@@ -1,0 +1,2323 @@
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "59da1b8347866b87694e2a9b6b853004b84e8bd0715b6886a54801f4b30bf087",
+  "bit_sha256": "73a2c2ca2ae24300bcc437b851fdcd09ec3a942ca32d88669632a6d37eca05ac",
+  "attached": true,
+  "uart_only": true,
+  "entry": null,
+  "frames": [
+    {
+      "sequence": 3090,
+      "pair": 2,
+      "invoke_ticks": 1857876,
+      "displayed": 3090,
+      "captures": 3091,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 0.7516913489671424
+    },
+    {
+      "sequence": 3120,
+      "pair": 2,
+      "invoke_ticks": 1860541,
+      "displayed": 3120,
+      "captures": 3121,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 1.7595905689522624
+    },
+    {
+      "sequence": 3150,
+      "pair": 2,
+      "invoke_ticks": 1859745,
+      "displayed": 3150,
+      "captures": 3151,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 2.7515456399996765
+    },
+    {
+      "sequence": 3180,
+      "pair": 2,
+      "invoke_ticks": 1856205,
+      "displayed": 3180,
+      "captures": 3181,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 3.7592546129599214
+    },
+    {
+      "sequence": 3210,
+      "pair": 2,
+      "invoke_ticks": 1858668,
+      "displayed": 3210,
+      "captures": 3211,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 4.751220593985636
+    },
+    {
+      "sequence": 3240,
+      "pair": 2,
+      "invoke_ticks": 1856246,
+      "displayed": 3240,
+      "captures": 3241,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 5.743290510959923
+    },
+    {
+      "sequence": 3270,
+      "pair": 2,
+      "invoke_ticks": 1856363,
+      "displayed": 3270,
+      "captures": 3271,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 6.751146506983787
+    },
+    {
+      "sequence": 3300,
+      "pair": 2,
+      "invoke_ticks": 1858906,
+      "displayed": 3300,
+      "captures": 3301,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 7.743170959001873
+    },
+    {
+      "sequence": 3330,
+      "pair": 2,
+      "invoke_ticks": 1859383,
+      "displayed": 3330,
+      "captures": 3331,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 8.751001657976303
+    },
+    {
+      "sequence": 3360,
+      "pair": 2,
+      "invoke_ticks": 1856382,
+      "displayed": 3360,
+      "captures": 3361,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 9.742801910964772
+    },
+    {
+      "sequence": 3390,
+      "pair": 2,
+      "invoke_ticks": 1859320,
+      "displayed": 3390,
+      "captures": 3391,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 10.734973951999564
+    },
+    {
+      "sequence": 3420,
+      "pair": 2,
+      "invoke_ticks": 1859156,
+      "displayed": 3420,
+      "captures": 3421,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 11.742825825989712
+    },
+    {
+      "sequence": 3450,
+      "pair": 2,
+      "invoke_ticks": 1858867,
+      "displayed": 3450,
+      "captures": 3451,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 12.734718049992807
+    },
+    {
+      "sequence": 3480,
+      "pair": 2,
+      "invoke_ticks": 1859151,
+      "displayed": 3480,
+      "captures": 3481,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 13.74262281699339
+    },
+    {
+      "sequence": 3510,
+      "pair": 2,
+      "invoke_ticks": 1858883,
+      "displayed": 3510,
+      "captures": 3511,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 14.734575534996111
+    },
+    {
+      "sequence": 3540,
+      "pair": 2,
+      "invoke_ticks": 1861227,
+      "displayed": 3540,
+      "captures": 3541,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 15.726588194957003
+    },
+    {
+      "sequence": 3570,
+      "pair": 2,
+      "invoke_ticks": 1856931,
+      "displayed": 3570,
+      "captures": 3571,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 16.73447656695498
+    },
+    {
+      "sequence": 3600,
+      "pair": 2,
+      "invoke_ticks": 1854092,
+      "displayed": 3600,
+      "captures": 3601,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 17.726469341956545
+    },
+    {
+      "sequence": 3630,
+      "pair": 2,
+      "invoke_ticks": 1860037,
+      "displayed": 3630,
+      "captures": 3631,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 18.73430870496668
+    },
+    {
+      "sequence": 3660,
+      "pair": 2,
+      "invoke_ticks": 1859652,
+      "displayed": 3660,
+      "captures": 3661,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 19.72616996098077
+    },
+    {
+      "sequence": 3690,
+      "pair": 2,
+      "invoke_ticks": 1859500,
+      "displayed": 3690,
+      "captures": 3691,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 20.718151173961814
+    },
+    {
+      "sequence": 3720,
+      "pair": 2,
+      "invoke_ticks": 1861626,
+      "displayed": 3720,
+      "captures": 3721,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 21.726042112975847
+    },
+    {
+      "sequence": 3750,
+      "pair": 2,
+      "invoke_ticks": 1859511,
+      "displayed": 3750,
+      "captures": 3751,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 22.71791820897488
+    },
+    {
+      "sequence": 3780,
+      "pair": 2,
+      "invoke_ticks": 1859790,
+      "displayed": 3780,
+      "captures": 3781,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 23.72589609096758
+    },
+    {
+      "sequence": 3810,
+      "pair": 2,
+      "invoke_ticks": 1858665,
+      "displayed": 3810,
+      "captures": 3811,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 24.717848942964338
+    },
+    {
+      "sequence": 3840,
+      "pair": 2,
+      "invoke_ticks": 1859988,
+      "displayed": 3840,
+      "captures": 3841,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 25.709814317000564
+    },
+    {
+      "sequence": 3870,
+      "pair": 2,
+      "invoke_ticks": 1859680,
+      "displayed": 3870,
+      "captures": 3871,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 26.71771582600195
+    },
+    {
+      "sequence": 3900,
+      "pair": 2,
+      "invoke_ticks": 1856386,
+      "displayed": 3900,
+      "captures": 3901,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 27.70956381096039
+    },
+    {
+      "sequence": 3930,
+      "pair": 2,
+      "invoke_ticks": 1858978,
+      "displayed": 3930,
+      "captures": 3931,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 28.71762420196319
+    },
+    {
+      "sequence": 3960,
+      "pair": 2,
+      "invoke_ticks": 1858298,
+      "displayed": 3960,
+      "captures": 3961,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 29.709467503998894
+    },
+    {
+      "sequence": 3990,
+      "pair": 2,
+      "invoke_ticks": 1855773,
+      "displayed": 3990,
+      "captures": 3991,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 30.701327562972438
+    },
+    {
+      "sequence": 4020,
+      "pair": 2,
+      "invoke_ticks": 1856823,
+      "displayed": 4020,
+      "captures": 4021,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 31.709294345986564
+    },
+    {
+      "sequence": 4050,
+      "pair": 2,
+      "invoke_ticks": 1860698,
+      "displayed": 4050,
+      "captures": 4051,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 32.701204041950405
+    },
+    {
+      "sequence": 4080,
+      "pair": 2,
+      "invoke_ticks": 1858712,
+      "displayed": 4080,
+      "captures": 4081,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 33.70909622096224
+    },
+    {
+      "sequence": 4110,
+      "pair": 2,
+      "invoke_ticks": 1855461,
+      "displayed": 4110,
+      "captures": 4111,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 34.701079634949565
+    },
+    {
+      "sequence": 4140,
+      "pair": 2,
+      "invoke_ticks": 1858403,
+      "displayed": 4140,
+      "captures": 4141,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 35.693052985996474
+    },
+    {
+      "sequence": 4170,
+      "pair": 2,
+      "invoke_ticks": 1859563,
+      "displayed": 4170,
+      "captures": 4171,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 36.701308953983244
+    },
+    {
+      "sequence": 4200,
+      "pair": 2,
+      "invoke_ticks": 1858541,
+      "displayed": 4200,
+      "captures": 4201,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 37.692854007997084
+    },
+    {
+      "sequence": 4230,
+      "pair": 2,
+      "invoke_ticks": 1859852,
+      "displayed": 4230,
+      "captures": 4231,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 38.700675144966226
+    },
+    {
+      "sequence": 4260,
+      "pair": 2,
+      "invoke_ticks": 1858710,
+      "displayed": 4260,
+      "captures": 4261,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 39.69261864898726
+    },
+    {
+      "sequence": 4290,
+      "pair": 2,
+      "invoke_ticks": 1858187,
+      "displayed": 4290,
+      "captures": 4291,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 40.68466042797081
+    },
+    {
+      "sequence": 4320,
+      "pair": 2,
+      "invoke_ticks": 1859446,
+      "displayed": 4320,
+      "captures": 4321,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 41.69256830395898
+    },
+    {
+      "sequence": 4350,
+      "pair": 2,
+      "invoke_ticks": 1859301,
+      "displayed": 4350,
+      "captures": 4351,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 42.684382070961874
+    },
+    {
+      "sequence": 4380,
+      "pair": 2,
+      "invoke_ticks": 1860899,
+      "displayed": 4380,
+      "captures": 4381,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 43.69235731399385
+    },
+    {
+      "sequence": 4410,
+      "pair": 2,
+      "invoke_ticks": 1860033,
+      "displayed": 4410,
+      "captures": 4411,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 44.68401945900405
+    },
+    {
+      "sequence": 4440,
+      "pair": 2,
+      "invoke_ticks": 1861075,
+      "displayed": 4440,
+      "captures": 4441,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 45.67606138397241
+    },
+    {
+      "sequence": 4470,
+      "pair": 2,
+      "invoke_ticks": 1860898,
+      "displayed": 4470,
+      "captures": 4471,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 46.68409171397798
+    },
+    {
+      "sequence": 4500,
+      "pair": 2,
+      "invoke_ticks": 1859456,
+      "displayed": 4500,
+      "captures": 4501,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 47.67611116997432
+    },
+    {
+      "sequence": 4530,
+      "pair": 2,
+      "invoke_ticks": 1859297,
+      "displayed": 4530,
+      "captures": 4531,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 48.683742377965245
+    },
+    {
+      "sequence": 4560,
+      "pair": 2,
+      "invoke_ticks": 1860960,
+      "displayed": 4560,
+      "captures": 4561,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 49.675721833948046
+    },
+    {
+      "sequence": 4590,
+      "pair": 2,
+      "invoke_ticks": 1861573,
+      "displayed": 4590,
+      "captures": 4591,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 50.667727434949484
+    },
+    {
+      "sequence": 4620,
+      "pair": 2,
+      "invoke_ticks": 1859475,
+      "displayed": 4620,
+      "captures": 4621,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 51.67566727899248
+    },
+    {
+      "sequence": 4650,
+      "pair": 2,
+      "invoke_ticks": 1857463,
+      "displayed": 4650,
+      "captures": 4651,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 52.66749894898385
+    },
+    {
+      "sequence": 4680,
+      "pair": 2,
+      "invoke_ticks": 1858188,
+      "displayed": 4680,
+      "captures": 4681,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 53.67536861996632
+    },
+    {
+      "sequence": 4710,
+      "pair": 2,
+      "invoke_ticks": 1859436,
+      "displayed": 4710,
+      "captures": 4711,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 54.66731292998884
+    },
+    {
+      "sequence": 4740,
+      "pair": 2,
+      "invoke_ticks": 1861721,
+      "displayed": 4740,
+      "captures": 4741,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 55.65919325099094
+    },
+    {
+      "sequence": 4770,
+      "pair": 2,
+      "invoke_ticks": 1862046,
+      "displayed": 4770,
+      "captures": 4771,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 56.667155342991464
+    },
+    {
+      "sequence": 4800,
+      "pair": 2,
+      "invoke_ticks": 1856913,
+      "displayed": 4800,
+      "captures": 4801,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 57.659109425963834
+    },
+    {
+      "sequence": 4830,
+      "pair": 2,
+      "invoke_ticks": 1859335,
+      "displayed": 4830,
+      "captures": 4831,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 58.66697481198935
+    },
+    {
+      "sequence": 4860,
+      "pair": 2,
+      "invoke_ticks": 1856291,
+      "displayed": 4860,
+      "captures": 4861,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 59.65891205595108
+    },
+    {
+      "sequence": 4890,
+      "pair": 2,
+      "invoke_ticks": 1860298,
+      "displayed": 4890,
+      "captures": 4891,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 60.6508366529597
+    },
+    {
+      "sequence": 4920,
+      "pair": 2,
+      "invoke_ticks": 1859377,
+      "displayed": 4920,
+      "captures": 4921,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 61.658781832957175
+    },
+    {
+      "sequence": 4950,
+      "pair": 2,
+      "invoke_ticks": 1860997,
+      "displayed": 4950,
+      "captures": 4951,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 62.6507311379537
+    },
+    {
+      "sequence": 4980,
+      "pair": 2,
+      "invoke_ticks": 1858858,
+      "displayed": 4980,
+      "captures": 4981,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 63.65859733597608
+    },
+    {
+      "sequence": 5010,
+      "pair": 2,
+      "invoke_ticks": 1858038,
+      "displayed": 5010,
+      "captures": 5011,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 64.65047077799682
+    },
+    {
+      "sequence": 5040,
+      "pair": 2,
+      "invoke_ticks": 1861330,
+      "displayed": 5040,
+      "captures": 5041,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 65.64253656397341
+    },
+    {
+      "sequence": 5070,
+      "pair": 2,
+      "invoke_ticks": 1859540,
+      "displayed": 5070,
+      "captures": 5071,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 66.65036805195268
+    },
+    {
+      "sequence": 5100,
+      "pair": 2,
+      "invoke_ticks": 1859196,
+      "displayed": 5100,
+      "captures": 5101,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 67.64228896895656
+    },
+    {
+      "sequence": 5130,
+      "pair": 2,
+      "invoke_ticks": 1859435,
+      "displayed": 5130,
+      "captures": 5131,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 68.6501943669864
+    },
+    {
+      "sequence": 5160,
+      "pair": 2,
+      "invoke_ticks": 1855604,
+      "displayed": 5160,
+      "captures": 5161,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 69.64224208396627
+    },
+    {
+      "sequence": 5190,
+      "pair": 2,
+      "invoke_ticks": 1856751,
+      "displayed": 5190,
+      "captures": 5191,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 70.63414867594838
+    },
+    {
+      "sequence": 5220,
+      "pair": 2,
+      "invoke_ticks": 1859787,
+      "displayed": 5220,
+      "captures": 5221,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 71.6421109859948
+    },
+    {
+      "sequence": 5250,
+      "pair": 2,
+      "invoke_ticks": 1858559,
+      "displayed": 5250,
+      "captures": 5251,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 72.63424665597267
+    },
+    {
+      "sequence": 5280,
+      "pair": 2,
+      "invoke_ticks": 1856285,
+      "displayed": 5280,
+      "captures": 5281,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 73.62617336498806
+    },
+    {
+      "sequence": 5310,
+      "pair": 2,
+      "invoke_ticks": 1859116,
+      "displayed": 5310,
+      "captures": 5311,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 74.63395081995986
+    },
+    {
+      "sequence": 5340,
+      "pair": 2,
+      "invoke_ticks": 1861097,
+      "displayed": 5340,
+      "captures": 5341,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 75.62586183595704
+    },
+    {
+      "sequence": 5370,
+      "pair": 2,
+      "invoke_ticks": 1859312,
+      "displayed": 5370,
+      "captures": 5371,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 76.63372717797756
+    },
+    {
+      "sequence": 5400,
+      "pair": 2,
+      "invoke_ticks": 1858932,
+      "displayed": 5400,
+      "captures": 5401,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 77.62568537797779
+    },
+    {
+      "sequence": 5430,
+      "pair": 2,
+      "invoke_ticks": 1861395,
+      "displayed": 5430,
+      "captures": 5431,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 78.61780019395519
+    },
+    {
+      "sequence": 5460,
+      "pair": 2,
+      "invoke_ticks": 1859876,
+      "displayed": 5460,
+      "captures": 5461,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 79.62576798000373
+    },
+    {
+      "sequence": 5490,
+      "pair": 2,
+      "invoke_ticks": 1858613,
+      "displayed": 5490,
+      "captures": 5491,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 80.61743380594999
+    },
+    {
+      "sequence": 5520,
+      "pair": 2,
+      "invoke_ticks": 1860917,
+      "displayed": 5520,
+      "captures": 5521,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 81.62533659196924
+    },
+    {
+      "sequence": 5550,
+      "pair": 2,
+      "invoke_ticks": 1862692,
+      "displayed": 5550,
+      "captures": 5551,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 82.61738690797938
+    },
+    {
+      "sequence": 5580,
+      "pair": 2,
+      "invoke_ticks": 1861665,
+      "displayed": 5580,
+      "captures": 5581,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 83.6094154449529
+    },
+    {
+      "sequence": 5610,
+      "pair": 2,
+      "invoke_ticks": 1859372,
+      "displayed": 5610,
+      "captures": 5611,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 84.61696137394756
+    },
+    {
+      "sequence": 5640,
+      "pair": 2,
+      "invoke_ticks": 1859109,
+      "displayed": 5640,
+      "captures": 5641,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 85.6092894039466
+    },
+    {
+      "sequence": 5670,
+      "pair": 2,
+      "invoke_ticks": 1859394,
+      "displayed": 5670,
+      "captures": 5671,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 86.6172295739525
+    },
+    {
+      "sequence": 5700,
+      "pair": 2,
+      "invoke_ticks": 1855269,
+      "displayed": 5700,
+      "captures": 5701,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 87.608976236952
+    },
+    {
+      "sequence": 5730,
+      "pair": 2,
+      "invoke_ticks": 1859414,
+      "displayed": 5730,
+      "captures": 5731,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 88.6011052269605
+    },
+    {
+      "sequence": 5760,
+      "pair": 2,
+      "invoke_ticks": 1858459,
+      "displayed": 5760,
+      "captures": 5761,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 89.60892710997723
+    },
+    {
+      "sequence": 5790,
+      "pair": 2,
+      "invoke_ticks": 1859004,
+      "displayed": 5790,
+      "captures": 5791,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 90.60085217095912
+    },
+    {
+      "sequence": 5820,
+      "pair": 2,
+      "invoke_ticks": 1858935,
+      "displayed": 5820,
+      "captures": 5821,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 91.6086724549532
+    },
+    {
+      "sequence": 5850,
+      "pair": 2,
+      "invoke_ticks": 1860503,
+      "displayed": 5850,
+      "captures": 5851,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 92.60046721296385
+    },
+    {
+      "sequence": 5880,
+      "pair": 2,
+      "invoke_ticks": 1859150,
+      "displayed": 5880,
+      "captures": 5881,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 93.59230459696846
+    },
+    {
+      "sequence": 5910,
+      "pair": 2,
+      "invoke_ticks": 1860327,
+      "displayed": 5910,
+      "captures": 5911,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 94.60038927796995
+    },
+    {
+      "sequence": 5940,
+      "pair": 2,
+      "invoke_ticks": 1858107,
+      "displayed": 5940,
+      "captures": 5941,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 95.59235859598266
+    },
+    {
+      "sequence": 5970,
+      "pair": 2,
+      "invoke_ticks": 1860881,
+      "displayed": 5970,
+      "captures": 5971,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 96.60034135798924
+    },
+    {
+      "sequence": 6000,
+      "pair": 2,
+      "invoke_ticks": 1856840,
+      "displayed": 6000,
+      "captures": 6001,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 97.59222050895914
+    },
+    {
+      "sequence": 6030,
+      "pair": 2,
+      "invoke_ticks": 1861745,
+      "displayed": 6030,
+      "captures": 6031,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 98.58424290496623
+    },
+    {
+      "sequence": 6060,
+      "pair": 2,
+      "invoke_ticks": 1857822,
+      "displayed": 6060,
+      "captures": 6061,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 99.59213193098549
+    },
+    {
+      "sequence": 6090,
+      "pair": 2,
+      "invoke_ticks": 1859138,
+      "displayed": 6090,
+      "captures": 6091,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 100.58385847200407
+    },
+    {
+      "sequence": 6120,
+      "pair": 2,
+      "invoke_ticks": 1859748,
+      "displayed": 6120,
+      "captures": 6121,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 101.59193893097108
+    },
+    {
+      "sequence": 6150,
+      "pair": 2,
+      "invoke_ticks": 1860031,
+      "displayed": 6150,
+      "captures": 6151,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 102.58410741499392
+    },
+    {
+      "sequence": 6180,
+      "pair": 2,
+      "invoke_ticks": 1860727,
+      "displayed": 6180,
+      "captures": 6181,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 103.57557884196285
+    },
+    {
+      "sequence": 6210,
+      "pair": 2,
+      "invoke_ticks": 1857201,
+      "displayed": 6210,
+      "captures": 6211,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 104.58366326196119
+    },
+    {
+      "sequence": 6240,
+      "pair": 2,
+      "invoke_ticks": 1857575,
+      "displayed": 6240,
+      "captures": 6241,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 105.57569641398732
+    },
+    {
+      "sequence": 6270,
+      "pair": 2,
+      "invoke_ticks": 1858721,
+      "displayed": 6270,
+      "captures": 6271,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 106.58360491396161
+    },
+    {
+      "sequence": 6300,
+      "pair": 2,
+      "invoke_ticks": 1857968,
+      "displayed": 6300,
+      "captures": 6301,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 107.57542544498574
+    },
+    {
+      "sequence": 6330,
+      "pair": 2,
+      "invoke_ticks": 1859004,
+      "displayed": 6330,
+      "captures": 6331,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 108.567548565974
+    },
+    {
+      "sequence": 6360,
+      "pair": 2,
+      "invoke_ticks": 1859721,
+      "displayed": 6360,
+      "captures": 6361,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 109.57532416394679
+    },
+    {
+      "sequence": 6390,
+      "pair": 2,
+      "invoke_ticks": 1859188,
+      "displayed": 6390,
+      "captures": 6391,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 110.56750577397179
+    },
+    {
+      "sequence": 6420,
+      "pair": 2,
+      "invoke_ticks": 1862071,
+      "displayed": 6420,
+      "captures": 6421,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 111.57521428895416
+    },
+    {
+      "sequence": 6450,
+      "pair": 2,
+      "invoke_ticks": 1860485,
+      "displayed": 6450,
+      "captures": 6451,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 112.56717764999485
+    },
+    {
+      "sequence": 6480,
+      "pair": 2,
+      "invoke_ticks": 1861601,
+      "displayed": 6480,
+      "captures": 6481,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 113.55913067999063
+    },
+    {
+      "sequence": 6510,
+      "pair": 2,
+      "invoke_ticks": 1860314,
+      "displayed": 6510,
+      "captures": 6511,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 114.5669219889678
+    },
+    {
+      "sequence": 6540,
+      "pair": 2,
+      "invoke_ticks": 1856903,
+      "displayed": 6540,
+      "captures": 6541,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 115.5590071780025
+    },
+    {
+      "sequence": 6570,
+      "pair": 2,
+      "invoke_ticks": 1860866,
+      "displayed": 6570,
+      "captures": 6571,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 116.56687959400006
+    },
+    {
+      "sequence": 6600,
+      "pair": 2,
+      "invoke_ticks": 1858430,
+      "displayed": 6600,
+      "captures": 6601,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 117.55872770899441
+    },
+    {
+      "sequence": 6630,
+      "pair": 2,
+      "invoke_ticks": 1857857,
+      "displayed": 6630,
+      "captures": 6631,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 118.55069320800249
+    },
+    {
+      "sequence": 6660,
+      "pair": 2,
+      "invoke_ticks": 1859076,
+      "displayed": 6660,
+      "captures": 6661,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 119.55848948896164
+    }
+  ],
+  "performance": [
+    {
+      "sequence": 3090,
+      "capture_ticks": 3316350,
+      "invoke_ticks": 1857876,
+      "commit_ticks": 1477532,
+      "period_ticks": 4992285,
+      "overlap_ticks": 1664149
+    },
+    {
+      "sequence": 3120,
+      "capture_ticks": 3316720,
+      "invoke_ticks": 1860541,
+      "commit_ticks": 1475459,
+      "period_ticks": 4992091,
+      "overlap_ticks": 1663410
+    },
+    {
+      "sequence": 3150,
+      "capture_ticks": 3316748,
+      "invoke_ticks": 1859745,
+      "commit_ticks": 1475596,
+      "period_ticks": 4991959,
+      "overlap_ticks": 1664548
+    },
+    {
+      "sequence": 3180,
+      "capture_ticks": 3316811,
+      "invoke_ticks": 1856205,
+      "commit_ticks": 1477984,
+      "period_ticks": 4991032,
+      "overlap_ticks": 1663622
+    },
+    {
+      "sequence": 3210,
+      "capture_ticks": 3316983,
+      "invoke_ticks": 1858668,
+      "commit_ticks": 1477411,
+      "period_ticks": 4991497,
+      "overlap_ticks": 1664006
+    },
+    {
+      "sequence": 3240,
+      "capture_ticks": 3317327,
+      "invoke_ticks": 1856246,
+      "commit_ticks": 1478184,
+      "period_ticks": 4991926,
+      "overlap_ticks": 1663961
+    },
+    {
+      "sequence": 3270,
+      "capture_ticks": 3316719,
+      "invoke_ticks": 1856363,
+      "commit_ticks": 1478507,
+      "period_ticks": 4991717,
+      "overlap_ticks": 1663962
+    },
+    {
+      "sequence": 3300,
+      "capture_ticks": 3316182,
+      "invoke_ticks": 1858906,
+      "commit_ticks": 1476970,
+      "period_ticks": 4991436,
+      "overlap_ticks": 1663886
+    },
+    {
+      "sequence": 3330,
+      "capture_ticks": 3316533,
+      "invoke_ticks": 1859383,
+      "commit_ticks": 1476149,
+      "period_ticks": 4992127,
+      "overlap_ticks": 1664059
+    },
+    {
+      "sequence": 3360,
+      "capture_ticks": 3317233,
+      "invoke_ticks": 1856382,
+      "commit_ticks": 1479223,
+      "period_ticks": 4992073,
+      "overlap_ticks": 1663654
+    },
+    {
+      "sequence": 3390,
+      "capture_ticks": 3316957,
+      "invoke_ticks": 1859320,
+      "commit_ticks": 1475223,
+      "period_ticks": 4991676,
+      "overlap_ticks": 1664171
+    },
+    {
+      "sequence": 3420,
+      "capture_ticks": 3316505,
+      "invoke_ticks": 1859156,
+      "commit_ticks": 1475487,
+      "period_ticks": 4991956,
+      "overlap_ticks": 1663716
+    },
+    {
+      "sequence": 3450,
+      "capture_ticks": 3317303,
+      "invoke_ticks": 1858867,
+      "commit_ticks": 1475235,
+      "period_ticks": 4991547,
+      "overlap_ticks": 1663841
+    },
+    {
+      "sequence": 3480,
+      "capture_ticks": 3316154,
+      "invoke_ticks": 1859151,
+      "commit_ticks": 1475818,
+      "period_ticks": 4991047,
+      "overlap_ticks": 1663524
+    },
+    {
+      "sequence": 3510,
+      "capture_ticks": 3316549,
+      "invoke_ticks": 1858883,
+      "commit_ticks": 1476269,
+      "period_ticks": 4991706,
+      "overlap_ticks": 1663970
+    },
+    {
+      "sequence": 3540,
+      "capture_ticks": 3315963,
+      "invoke_ticks": 1861227,
+      "commit_ticks": 1473438,
+      "period_ticks": 4990666,
+      "overlap_ticks": 1663673
+    },
+    {
+      "sequence": 3570,
+      "capture_ticks": 3316148,
+      "invoke_ticks": 1856931,
+      "commit_ticks": 1477217,
+      "period_ticks": 4990835,
+      "overlap_ticks": 1663600
+    },
+    {
+      "sequence": 3600,
+      "capture_ticks": 3316444,
+      "invoke_ticks": 1854092,
+      "commit_ticks": 1481115,
+      "period_ticks": 4991019,
+      "overlap_ticks": 1664059
+    },
+    {
+      "sequence": 3630,
+      "capture_ticks": 3315601,
+      "invoke_ticks": 1860037,
+      "commit_ticks": 1475310,
+      "period_ticks": 4991782,
+      "overlap_ticks": 1664194
+    },
+    {
+      "sequence": 3660,
+      "capture_ticks": 3315950,
+      "invoke_ticks": 1859652,
+      "commit_ticks": 1474886,
+      "period_ticks": 4991830,
+      "overlap_ticks": 1663863
+    },
+    {
+      "sequence": 3690,
+      "capture_ticks": 3317200,
+      "invoke_ticks": 1859500,
+      "commit_ticks": 1475442,
+      "period_ticks": 4992627,
+      "overlap_ticks": 1663738
+    },
+    {
+      "sequence": 3720,
+      "capture_ticks": 3316785,
+      "invoke_ticks": 1861626,
+      "commit_ticks": 1472982,
+      "period_ticks": 4991819,
+      "overlap_ticks": 1663503
+    },
+    {
+      "sequence": 3750,
+      "capture_ticks": 3316315,
+      "invoke_ticks": 1859511,
+      "commit_ticks": 1476454,
+      "period_ticks": 4992172,
+      "overlap_ticks": 1663860
+    },
+    {
+      "sequence": 3780,
+      "capture_ticks": 3316145,
+      "invoke_ticks": 1859790,
+      "commit_ticks": 1475811,
+      "period_ticks": 4992345,
+      "overlap_ticks": 1663979
+    },
+    {
+      "sequence": 3810,
+      "capture_ticks": 3316724,
+      "invoke_ticks": 1858665,
+      "commit_ticks": 1476349,
+      "period_ticks": 4992523,
+      "overlap_ticks": 1663858
+    },
+    {
+      "sequence": 3840,
+      "capture_ticks": 3316509,
+      "invoke_ticks": 1859988,
+      "commit_ticks": 1475485,
+      "period_ticks": 4992178,
+      "overlap_ticks": 1663627
+    },
+    {
+      "sequence": 3870,
+      "capture_ticks": 3316329,
+      "invoke_ticks": 1859680,
+      "commit_ticks": 1475834,
+      "period_ticks": 4992525,
+      "overlap_ticks": 1663288
+    },
+    {
+      "sequence": 3900,
+      "capture_ticks": 3317269,
+      "invoke_ticks": 1856386,
+      "commit_ticks": 1477350,
+      "period_ticks": 4991628,
+      "overlap_ticks": 1663382
+    },
+    {
+      "sequence": 3930,
+      "capture_ticks": 3316223,
+      "invoke_ticks": 1858978,
+      "commit_ticks": 1475414,
+      "period_ticks": 4991239,
+      "overlap_ticks": 1664368
+    },
+    {
+      "sequence": 3960,
+      "capture_ticks": 3316257,
+      "invoke_ticks": 1858298,
+      "commit_ticks": 1476817,
+      "period_ticks": 4991521,
+      "overlap_ticks": 1663866
+    },
+    {
+      "sequence": 3990,
+      "capture_ticks": 3315757,
+      "invoke_ticks": 1855773,
+      "commit_ticks": 1478340,
+      "period_ticks": 4990485,
+      "overlap_ticks": 1664050
+    },
+    {
+      "sequence": 4020,
+      "capture_ticks": 3316420,
+      "invoke_ticks": 1856823,
+      "commit_ticks": 1476946,
+      "period_ticks": 4991764,
+      "overlap_ticks": 1663994
+    },
+    {
+      "sequence": 4050,
+      "capture_ticks": 3316027,
+      "invoke_ticks": 1860698,
+      "commit_ticks": 1473502,
+      "period_ticks": 4990640,
+      "overlap_ticks": 1663368
+    },
+    {
+      "sequence": 4080,
+      "capture_ticks": 3316079,
+      "invoke_ticks": 1858712,
+      "commit_ticks": 1476322,
+      "period_ticks": 4992158,
+      "overlap_ticks": 1664286
+    },
+    {
+      "sequence": 4110,
+      "capture_ticks": 3316994,
+      "invoke_ticks": 1855461,
+      "commit_ticks": 1480252,
+      "period_ticks": 4991359,
+      "overlap_ticks": 1663797
+    },
+    {
+      "sequence": 4140,
+      "capture_ticks": 3316762,
+      "invoke_ticks": 1858403,
+      "commit_ticks": 1476625,
+      "period_ticks": 4991763,
+      "overlap_ticks": 1664374
+    },
+    {
+      "sequence": 4170,
+      "capture_ticks": 3317022,
+      "invoke_ticks": 1859563,
+      "commit_ticks": 1474812,
+      "period_ticks": 4991112,
+      "overlap_ticks": 1663604
+    },
+    {
+      "sequence": 4200,
+      "capture_ticks": 3316066,
+      "invoke_ticks": 1858541,
+      "commit_ticks": 1476264,
+      "period_ticks": 4991554,
+      "overlap_ticks": 1664590
+    },
+    {
+      "sequence": 4230,
+      "capture_ticks": 3316774,
+      "invoke_ticks": 1859852,
+      "commit_ticks": 1475011,
+      "period_ticks": 4992091,
+      "overlap_ticks": 1663757
+    },
+    {
+      "sequence": 4260,
+      "capture_ticks": 3317157,
+      "invoke_ticks": 1858710,
+      "commit_ticks": 1475203,
+      "period_ticks": 4990627,
+      "overlap_ticks": 1663823
+    },
+    {
+      "sequence": 4290,
+      "capture_ticks": 3316529,
+      "invoke_ticks": 1858187,
+      "commit_ticks": 1476335,
+      "period_ticks": 4991293,
+      "overlap_ticks": 1663312
+    },
+    {
+      "sequence": 4320,
+      "capture_ticks": 3316408,
+      "invoke_ticks": 1859446,
+      "commit_ticks": 1475596,
+      "period_ticks": 4992557,
+      "overlap_ticks": 1663721
+    },
+    {
+      "sequence": 4350,
+      "capture_ticks": 3315767,
+      "invoke_ticks": 1859301,
+      "commit_ticks": 1475384,
+      "period_ticks": 4991891,
+      "overlap_ticks": 1664044
+    },
+    {
+      "sequence": 4380,
+      "capture_ticks": 3317325,
+      "invoke_ticks": 1860899,
+      "commit_ticks": 1474716,
+      "period_ticks": 4991574,
+      "overlap_ticks": 1663738
+    },
+    {
+      "sequence": 4410,
+      "capture_ticks": 3316759,
+      "invoke_ticks": 1860033,
+      "commit_ticks": 1475531,
+      "period_ticks": 4991387,
+      "overlap_ticks": 1663601
+    },
+    {
+      "sequence": 4440,
+      "capture_ticks": 3316975,
+      "invoke_ticks": 1861075,
+      "commit_ticks": 1474177,
+      "period_ticks": 4991339,
+      "overlap_ticks": 1663775
+    },
+    {
+      "sequence": 4470,
+      "capture_ticks": 3316424,
+      "invoke_ticks": 1860898,
+      "commit_ticks": 1474494,
+      "period_ticks": 4991630,
+      "overlap_ticks": 1663819
+    },
+    {
+      "sequence": 4500,
+      "capture_ticks": 3315834,
+      "invoke_ticks": 1859456,
+      "commit_ticks": 1475146,
+      "period_ticks": 4991371,
+      "overlap_ticks": 1663696
+    },
+    {
+      "sequence": 4530,
+      "capture_ticks": 3316054,
+      "invoke_ticks": 1859297,
+      "commit_ticks": 1475122,
+      "period_ticks": 4991389,
+      "overlap_ticks": 1663929
+    },
+    {
+      "sequence": 4560,
+      "capture_ticks": 3316436,
+      "invoke_ticks": 1860960,
+      "commit_ticks": 1474478,
+      "period_ticks": 4991388,
+      "overlap_ticks": 1664030
+    },
+    {
+      "sequence": 4590,
+      "capture_ticks": 3317210,
+      "invoke_ticks": 1861573,
+      "commit_ticks": 1474439,
+      "period_ticks": 4992663,
+      "overlap_ticks": 1663596
+    },
+    {
+      "sequence": 4620,
+      "capture_ticks": 3316533,
+      "invoke_ticks": 1859475,
+      "commit_ticks": 1476295,
+      "period_ticks": 4991114,
+      "overlap_ticks": 1664105
+    },
+    {
+      "sequence": 4650,
+      "capture_ticks": 3316749,
+      "invoke_ticks": 1857463,
+      "commit_ticks": 1476876,
+      "period_ticks": 4991124,
+      "overlap_ticks": 1663569
+    },
+    {
+      "sequence": 4680,
+      "capture_ticks": 3316590,
+      "invoke_ticks": 1858188,
+      "commit_ticks": 1476890,
+      "period_ticks": 4991952,
+      "overlap_ticks": 1663983
+    },
+    {
+      "sequence": 4710,
+      "capture_ticks": 3316005,
+      "invoke_ticks": 1859436,
+      "commit_ticks": 1475260,
+      "period_ticks": 4991324,
+      "overlap_ticks": 1663773
+    },
+    {
+      "sequence": 4740,
+      "capture_ticks": 3316544,
+      "invoke_ticks": 1861721,
+      "commit_ticks": 1472328,
+      "period_ticks": 4990921,
+      "overlap_ticks": 1663626
+    },
+    {
+      "sequence": 4770,
+      "capture_ticks": 3316085,
+      "invoke_ticks": 1862046,
+      "commit_ticks": 1473577,
+      "period_ticks": 4990899,
+      "overlap_ticks": 1664426
+    },
+    {
+      "sequence": 4800,
+      "capture_ticks": 3316424,
+      "invoke_ticks": 1856913,
+      "commit_ticks": 1477771,
+      "period_ticks": 4992155,
+      "overlap_ticks": 1664120
+    },
+    {
+      "sequence": 4830,
+      "capture_ticks": 3316614,
+      "invoke_ticks": 1859335,
+      "commit_ticks": 1474951,
+      "period_ticks": 4991282,
+      "overlap_ticks": 1663561
+    },
+    {
+      "sequence": 4860,
+      "capture_ticks": 3316787,
+      "invoke_ticks": 1856291,
+      "commit_ticks": 1478314,
+      "period_ticks": 4992205,
+      "overlap_ticks": 1663727
+    },
+    {
+      "sequence": 4890,
+      "capture_ticks": 3317547,
+      "invoke_ticks": 1860298,
+      "commit_ticks": 1474253,
+      "period_ticks": 4991411,
+      "overlap_ticks": 1663461
+    },
+    {
+      "sequence": 4920,
+      "capture_ticks": 3316606,
+      "invoke_ticks": 1859377,
+      "commit_ticks": 1475400,
+      "period_ticks": 4991647,
+      "overlap_ticks": 1664026
+    },
+    {
+      "sequence": 4950,
+      "capture_ticks": 3316417,
+      "invoke_ticks": 1860997,
+      "commit_ticks": 1474308,
+      "period_ticks": 4990792,
+      "overlap_ticks": 1664120
+    },
+    {
+      "sequence": 4980,
+      "capture_ticks": 3316092,
+      "invoke_ticks": 1858858,
+      "commit_ticks": 1476763,
+      "period_ticks": 4991285,
+      "overlap_ticks": 1663965
+    },
+    {
+      "sequence": 5010,
+      "capture_ticks": 3316727,
+      "invoke_ticks": 1858038,
+      "commit_ticks": 1477161,
+      "period_ticks": 4992183,
+      "overlap_ticks": 1663641
+    },
+    {
+      "sequence": 5040,
+      "capture_ticks": 3315598,
+      "invoke_ticks": 1861330,
+      "commit_ticks": 1473857,
+      "period_ticks": 4991173,
+      "overlap_ticks": 1663909
+    },
+    {
+      "sequence": 5070,
+      "capture_ticks": 3316388,
+      "invoke_ticks": 1859540,
+      "commit_ticks": 1475843,
+      "period_ticks": 4992566,
+      "overlap_ticks": 1664216
+    },
+    {
+      "sequence": 5100,
+      "capture_ticks": 3316457,
+      "invoke_ticks": 1859196,
+      "commit_ticks": 1476106,
+      "period_ticks": 4991621,
+      "overlap_ticks": 1664450
+    },
+    {
+      "sequence": 5130,
+      "capture_ticks": 3315464,
+      "invoke_ticks": 1859435,
+      "commit_ticks": 1475002,
+      "period_ticks": 4991034,
+      "overlap_ticks": 1663845
+    },
+    {
+      "sequence": 5160,
+      "capture_ticks": 3317069,
+      "invoke_ticks": 1855604,
+      "commit_ticks": 1478995,
+      "period_ticks": 4991348,
+      "overlap_ticks": 1664287
+    },
+    {
+      "sequence": 5190,
+      "capture_ticks": 3317414,
+      "invoke_ticks": 1856751,
+      "commit_ticks": 1477641,
+      "period_ticks": 4990903,
+      "overlap_ticks": 1663321
+    },
+    {
+      "sequence": 5220,
+      "capture_ticks": 3316394,
+      "invoke_ticks": 1859787,
+      "commit_ticks": 1474339,
+      "period_ticks": 4991338,
+      "overlap_ticks": 1663710
+    },
+    {
+      "sequence": 5250,
+      "capture_ticks": 3316674,
+      "invoke_ticks": 1858559,
+      "commit_ticks": 1476245,
+      "period_ticks": 4991645,
+      "overlap_ticks": 1663737
+    },
+    {
+      "sequence": 5280,
+      "capture_ticks": 3315852,
+      "invoke_ticks": 1856285,
+      "commit_ticks": 1478519,
+      "period_ticks": 4991966,
+      "overlap_ticks": 1663463
+    },
+    {
+      "sequence": 5310,
+      "capture_ticks": 3316782,
+      "invoke_ticks": 1859116,
+      "commit_ticks": 1475821,
+      "period_ticks": 4991443,
+      "overlap_ticks": 1663952
+    },
+    {
+      "sequence": 5340,
+      "capture_ticks": 3316167,
+      "invoke_ticks": 1861097,
+      "commit_ticks": 1473471,
+      "period_ticks": 4990592,
+      "overlap_ticks": 1664084
+    },
+    {
+      "sequence": 5370,
+      "capture_ticks": 3316616,
+      "invoke_ticks": 1859312,
+      "commit_ticks": 1474844,
+      "period_ticks": 4990466,
+      "overlap_ticks": 1663621
+    },
+    {
+      "sequence": 5400,
+      "capture_ticks": 3316996,
+      "invoke_ticks": 1858932,
+      "commit_ticks": 1475590,
+      "period_ticks": 4991896,
+      "overlap_ticks": 1663900
+    },
+    {
+      "sequence": 5430,
+      "capture_ticks": 3316446,
+      "invoke_ticks": 1861395,
+      "commit_ticks": 1473719,
+      "period_ticks": 4991105,
+      "overlap_ticks": 1664106
+    },
+    {
+      "sequence": 5460,
+      "capture_ticks": 3315913,
+      "invoke_ticks": 1859876,
+      "commit_ticks": 1475356,
+      "period_ticks": 4991155,
+      "overlap_ticks": 1663856
+    },
+    {
+      "sequence": 5490,
+      "capture_ticks": 3316370,
+      "invoke_ticks": 1858613,
+      "commit_ticks": 1476946,
+      "period_ticks": 4991960,
+      "overlap_ticks": 1664321
+    },
+    {
+      "sequence": 5520,
+      "capture_ticks": 3316052,
+      "invoke_ticks": 1860917,
+      "commit_ticks": 1474540,
+      "period_ticks": 4991206,
+      "overlap_ticks": 1664048
+    },
+    {
+      "sequence": 5550,
+      "capture_ticks": 3316696,
+      "invoke_ticks": 1862692,
+      "commit_ticks": 1471915,
+      "period_ticks": 4990791,
+      "overlap_ticks": 1663413
+    },
+    {
+      "sequence": 5580,
+      "capture_ticks": 3316636,
+      "invoke_ticks": 1861665,
+      "commit_ticks": 1474002,
+      "period_ticks": 4991482,
+      "overlap_ticks": 1663817
+    },
+    {
+      "sequence": 5610,
+      "capture_ticks": 3317273,
+      "invoke_ticks": 1859372,
+      "commit_ticks": 1474864,
+      "period_ticks": 4992170,
+      "overlap_ticks": 1663400
+    },
+    {
+      "sequence": 5640,
+      "capture_ticks": 3315420,
+      "invoke_ticks": 1859109,
+      "commit_ticks": 1476022,
+      "period_ticks": 4991018,
+      "overlap_ticks": 1663911
+    },
+    {
+      "sequence": 5670,
+      "capture_ticks": 3316607,
+      "invoke_ticks": 1859394,
+      "commit_ticks": 1474993,
+      "period_ticks": 4990842,
+      "overlap_ticks": 1664028
+    },
+    {
+      "sequence": 5700,
+      "capture_ticks": 3317128,
+      "invoke_ticks": 1855269,
+      "commit_ticks": 1479577,
+      "period_ticks": 4991847,
+      "overlap_ticks": 1663480
+    },
+    {
+      "sequence": 5730,
+      "capture_ticks": 3317174,
+      "invoke_ticks": 1859414,
+      "commit_ticks": 1475652,
+      "period_ticks": 4990861,
+      "overlap_ticks": 1663543
+    },
+    {
+      "sequence": 5760,
+      "capture_ticks": 3317089,
+      "invoke_ticks": 1858459,
+      "commit_ticks": 1475319,
+      "period_ticks": 4990798,
+      "overlap_ticks": 1663289
+    },
+    {
+      "sequence": 5790,
+      "capture_ticks": 3317192,
+      "invoke_ticks": 1859004,
+      "commit_ticks": 1476041,
+      "period_ticks": 4991188,
+      "overlap_ticks": 1663981
+    },
+    {
+      "sequence": 5820,
+      "capture_ticks": 3316458,
+      "invoke_ticks": 1858935,
+      "commit_ticks": 1475539,
+      "period_ticks": 4991980,
+      "overlap_ticks": 1663671
+    },
+    {
+      "sequence": 5850,
+      "capture_ticks": 3316260,
+      "invoke_ticks": 1860503,
+      "commit_ticks": 1475715,
+      "period_ticks": 4992399,
+      "overlap_ticks": 1664436
+    },
+    {
+      "sequence": 5880,
+      "capture_ticks": 3317018,
+      "invoke_ticks": 1859150,
+      "commit_ticks": 1476482,
+      "period_ticks": 4991151,
+      "overlap_ticks": 1664263
+    },
+    {
+      "sequence": 5910,
+      "capture_ticks": 3317013,
+      "invoke_ticks": 1860327,
+      "commit_ticks": 1474156,
+      "period_ticks": 4991012,
+      "overlap_ticks": 1663345
+    },
+    {
+      "sequence": 5940,
+      "capture_ticks": 3316440,
+      "invoke_ticks": 1858107,
+      "commit_ticks": 1476458,
+      "period_ticks": 4990843,
+      "overlap_ticks": 1664062
+    },
+    {
+      "sequence": 5970,
+      "capture_ticks": 3316476,
+      "invoke_ticks": 1860881,
+      "commit_ticks": 1474349,
+      "period_ticks": 4991061,
+      "overlap_ticks": 1663484
+    },
+    {
+      "sequence": 6000,
+      "capture_ticks": 3315086,
+      "invoke_ticks": 1856840,
+      "commit_ticks": 1477743,
+      "period_ticks": 4991035,
+      "overlap_ticks": 1664426
+    },
+    {
+      "sequence": 6030,
+      "capture_ticks": 3317486,
+      "invoke_ticks": 1861745,
+      "commit_ticks": 1472548,
+      "period_ticks": 4991679,
+      "overlap_ticks": 1663787
+    },
+    {
+      "sequence": 6060,
+      "capture_ticks": 3316505,
+      "invoke_ticks": 1857822,
+      "commit_ticks": 1476683,
+      "period_ticks": 4991432,
+      "overlap_ticks": 1664122
+    },
+    {
+      "sequence": 6090,
+      "capture_ticks": 3317215,
+      "invoke_ticks": 1859138,
+      "commit_ticks": 1474692,
+      "period_ticks": 4990501,
+      "overlap_ticks": 1663692
+    },
+    {
+      "sequence": 6120,
+      "capture_ticks": 3316177,
+      "invoke_ticks": 1859748,
+      "commit_ticks": 1474485,
+      "period_ticks": 4990914,
+      "overlap_ticks": 1663608
+    },
+    {
+      "sequence": 6150,
+      "capture_ticks": 3317688,
+      "invoke_ticks": 1860031,
+      "commit_ticks": 1474263,
+      "period_ticks": 4990789,
+      "overlap_ticks": 1663342
+    },
+    {
+      "sequence": 6180,
+      "capture_ticks": 3317568,
+      "invoke_ticks": 1860727,
+      "commit_ticks": 1473426,
+      "period_ticks": 4991605,
+      "overlap_ticks": 1663662
+    },
+    {
+      "sequence": 6210,
+      "capture_ticks": 3317079,
+      "invoke_ticks": 1857201,
+      "commit_ticks": 1478094,
+      "period_ticks": 4991379,
+      "overlap_ticks": 1664240
+    },
+    {
+      "sequence": 6240,
+      "capture_ticks": 3316790,
+      "invoke_ticks": 1857575,
+      "commit_ticks": 1477011,
+      "period_ticks": 4991431,
+      "overlap_ticks": 1663186
+    },
+    {
+      "sequence": 6270,
+      "capture_ticks": 3315328,
+      "invoke_ticks": 1858721,
+      "commit_ticks": 1476451,
+      "period_ticks": 4990905,
+      "overlap_ticks": 1663816
+    },
+    {
+      "sequence": 6300,
+      "capture_ticks": 3317239,
+      "invoke_ticks": 1857968,
+      "commit_ticks": 1476244,
+      "period_ticks": 4990637,
+      "overlap_ticks": 1663318
+    },
+    {
+      "sequence": 6330,
+      "capture_ticks": 3316218,
+      "invoke_ticks": 1859004,
+      "commit_ticks": 1476675,
+      "period_ticks": 4991863,
+      "overlap_ticks": 1663382
+    },
+    {
+      "sequence": 6360,
+      "capture_ticks": 3316358,
+      "invoke_ticks": 1859721,
+      "commit_ticks": 1475664,
+      "period_ticks": 4991780,
+      "overlap_ticks": 1664523
+    },
+    {
+      "sequence": 6390,
+      "capture_ticks": 3316329,
+      "invoke_ticks": 1859188,
+      "commit_ticks": 1476366,
+      "period_ticks": 4991026,
+      "overlap_ticks": 1664011
+    },
+    {
+      "sequence": 6420,
+      "capture_ticks": 3316934,
+      "invoke_ticks": 1862071,
+      "commit_ticks": 1472719,
+      "period_ticks": 4991137,
+      "overlap_ticks": 1663463
+    },
+    {
+      "sequence": 6450,
+      "capture_ticks": 3317303,
+      "invoke_ticks": 1860485,
+      "commit_ticks": 1475174,
+      "period_ticks": 4991497,
+      "overlap_ticks": 1664088
+    },
+    {
+      "sequence": 6480,
+      "capture_ticks": 3316534,
+      "invoke_ticks": 1861601,
+      "commit_ticks": 1474377,
+      "period_ticks": 4992628,
+      "overlap_ticks": 1663926
+    },
+    {
+      "sequence": 6510,
+      "capture_ticks": 3316071,
+      "invoke_ticks": 1860314,
+      "commit_ticks": 1475171,
+      "period_ticks": 4992245,
+      "overlap_ticks": 1663813
+    },
+    {
+      "sequence": 6540,
+      "capture_ticks": 3316333,
+      "invoke_ticks": 1856903,
+      "commit_ticks": 1478329,
+      "period_ticks": 4991107,
+      "overlap_ticks": 1663997
+    },
+    {
+      "sequence": 6570,
+      "capture_ticks": 3316776,
+      "invoke_ticks": 1860866,
+      "commit_ticks": 1474935,
+      "period_ticks": 4991996,
+      "overlap_ticks": 1663168
+    },
+    {
+      "sequence": 6600,
+      "capture_ticks": 3317407,
+      "invoke_ticks": 1858430,
+      "commit_ticks": 1476754,
+      "period_ticks": 4991277,
+      "overlap_ticks": 1663962
+    },
+    {
+      "sequence": 6630,
+      "capture_ticks": 3317532,
+      "invoke_ticks": 1857857,
+      "commit_ticks": 1477377,
+      "period_ticks": 4990969,
+      "overlap_ticks": 1663482
+    },
+    {
+      "sequence": 6660,
+      "capture_ticks": 3316855,
+      "invoke_ticks": 1859076,
+      "commit_ticks": 1476436,
+      "period_ticks": 4991779,
+      "overlap_ticks": 1663698
+    }
+  ],
+  "performance_clock_hz": 100000000,
+  "observation_seconds": 120.17570972297108,
+  "observed_committed_pair_hz": 30.048785556810774,
+  "stage_ms": {
+    "capture": {
+      "min": 33.15086,
+      "max": 33.17688,
+      "mean": 33.16581483333333
+    },
+    "invoke": {
+      "min": 18.54092,
+      "max": 18.62692,
+      "mean": 18.591100666666666
+    },
+    "commit": {
+      "min": 14.71915,
+      "max": 14.81115,
+      "mean": 14.758277333333332
+    },
+    "period": {
+      "min": 49.90466,
+      "max": 49.92663,
+      "mean": 49.914965333333335
+    },
+    "overlap": {
+      "min": 16.63168,
+      "max": 16.6459,
+      "mean": 16.63833375
+    }
+  },
+  "live_ok": true
+}

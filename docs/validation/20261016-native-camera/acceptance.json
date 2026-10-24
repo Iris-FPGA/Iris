@@ -1,0 +1,62 @@
+{
+  "scope": "Native camera input and HDMI left view; AI parameter rollback",
+  "visual_quality_accepted": false,
+  "visual_feedback": "肉眼不太好分辨细节，在用户视角一直有雪花的现象",
+  "earlier_feedback_superseded": "噪点减少，细节正常",
+  "noise_source_confirmed": false,
+  "flash_modified": false,
+  "program_mode": "jtag SRAM",
+  "hdmi_output": [
+    1920,
+    1080
+  ],
+  "camera_source": [
+    1920,
+    1080
+  ],
+  "left_native_camera": true,
+  "left_bypasses_640_downsample_and_enlargement": true,
+  "left_and_right_same_captured_frame": false,
+  "camera_filter": "Single native-resolution Gaussian3 before white balance/gamma; replicate borders",
+  "temporal_denoise": false,
+  "geometric_stabilization": false,
+  "exposure_and_white_balance_statistics": "Upstream of filter; unchanged",
+  "ai_tensor_shape": [
+    640,
+    480,
+    4
+  ],
+  "ai_tensor_filters_enabled": false,
+  "ai_contour_parameters_restored": true,
+  "ai_weights_changed": false,
+  "firmware_sha256": "59da1b8347866b87694e2a9b6b853004b84e8bd0715b6886a54801f4b30bf087",
+  "model_sha256": "e4a45f1d9314654565f3300978d8a7b8843fc0c0687c454c4b6e3b47e0f05386",
+  "bit_sha256": "dc257a63cf111a89e90fe4ce07899d23b6132cd1137ef941b916a73e233bfac9",
+  "hex_sha256": "01866be3d49568b87c0d4f79fa9cc2833866bcc899ee0417372d56c5dbbaf439",
+  "timing_setup_min_ns": 0.01,
+  "timing_hold_min_ns": 0.026,
+  "resources": {
+    "XLRs_used": 57336,
+    "XLRs_total": 60800,
+    "RAM_used": 246,
+    "RAM_total": 256,
+    "DSP_used": 113,
+    "DSP_total": 160
+  },
+  "rtl": {
+    "full_camera_pairs": 1036800,
+    "camera_exact_2d_convolution_pass": true,
+    "contour_vectors": 10240,
+    "panel_tests_pass": 3,
+    "panel_samples_per_test": 2074559
+  },
+  "observation_seconds": 120.01992323400918,
+  "committed_hz": 30.051619284871652,
+  "live_ok": true,
+  "max_errors": {
+    "underflows": 0,
+    "read_errors": 0,
+    "rejects": 0
+  },
+  "limitation": "UART and RTL checks do not establish a noise-free camera, DDR or HDMI signal"
+}

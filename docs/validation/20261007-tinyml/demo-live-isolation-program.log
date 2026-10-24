@@ -1,0 +1,15 @@
+WARNING: The system libstdc++.so is more recent (version 36) than the copy shipped with the Efinity software (version 32).
+The Efinity software may not function correctly on this system.
+To avoid potential compatibility issues, please back up and remove "/home/noir/Applications/efinity/2026.1/lib/libstdc++.so.6"
+
+setup: minimum +0.015 ns (23 relationships)
+hold: minimum +0.026 ns (23 relationships)
+==> 烧录 mode=jtag
+Programming using Board Profile: Generic Board Profile Using FT4232H
+Connecting to JTAG_TAP: efx_ti
+jtag programming started!
+JTAG Programming on ftdi://0x0403:0x6011:1:f/2
+Programming 'outflow/iris_ws.bit' via JTAG at freq 3.0 MHz
+Device ID read from JTAG: 0x10660A79
+... finished with JTAG programming
+烧录完成

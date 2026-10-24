@@ -1,0 +1,99 @@
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "80a806869623c862316f5ac3c5472117b0d8751e4adbe8c7933d913a4ff071ce",
+  "bit_sha256": "b1152a34dcabc33085b48d5b46452747863ab2ddd3965e2ab29ac16e8e1e34f8",
+  "attached": true,
+  "frames": [
+    {
+      "sequence": 56,
+      "pair": 1,
+      "invoke_ticks": 259167032,
+      "displayed": 56,
+      "captures": 56,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 0.20791471601114608
+    },
+    {
+      "sequence": 57,
+      "pair": 0,
+      "invoke_ticks": 258994409,
+      "displayed": 57,
+      "captures": 57,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 2.9434286289906595
+    },
+    {
+      "sequence": 58,
+      "pair": 1,
+      "invoke_ticks": 258596919,
+      "displayed": 58,
+      "captures": 58,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 5.663378519995604
+    },
+    {
+      "sequence": 59,
+      "pair": 0,
+      "invoke_ticks": 258695446,
+      "displayed": 59,
+      "captures": 59,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 8.399186872993596
+    },
+    {
+      "sequence": 60,
+      "pair": 1,
+      "invoke_ticks": 259120466,
+      "displayed": 60,
+      "captures": 60,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 11.119069965003291
+    },
+    {
+      "sequence": 61,
+      "pair": 0,
+      "invoke_ticks": 259262212,
+      "displayed": 61,
+      "captures": 61,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 13.870936944003915
+    },
+    {
+      "sequence": 62,
+      "pair": 1,
+      "invoke_ticks": 259161747,
+      "displayed": 62,
+      "captures": 62,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 16.622839885007124
+    },
+    {
+      "sequence": 63,
+      "pair": 0,
+      "invoke_ticks": 259143814,
+      "displayed": 63,
+      "captures": 63,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 19.34270521599683
+    }
+  ],
+  "observation_seconds": 20.143449928989867,
+  "observed_committed_pair_hz": 0.365825797779455,
+  "live_ok": true
+}

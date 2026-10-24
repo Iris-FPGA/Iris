@@ -1,0 +1,28 @@
+2026-10-08 07:26:18.373576: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-08 07:26:18.805832: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-10-08 07:26:20.458458: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+/home/noir/.config/matplotlib is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-zinhmgx_ because there was an issue with the default path (/home/noir/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+/home/noir/Documents/workspace/Iris/.venv-style/lib/python3.11/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+{
+  "scope": "one captured input and its frozen displayed output; student model only",
+  "tensorflow_version": "2.20.0",
+  "resolver": "BUILTIN_REF",
+  "model_sha256": "21ad447851ae878b135dee2480c33c41862e7fcc4c5889878f4fefbcb26aea47",
+  "displayed_count": 1,
+  "pair": 0,
+  "input_sha256": "3ffdbb0e10418a89232e6e324133c2bf2c5935a2fe9c7b20e41cd78f72b72a59",
+  "output_sha256": "69986c4cad116ef02d779499bc405ee0bb11d4365ac189882302f416e331029c",
+  "reference_sha256": "69986c4cad116ef02d779499bc405ee0bb11d4365ac189882302f416e331029c",
+  "exact": true,
+  "different_bytes": 0,
+  "max_abs_lsb": 0,
+  "mae_lsb": 0.0,
+  "input_rgb_std": 56.04800796508789
+}

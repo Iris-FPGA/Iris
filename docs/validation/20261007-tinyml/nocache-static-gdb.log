@@ -1,0 +1,9 @@
+0x00000fa4 in ?? ()
+Loading section .init, size 0x68 lma 0x800000
+Loading section .text, size 0x2a888 lma 0x800068
+Loading section .rodata, size 0x223b0 lma 0x82a8f0
+Loading section .init_array, size 0x50 lma 0x84cca0
+Loading section .fini_array, size 0x4 lma 0x84ccf0
+Loading section .data, size 0x8ac lma 0x84cd00
+Start address 0x00800000, load size 316832
+Transfer rate: 40 KB/sec, 12673 bytes/write.

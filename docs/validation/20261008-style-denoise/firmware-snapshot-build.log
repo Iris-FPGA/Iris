@@ -1,0 +1,30 @@
+{
+  "compile_command": [
+    "/home/noir/Applications/riscv-none-elf/bin/riscv-none-elf-gcc",
+    "-O2",
+    "-g",
+    "-march=rv32im_zicsr_zifencei",
+    "-mabi=ilp32",
+    "-msmall-data-limit=0",
+    "-nostdlib",
+    "-ffunction-sections",
+    "-fdata-sections",
+    "-fno-builtin",
+    "-DIRIS_STREAM_SNAPSHOT=1",
+    "-I/home/noir/Documents/workspace/Iris/iris_ws/embedded_sw/SapphireSoc/bsp/efinix/EfxSapphireSoc/include",
+    "-I/home/noir/Documents/workspace/Iris/iris_ws/embedded_sw/SapphireSoc/software/standalone/driver",
+    "-I/home/noir/Documents/workspace/Iris/firmware/stream_style/build/native-d2",
+    "-T/home/noir/Documents/workspace/Iris/firmware/stream_style/stream.ld",
+    "/home/noir/Documents/workspace/Iris/firmware/stream_style/start.S",
+    "/home/noir/Documents/workspace/Iris/firmware/stream_style/main.c",
+    "/home/noir/Documents/workspace/Iris/iris_ws/embedded_sw/SapphireSoc/software/standalone/common/trap.S",
+    "-Wl,--gc-sections,-Map,/home/noir/Documents/workspace/Iris/firmware/stream_style/build/stream_style-snapshot.map",
+    "-lgcc",
+    "-o",
+    "/home/noir/Documents/workspace/Iris/firmware/stream_style/build/stream_style-snapshot.elf"
+  ],
+  "elf_sha256": "6f71996ad8d2d57425b2b085b728f041016962bc51a03ad9886c619fcfb5918c",
+  "parameters_sha256": "6b6b36bc2267cb070d9985b9d8f531d06b33246aec3a2463e0d0e6bed8af13d0",
+  "source_sha256": "744d668bed96d9b9541caf0169476e8c880d2953a25f1c0874ebdb710ca0896f",
+  "snapshot": true
+}

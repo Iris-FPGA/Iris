@@ -1,0 +1,42 @@
+{
+  "scope": "OCR code/stack/result; hardware CI read/copy/read of 64KiB known RGBA fixture, diagnostic only",
+  "elf_sha256": "9d3060f78e5d1985bcf3ff69009a10901b82b175849e1fea7f3ae48cc74643d5",
+  "bit_sha256": "6154be006cff81f8b880de856c001aeaa9fcccd0b2194a28f8161633d1d909c9",
+  "reset": "",
+  "serial_mode": "0xf8100030: 00000001 \n",
+  "load": "1156 bytes written at address 0xf9000000\ndownloaded 1156 bytes in 0.033674s (33.525 KiB/s)\n",
+  "raw": "0xf9000e00: bad00001 00004000 01c00000 524d4b52 805a173c 00000965 00000000 00000000 \n0xf9000e20: 00000000 00004000 03000000 474c4f4f 805a173c 00001e67 00000002 00000965 \n0xf9000e40: 00004000 00000000 000004ff 00000000 00000000 00000000 000004ff 49520101 \n",
+  "registers": {
+    "pc": "pc (/32): 0xf900044c\n",
+    "mcause": "mcause (/32): 0x00000000\n",
+    "mepc": "mepc (/32): 0x00000000\n",
+    "mtval": "mtval (/32): 0x00000000\n"
+  },
+  "words": [
+    3134193665,
+    16384,
+    29360128,
+    1380797266,
+    2153387836,
+    2405,
+    0,
+    0,
+    0,
+    16384,
+    50331648,
+    1196183375,
+    2153387836,
+    7783,
+    2,
+    2405,
+    16384,
+    0,
+    1279,
+    0,
+    0,
+    0,
+    1279,
+    1230110977
+  ],
+  "capture_audit": "0xf8100028: 00000000 00000000 00000001 \n"
+}

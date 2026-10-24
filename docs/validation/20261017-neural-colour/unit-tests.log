@@ -1,0 +1,6 @@
+PASS contour: 10240 vectors, CNN colour stripes, pale/dark strokes, chroma-preserving ink, convolution and pipeline
+tests/video/tb_style_contour.sv:33: $finish called at 102501000 (1ps)
+PASS contour: 10240 vectors, CNN colour stripes, pale/dark strokes, chroma-preserving ink, convolution and pipeline
+tests/video/tb_style_contour.sv:33: $finish called at 102501000 (1ps)
+PASS contour: 10240 vectors, CNN colour stripes, pale/dark strokes, chroma-preserving ink, convolution and pipeline
+tests/video/tb_style_contour.sv:33: $finish called at 102501000 (1ps)

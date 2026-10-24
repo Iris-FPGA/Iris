@@ -1,0 +1,111 @@
+{
+  "scope": "Increase existing CNN colour stripes from 2x to 4x channel range gain; display processing only",
+  "supersedes": "docs/validation/20261017-neural-colour: 2x colour gain",
+  "configuration": {
+    "colour_source": "CNN only",
+    "saturation_q2": 16,
+    "normal_threshold": 20,
+    "normal_ink_gain": 2,
+    "normal_ink_cap": 128,
+    "strong_threshold": 40,
+    "strong_ink_gain": 4,
+    "strong_ink_cap": 160,
+    "darkening_limited_to_minimum_channel": true
+  },
+  "unit_tests": {
+    "status": "PASS",
+    "configurations": 3,
+    "vectors_each": 10240,
+    "total_vectors": 30720,
+    "checks": [
+      "pale single-pixel CNN stripes",
+      "dark CNN strokes with strong camera contours",
+      "neutral grey stays neutral",
+      "no loss of per-pixel channel range",
+      "independent 5x5 convolution and six-cycle alignment"
+    ]
+  },
+  "display_tests": {
+    "status": "PASS",
+    "exit_code": 0,
+    "cases": [
+      [
+        0,
+        2,
+        3
+      ]
+    ],
+    "samples_each": 2074559,
+    "total_samples": 2074559,
+    "command": "IVERILOG=/tmp/iris-iverilog/usr/bin/iverilog VVP=/tmp/iris-iverilog/usr/bin/vvp IVERILOG_LIB=/tmp/iris-iverilog/usr/lib/x86_64-linux-gnu/ivl python3 -u tests/video/run_style_contour_tests.py --panels --negative 0",
+    "previous_full_regression": "docs/validation/20261017-neural-colour/validation.json"
+  },
+  "build": {
+    "map": "PASS",
+    "interface": "PASS",
+    "pnr": "PASS",
+    "pgm": "PASS",
+    "exit_code": 0,
+    "minimum_setup_slack_ns": 0.016,
+    "minimum_hold_slack_ns": 0.022,
+    "bitstream": "iris_ws/outflow/iris_ws.bit",
+    "bitstream_sha256": "65822b6492d136f0f60932f6a4656ba4d02ac81c01e489d2feec83af85db9d8e",
+    "ram10_used": 256,
+    "dsp48_used": 114
+  },
+  "offline_previews": [
+    {
+      "scope": "offline display reference; raw CNN unmodified",
+      "raw_output_sha256": "7ec54ec2e3a0d4db12a9bdf9cf26329c55db12045577067e34ba4bcf98db3eaa",
+      "mode": 2,
+      "contour_guidance": true,
+      "thicken_kernel": [
+        1,
+        1
+      ],
+      "scale": 1.2276244163513184,
+      "preview": "docs/validation/20261017-vivid-neural-colour/default-camera-comparison.png",
+      "gradient_kernel": "Gaussian3 convolved with Sobel3, 5x5",
+      "threshold": 20,
+      "gain": 2,
+      "ink_cap": 128,
+      "colour_source": "CNN only",
+      "saturation_q2": 16,
+      "colour_quantization": false,
+      "raw_mean_chroma": 15.0203515625,
+      "previous_mean_chroma": 4.361041666666667,
+      "visible_mean_chroma": 60.08140625,
+      "pixels_with_chroma_loss": 0
+    },
+    {
+      "scope": "offline display reference; raw CNN unmodified",
+      "raw_output_sha256": "bd5d481e4782ad54c5f497121a308429c7626785ed0cb9e477ecdbbead658213",
+      "mode": 2,
+      "contour_guidance": true,
+      "thicken_kernel": [
+        1,
+        1
+      ],
+      "scale": 1.2276244163513184,
+      "preview": "docs/validation/20261017-vivid-neural-colour/default-strokes-comparison.png",
+      "gradient_kernel": "Gaussian3 convolved with Sobel3, 5x5",
+      "threshold": 20,
+      "gain": 2,
+      "ink_cap": 128,
+      "colour_source": "CNN only",
+      "saturation_q2": 16,
+      "colour_quantization": false,
+      "raw_mean_chroma": 14.109765625,
+      "previous_mean_chroma": 4.072434895833333,
+      "visible_mean_chroma": 56.4390625,
+      "pixels_with_chroma_loss": 0
+    }
+  ],
+  "offline_previews_match_independent_oracle": true,
+  "oracle_pixels_checked": 614400,
+  "hardware": {
+    "new_bitstream_loaded": false,
+    "flash_modified": false,
+    "new_board_image_quality_confirmed": false
+  }
+}

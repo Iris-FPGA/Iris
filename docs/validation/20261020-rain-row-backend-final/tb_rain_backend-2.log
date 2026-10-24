@@ -1,0 +1,2 @@
+PASS Rain DMA Conv /mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-backend-final/fixtures/2 cycles=92037 AR=276 AW=136
+tests/video/tb_rain_backend.sv:189: $finish called at 923670000 (1ps)

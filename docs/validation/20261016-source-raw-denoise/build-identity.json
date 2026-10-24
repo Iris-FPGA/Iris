@@ -1,0 +1,20 @@
+{
+  "bit_sha256": "73a2c2ca2ae24300bcc437b851fdcd09ec3a942ca32d88669632a6d37eca05ac",
+  "hex_sha256": "252fb1fb75d2162bd114dbae16449fda20627545525e84476fe99df9a6d8c16b",
+  "setup_min_ns": 0.013,
+  "hold_min_ns": 0.026,
+  "resources": {
+    "XLRs": {
+      "used": 58373,
+      "total": 60800
+    },
+    "Memory Blocks": {
+      "used": 256,
+      "total": 256
+    },
+    "DSP Blocks": {
+      "used": 113,
+      "total": 160
+    }
+  }
+}

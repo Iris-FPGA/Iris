@@ -1,0 +1,3457 @@
+{
+  "status": "software_checks_passed_hardware_unproven",
+  "target": "Ti60",
+  "blockers": [],
+  "parity": {
+    "pytorch_unfused_vs_fused_0": {
+      "max_abs": 0.000274658203125,
+      "mae": 3.569406392974391e-05,
+      "rmse": 4.774181120096205e-05,
+      "psnr_255_db": 134.55282578880332,
+      "atol": 0.01,
+      "rtol": 0.0001,
+      "passed": true
+    },
+    "pytorch_unfused_vs_fused_1": {
+      "max_abs": 0.0002288818359375,
+      "mae": 2.9197425950163353e-05,
+      "rmse": 3.836262846216475e-05,
+      "psnr_255_db": 136.4526364940212,
+      "atol": 0.01,
+      "rtol": 0.0001,
+      "passed": true
+    },
+    "pytorch_unfused_vs_fused_2": {
+      "max_abs": 0.000244140625,
+      "mae": 4.8570081465489544e-05,
+      "rmse": 6.698847903171165e-05,
+      "psnr_255_db": 131.61080126307758,
+      "atol": 0.01,
+      "rtol": 0.0001,
+      "passed": true
+    },
+    "pytorch_fused_vs_onnx_0": {
+      "max_abs": 0.0003204345703125,
+      "mae": 2.9306824823531013e-05,
+      "rmse": 4.0430907100579896e-05,
+      "psnr_255_db": 135.99653390475748,
+      "atol": 0.01,
+      "rtol": 0.0001,
+      "passed": true
+    },
+    "pytorch_fused_vs_onnx_1": {
+      "max_abs": 0.00018310546875,
+      "mae": 2.3299628689225454e-05,
+      "rmse": 3.070814925663774e-05,
+      "psnr_255_db": 138.38573075220472,
+      "atol": 0.01,
+      "rtol": 0.0001,
+      "passed": true
+    },
+    "pytorch_fused_vs_onnx_2": {
+      "max_abs": 0.000213623046875,
+      "mae": 3.835166626231512e-05,
+      "rmse": 5.1754240794258996e-05,
+      "psnr_255_db": 133.85188476645325,
+      "atol": 0.01,
+      "rtol": 0.0001,
+      "passed": true
+    },
+    "pytorch_fused_vs_saved_model_0": {
+      "max_abs": 0.000396728515625,
+      "mae": 3.2966199190317034e-05,
+      "rmse": 4.3902697907613923e-05,
+      "psnr_255_db": 135.28097942233896,
+      "atol": 0.01,
+      "rtol": 0.0001,
+      "passed": true
+    },
+    "pytorch_fused_vs_saved_model_1": {
+      "max_abs": 0.000274658203125,
+      "mae": 2.9903848068594623e-05,
+      "rmse": 3.894157718955042e-05,
+      "psnr_255_db": 136.3225328669262,
+      "atol": 0.01,
+      "rtol": 0.0001,
+      "passed": true
+    },
+    "pytorch_fused_vs_saved_model_2": {
+      "max_abs": 0.0003662109375,
+      "mae": 7.011717692269788e-05,
+      "rmse": 9.778389357248663e-05,
+      "psnr_255_db": 128.3254570872919,
+      "atol": 0.01,
+      "rtol": 0.0001,
+      "passed": true
+    }
+  },
+  "artifacts": {
+    "onnx": "/root/gpufree-data/FPGA/examples/fast_neural_style/output/onnx/rain-princess-cropped_style.onnx",
+    "saved_model": "/root/gpufree-data/FPGA/examples/fast_neural_style/output/saved_model/run-a1ho0bsx",
+    "int8_tflite": "/root/gpufree-data/FPGA/examples/fast_neural_style/output/tflite/rain-princess-cropped_style_int8.tflite",
+    "preview": "/root/gpufree-data/FPGA/examples/fast_neural_style/output/tflite/rain-princess-cropped_style_int8.tflite.preview.png"
+  },
+  "target_contract": {
+    "width": 0.25,
+    "batch": 1,
+    "io_layout": "NHWC",
+    "io_dtype": "int8",
+    "convolution": "3x3 zero SAME; stride 2 on even sizes pads right/bottom by 1",
+    "residual_blocks": 5,
+    "upsampling": "two nearest-neighbor 2x resizes"
+  },
+  "hardware_required": [
+    "Nearest-neighbor 2x resize must execute in the hardware pipeline with identical input/output quantization.",
+    "Pipeline boundary RGB preprocessing, scale/zero-point quantization and output dequantization/clipping need an explicit implementation and placement.",
+    "Confirm compiler support for reported op versions/options, per-channel quantization, residual requantization, SAME padding and memory/scheduling on Ti60."
+  ],
+  "hardware_proven": false,
+  "scope": "Software parity and FlatBuffer compatibility screen only; no Ti60 compilation, placement or hardware execution proof.",
+  "metadata": {
+    "architecture": "ti60_style_bn_3x3_v1",
+    "width": 0.25,
+    "image_size": 128
+  },
+  "size": 128,
+  "calibration": {
+    "count": 90,
+    "files": [
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000005010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000006010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000011010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000026010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000028010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000030001.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000030010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000031010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000039010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000042010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000052010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000064010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000094010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000097010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000099010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000102010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000106010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000109010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000110000.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000110001.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000111010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000116010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000135010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000148010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000160001.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000164010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000172010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000177010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000200001.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000200010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000201000.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000201010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000202010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000205010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000207010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000210000.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000210010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000213010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000227010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000229010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000252010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000255010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000260010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000265010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000266010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000284010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000290010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000299010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000300001.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000303010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000312010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000323010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000342010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000348010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000356010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000357010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000370010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000376010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000390001.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000396010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000397010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000398010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000399010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000414010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000423010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000425010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000429010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000435010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000444010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000445010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000453010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000455010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000456010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000469010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000480001.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000480010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000490010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000497010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000505010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000518010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000523010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000527010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000530001.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000535010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000536010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000543010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000546010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000548010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000554010.jpg",
+      "/root/gpufree-data/FPGA/examples/fast_neural_style/images/calib/COCO_train2014_000000576010.jpg"
+    ],
+    "preprocessing": "RGB PIL bilinear shorter-edge Resize, CenterCrop, float32 RGB 0..255"
+  },
+  "saved_model_signature": {
+    "key": "serving_default",
+    "input": "input",
+    "input_layout": "NHWC",
+    "input_shape": [
+      1,
+      128,
+      128,
+      3
+    ],
+    "output": "output_0",
+    "output_layout": "NHWC",
+    "output_shape": [
+      1,
+      128,
+      128,
+      3
+    ]
+  },
+  "audit": {
+    "blockers": [],
+    "passed": true,
+    "model_bytes": 125336,
+    "largest_tensor": {
+      "subgraph": 0,
+      "index": 55,
+      "name": "model_25/tf.compat.v1.image.resize_nearest_neighbor_1/ResizeNearestNeighbor",
+      "shape": [
+        1,
+        128,
+        128,
+        16
+      ],
+      "shape_signature": [],
+      "dtype": "INT8",
+      "scales": [
+        0.027002811431884766
+      ],
+      "zero_points": [
+        -128
+      ],
+      "quantized_dimension": 0,
+      "bytes": 262144,
+      "constant": false
+    },
+    "memory_note": "Largest logical tensor only; not an arena or peak RAM estimate.",
+    "subgraphs": [
+      {
+        "index": 0,
+        "inputs": [
+          0
+        ],
+        "outputs": [
+          57
+        ],
+        "operators": [
+          {
+            "index": 0,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              0,
+              34,
+              33
+            ],
+            "outputs": [
+              35
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 1,
+              "StrideW": 1,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "RELU"
+            }
+          },
+          {
+            "index": 1,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              35,
+              32,
+              31
+            ],
+            "outputs": [
+              36
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 2,
+              "StrideW": 2,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "RELU"
+            }
+          },
+          {
+            "index": 2,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              36,
+              30,
+              29
+            ],
+            "outputs": [
+              37
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 2,
+              "StrideW": 2,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "RELU"
+            }
+          },
+          {
+            "index": 3,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              37,
+              28,
+              27
+            ],
+            "outputs": [
+              38
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 1,
+              "StrideW": 1,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "RELU"
+            }
+          },
+          {
+            "index": 4,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              38,
+              26,
+              25
+            ],
+            "outputs": [
+              39
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 1,
+              "StrideW": 1,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "NONE"
+            }
+          },
+          {
+            "index": 5,
+            "name": "ADD",
+            "version": 2,
+            "inputs": [
+              37,
+              39
+            ],
+            "outputs": [
+              40
+            ],
+            "options": {
+              "FusedActivationFunction": "NONE",
+              "PotScaleInt16": true
+            }
+          },
+          {
+            "index": 6,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              40,
+              24,
+              23
+            ],
+            "outputs": [
+              41
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 1,
+              "StrideW": 1,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "RELU"
+            }
+          },
+          {
+            "index": 7,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              41,
+              22,
+              21
+            ],
+            "outputs": [
+              42
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 1,
+              "StrideW": 1,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "NONE"
+            }
+          },
+          {
+            "index": 8,
+            "name": "ADD",
+            "version": 2,
+            "inputs": [
+              40,
+              42
+            ],
+            "outputs": [
+              43
+            ],
+            "options": {
+              "FusedActivationFunction": "NONE",
+              "PotScaleInt16": true
+            }
+          },
+          {
+            "index": 9,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              43,
+              20,
+              19
+            ],
+            "outputs": [
+              44
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 1,
+              "StrideW": 1,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "RELU"
+            }
+          },
+          {
+            "index": 10,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              44,
+              18,
+              17
+            ],
+            "outputs": [
+              45
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 1,
+              "StrideW": 1,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "NONE"
+            }
+          },
+          {
+            "index": 11,
+            "name": "ADD",
+            "version": 2,
+            "inputs": [
+              43,
+              45
+            ],
+            "outputs": [
+              46
+            ],
+            "options": {
+              "FusedActivationFunction": "NONE",
+              "PotScaleInt16": true
+            }
+          },
+          {
+            "index": 12,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              46,
+              16,
+              15
+            ],
+            "outputs": [
+              47
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 1,
+              "StrideW": 1,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "RELU"
+            }
+          },
+          {
+            "index": 13,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              47,
+              14,
+              13
+            ],
+            "outputs": [
+              48
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 1,
+              "StrideW": 1,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "NONE"
+            }
+          },
+          {
+            "index": 14,
+            "name": "ADD",
+            "version": 2,
+            "inputs": [
+              46,
+              48
+            ],
+            "outputs": [
+              49
+            ],
+            "options": {
+              "FusedActivationFunction": "NONE",
+              "PotScaleInt16": true
+            }
+          },
+          {
+            "index": 15,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              49,
+              12,
+              11
+            ],
+            "outputs": [
+              50
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 1,
+              "StrideW": 1,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "RELU"
+            }
+          },
+          {
+            "index": 16,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              50,
+              10,
+              9
+            ],
+            "outputs": [
+              51
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 1,
+              "StrideW": 1,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "NONE"
+            }
+          },
+          {
+            "index": 17,
+            "name": "ADD",
+            "version": 2,
+            "inputs": [
+              49,
+              51
+            ],
+            "outputs": [
+              52
+            ],
+            "options": {
+              "FusedActivationFunction": "NONE",
+              "PotScaleInt16": true
+            }
+          },
+          {
+            "index": 18,
+            "name": "RESIZE_NEAREST_NEIGHBOR",
+            "version": 2,
+            "inputs": [
+              52,
+              1
+            ],
+            "outputs": [
+              53
+            ],
+            "options": {
+              "AlignCorners": false,
+              "HalfPixelCenters": false
+            }
+          },
+          {
+            "index": 19,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              53,
+              8,
+              7
+            ],
+            "outputs": [
+              54
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 1,
+              "StrideW": 1,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "RELU"
+            }
+          },
+          {
+            "index": 20,
+            "name": "RESIZE_NEAREST_NEIGHBOR",
+            "version": 2,
+            "inputs": [
+              54,
+              2
+            ],
+            "outputs": [
+              55
+            ],
+            "options": {
+              "AlignCorners": false,
+              "HalfPixelCenters": false
+            }
+          },
+          {
+            "index": 21,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              55,
+              6,
+              5
+            ],
+            "outputs": [
+              56
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 1,
+              "StrideW": 1,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "RELU"
+            }
+          },
+          {
+            "index": 22,
+            "name": "CONV_2D",
+            "version": 3,
+            "inputs": [
+              56,
+              4,
+              3
+            ],
+            "outputs": [
+              57
+            ],
+            "options": {
+              "Padding": "SAME",
+              "StrideH": 1,
+              "StrideW": 1,
+              "DilationHFactor": 1,
+              "DilationWFactor": 1,
+              "FusedActivationFunction": "NONE"
+            }
+          }
+        ],
+        "tensors": [
+          {
+            "index": 0,
+            "name": "serving_default_input:0",
+            "shape": [
+              1,
+              128,
+              128,
+              3
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              1.0
+            ],
+            "zero_points": [
+              -128
+            ],
+            "quantized_dimension": 0,
+            "bytes": 49152,
+            "constant": false
+          },
+          {
+            "index": 1,
+            "name": "arith.constant",
+            "shape": [
+              2
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [],
+            "zero_points": [],
+            "quantized_dimension": 0,
+            "bytes": 8,
+            "constant": true
+          },
+          {
+            "index": 2,
+            "name": "arith.constant1",
+            "shape": [
+              2
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [],
+            "zero_points": [],
+            "quantized_dimension": 0,
+            "bytes": 8,
+            "constant": true
+          },
+          {
+            "index": 3,
+            "name": "tfl.pseudo_qconst",
+            "shape": [
+              3
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              0.002078481251373887,
+              0.0019421885954216123,
+              0.002480112947523594
+            ],
+            "zero_points": [
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 12,
+            "constant": true
+          },
+          {
+            "index": 4,
+            "name": "tfl.pseudo_qconst1",
+            "shape": [
+              3,
+              3,
+              3,
+              8
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.01883314549922943,
+              0.017598196864128113,
+              0.022472336888313293
+            ],
+            "zero_points": [
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 216,
+            "constant": true
+          },
+          {
+            "index": 5,
+            "name": "tfl.pseudo_qconst2",
+            "shape": [
+              8
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              0.00020635947294067591,
+              0.0003497000434435904,
+              0.0004596106882672757,
+              0.0004335224803071469,
+              0.00035664302413351834,
+              0.00022549001732841134,
+              0.00035844772355630994,
+              0.0001929882710101083
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32,
+            "constant": true
+          },
+          {
+            "index": 6,
+            "name": "tfl.pseudo_qconst3",
+            "shape": [
+              8,
+              3,
+              3,
+              16
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.007642147596925497,
+              0.012950505129992962,
+              0.017020845785737038,
+              0.01605471596121788,
+              0.013207625597715378,
+              0.008350612595677376,
+              0.013274459168314934,
+              0.007146969437599182
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 1152,
+            "constant": true
+          },
+          {
+            "index": 7,
+            "name": "tfl.pseudo_qconst4",
+            "shape": [
+              16
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              7.624357385793701e-05,
+              7.850787369534373e-05,
+              6.676388147752732e-05,
+              0.00011275109864072874,
+              0.00019014079589396715,
+              8.295603038277477e-05,
+              8.230308594647795e-05,
+              0.00016130614676512778,
+              8.128830813802779e-05,
+              0.00015054369578137994,
+              9.558906458551064e-05,
+              5.283093196339905e-05,
+              0.000126113707665354,
+              9.602103818906471e-05,
+              0.0001250580680789426,
+              0.0001896408066386357
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 64,
+            "constant": true
+          },
+          {
+            "index": 8,
+            "name": "tfl.pseudo_qconst5",
+            "shape": [
+              16,
+              3,
+              3,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.0004908860428258777,
+              0.0005054645007476211,
+              0.0004298520798329264,
+              0.0007259357953444123,
+              0.001224201056174934,
+              0.0005341034848242998,
+              0.0005298995529301465,
+              0.0010385522618889809,
+              0.0005233660340309143,
+              0.0009692594176158309,
+              0.0006154399015940726,
+              0.0003401462745387107,
+              0.000811969512142241,
+              0.000618221121840179,
+              0.0008051729528233409,
+              0.0012209819396957755
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 4608,
+            "constant": true
+          },
+          {
+            "index": 9,
+            "name": "tfl.pseudo_qconst6",
+            "shape": [
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              0.00018852647917810827,
+              0.0001691729703452438,
+              0.00019774772226810455,
+              0.00020355594460852444,
+              0.00015719076327513903,
+              0.0001282765151700005,
+              0.00015166858793236315,
+              0.00018753885524347425,
+              0.00012470562069211155,
+              0.0001597749796928838,
+              0.00017246718925889581,
+              0.00015275063924491405,
+              0.0001141412285505794,
+              0.00013710874191019684,
+              0.00019486676319502294,
+              0.00020091401529498398,
+              0.00017487298464402556,
+              0.00015640117635484785,
+              0.00021081490558572114,
+              0.00017492406186647713,
+              0.00014079494576435536,
+              0.00015231833094730973,
+              0.00017796024621929973,
+              0.00017292144184466451,
+              0.0001566289720358327,
+              0.00019585713744163513,
+              0.00021358071535360068,
+              0.00020180328283458948,
+              0.0002003080298891291,
+              0.00012650425196625292,
+              0.00021095633564982563,
+              0.00016423509805463254
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 128,
+            "constant": true
+          },
+          {
+            "index": 10,
+            "name": "tfl.pseudo_qconst7",
+            "shape": [
+              32,
+              3,
+              3,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.006211020518094301,
+              0.005573417525738478,
+              0.006514814682304859,
+              0.006706167012453079,
+              0.005178662482649088,
+              0.0042260801419615746,
+              0.004996734205633402,
+              0.00617848290130496,
+              0.004108436871320009,
+              0.005263799801468849,
+              0.005681945476680994,
+              0.0050323824398219585,
+              0.003760392079129815,
+              0.004517058841884136,
+              0.006419901270419359,
+              0.006619128864258528,
+              0.00576120475307107,
+              0.005152649711817503,
+              0.006945314351469278,
+              0.0057628876529634,
+              0.004638500977307558,
+              0.005018139723688364,
+              0.0058629149571061134,
+              0.00569691089913249,
+              0.0051601543091237545,
+              0.006452529225498438,
+              0.007036434020847082,
+              0.006648425478488207,
+              0.006599164567887783,
+              0.004167692735791206,
+              0.00694997375831008,
+              0.005410738755017519
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 9216,
+            "constant": true
+          },
+          {
+            "index": 11,
+            "name": "tfl.pseudo_qconst8",
+            "shape": [
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              7.774248661007732e-05,
+              5.5395576055161655e-05,
+              7.396077853627503e-05,
+              6.162157660583034e-05,
+              7.976108463481069e-05,
+              7.157467916840687e-05,
+              8.361870277440175e-05,
+              6.992299313424155e-05,
+              8.585392060922459e-05,
+              7.317421841435134e-05,
+              8.221755706472322e-05,
+              4.9282010877504945e-05,
+              7.125806587282568e-05,
+              7.229602488223463e-05,
+              8.245398930739611e-05,
+              9.208780829794705e-05,
+              0.00012595461157616228,
+              7.305108738364652e-05,
+              6.956221477594227e-05,
+              5.299464100971818e-05,
+              6.949485396035016e-05,
+              6.72961468808353e-05,
+              6.082757317926735e-05,
+              8.388984861085191e-05,
+              8.576541586080566e-05,
+              0.00010469345579622313,
+              7.507987902499735e-05,
+              6.310813478194177e-05,
+              6.606926035601646e-05,
+              8.170397632056847e-05,
+              6.571286940015852e-05,
+              8.258769230451435e-05
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 128,
+            "constant": true
+          },
+          {
+            "index": 12,
+            "name": "tfl.pseudo_qconst9",
+            "shape": [
+              32,
+              3,
+              3,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.0006276926724240184,
+              0.0004472637374419719,
+              0.0005971591453999281,
+              0.0004975324845872819,
+              0.0006439908174797893,
+              0.0005778938066214323,
+              0.0006751372129656374,
+              0.0005645580822601914,
+              0.0006931843236088753,
+              0.0005908084567636251,
+              0.0006638243794441223,
+              0.00039790282608009875,
+              0.0005753374425694346,
+              0.000583717948757112,
+              0.0006657332996837795,
+              0.0007435167208313942,
+              0.0010169572196900845,
+              0.000589814328122884,
+              0.0005616451380774379,
+              0.0004278786072973162,
+              0.0005611013039015234,
+              0.0005433489568531513,
+              0.0004911216674372554,
+              0.0006773264613002539,
+              0.0006924697663635015,
+              0.0008452947367914021,
+              0.0006061947788111866,
+              0.0005095349042676389,
+              0.0005334430607035756,
+              0.0006596777238883078,
+              0.0005305655649863183,
+              0.0006668128189630806
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 9216,
+            "constant": true
+          },
+          {
+            "index": 13,
+            "name": "tfl.pseudo_qconst10",
+            "shape": [
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              0.00012177740427432582,
+              0.0001403373753419146,
+              0.00015942752361297607,
+              0.00030113381217233837,
+              0.00025161774829030037,
+              0.0001135971542680636,
+              0.00014796167670283467,
+              0.00019832172256428748,
+              0.00013079783821012825,
+              0.00017204429605044425,
+              0.00018558514420874417,
+              0.0001897086331155151,
+              0.0001072574668796733,
+              0.00013012337149120867,
+              0.0001983385009225458,
+              0.00018334269407205284,
+              0.00014743806968908757,
+              0.00020155492529738694,
+              0.0001646444434300065,
+              0.00017853619647212327,
+              0.00011673277185764164,
+              0.00011453463230282068,
+              0.00025757303228601813,
+              0.00016735329700168222,
+              0.0001500483776908368,
+              0.00017476596985943615,
+              0.00017045644926838577,
+              0.00020565054728649557,
+              0.00016729309572838247,
+              0.00011625161278061569,
+              0.0001932645682245493,
+              0.00020339054754003882
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 128,
+            "constant": true
+          },
+          {
+            "index": 14,
+            "name": "tfl.pseudo_qconst11",
+            "shape": [
+              32,
+              3,
+              3,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.003224933985620737,
+              0.0037164429668337107,
+              0.0042219921015203,
+              0.007974687032401562,
+              0.006663392297923565,
+              0.0030083029996603727,
+              0.003918351139873266,
+              0.005251996219158173,
+              0.00346381519921124,
+              0.004556111991405487,
+              0.004914703778922558,
+              0.005023902747780085,
+              0.0028404141776263714,
+              0.003445953829213977,
+              0.005252440460026264,
+              0.004855318460613489,
+              0.0039044851437211037,
+              0.0053376187570393085,
+              0.004360147751867771,
+              0.004728031810373068,
+              0.0030913411173969507,
+              0.003033129498362541,
+              0.006821101531386375,
+              0.00443188427016139,
+              0.003973611630499363,
+              0.0046281879767775536,
+              0.004514062311500311,
+              0.0054460796527564526,
+              0.004430289845913649,
+              0.0030785989947617054,
+              0.0051180715672671795,
+              0.005386230070143938
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 9216,
+            "constant": true
+          },
+          {
+            "index": 15,
+            "name": "tfl.pseudo_qconst12",
+            "shape": [
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              0.00010089393617818132,
+              5.8436417020857334e-05,
+              0.00010039105109171942,
+              0.00010696240497054532,
+              6.680214573862031e-05,
+              5.4164851462701336e-05,
+              4.587413786794059e-05,
+              8.003231778275222e-05,
+              7.456447201548144e-05,
+              0.00010583208495518193,
+              9.013486123876646e-05,
+              6.312995537882671e-05,
+              5.5792461353121325e-05,
+              5.879176751477644e-05,
+              6.242821109481156e-05,
+              0.00010365762136643752,
+              5.0363552873022854e-05,
+              5.688582677976228e-05,
+              6.625277455896139e-05,
+              8.968748443294317e-05,
+              4.789257582160644e-05,
+              5.8664030802901834e-05,
+              6.791875784983858e-05,
+              7.405005453620106e-05,
+              0.00010623352864058688,
+              8.891659672372043e-05,
+              5.438657171907835e-05,
+              9.98061805148609e-05,
+              7.633863424416631e-05,
+              9.17378711164929e-05,
+              7.218598329927772e-05,
+              9.152464190265164e-05
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 128,
+            "constant": true
+          },
+          {
+            "index": 16,
+            "name": "tfl.pseudo_qconst13",
+            "shape": [
+              32,
+              3,
+              3,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.0009740102104842663,
+              0.0005641336902044713,
+              0.0009691554587334394,
+              0.0010325940093025565,
+              0.0006448947824537754,
+              0.0005228968220762908,
+              0.0004428599204402417,
+              0.0007726162439212203,
+              0.0007198307430371642,
+              0.0010216821683570743,
+              0.0008701442275196314,
+              0.00060944416327402,
+              0.0005386094562709332,
+              0.0005675641587004066,
+              0.000602669664658606,
+              0.0010006902739405632,
+              0.00048619986046105623,
+              0.0005491646006703377,
+              0.0006395912496373057,
+              0.0008658253354951739,
+              0.00046234551700763404,
+              0.0005663310294039547,
+              0.0006556743755936623,
+              0.0007148646982386708,
+              0.001025557634420693,
+              0.0008583833696320653,
+              0.0005250372923910618,
+              0.0009635092574171722,
+              0.0007369581726379693,
+              0.0008856193744577467,
+              0.0006968692759983242,
+              0.0008835609187372029
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 9216,
+            "constant": true
+          },
+          {
+            "index": 17,
+            "name": "tfl.pseudo_qconst14",
+            "shape": [
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              6.289409793680534e-05,
+              9.08962610992603e-05,
+              0.00013698713155463338,
+              0.00017140487034339458,
+              0.00019576051272451878,
+              8.845530828693882e-05,
+              9.991696424549446e-05,
+              0.00012062085443176329,
+              7.054622983559966e-05,
+              7.944595563458279e-05,
+              0.00011774373706430197,
+              8.505820733262226e-05,
+              6.669054710073397e-05,
+              7.986899436218664e-05,
+              9.984048665501177e-05,
+              0.00012137989688199013,
+              0.0001356892316835001,
+              9.047395724337548e-05,
+              0.00014253027620725334,
+              0.0001569252199260518,
+              6.667293928330764e-05,
+              8.207647624658421e-05,
+              0.00010388648661319166,
+              0.0001180013787234202,
+              0.00010292858496541157,
+              0.00018057666602544487,
+              0.00013583345571532845,
+              0.00011283471394563094,
+              8.2959741121158e-05,
+              0.00012178748147562146,
+              9.708767902338877e-05,
+              0.00016359677829314023
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 128,
+            "constant": true
+          },
+          {
+            "index": 18,
+            "name": "tfl.pseudo_qconst15",
+            "shape": [
+              32,
+              3,
+              3,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.001701517030596733,
+              0.0024590787943452597,
+              0.0037060067988932133,
+              0.004637133330106735,
+              0.005296043120324612,
+              0.0023930419702082872,
+              0.0027031220961362123,
+              0.0032632385846227407,
+              0.0019085354870185256,
+              0.002149305772036314,
+              0.00318540190346539,
+              0.0023011378943920135,
+              0.0018042250303551555,
+              0.00216075056232512,
+              0.002701053163036704,
+              0.003283773548901081,
+              0.003670893609523773,
+              0.002447654027491808,
+              0.0038559690583497286,
+              0.004245405551046133,
+              0.0018037486588582397,
+              0.0022204711567610502,
+              0.002810512203723192,
+              0.003192372154444456,
+              0.0027845974545925856,
+              0.004885264206677675,
+              0.0036747956182807684,
+              0.0030525948386639357,
+              0.0022443667985498905,
+              0.0032948001753538847,
+              0.00262657948769629,
+              0.004425895866006613
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 9216,
+            "constant": true
+          },
+          {
+            "index": 19,
+            "name": "tfl.pseudo_qconst16",
+            "shape": [
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              7.349756924668327e-05,
+              5.2270475862314925e-05,
+              6.596132152481005e-05,
+              6.339843821479008e-05,
+              9.518756996840239e-05,
+              6.703100370941684e-05,
+              6.6909815359395e-05,
+              9.840803249971941e-05,
+              8.077282836893573e-05,
+              8.556780812796205e-05,
+              6.297095387708396e-05,
+              9.066318307304755e-05,
+              8.466849249089137e-05,
+              9.356065129395574e-05,
+              6.294417835306376e-05,
+              8.13116057543084e-05,
+              6.883827882120386e-05,
+              6.48204586468637e-05,
+              7.743013702565804e-05,
+              6.979705358389765e-05,
+              0.00010678214312065393,
+              5.5715245252940804e-05,
+              7.684165029786527e-05,
+              7.248416659422219e-05,
+              5.7588866184232756e-05,
+              7.597351213917136e-05,
+              0.00013215122453402728,
+              6.59861252643168e-05,
+              0.00010609239689074457,
+              0.0001023364020511508,
+              8.839365182211623e-05,
+              5.9468020481290296e-05
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 128,
+            "constant": true
+          },
+          {
+            "index": 20,
+            "name": "tfl.pseudo_qconst17",
+            "shape": [
+              32,
+              3,
+              3,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.000815152598079294,
+              0.0005797254852950573,
+              0.0007315690163522959,
+              0.0007031443528831005,
+              0.0010557137429714203,
+              0.0007434327271766961,
+              0.0007420885958708823,
+              0.0010914314771071076,
+              0.0008958416292443871,
+              0.0009490221855230629,
+              0.0006984031642787158,
+              0.001005534315481782,
+              0.0009390479535795748,
+              0.0010376698337495327,
+              0.0006981062470003963,
+              0.0009018171112984419,
+              0.0007634770008735359,
+              0.0007189158350229263,
+              0.0008587682386860251,
+              0.0007741106674075127,
+              0.001184307737275958,
+              0.0006179310148581862,
+              0.0008522413554601371,
+              0.0008039131062105298,
+              0.0006387110915966332,
+              0.0008426129934377968,
+              0.001465673209168017,
+              0.0007318441057577729,
+              0.0011766578536480665,
+              0.001135000609792769,
+              0.0009803632274270058,
+              0.0006595525774173439
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 9216,
+            "constant": true
+          },
+          {
+            "index": 21,
+            "name": "tfl.pseudo_qconst18",
+            "shape": [
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              9.283774852519855e-05,
+              0.00013394995767157525,
+              0.0002150821383111179,
+              0.0001404982467647642,
+              9.799767576623708e-05,
+              0.0001290011132368818,
+              0.00010380637104390189,
+              0.00014282530173659325,
+              7.91058992035687e-05,
+              9.23361221794039e-05,
+              9.701370436232537e-05,
+              9.309978486271575e-05,
+              5.7034256315091625e-05,
+              7.891034329077229e-05,
+              0.00018848174659069628,
+              0.00011460787209216505,
+              0.0001230519701493904,
+              7.237115642055869e-05,
+              0.0001164061322924681,
+              0.00011306199303362519,
+              8.937412349041551e-05,
+              8.4798812167719e-05,
+              0.0001073344174074009,
+              0.00013010457041673362,
+              8.261857146862894e-05,
+              0.0002158212155336514,
+              0.00024332402972504497,
+              0.0001068077763193287,
+              8.479659300064668e-05,
+              8.840752707328647e-05,
+              0.00010690905764931813,
+              0.00010247571481158957
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 128,
+            "constant": true
+          },
+          {
+            "index": 22,
+            "name": "tfl.pseudo_qconst19",
+            "shape": [
+              32,
+              3,
+              3,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.0011181831359863281,
+              0.0016133587341755629,
+              0.0025905543006956577,
+              0.001692229532636702,
+              0.0011803318047896028,
+              0.0015537523431703448,
+              0.0012502946192398667,
+              0.0017202576855197549,
+              0.0009527900838293135,
+              0.001112141297198832,
+              0.0011684803757816553,
+              0.0011213392717763782,
+              0.0006869484204798937,
+              0.0009504347108304501,
+              0.002270166063681245,
+              0.0013803931651636958,
+              0.0014820980140939355,
+              0.0008716735173948109,
+              0.001402052235789597,
+              0.0013617738150060177,
+              0.0010764655889943242,
+              0.0010213583009317517,
+              0.0012927880743518472,
+              0.0015670428983867168,
+              0.0009950983803719282,
+              0.002599456114694476,
+              0.002930713351815939,
+              0.001286444952711463,
+              0.0010213315254077315,
+              0.0010648233583196998,
+              0.0012876648688688874,
+              0.001234267489053309
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 9216,
+            "constant": true
+          },
+          {
+            "index": 23,
+            "name": "tfl.pseudo_qconst20",
+            "shape": [
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              0.00021723458485212177,
+              0.00042034723446704447,
+              0.00018095292034558952,
+              0.00024322241370100528,
+              0.00016000753385014832,
+              0.0002523410366848111,
+              0.00014146706962492317,
+              0.00012532496475614607,
+              0.00017349365225527436,
+              0.00013068814587313682,
+              0.00016689499898348004,
+              9.316323121311143e-05,
+              0.00022203437401913106,
+              0.00013236857193987817,
+              0.00022283312864601612,
+              0.00024467220646329224,
+              0.0001444507361156866,
+              0.00019443582277745008,
+              0.00010798875882755965,
+              0.0001861160562839359,
+              0.00010607065632939339,
+              9.782966662896797e-05,
+              0.0001211645794683136,
+              0.00012094877456547692,
+              0.00024615804431959987,
+              0.0001432515273336321,
+              0.0001936684420797974,
+              0.00014781880599912256,
+              0.0002236065047327429,
+              0.00021050419309176505,
+              0.0001466206886107102,
+              0.00011068292224081233
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 128,
+            "constant": true
+          },
+          {
+            "index": 24,
+            "name": "tfl.pseudo_qconst21",
+            "shape": [
+              32,
+              3,
+              3,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.0031533916480839252,
+              0.006101788487285376,
+              0.0026267245411872864,
+              0.0035306327044963837,
+              0.0023226800840348005,
+              0.003662999253720045,
+              0.0020535453222692013,
+              0.0018192256102338433,
+              0.002518445486202836,
+              0.0018970777746289968,
+              0.002422658959403634,
+              0.001352363615296781,
+              0.0032230657525360584,
+              0.0019214710919186473,
+              0.0032346604857593775,
+              0.0035516780335456133,
+              0.002096856478601694,
+              0.002822443377226591,
+              0.0015675720060244203,
+              0.0027016729582101107,
+              0.0015397287206724286,
+              0.001420101965777576,
+              0.001758833066560328,
+              0.001755700446665287,
+              0.003573246533051133,
+              0.002079448662698269,
+              0.002811304060742259,
+              0.0021457476541399956,
+              0.003245886880904436,
+              0.003055692883208394,
+              0.002128355670720339,
+              0.0016066806856542826
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 9216,
+            "constant": true
+          },
+          {
+            "index": 25,
+            "name": "tfl.pseudo_qconst22",
+            "shape": [
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              0.00012965966016054153,
+              0.000158335838932544,
+              0.0001313965185545385,
+              0.00014727306552231312,
+              0.00010367506183683872,
+              0.00012772530317306519,
+              0.0001485764660174027,
+              0.0001244890154339373,
+              0.00010508418927202001,
+              0.0001705233589746058,
+              0.0001981481909751892,
+              0.00010048515105154365,
+              0.00013344654871616513,
+              0.0001350225938949734,
+              9.471446537645534e-05,
+              0.00015994497516658157,
+              0.00014078785898163915,
+              0.00012605257506947964,
+              0.00014663863112218678,
+              0.00022589687432628125,
+              0.00016721038264222443,
+              0.00013525999384000897,
+              0.00012870339560322464,
+              0.00010464200022397563,
+              0.00012109274393878877,
+              0.000205228992854245,
+              0.0001670284545980394,
+              0.00014671171084046364,
+              0.0001724463072605431,
+              7.10068125044927e-05,
+              0.000126966493553482,
+              0.0001984666450880468
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 128,
+            "constant": true
+          },
+          {
+            "index": 26,
+            "name": "tfl.pseudo_qconst23",
+            "shape": [
+              32,
+              3,
+              3,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.0012043118476867676,
+              0.0014706635847687721,
+              0.0012204443337395787,
+              0.00136790971737355,
+              0.0009629603591747582,
+              0.0011863451218232512,
+              0.0013800159795209765,
+              0.0011562856379896402,
+              0.0009760487009771168,
+              0.0015838643303140998,
+              0.0018404508009552956,
+              0.0009333316702395678,
+              0.0012394854566082358,
+              0.0012541242176666856,
+              0.000879732018802315,
+              0.001485609682276845,
+              0.0013076734030619264,
+              0.0011708083329722285,
+              0.0013620168901979923,
+              0.0020981875713914633,
+              0.0015530926175415516,
+              0.0012563292402774096,
+              0.0011954298242926598,
+              0.0009719415102154016,
+              0.0011247402289882302,
+              0.0019062190549448133,
+              0.0015514027327299118,
+              0.0013626957079395652,
+              0.0016017251182347536,
+              0.0006595293525606394,
+              0.001179297105409205,
+              0.0018434086814522743
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 9216,
+            "constant": true
+          },
+          {
+            "index": 27,
+            "name": "tfl.pseudo_qconst24",
+            "shape": [
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              0.00011893704504473135,
+              0.0002017182414419949,
+              8.19474589661695e-05,
+              5.062034688307904e-05,
+              9.189157572109252e-05,
+              9.068134386325255e-05,
+              0.0007107817800715566,
+              9.0643712610472e-05,
+              0.00016559197683818638,
+              0.0002486656594555825,
+              0.0001060777431121096,
+              6.722286343574524e-05,
+              0.00010174608905799687,
+              0.00017686188220977783,
+              6.319796375464648e-05,
+              0.00044239492854103446,
+              7.176520011853427e-05,
+              0.0001023067015921697,
+              0.00011011578317265958,
+              8.718253957340494e-05,
+              5.7476438087178394e-05,
+              6.962505722185597e-05,
+              0.00021448038751259446,
+              8.023301779758185e-05,
+              7.264260057127103e-05,
+              0.00035868785926140845,
+              7.475492748199031e-05,
+              5.6812496040947735e-05,
+              0.000131891094497405,
+              0.0002694902359507978,
+              0.0001094650651793927,
+              0.0001281169825233519
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 128,
+            "constant": true
+          },
+          {
+            "index": 28,
+            "name": "tfl.pseudo_qconst25",
+            "shape": [
+              32,
+              3,
+              3,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.004799178335815668,
+              0.008139447309076786,
+              0.0033066270407289267,
+              0.002042560139670968,
+              0.0037078780587762594,
+              0.0036590443924069405,
+              0.028680454939603806,
+              0.0036575261037796736,
+              0.006681731902062893,
+              0.010033802129328251,
+              0.004280298016965389,
+              0.002712481189519167,
+              0.004105513449758291,
+              0.007136478554457426,
+              0.002550074364989996,
+              0.01785089075565338,
+              0.0028957671020179987,
+              0.004128134343773127,
+              0.004443235229700804,
+              0.0035178656689822674,
+              0.002319207414984703,
+              0.002809411147609353,
+              0.008654407225549221,
+              0.0032374486327171326,
+              0.002931170864030719,
+              0.01447326224297285,
+              0.003016404341906309,
+              0.002292416989803314,
+              0.0053218817338347435,
+              0.010874086059629917,
+              0.00441697845235467,
+              0.005169594194740057
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 9216,
+            "constant": true
+          },
+          {
+            "index": 29,
+            "name": "tfl.pseudo_qconst26",
+            "shape": [
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              2.350193608435802e-05,
+              2.4489196221111342e-05,
+              3.5809258406516165e-05,
+              2.1644747903337702e-05,
+              2.691512054298073e-05,
+              3.647121775429696e-05,
+              2.590671465441119e-05,
+              2.8957470931345597e-05,
+              2.1047935661044903e-05,
+              4.802389594260603e-05,
+              2.502350980648771e-05,
+              3.198045669705607e-05,
+              3.4775177482515574e-05,
+              1.9753482774831355e-05,
+              2.760159804893192e-05,
+              3.3283875382039696e-05,
+              4.5005166612099856e-05,
+              3.996292798547074e-05,
+              8.236255962401628e-05,
+              0.00011681246542138979,
+              2.4074743123492226e-05,
+              2.455214962537866e-05,
+              2.740460513450671e-05,
+              2.1692241716664284e-05,
+              3.3568030630704015e-05,
+              8.836547931423411e-05,
+              3.6659421311924234e-05,
+              3.842163278022781e-05,
+              3.584576188586652e-05,
+              3.5480021324474365e-05,
+              2.4172542907763273e-05,
+              2.3402079023071565e-05
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 128,
+            "constant": true
+          },
+          {
+            "index": 30,
+            "name": "tfl.pseudo_qconst27",
+            "shape": [
+              32,
+              3,
+              3,
+              16
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.0005783633678220212,
+              0.0006026590126566589,
+              0.0008812364540062845,
+              0.0005326594691723585,
+              0.0006623590597882867,
+              0.000897526741027832,
+              0.0006375429802574217,
+              0.0007126196287572384,
+              0.0005179724539630115,
+              0.0011818286729976535,
+              0.0006158080650493503,
+              0.0007870128029026091,
+              0.0008557885885238647,
+              0.0004861170018557459,
+              0.0006792526692152023,
+              0.0008190888329409063,
+              0.001107540214434266,
+              0.0009834548691287637,
+              0.002026875037699938,
+              0.0028746589086949825,
+              0.0005924596916884184,
+              0.0006042082677595317,
+              0.0006744048441760242,
+              0.0005338282790035009,
+              0.0008260816684924066,
+              0.0021746018901467323,
+              0.0009021583246067166,
+              0.0009455248946323991,
+              0.0008821348310448229,
+              0.0008731342386454344,
+              0.0005948664620518684,
+              0.0005759059567935765
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 4608,
+            "constant": true
+          },
+          {
+            "index": 31,
+            "name": "tfl.pseudo_qconst28",
+            "shape": [
+              16
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              0.0001722825545584783,
+              7.71322738728486e-05,
+              5.3277326514944434e-05,
+              0.00010813281551236287,
+              7.516069308621809e-05,
+              6.839255365775898e-05,
+              0.00013597340148407966,
+              0.00010770236258395016,
+              8.67618655320257e-05,
+              6.07617330388166e-05,
+              9.46841319091618e-05,
+              0.00016063575458247215,
+              6.32995433988981e-05,
+              0.00018490164075046778,
+              8.786871330812573e-05,
+              8.704356150701642e-05
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 64,
+            "constant": true
+          },
+          {
+            "index": 32,
+            "name": "tfl.pseudo_qconst29",
+            "shape": [
+              16,
+              3,
+              3,
+              8
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.006202273536473513,
+              0.0027768071740865707,
+              0.001918015070259571,
+              0.003892845008522272,
+              0.002705829218029976,
+              0.002462172182276845,
+              0.00489512225612998,
+              0.0038773484993726015,
+              0.003123478265479207,
+              0.002187458099797368,
+              0.0034086843952536583,
+              0.0057829818688333035,
+              0.0022788208443671465,
+              0.00665656803175807,
+              0.0031633253674954176,
+              0.003133619436994195
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 1152,
+            "constant": true
+          },
+          {
+            "index": 33,
+            "name": "tfl.pseudo_qconst30",
+            "shape": [
+              8
+            ],
+            "shape_signature": [],
+            "dtype": "INT32",
+            "scales": [
+              7.27069127606228e-05,
+              7.488883420592174e-05,
+              9.425488678971305e-05,
+              6.78619762766175e-05,
+              5.777654951089062e-05,
+              0.00011765349336201325,
+              8.067378803389147e-05,
+              4.060423088958487e-05
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32,
+            "constant": true
+          },
+          {
+            "index": 34,
+            "name": "tfl.pseudo_qconst31",
+            "shape": [
+              8,
+              3,
+              3,
+              3
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              7.27069127606228e-05,
+              7.488883420592174e-05,
+              9.425488678971305e-05,
+              6.78619762766175e-05,
+              5.777654951089062e-05,
+              0.00011765349336201325,
+              8.067378803389147e-05,
+              4.060423088958487e-05
+            ],
+            "zero_points": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "quantized_dimension": 0,
+            "bytes": 216,
+            "constant": true
+          },
+          {
+            "index": 35,
+            "name": "model_25/tf.nn.relu/Relu;model_25/tf.math.add/Add;model_25/tf.nn.convolution/convolution;Const_301",
+            "shape": [
+              1,
+              128,
+              128,
+              8
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.027777323499321938
+            ],
+            "zero_points": [
+              -128
+            ],
+            "quantized_dimension": 0,
+            "bytes": 131072,
+            "constant": false
+          },
+          {
+            "index": 36,
+            "name": "model_25/tf.nn.relu_1/Relu;model_25/tf.math.add_1/Add;model_25/tf.nn.convolution_1/convolution;Const_28",
+            "shape": [
+              1,
+              64,
+              64,
+              16
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.04063524305820465
+            ],
+            "zero_points": [
+              -128
+            ],
+            "quantized_dimension": 0,
+            "bytes": 65536,
+            "constant": false
+          },
+          {
+            "index": 37,
+            "name": "model_25/tf.nn.relu_2/Relu;model_25/tf.math.add_2/Add;model_25/tf.nn.convolution_2/convolution;Const_26",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.02478279359638691
+            ],
+            "zero_points": [
+              -128
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 38,
+            "name": "model_25/tf.nn.relu_3/Relu;model_25/tf.math.add_5/Add;model_25/tf.nn.convolution_5/convolution;Const_24",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.1076628565788269
+            ],
+            "zero_points": [
+              -128
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 39,
+            "name": "model_25/tf.math.add_8/Add;model_25/tf.nn.convolution_8/convolution;Const_22",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.0740315392613411
+            ],
+            "zero_points": [
+              -3
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 40,
+            "name": "model_25/tf.math.add_10/Add",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.06888918578624725
+            ],
+            "zero_points": [
+              -12
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 41,
+            "name": "model_25/tf.nn.relu_4/Relu;model_25/tf.math.add_13/Add;model_25/tf.nn.convolution_11/convolution;Const_20",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.08302552998065948
+            ],
+            "zero_points": [
+              -128
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 42,
+            "name": "model_25/tf.math.add_16/Add;model_25/tf.nn.convolution_14/convolution;Const_18",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.09115435183048248
+            ],
+            "zero_points": [
+              -1
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 43,
+            "name": "model_25/tf.math.add_18/Add",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.0901641845703125
+            ],
+            "zero_points": [
+              -2
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 44,
+            "name": "model_25/tf.nn.relu_5/Relu;model_25/tf.math.add_21/Add;model_25/tf.nn.convolution_17/convolution;Const_16",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.03696354106068611
+            ],
+            "zero_points": [
+              -128
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 45,
+            "name": "model_25/tf.math.add_24/Add;model_25/tf.nn.convolution_20/convolution;Const_14",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.10680462419986725
+            ],
+            "zero_points": [
+              -17
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 46,
+            "name": "model_25/tf.math.add_26/Add",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.1035861149430275
+            ],
+            "zero_points": [
+              -21
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 47,
+            "name": "model_25/tf.nn.relu_6/Relu;model_25/tf.math.add_29/Add;model_25/tf.nn.convolution_23/convolution;Const_12",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.03776120766997337
+            ],
+            "zero_points": [
+              -128
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 48,
+            "name": "model_25/tf.math.add_32/Add;model_25/tf.nn.convolution_26/convolution;Const_10",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.1238543838262558
+            ],
+            "zero_points": [
+              6
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 49,
+            "name": "model_25/tf.math.add_34/Add",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.1238543838262558
+            ],
+            "zero_points": [
+              6
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 50,
+            "name": "model_25/tf.nn.relu_7/Relu;model_25/tf.math.add_37/Add;model_25/tf.nn.convolution_29/convolution;Const_8",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.030353544279932976
+            ],
+            "zero_points": [
+              -128
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 51,
+            "name": "model_25/tf.math.add_40/Add;model_25/tf.nn.convolution_32/convolution;Const_6",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.1553182750940323
+            ],
+            "zero_points": [
+              12
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 52,
+            "name": "model_25/tf.math.add_42/Add",
+            "shape": [
+              1,
+              32,
+              32,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.1553182750940323
+            ],
+            "zero_points": [
+              12
+            ],
+            "quantized_dimension": 0,
+            "bytes": 32768,
+            "constant": false
+          },
+          {
+            "index": 53,
+            "name": "model_25/tf.compat.v1.image.resize_nearest_neighbor/ResizeNearestNeighbor",
+            "shape": [
+              1,
+              64,
+              64,
+              32
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.1553182750940323
+            ],
+            "zero_points": [
+              12
+            ],
+            "quantized_dimension": 0,
+            "bytes": 131072,
+            "constant": false
+          },
+          {
+            "index": 54,
+            "name": "model_25/tf.nn.relu_8/Relu;model_25/tf.math.add_43/Add;model_25/tf.nn.convolution_33/convolution;Const_4",
+            "shape": [
+              1,
+              64,
+              64,
+              16
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.027002811431884766
+            ],
+            "zero_points": [
+              -128
+            ],
+            "quantized_dimension": 0,
+            "bytes": 65536,
+            "constant": false
+          },
+          {
+            "index": 55,
+            "name": "model_25/tf.compat.v1.image.resize_nearest_neighbor_1/ResizeNearestNeighbor",
+            "shape": [
+              1,
+              128,
+              128,
+              16
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.027002811431884766
+            ],
+            "zero_points": [
+              -128
+            ],
+            "quantized_dimension": 0,
+            "bytes": 262144,
+            "constant": false
+          },
+          {
+            "index": 56,
+            "name": "model_25/tf.nn.relu_9/Relu;model_25/tf.math.add_44/Add;model_25/tf.nn.convolution_34/convolution;Const_2",
+            "shape": [
+              1,
+              128,
+              128,
+              8
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              0.1103629320859909
+            ],
+            "zero_points": [
+              -128
+            ],
+            "quantized_dimension": 0,
+            "bytes": 131072,
+            "constant": false
+          },
+          {
+            "index": 57,
+            "name": "PartitionedCall:0",
+            "shape": [
+              1,
+              128,
+              128,
+              3
+            ],
+            "shape_signature": [],
+            "dtype": "INT8",
+            "scales": [
+              2.283437490463257
+            ],
+            "zero_points": [
+              -89
+            ],
+            "quantized_dimension": 0,
+            "bytes": 49152,
+            "constant": false
+          }
+        ]
+      }
+    ]
+  },
+  "verification": {
+    "image": "/root/gpufree-data/FPGA/examples/fast_neural_style/images/content-images/cobi.jpg",
+    "float_vs_int8_unclipped": {
+      "max_abs": 32.311180114746094,
+      "mae": 4.1441122805323785,
+      "rmse": 5.778076384963798,
+      "psnr_255_db": 32.89513803210846
+    },
+    "float_vs_int8_clipped_0_255": {
+      "max_abs": 32.311180114746094,
+      "mae": 4.062991331094054,
+      "rmse": 5.740899431403576,
+      "psnr_255_db": 32.95120482868271
+    },
+    "input_clipped_fraction": 0.0,
+    "output_at_int8_limits_fraction": 0.0,
+    "quality_note": "Measured on one image; no universal int8 quality threshold is asserted.",
+    "io_formulas": {
+      "quantize": "clip(round(real / scale + zero_point), -128, 127)",
+      "dequantize": "(int8_code - zero_point) * scale",
+      "preview": "round(clip(dequantized_RGB, 0, 255)) as uint8"
+    },
+    "input_quantization": {
+      "scale": 1.0,
+      "zero_point": -128
+    },
+    "output_quantization": {
+      "scale": 2.283437490463257,
+      "zero_point": -89
+    }
+  }
+}

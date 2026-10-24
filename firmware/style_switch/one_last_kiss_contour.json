@@ -1,0 +1,12 @@
+{
+  "source": "Existing deployed One Last Kiss contour controller, read from DDR after restoring the pre-test Flash backup. Length and FNV match its original OCR loader. Neural parameters match the current header byte for byte.",
+  "entry": "0x00800000",
+  "bytes": 6364,
+  "sha256": "48d70e1c572711db7c135729c978a37fddd6a46ae19a4bf5788dd7faf91c189b",
+  "fnv1a": "3709eec3",
+  "parameters_sha256": "6b6b36bc2267cb070d9985b9d8f531d06b33246aec3a2463e0d0e6bed8af13d0",
+  "parameter_offset": 5740,
+  "parameter_bytes": 624,
+  "source_flash_header_generated": "2026-10-20 23:28:49",
+  "source_flash_backup_file_sha256": "e0d6980c80233a00a24f794156bdb0025eb0c8d8a0e50560a3be170116a11af9"
+}

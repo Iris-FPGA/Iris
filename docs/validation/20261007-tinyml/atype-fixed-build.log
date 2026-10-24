@@ -1,0 +1,20 @@
+WARNING: The system libstdc++.so is more recent (version 36) than the copy shipped with the Efinity software (version 32).
+The Efinity software may not function correctly on this system.
+To avoid potential compatibility issues, please back up and remove "/home/noir/Applications/efinity/2026.1/lib/libstdc++.so.6"
+
+==> map
+Running: efx_run_map.py iris_ws --family Titanium --device Ti60F225 --project_xml /home/noir/Documents/workspace/Iris/iris_ws/iris_ws.xml --dir /home/noir/Documents/workspace/Iris/iris_ws/ip/csi_rx_59 --dir /home/noir/Documents/workspace/Iris/iris_ws/ip/SapphireSoc --output_dir outflow --work_dir work_syn --opt root=top --opt veri_options=verilog_mode=verilog_2k,vhdl_mode=vhdl_2008 work-dir=work_syn write_efx_verilog=on I=ip/csi_rx_59 I=src/i2c I=src/ddr I=src/ddr/efx_ddr3 I=src/cnn I=src/cnn/rtl I=ip/SapphireSoc
+[92m   map :	PASS [0m
+==> interface
+Running: efx_run_pt_unified.py iris_ws Titanium Ti60F225 --output_dir outflow --timing_model I3 --project_xml iris_ws.xml
+[92m   interface :	PASS [0m
+==> 修复 sdc 时钟周期
+==> pnr
+Running: efx_run_pnr.py iris_ws --prj /home/noir/Documents/workspace/Iris/iris_ws/iris_ws.xml --family Titanium --device Ti60F225 --timing_model I3 --dir /home/noir/Documents/workspace/Iris/iris_ws/ip/csi_rx_59 --dir /home/noir/Documents/workspace/Iris/iris_ws/ip/SapphireSoc --output_dir outflow --work_dir work_pnr --opt sdc_file=iris_ws.pt.sdc
+[92m   pnr :	PASS [0m
+setup: minimum +0.024 ns (23 relationships)
+hold: minimum +0.026 ns (23 relationships)
+==> pgm(生成bit/hex)
+Running: efx_run_pgm.py iris_ws --family Titanium --device Ti60F225 --output_dir outflow --work_dir work_pnr --opt mode=active width=1 enable_roms=smart spi_low_power_mode=on io_weak_pullup=on oscillator_clock_divider=DIV8 bitstream_compression=on enable_external_master_clock=off active_capture_clk_edge=posedge jtag_usercode=0xFFFFFFFF release_tri_then_reset=on
+[92m   pgm :	PASS [0m
+完成：outflow/iris_ws.bit 与 iris_ws.hex

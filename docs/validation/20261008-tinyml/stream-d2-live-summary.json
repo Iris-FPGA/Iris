@@ -1,0 +1,14 @@
+{
+  "fresh_pair_hz": 15.023324353416404,
+  "seconds": 90.06761102299788,
+  "first_displayed": 2,
+  "last_displayed": 1351,
+  "invoke_ms_min": 18.1163,
+  "invoke_ms_max": 18.20785,
+  "errors": {
+    "underflows": 0,
+    "read_errors": 0,
+    "rejects": 0
+  },
+  "live_ok": true
+}

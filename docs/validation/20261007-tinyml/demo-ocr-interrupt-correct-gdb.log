@@ -1,0 +1,15 @@
+crash () at /home/noir/Documents/workspace/tinyml/tinyml_hello_world/Ti60F225_tinyml_hello_world/embedded_sw/SapphireSoc/software/standalone/tinyml_ypd/src/platform/interrupt/intc.c:21
+21		while(1);
+pc             0x80b2bc	0x80b2bc <crash+48>
+#0  crash () at /home/noir/Documents/workspace/tinyml/tinyml_hello_world/Ti60F225_tinyml_hello_world/embedded_sw/SapphireSoc/software/standalone/tinyml_ypd/src/platform/interrupt/intc.c:21
+#1  0x0080b32c in trap () at /home/noir/Documents/workspace/tinyml/tinyml_hello_world/Ti60F225_tinyml_hello_world/embedded_sw/SapphireSoc/software/standalone/tinyml_ypd/src/platform/interrupt/intc.c:50
+#2  0x00816954 in trap_entry () at /home/noir/Documents/workspace/Iris/iris_ws/embedded_sw/SapphireSoc/software/standalone/common/trap.S:66
+Backtrace stopped: frame did not save the PC
+$1 = {0xa, 0x0, 0x0, 0x0}
+$2 = 0x827804
+0x827804 <_ZL6add_op>:	0x00816a04	0x00816a08	0x00816a54	0x0000000c
+0x827814 <_ZL6add_op+16>:	0x00825194	0x00827820	0x00000000
+mcause (/32): 0x00000005
+mepc (/32): 0x008217bc
+mtval (/32): 0x17201728
+[Inferior 1 (Remote target) detached]

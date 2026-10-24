@@ -1,0 +1,302 @@
+# Iris TinyML Style Firmware
+
+The optional `RAIN_BACKEND=1` / `--rain-backend --burst-dma --live-rgb`
+backend now runs the **unchanged complete Rain Princess model at 30.05 fresh
+HDMI AI frames/s** on Ti60. The 180-frame board run measured a 31.775 ms median
+Invoke, exact 49,152-byte equality to BUILTIN_REF, and zero underflow, read
+errors or rejected commands. It uses an 8x8 row-cached Conv engine, four Add
+lanes, overlapped row writes, eight-beat Resize DMA and direct camera/display
+tensor binding. The verified SRAM project is `build/rain_row_overlap/iris_ws`
+with `build/rain_row_direct_live/tinyml_style.elf`.
+See [reproduction and validation](../../docs/validation/20261020-rain-row-overlap/README.md).
+This backend is disabled by default; only SRAM was programmed.
+
+The following measurements describe the earlier vendor backend.
+
+The complete Rain Princess camera/HDMI path uses `MODEL_PROFILE=rain_princess LIVE_DEMO=1`
+and the matching `prepare-tinyml-project.py --live-rgb` project. No model distillation
+is used. See [build and validation notes](../../docs/validation/20261019-rain-princess-hdmi/README.md).
+HDMI is 1920x1080 with two 960x1080 panels: a live camera on the left and the
+latest complete AI output on the right. The original validated 8x2/cache1024/Add-LITE
+backend produces approximately 2.40 fresh AI frames/s (0.3636 s per Invoke).
+The four-beat capture staging uses 96 bits of RAM and 32 bits of registers.
+The camera
+and HDMI refresh counters are separate from the fractional AI frame counter.
+The user confirmed the left panel is smooth while the AI panel still stutters.
+This backend does not meet the required 30 fresh AI frames/s. The remote
+micro4_d2 student/contour image is a different network and must not be loaded
+as an optimization of Rain Princess. The complete-model color image was
+restored and its camera output matched BUILTIN_REF byte for byte.
+`LIVE_PIPELINE=1 OBJDIR=build/rain_princess_pipeline` overlaps next-frame
+capture with inference in the third bank. On the same bitstream, 20 complete
+outputs passed at about 2.60 fresh frames/s, with exact camera-output parity
+and zero errors. Prefetch queues an input while the previous Invoke runs;
+end-to-end latency reduction has not been established.
+
+The earlier vendor SRAM image adds optional RGB tensor burst DMA, selected by
+`prepare-tinyml-project.py --live-rgb --burst-dma`. On 2026-10-20,
+`rain_princess_rect_8x2_burst_rgb` plus the pipeline ELF completed 60 fresh
+outputs at approximately **2.72 frames/s**, with a median Invoke of 354.545 ms.
+The 49,152-byte output matched the complete model's BUILTIN_REF exactly;
+underflow/readerr/rejects stayed zero. The design uses 60,328/60,800 XLRs,
+255/256 RAM blocks and 53/160 DSPs, with minimum setup +0.016 ns and hold
++0.026 ns. The model, its 128x128 RGB tensor size, and the HDMI geometry are
+unchanged. See `burst-rgb-live-debug.json`, `burst-rgb-reference-parity.json`
+and `burst-rgb-performance.json` in the validation directory linked above.
+The burst backend remains disabled by default in the source project. It
+specializes copy to C3/C16/C32 and Resize to C16/C32, the channels required
+by this unchanged model. Generic/default DMA parameter combinations are
+also tested. Four earlier generic burst candidates exceeded XLR capacity
+and were never programmed.
+
+This still does **not** meet 30 fresh frames/s. The first-frame profile records
+328.392 ms in Conv, 22.556 ms in Add and 2.958 ms in Resize. The existing 8x2
+Conv arithmetic alone has an optimistic lower bound of 97.321 ms at 100 MHz.
+Reaching 33.333 ms per complete frame requires a different Conv computation
+and data-reuse structure as well as faster Add; the DMA result does not prove
+that the Ti60 can fit or sustain such a backend. Only SRAM was programmed.
+
+Rain Princess static inference is available with `MODEL_PROFILE=rain_princess`.
+It uses the complete 128x128 RGB network, strict hardware dispatch by default,
+and an independent `build/rain_princess` output directory. The matching FPGA
+project and software reference have been built. On 2026-10-19, all 23 hardware
+operations completed on Ti60 and the 49,152-byte static output matched the
+reference exactly. Invoke took 4.40087053 seconds, excluding profile UART output;
+this does not meet real-time video requirements.
+See [the Rain Princess validation and reproduction instructions](../../docs/validation/20261018-rain-princess-tinyml/README.md).
+
+Static-input bring-up for the official Ti60 TFLM runtime. The strict build now
+contains a real Iris INT8 nearest-neighbor 2x DMA accelerator. Conv/Add dispatch
+must return `OP_OK` with `STANDARD` or `LITE`; unsupported hardware dispatch
+stops before the vendor CPU fallback loops. The original model has completed all 23 hardware operations on board with exact
+49152-byte equality to TensorFlow BUILTIN_REF on one static fixture. Evidence:
+`docs/validation/20261007-tinyml/cache-restored-static-strict-debug.json`.
+Its roughly 4.4-second UART-profiled run does not satisfy real-time acceptance.
+The optimized RGBA640 model has also completed all 10 hardware operations with
+exact 1,228,800-byte equality to its own BUILTIN_REF fixture. Invoke takes
+1.37987371 seconds at 100 MHz, excluding profile UART transmission; it does
+not meet 15 fresh style frames/s. Evidence:
+`docs/validation/20261007-tinyml/rgba640-static-strict-debug.json`.
+The associated SRAM bitstream passed Efinity setup +0.030 ns / hold +0.024 ns
+and uses 59,740 XLRs, 236 RAM blocks and 54 DSPs. Flash remains unchanged.
+
+## Build
+
+The sibling `../tinyml` checkout is pinned to official revision
+`96886fa0c73e25e6218db7d0863f84677cf65138`. Its runtime and accelerator archive
+remain unchanged. Narrow licensed source overrides live in `src/overrides`:
+Conv/Add reject fallback, MicroInterpreter propagates Init/Prepare errors, and
+MicroGraph checks immutable node-vector pointers before dereferencing them.
+Allocation tracing remains enabled before Invoke and is excluded from its timing.
+
+Run from the Iris repository root:
+
+```sh
+.script/build-tinyml-firmware check-model
+.script/build-tinyml-firmware \
+  STANDALONE="$PWD/iris_ws/embedded_sw/SapphireSoc/software/standalone" \
+  BSP_PATH="$PWD/iris_ws/embedded_sw/SapphireSoc/bsp/efinix/EfxSapphireSoc" \
+  RISCV_BIN=/home/noir/Applications/riscv-none-elf/bin/riscv-none-elf- \
+  DDR_BASE=0x00800000 DDR_BYTES=0x02000000 STRICT_DISPATCH=1 -j8
+```
+
+`STRICT_DISPATCH=0` is a diagnostic software-permitting build. Do not use it as
+hardware-only acceptance evidence. The board build must match the generated
+Iris BSP: RV32IM soft-float, one hart, 100 MHz core/peripheral clocks, 16 KiB OCR,
+and 1 KiB instruction/data caches (original parity used 4 KiB). The vendor archive requires Sapphire's
+data-cache flush instruction; disabling the CPU cache causes an illegal instruction. The installed xPack GCC 12.3
+and Efinity 2026.1 are used; the actual generated syscall file is `syscalls.c`.
+The build records compiler, flags, BSP, archive, and model hashes.
+
+The linker reserves image/BSS, a 2 MiB heap, and a 64-byte-aligned 2 MiB tensor
+arena in the explicit DDR window. Its 8 KiB control stack is in OCR
+`[0xf9002000,0xf9004000)`. A DDR image loader must initialize storage and enter
+`_start`; this ELF is not a Flash bootloader. The arena is NOLOAD, outside BSS
+clear and the libc heap. No CPU boot image has been committed to Flash here.
+
+## Static fixture and acceptance
+
+The checked-in original 125336-byte model is unchanged: INT8 NHWC
+`[1,128,128,3]`, input scale 1 / zero point -128, 16 Conv, 5 Add, 2 Resize nodes.
+A gradient/checkerboard fixture is filled directly in its input tensor.
+`iris_result` is debugger-readable: word 0 is 1=running, 2=output-ready,
+3=stopped; word 1 is the initialization phase; words 2/3 are output address/size,
+word 4 is FNV-1a, words 5/6 are CLINT ticks. Status 2 requires successful Invoke.
+A checksum or capability print is not a numeric-parity result. The new profiler records during Invoke and prints afterward, excluding UART
+transmission from timing. The original parity evidence predates this change.
+Neither a single static Invoke nor HDMI refresh establishes fresh-frame throughput.
+
+The CPU has a native 128-bit DDR line adapter, preserving WSTRB for sub-word
+stores and returning full lines to Sapphire's upstream lane selector. The DDR
+arbiter protects video ownership/ranges. The shared address bridge now retains
+AW/AR selection until acceptance under backpressure. A pipelined write stream is blocked after LAST until its B response releases
+ownership. Without that gate, later W data can precede its address. Independent
+read/write operation remains enabled; transaction serialization is a diagnostic
+parameter only and its board run encountered a startup stall.
+
+## Hardware resize ABI
+
+Custom function-ID bit 9 selects Iris; vendor IDs remain separate. These are
+function IDs, not bit positions in the RISC-V instruction word.
+
+| ID | Operation | Operands/result |
+| --- | --- | --- |
+| 0x200 | Capability | returns 0x49520101 |
+| 0x201 | Addresses | rs1=source, rs2=destination |
+| 0x202 | Shape | rs1=input height, rs2=input width |
+| 0x203 | Channels | rs1=4, 8, 16, or 32; 3 for unchanged copy/stream only |
+| 0x204 | Start | 0=accepted, FFFFFFFE=busy, FFFFFFFF=invalid |
+| 0x205 | Status | bit 0=busy, bit 1=done, bit 2=error, bit 3=stream word ready, bits 8+=error code |
+| 0x206 | Abort | drains outstanding AXI response before idle |
+| 0x208 | Tensor copy | unchanged 1x transfer, final B required |
+| 0x209 | Dummy audit | counts read RGBA lanes whose fourth byte differs from 0x80 |
+| 0x20A..0x20D | Stream words | four unchanged 32-bit words from the current DMA read |
+| 0x20E | Stream acknowledge | releases the published 16-byte word |
+| 0x20F | Read-only stream | source H/W/C configured above; no DDR writes |
+
+Input/output are disjoint, 16-byte-aligned contiguous NHWC INT8. Rows must be
+multiples of 16 bytes; input H/W range is 1..1024. Output H/W are exactly doubled,
+quantization is unchanged, and both TensorFlow resize flags are false.
+`out[y,x,c]=in[y/2,x/2,c]`. Address/size validation is pipelined. Invalid requests
+emit no DMA; completion requires the final successful B response. Vendor and
+Iris DMA cannot acquire ownership while the other has an outstanding request.
+The firmware writes back/invalidates CPU cache and resets TinyML cache at DMA boundaries and aborts on its CLINT
+one-second timeout. It never uses software resize after an error.
+
+## Reproducible board diagnostic
+
+After an Efinity build with passing timing, `.script/sync-iris jtag` changes SRAM
+only. Stop OpenOCD before programming, then start Efinity's bundled OpenOCD with
+`.script/openocd_ftdi_iris.cfg` and the generated `debug_ti.cfg`.
+
+```sh
+.script/probe-iris-ddr --execute-ddr --stress-pipeline \
+  --base 0x00700000 --output docs/validation/20261007-tinyml/ddr-stress.json
+```
+
+This requires an already running OpenOCD Tcl server on port 6666. It overwrites
+the selected 64 KiB test window and halts the CPU afterward; do not run against
+a live arena occupying that window. Word/halfword/byte tests, sparse neighboring
+lane preservation, random scatter writes, a three-second retention test, and
+four distinct DDR instructions must all pass. BRAM result word 0 must be
+`600d0001`, word 15 `12345679`, and error counters zero. `--execute-ddr` covers
+concurrent instruction/data traffic; `--stress-pipeline` adds firmware-like O3
+unrolled loops. JSON records compile arguments, ELF/bit-file/source digests and
+raw board results. Link the bit-file digest to the separate programming report
+before making any loaded-image provenance claim.
+
+The static model runner loads the ELF, captures the complete stop message,
+reads the descriptor, and dumps output only after successful Invoke:
+
+```sh
+.script/run-tinyml-bringup --timeout 90 \
+  --output docs/validation/20261007-tinyml/static-strict \
+  --golden one_last_kiss_style/build/golden-0.bin
+```
+
+Its parity record distinguishes exact equality, maximum error, MAE, and byte
+mismatches. No numeric tolerance is silently treated as an exact pass.
+
+## Still required
+
+640x480 model output parity and measured
+fresh-frame throughput; hardware camera crop/preprocess and ownership; neural
+output postprocess/HDMI comparison; Flash loader, readback and cold-boot proof.
+The trained low-decoder model is preserved in `one_last_kiss_style/models`;
+official model arrays are in `iris_ws/RISC-V/rgba640`. Source configuration is
+now 4x2/CounterDepth640 for the camera demo; its board validation is separate from original parity.
+Build with `MODEL_PROFILE=rgba640` (4 MiB arena), or `original` (2 MiB).
+The safe firmware scratch window is `[0x00700000,0x00710000)`. See `docs/validation/20261007-tinyml` for measured
+results and failures. RTL passes, target links, and timing passes do not imply
+end-to-end visual or performance acceptance.
+
+## Low-rate camera demo (bring-up in progress)
+
+Build `MODEL_PROFILE=rgba640 LIVE_DEMO=1 STRICT_DISPATCH=1`. The current source
+uses hardware DMA tensor transport around Invoke, retaining the statically
+validated arena addresses. CPU code configures transport and operators; it does
+not copy, quantize or process image pixels. CI 0x208 performs an unchanged tensor
+copy with the same alignment, range, overlap, final-B and abort rules as resize;
+0x204 retains nearest-neighbour 2x behavior.
+
+APB0 at `0xf8100000` exposes capture/commit controls, pair ownership and counters.
+Input banks are `0x03000000` / `0x03200000`; output banks are `0x03400000` /
+`0x03600000`, each containing 1,228,800 RGBA INT8 bytes. Only the inactive pair
+is captured and written. Commit changes both panels at VS; acknowledgement
+precedes reuse. The panels show matched 640x480 input and style on 1080p output.
+OCR control data uses `[0xf9001000,0xf9002000)`; the stack remains in the upper
+8 KiB. The licensed MicroProfiler header override caps events at 24, rebuilt
+consistently across source objects, to fit control data in OCR.
+
+The demo profile reduces the KEY2/UART-C thumbnail to 48x27 to save RAM;
+exposure and AWB remain available. Non-demo defaults retain 96x54.
+
+After a successful fresh Efinity build/timing check, stop OpenOCD and program
+SRAM with `.script/sync-iris jtag`, restart the official OpenOCD server, then:
+
+```sh
+.script/run-iris-style-demo --seconds 25 --snapshot \
+  --output docs/validation/20261007-tinyml/camera-demo
+.venv-style/bin/python .script/verify-style-snapshot.py \
+  docs/validation/20261007-tinyml/camera-demo
+```
+
+The runner records committed pair rate separately from HDMI refresh. Its JTAG
+pixel snapshots showed dummy-channel anomalies; do not treat them as accepted
+camera parity. Use the DMA/UART snapshot procedure below to audit actual reads. Use
+`--attach` to observe an already running firmware. After a failed DMA/cache run,
+reload SRAM before loading another ELF: warm reset has not reliably restored
+execution. Current live bring-up is not yet accepted; Flash is unchanged.
+
+### Hardware DMA snapshot
+
+Rebuild with `LIVE_DEMO=1 LIVE_SNAPSHOT=1` and load the freshly timing-passed
+audit bitstream into SRAM. The firmware exports the first complete camera
+input before Invoke, then its corresponding output after display commit. CPU
+code forwards CI register words unchanged to UART; it does not read DDR pixels
+or alter them. The host switches UART to 500000 baud and acknowledges readiness.
+
+```sh
+.script/export-style-uart --output docs/validation/20261008-tinyml/camera-stream
+.venv-style/bin/python .script/verify-style-snapshot.py \
+  docs/validation/20261008-tinyml/camera-stream
+```
+
+Successful export requires both full 1,228,800-byte tensors and zero hardware
+dummy violations. The independent verifier compares every byte to BUILTIN_REF
+and renders the pair. Snapshot firmware freezes after this pair; rebuild with
+`LIVE_SNAPSHOT=0` for continuous operation. The first hardware export failed:
+22506 of 307200 input dummy bytes were wrong. Firmware stopped before Invoke;
+neither camera parity nor visible image correctness has been established.
+
+The later staged-burst capture bit (`b1152a34...`) passed a full real-camera
+export: both dummy audits were zero and all 1,228,800 output bytes matched
+TensorFlow 2.20 BUILTIN_REF. The 40-second continuous run committed 14 pairs
+at 0.365842 Hz with zero underflows/read errors/rejections. See
+`docs/validation/20261008-tinyml/demo-capture-staged-*`. A later run froze
+after 154 displayed pairs: the user confirmed both HDMI panels stopped
+changing, and the CPU was waiting for the official Add driver completion flag.
+The PLIC had no pending interrupt, its enable/priority and the driver list were
+valid, and DDR display traffic continued. See `demo-display-freeze-*.json`;
+the short passing windows do not establish long-running stability. Actual HDMI sink
+appearance remains a separate user check; 15 Hz and Flash boot remain pending.
+
+Diagnostic APB words 10/11 count dummy violations at the capture writer and the
+DDR controller write bus. Word 12 controls DDR read/write serialization; default
+0 preserves concurrent operation. `export-style-uart --serial-ddr` sets it before
+ELF loading. The bridge drains both outstanding directions when changing mode
+and retains an already offered address under backpressure. This is a diagnostic
+control, not performance or end-to-end acceptance evidence.
+
+`.script/probe-iris-style-dma --output <report.json>` runs a 64KiB known RGBA
+fixture entirely from OCR, checking CPU stores, CI reads, hardware copy and
+one-second retention. Reload SRAM before **each** invocation. Source defaults
+to 7MiB and destination to 48MiB; both windows are overwritten. `--capture-first`
+adds one real camera capture before these checks and separately audits the
+captured bank. The clean no-capture test passed, while adding capture reproduced
+the DDR failure. Warm-reset failures are recorded separately and cannot establish
+an address-capacity limit. Both tests leave the CPU halted.
+`--capture-first --captures 30` also records the CLINT interval between first
+and last capture completions. The staged-burst bit passed all 30 captures at
+60.1011 Hz and passed the subsequent fixture checks. This isolated acquisition
+test does not include concurrent neural inference or displayed style panels.

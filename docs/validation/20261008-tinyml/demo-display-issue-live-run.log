@@ -1,0 +1,9 @@
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "80a806869623c862316f5ac3c5472117b0d8751e4adbe8c7933d913a4ff071ce",
+  "bit_sha256": "b1152a34dcabc33085b48d5b46452747863ab2ddd3965e2ab29ac16e8e1e34f8",
+  "attached": true,
+  "frames": [],
+  "observation_seconds": 12.027860184025485,
+  "live_ok": false
+}

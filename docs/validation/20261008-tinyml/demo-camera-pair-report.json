@@ -1,0 +1,101 @@
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "0db92c7206301e0ffa5a5a8f13992dc8a0d35acb9d81b3689298229bf6ffd97d",
+  "bit_sha256": "2e3495e3c83300bdce0642b41da9e0a8f7110fb73c7e069acbb5fd602ed22ef4",
+  "attached": true,
+  "frames": [
+    {
+      "sequence": 14,
+      "pair": 1,
+      "invoke_ticks": 259309255,
+      "displayed": 14,
+      "captures": 14,
+      "underflows": 7,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 1.1198854339891113
+    },
+    {
+      "sequence": 15,
+      "pair": 0,
+      "invoke_ticks": 259299960,
+      "displayed": 15,
+      "captures": 15,
+      "underflows": 7,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 3.871128509985283
+    },
+    {
+      "sequence": 16,
+      "pair": 1,
+      "invoke_ticks": 259096638,
+      "displayed": 16,
+      "captures": 16,
+      "underflows": 7,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 6.622914805979235
+    },
+    {
+      "sequence": 17,
+      "pair": 0,
+      "invoke_ticks": 258694261,
+      "displayed": 17,
+      "captures": 17,
+      "underflows": 8,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 9.342692210979294
+    },
+    {
+      "sequence": 18,
+      "pair": 1,
+      "invoke_ticks": 258674372,
+      "displayed": 18,
+      "captures": 18,
+      "underflows": 8,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 12.078462726989528
+    },
+    {
+      "sequence": 19,
+      "pair": 0,
+      "invoke_ticks": 259132218,
+      "displayed": 19,
+      "captures": 19,
+      "underflows": 8,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 14.81422740398557
+    }
+  ],
+  "observation_seconds": 15.110175121983048,
+  "observed_committed_pair_hz": 0.3651142939875988,
+  "snapshot_status": [
+    1230176330,
+    1,
+    52428800,
+    56623104,
+    19,
+    20,
+    8,
+    0,
+    0,
+    655361
+  ],
+  "snapshot_pair": 0,
+  "snapshot_displayed_count": 19,
+  "snapshot_files": {
+    "input": {
+      "path": "/home/noir/Documents/workspace/Iris/docs/validation/20261008-tinyml/demo-camera-pair-input.bin",
+      "sha256": "ed1c0c59e45005ab21e265e761d7107be025e901dabb0240f0b683304d654c95"
+    },
+    "output": {
+      "path": "/home/noir/Documents/workspace/Iris/docs/validation/20261008-tinyml/demo-camera-pair-output.bin",
+      "sha256": "3a7a7a2b533b1faadbed4277da9d2371aa0b6e15397a1f053465ef0d6d15b29e"
+    }
+  },
+  "live_ok": false
+}

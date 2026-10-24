@@ -1,0 +1,4 @@
+PASS output dequantization: 1024 independent floating-reference RGB pixels, saturation, pipeline/valid/reset
+tests/video/tb_style_dequant.sv:26: $finish called at 10291000 (1ps)
+PASS output dequantization: 1024 independent floating-reference RGB pixels, saturation, pipeline/valid/reset
+tests/video/tb_style_dequant.sv:26: $finish called at 10291000 (1ps)

@@ -1,0 +1,379 @@
+{
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "model_bytes": 125336,
+  "model_symbol": "rain_princess_int8_model_data",
+  "rain_row_backend": true,
+  "project_manifest": "/mnt/mydata/Iris/dev/fastnst/firmware/tinyml_style/build/rain_row_8x8_restart/iris_ws/tinyml-project.json",
+  "elf_sha256": "cbef2aa0519dfb2d4f3d6d6cf2329bf1bcfeecd5a6941a68aa4f4c6fcebfb242",
+  "bit_sha256": "f4211ecefe3db6717157173702f2e8c4fdc038fcc9e95a5dae0657bfbb86da3a",
+  "reset": "",
+  "load": "376792 bytes written at address 0x00800000\n4 bytes written at address 0x0085bfe0\n1844 bytes written at address 0x0085bff0\ndownloaded 378640 bytes in 9.296619s (39.774 KiB/s)\n",
+  "descriptor": [
+    2,
+    12,
+    50331648,
+    54525952,
+    49152,
+    3659855,
+    0,
+    17764,
+    17767,
+    0,
+    0,
+    0
+  ],
+  "apb_registers": [
+    1230176522,
+    2,
+    58720256,
+    60817408,
+    17764,
+    17768,
+    0,
+    0,
+    0,
+    196611,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1229980417,
+    7,
+    5,
+    4,
+    2,
+    0,
+    2003
+  ],
+  "frames": [
+    {
+      "sequence": 1,
+      "pair": 1,
+      "invoke_ticks": 5013137,
+      "displayed": 17753,
+      "captures": 17756,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 2,
+      "pair": 2,
+      "invoke_ticks": 3654760,
+      "displayed": 17754,
+      "captures": 17757,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 3,
+      "pair": 0,
+      "invoke_ticks": 3653656,
+      "displayed": 17755,
+      "captures": 17758,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 4,
+      "pair": 1,
+      "invoke_ticks": 3637976,
+      "displayed": 17756,
+      "captures": 17759,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 5,
+      "pair": 2,
+      "invoke_ticks": 3652685,
+      "displayed": 17757,
+      "captures": 17760,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 6,
+      "pair": 0,
+      "invoke_ticks": 3652436,
+      "displayed": 17758,
+      "captures": 17761,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 7,
+      "pair": 1,
+      "invoke_ticks": 3655450,
+      "displayed": 17759,
+      "captures": 17762,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 8,
+      "pair": 2,
+      "invoke_ticks": 3659984,
+      "displayed": 17760,
+      "captures": 17763,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 9,
+      "pair": 0,
+      "invoke_ticks": 3653442,
+      "displayed": 17761,
+      "captures": 17764,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 10,
+      "pair": 1,
+      "invoke_ticks": 3654606,
+      "displayed": 17762,
+      "captures": 17765,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 11,
+      "pair": 2,
+      "invoke_ticks": 3654852,
+      "displayed": 17763,
+      "captures": 17766,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 12,
+      "pair": 0,
+      "invoke_ticks": 3659855,
+      "displayed": 17764,
+      "captures": 17767,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    }
+  ],
+  "elapsed_seconds": 0.9329796499805525,
+  "frame_receipt_seconds": [
+    0.22536519600544125,
+    0.2733345340238884,
+    0.4651940519688651,
+    0.49731536605395377,
+    0.5451878469903022,
+    0.609509072965011,
+    0.6573915800545365,
+    0.7055142179597169,
+    0.7533473370131105,
+    0.8012496719602495,
+    0.8492676119785756,
+    0.8971894159913063
+  ],
+  "hardware_frame_period_ticks": [
+    0,
+    4991596,
+    4991628,
+    18302556,
+    4991612,
+    4991577,
+    4991589,
+    4991587,
+    4991611,
+    4991576,
+    4991587,
+    4991597
+  ],
+  "steady_intervals_seconds": [
+    0.1918595179449767,
+    0.03212131408508867,
+    0.04787248093634844,
+    0.0643212259747088,
+    0.04788250708952546,
+    0.048122637905180454,
+    0.0478331190533936,
+    0.047902334947139025,
+    0.048017940018326044,
+    0.04792180401273072
+  ],
+  "profile": [
+    {
+      "node": 0,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=194799 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 1,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=125867 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 2,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=108207 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 3,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=168021 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 4,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=168094 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 5,
+      "op": "ADD",
+      "mode": "IRIS_ROW_ADD",
+      "duration": "ticks=67065 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 6,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=171518 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 7,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=167668 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 8,
+      "op": "ADD",
+      "mode": "IRIS_ROW_ADD",
+      "duration": "ticks=68230 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 9,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=168852 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 10,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=167369 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 11,
+      "op": "ADD",
+      "mode": "IRIS_ROW_ADD",
+      "duration": "ticks=67214 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 12,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=169137 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 13,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=172366 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 14,
+      "op": "ADD",
+      "mode": "IRIS_ROW_ADD",
+      "duration": "ticks=68922 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 15,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=168919 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 16,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=169756 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 17,
+      "op": "ADD",
+      "mode": "IRIS_ROW_ADD",
+      "duration": "ticks=68206 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 18,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "mode": "IRIS_RESIZE_HW",
+      "duration": "ticks=101027 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 19,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=322122 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 20,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "mode": "IRIS_RESIZE_HW",
+      "duration": "ticks=198987 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 21,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=335994 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 22,
+      "op": "CONV_2D",
+      "mode": "IRIS_ROW_CONV",
+      "duration": "ticks=172244 cache_hit_raw=0 cache_miss_raw=0"
+    }
+  ],
+  "strict_dispatch": true,
+  "registers": {
+    "pc": "pc (/32): 0x00816808\n",
+    "mcause": "mcause (/32): 0x00000000\n",
+    "mepc": "mepc (/32): 0x00000000\n",
+    "mtval": "mtval (/32): 0x00000000\n"
+  },
+  "camera_output_numeric_parity_verified": false,
+  "visual_confirmation": false,
+  "completed": true,
+  "dump_pair": 0,
+  "files": {
+    "input": {
+      "path": "/mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-backend-restart/warm-input.bin",
+      "address": "0x3000000",
+      "bytes": 49152,
+      "sha256": "9bc6b8f043e387d003a7efc6a294f2f8236e9a4bc33c578aaf13f8fd25d4667e"
+    },
+    "output": {
+      "path": "/mnt/mydata/Iris/dev/fastnst/docs/validation/20261020-rain-row-backend-restart/warm-output.bin",
+      "address": "0x3400000",
+      "bytes": 49152,
+      "sha256": "bcb561f13f322a7658869d809defc2a57a4285fd7753e59ff4c28f67c4fb6ed4"
+    }
+  },
+  "cpu_left_running": true
+}

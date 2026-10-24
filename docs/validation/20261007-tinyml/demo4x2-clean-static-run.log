@@ -1,0 +1,146 @@
+161604 bytes written at address 0x00800000
+downloaded 161604 bytes in 3.843656s (41.059 KiB/s)
+
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x40 cpuAR=0x0x808040 fbAR=0x0x135800
+arb cpuAW=0x0x70fffc fbAW=0x0x536800 rdCnt cpu/fb=2251/40878 rresp=0
+arb ARhand=43405 rdDone=43405 AWhand=26601 wrDone=26601
+lastAR addr=0x0x441800 len=127 size=4 burst=1 | lastAW addr=0x0x248000 len=127
+Core 0 Hardware Settings:
+  Accelerator Active: 1
+  UUID: 0x4923687a
+  AXI DW: 128
+  AXI_DB_W: 16
+  Cache Enabled: 1
+  Cache Depth: 512
+  Conv Depthw Mode: 2
+  Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:2
+  Add Mode: 2
+  FC Mode: 0
+  Mul Mode: 0
+  LR Mode: 0
+  Min-Max Mode: 0
+  Reshape Mode: 0
+IRIS nodes OK: flatbuffer
+IRIS nodes OK: init
+IRIS prepare node 0 @0x0x1a2acb4IRIS prepare node 1 @0x0x1a2acd0IRIS prepare node 2 @0x0x1a2acecIRIS prepare node 3 @0x0x1a2ad08IRIS prepare node 4 @0x0x1a2ad24IRIS prepare node 5 @0x0x1a2ad40IRIS prepare node 6 @0x0x1a2ad5cIRIS prepare node 7 @0x0x1a2ad78IRIS prepare node 8 @0x0x1a2ad94IRIS prepare node 9 @0x0x1a2adb0DDR arena: base=0x0xa2af40 capacity=16777216 used=3688092
+profile: node; op; vendor execution mode; CLINT ticks (printed after Invoke)
+0; CONV_2D; STANDARD; ticks=135919556 cache_hit_raw=0 cache_miss_raw=0
+1; CONV_2D; STANDARD; ticks=41812048 cache_hit_raw=0 cache_miss_raw=0
+2; CONV_2D; STANDARD; ticks=19622219 cache_hit_raw=0 cache_miss_raw=0
+3; CONV_2D; STANDARD; ticks=3133590 cache_hit_raw=0 cache_miss_raw=0
+4; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=765081 cache_hit_raw=0 cache_miss_raw=0
+5; ADD; STANDARD; ticks=665057 cache_hit_raw=0 cache_miss_raw=0
+6; CONV_2D; STANDARD; ticks=6270672 cache_hit_raw=0 cache_miss_raw=0
+7; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=3091832 cache_hit_raw=0 cache_miss_raw=0
+8; ADD; STANDARD; ticks=2623796 cache_hit_raw=0 cache_miss_raw=0
+9; CONV_2D; STANDARD; ticks=6602234 cache_hit_raw=0 cache_miss_raw=0
+output bytes=1228800 FNV1a=0x0x3830f80b (diagnostic, no golden parity claim)
+CLINT ticks hi=0x0x0 lo=0x0xd24f9bd Hz=100000000 (excludes profile UART transmission)
+IRIS STOP: inference complete; validate output dump against the matching integer reference
+{
+  "elf": "/home/noir/Documents/workspace/Iris/firmware/tinyml_style/build/rgba640-static4x4.elf",
+  "elf_sha256": "f401788c351982363f7265f0b43c609e1d126a9cbc85482eb36da4c3b8dd3556",
+  "reset": "",
+  "load": "161604 bytes written at address 0x00800000\ndownloaded 161604 bytes in 3.843656s (41.059 KiB/s)\n",
+  "bit_file_sha256": "05a3e14c917c15014f474aeea43dc918f64d61d7950a0890ac47936cbb93ccde",
+  "descriptor_address": "0x82aae8",
+  "descriptor": [
+    2,
+    3,
+    10661696,
+    1228800,
+    942733323,
+    220527037,
+    0,
+    0
+  ],
+  "raw_descriptor": "0x0082aae8: 00000002 00000003 00a2af40 0012c000 3830f80b 0d24f9bd 00000000 00000000 \n",
+  "elapsed_seconds": 3.8447852850076742,
+  "registers": {
+    "pc": "pc (/32): 0x008001e4\n",
+    "mcause": "mcause (/32): 0x8000000b\n",
+    "mepc": "mepc (/32): 0x008174bc\n",
+    "mtval": "mtval (/32): 0x00000000\n"
+  },
+  "invoke_completed": true,
+  "profile": [
+    {
+      "node": 0,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=135919556 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 1,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=41812048 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 2,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=19622219 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 3,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=3133590 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 4,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "mode": "IRIS_RESIZE_HW",
+      "duration": "ticks=765081 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 5,
+      "op": "ADD",
+      "mode": "STANDARD",
+      "duration": "ticks=665057 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 6,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=6270672 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 7,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "mode": "IRIS_RESIZE_HW",
+      "duration": "ticks=3091832 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 8,
+      "op": "ADD",
+      "mode": "STANDARD",
+      "duration": "ticks=2623796 cache_hit_raw=0 cache_miss_raw=0"
+    },
+    {
+      "node": 9,
+      "op": "CONV_2D",
+      "mode": "STANDARD",
+      "duration": "ticks=6602234 cache_hit_raw=0 cache_miss_raw=0"
+    }
+  ],
+  "strict_dispatch_evidence": true,
+  "clint_hz": 100000000,
+  "invoke_seconds": 2.20527037,
+  "excludes_profile_uart": true,
+  "fresh_frame_fps": null,
+  "output_sha256": "828b3c885079d22f515ac4c6ac2d00e5d5aed96dd01259ba00c059192e5a8962",
+  "parity": {
+    "golden": "one_last_kiss_style/build/golden-rgba640.bin",
+    "golden_sha256": "828b3c885079d22f515ac4c6ac2d00e5d5aed96dd01259ba00c059192e5a8962",
+    "exact": true,
+    "max_abs_lsb": 0,
+    "mae_lsb": 0.0,
+    "different_bytes": 0
+  }
+}

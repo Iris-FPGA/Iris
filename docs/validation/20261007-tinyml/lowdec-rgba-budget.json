@@ -1,0 +1,133 @@
+{
+  "candidate": "c448_lowdec_skip_r0_refined_rgba_640_int8.tflite",
+  "nodes": [
+    {
+      "node": 0,
+      "op": "CONV_2D",
+      "output_shape": [
+        1,
+        480,
+        640,
+        4
+      ],
+      "macs": 44236800,
+      "padded_macs_4x4": 44236800,
+      "minimum_io_bytes": 2457600
+    },
+    {
+      "node": 1,
+      "op": "CONV_2D",
+      "output_shape": [
+        1,
+        240,
+        320,
+        4
+      ],
+      "macs": 11059200,
+      "padded_macs_4x4": 11059200,
+      "minimum_io_bytes": 1536000
+    },
+    {
+      "node": 2,
+      "op": "CONV_2D",
+      "output_shape": [
+        1,
+        120,
+        160,
+        8
+      ],
+      "macs": 5529600,
+      "padded_macs_4x4": 5529600,
+      "minimum_io_bytes": 460800
+    },
+    {
+      "node": 3,
+      "op": "CONV_2D",
+      "output_shape": [
+        1,
+        120,
+        160,
+        4
+      ],
+      "macs": 5529600,
+      "padded_macs_4x4": 5529600,
+      "minimum_io_bytes": 230400
+    },
+    {
+      "node": 4,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "output_shape": [
+        1,
+        240,
+        320,
+        4
+      ],
+      "minimum_io_bytes": 384000
+    },
+    {
+      "node": 5,
+      "op": "ADD",
+      "output_shape": [
+        1,
+        240,
+        320,
+        4
+      ],
+      "minimum_io_bytes": 921600
+    },
+    {
+      "node": 6,
+      "op": "CONV_2D",
+      "output_shape": [
+        1,
+        240,
+        320,
+        4
+      ],
+      "macs": 11059200,
+      "padded_macs_4x4": 11059200,
+      "minimum_io_bytes": 614400
+    },
+    {
+      "node": 7,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "output_shape": [
+        1,
+        480,
+        640,
+        4
+      ],
+      "minimum_io_bytes": 1536000
+    },
+    {
+      "node": 8,
+      "op": "ADD",
+      "output_shape": [
+        1,
+        480,
+        640,
+        4
+      ],
+      "minimum_io_bytes": 3686400
+    },
+    {
+      "node": 9,
+      "op": "CONV_2D",
+      "output_shape": [
+        1,
+        480,
+        640,
+        4
+      ],
+      "macs": 4915200,
+      "padded_macs_4x4": 4915200,
+      "minimum_io_bytes": 2457600
+    }
+  ],
+  "conv_macs": 82329600,
+  "padded_conv_macs_4x4": 82329600,
+  "minimum_io_bytes": 14284800,
+  "peak_compute_only_fps_at_100mhz_16mac": 19.43407960199005,
+  "measured_fpga_fps": null,
+  "limitations": "Compute-only upper bound excludes AXI, activation, Add, resize and CPU dispatch. Minimum I/O excludes repeated reads/cache effects. Not a 15-fps acceptance result."
+}

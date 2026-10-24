@@ -1,0 +1,32 @@
+{
+  "target_fresh_fps": 30,
+  "live_target_achieved": true,
+  "baseline_fresh_fps": 2.7178086617629424,
+  "fresh_fps": 30.050505317620654,
+  "speedup": 11.056887756818023,
+  "median_invoke_ms": 31.77482,
+  "output_exact_reference": true,
+  "all_errors_zero": true,
+  "flash_written": false,
+  "cpu_left_running": true,
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "soak_fresh_fps": 30.047704118166227,
+  "soak_consecutive_frames": 3600,
+  "soak_exact_reference": true,
+  "resources": {
+    "xlr": 55169,
+    "xlr_capacity": 60800,
+    "ram": 252,
+    "ram_capacity": 256,
+    "dsp": 143,
+    "dsp_capacity": 160
+  },
+  "timing": {
+    "setup_min_ns": 0.013,
+    "hold_min_ns": 0.026,
+    "model": "I3",
+    "tool": "Efinity 2026.1"
+  },
+  "bit_sha256": "49c105582a13a05a4bd4881e459b5399255ff1cdca8f7823456050d754d04702",
+  "elf_sha256": "81f75223325d48a087451a25cc91c1a03ccd22b89688c2f125ec7004a04d6f93"
+}

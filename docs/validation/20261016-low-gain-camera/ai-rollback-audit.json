@@ -1,0 +1,12 @@
+{
+  "iris_ws/src/cnn/iris_style_contour.v": true,
+  ".script/render-style-visibility.py": true,
+  "iris_ws/src/cnn/iris_stream_conv.v": true,
+  "iris_ws/src/cnn/iris_stream_cnn.v": true,
+  "point_sampler_body_matches_HEAD": true,
+  "tensor_filters_disabled": true,
+  "firmware_sha256": "59da1b8347866b87694e2a9b6b853004b84e8bd0715b6886a54801f4b30bf087",
+  "model_sha256": "e4a45f1d9314654565f3300978d8a7b8843fc0c0687c454c4b6e3b47e0f05386",
+  "contour_h_threshold": 32,
+  "contour_s_threshold": 40
+}

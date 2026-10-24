@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+"""Load a live TinyML ELF, record frames and dump a VS-confirmed matching pair.
+
+Requires OpenOCD Tcl on localhost:6666 and a separately programmed SRAM bitstream.
+CPU is halted only while reading the pair, then resumed so HDMI keeps updating.
+"""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import select
+import socket
+import struct
+import subprocess
+import termios
+import time
+import xml.etree.ElementTree as ET
+
+p=argparse.ArgumentParser(description=__doc__)
+p.add_argument('--elf',type=Path,required=True)
+p.add_argument('--bit-file',type=Path,required=True)
+p.add_argument('--riscv-prefix',required=True)
+p.add_argument('--output',type=Path,required=True)
+p.add_argument('--uart',default='/dev/serial/by-id/usb-FTDI_Quad_RS232-HS-if02-port0')
+p.add_argument('--frames',type=int,default=4)
+p.add_argument('--timeout',type=float,default=120)
+p.add_argument('--expected-model',type=Path,help='require these exact trained model bytes in the ELF and FPGA project')
+p.add_argument('--check-only',action='store_true',help='verify model/project identity without connecting to the board')
+a=p.parse_args()
+a.output.parent.mkdir(parents=True,exist_ok=True)
+elf=a.elf.resolve()
+if any(c in str(elf)+str(a.output.resolve()) for c in '{}\n\r'):
+    p.error('unsupported Tcl path characters')
+nm=subprocess.check_output([a.riscv_prefix+'nm','-S',str(elf)],text=True)
+match=re.search(r'^([0-9a-f]+) [0-9a-f]+ [BbDd] iris_live_result$',nm,re.M)
+if not match:p.error('live result symbol absent')
+descriptor_address=int(match[1],16)
+def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+# Refuse the historical student/contour image before touching the CPU. A live
+# RGB project and its ELF must carry the same complete trained FlatBuffer.
+project_manifest=a.bit_file.resolve().parents[1]/'tinyml-project.json'
+if not project_manifest.is_file():p.error('bitstream project lacks a TinyML model manifest')
+project=json.loads(project_manifest.read_text())
+project_xml=project_manifest.parent/'iris_ws.xml'
+parameters={node.get('name'):node.get('value') for node in ET.parse(project_xml).iter()
+            if node.tag.rsplit('}',1)[-1]=='dynparam'}
+if parameters.get('ENABLE_TINYML_RGB')!='1' or parameters.get('ENABLE_STREAM_CNN')!='0':
+    p.error('bitstream project is not a complete-model live RGB project')
+rain_backend=parameters.get('ENABLE_RAIN_BACKEND')=='1'
+if rain_backend!=bool(re.search(r'\b_Z12IrisRainConv',nm)):
+    p.error('ELF and bitstream project select different Conv/Add backends')
+model_symbols=re.findall(r'^([0-9a-f]+) ([0-9a-f]+) [Rr] (\w+_model_data)$',nm,re.M)
+if len(model_symbols)!=1:p.error('ELF must contain exactly one complete trained model')
+model_address,model_size,model_symbol=model_symbols[0]
+model_address=int(model_address,16);model_size=int(model_size,16)
+elf_bytes=elf.read_bytes()
+if elf_bytes[:6]!=b'\x7fELF\x01\x01':p.error('expected a little-endian ELF32 firmware')
+phoff=struct.unpack_from('<I',elf_bytes,28)[0]
+phentsize,phnum=struct.unpack_from('<HH',elf_bytes,42)
+model_data=None
+for index in range(phnum):
+    kind,offset,vaddr,_,filesz,_,_,_=struct.unpack_from('<8I',elf_bytes,phoff+index*phentsize)
+    if kind==1 and vaddr<=model_address and model_address+model_size<=vaddr+filesz:
+        begin=offset+model_address-vaddr
+        model_data=elf_bytes[begin:begin+model_size]
+if model_data is None:p.error('trained model is not present in an ELF load segment')
+model_hash=hashlib.sha256(model_data).hexdigest()
+if model_hash!=project.get('model_sha256'):p.error('ELF model differs from the bitstream project model')
+if a.expected_model and digest(a.expected_model)!=model_hash:p.error('ELF/project model differs from --expected-model')
+identity={'model_sha256':model_hash,'model_bytes':model_size,'model_symbol':model_symbol,
+          'rain_row_backend':rain_backend,
+          'project_manifest':str(project_manifest),'elf_sha256':digest(elf),'bit_sha256':digest(a.bit_file)}
+if a.check_only:
+    print(json.dumps(identity,indent=2));raise SystemExit(0)
+def words(raw):
+    return [int(v,16) for line in raw.splitlines() if re.match(r'^0x[0-9a-f]+:',line)
+            for v in line.split(':',1)[1].split()]
+raw=bytearray();report={};frame_receipts=[]
+with socket.create_connection(('localhost',6666),timeout=60) as connection:
+    def tcl(command):
+        connection.sendall(command.encode()+b'\x1a');data=bytearray()
+        while b'\x1a' not in data:
+            chunk=connection.recv(65536)
+            if not chunk:raise RuntimeError('OpenOCD disconnected')
+            data.extend(chunk)
+        return data.decode(errors='replace').rstrip('\x1a')
+    fd=os.open(a.uart,os.O_RDWR|os.O_NOCTTY|os.O_NONBLOCK)
+    try:
+        attr=termios.tcgetattr(fd);attr[0]=attr[1]=attr[3]=0
+        attr[2]=termios.CS8|termios.CLOCAL|termios.CREAD
+        attr[4]=attr[5]=termios.B115200
+        attr[6][termios.VMIN]=attr[6][termios.VTIME]=0
+        termios.tcsetattr(fd,termios.TCSANOW,attr);termios.tcflush(fd,termios.TCIFLUSH)
+        tcl('halt');reset=tcl('reset halt');loaded=tcl('load_image {'+str(elf)+'}')
+        if 'downloaded' not in loaded:raise RuntimeError('ELF load not confirmed: '+loaded)
+        print(loaded,flush=True);tcl('resume 0x00800000');begin=time.monotonic()
+        while time.monotonic()-begin<a.timeout:
+            if select.select([fd],[],[],.2)[0]:
+                chunk=os.read(fd,65536);raw.extend(chunk)
+                print(chunk.decode(errors='replace'),end='',flush=True)
+                complete_lines=len(re.findall(rb'IRIS LIVE frame=\d+[^\n]*\n',raw))
+                while len(frame_receipts)<complete_lines:frame_receipts.append(time.monotonic()-begin)
+            if b'IRIS STOP:' in raw:break
+            if len(re.findall(rb'IRIS LIVE frame=\d+[^\n]*\n',raw))>=a.frames:break
+        tcl('halt')
+        descriptor=words(tcl(f'mdw 0x{descriptor_address:x} 12'))
+        registers=words(tcl('mdw 0xf8100000 23'))
+        decoded=raw.decode(errors='replace').replace('\r','')
+        rows=re.findall(r'^(\d+); ([A-Z_0-9]+); ([A-Z_0-9]+); ([^\n]+)$',decoded,re.M)
+        frames=[dict(zip(('sequence','pair','invoke_ticks','displayed','captures','underflow','readerr','rejects'),map(int,m)))
+                for m in re.findall(r'IRIS LIVE frame=(\d+) pair=(\d+) Invoke_ticks=(\d+) displayed=(\d+) captures=(\d+) underflow=(\d+) readerr=(\d+) rejects=(\d+)',decoded)]
+        report={**identity,'reset':reset,'load':loaded,
+                'descriptor':descriptor,'apb_registers':registers,'frames':frames,
+                'elapsed_seconds':time.monotonic()-begin,
+                'frame_receipt_seconds':frame_receipts,
+                'hardware_frame_period_ticks':[int(v) for v in re.findall(r'IRIS LIVE frame=\d+[^\n]* period_ticks=(\d+)',decoded)],
+                'steady_intervals_seconds':[b-a for a,b in zip(frame_receipts[1:],frame_receipts[2:])],
+                'profile':[{'node':int(n),'op':op,'mode':mode,'duration':duration} for n,op,mode,duration in rows],
+                'strict_dispatch':len(rows)==23 and all(mode in ('STANDARD','LITE','IRIS_RESIZE_HW','IRIS_ROW_CONV','IRIS_ROW_ADD') for _,_,mode,_ in rows),
+                'registers':{r:tcl('reg '+r+' force') for r in ('pc','mcause','mepc','mtval')},
+                'camera_output_numeric_parity_verified':False,
+                'visual_confirmation':False}
+        report['completed']=len(frames)>=a.frames and b'IRIS STOP:' not in raw
+        if report['completed'] and len(registers)>=22 and registers[19]&4:
+            pair=registers[19]&3
+            if pair not in (0,1,2):raise RuntimeError('invalid displayed pair')
+            report['dump_pair']=pair;report['files']={}
+            for label,base in [('input',(0x03000000,0x03200000,0x03800000)[pair]),
+                               ('output',(0x03400000,0x03600000,0x03a00000)[pair])]:
+                path=Path(str(a.output)+'-'+label+'.bin').resolve()
+                dumped=tcl(f'dump_image {{{path}}} 0x{base:x} 49152')
+                if not path.exists() or path.stat().st_size!=49152:raise RuntimeError('incomplete dump: '+dumped)
+                report['files'][label]={'path':str(path),'address':hex(base),'bytes':49152,'sha256':digest(path)}
+        tcl('resume');report['cpu_left_running']=True
+    finally:
+        os.close(fd)
+        Path(str(a.output)+'-uart.log').write_bytes(raw)
+        Path(str(a.output)+'-debug.json').write_text(json.dumps(report,indent=2)+'\n')
+print(json.dumps(report,indent=2))
+raise SystemExit(0 if report.get('completed') and report.get('strict_dispatch') else 1)

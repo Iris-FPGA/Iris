@@ -1,0 +1,69 @@
+{
+  "scope": "Restore HDMI 1920x1080 and replace source Gaussian with native tensor 3x3 median plus contour noise dead zone; SRAM only",
+  "bit_sha256": "d90645ed03eb557813b1340b9c24a58e99b0fabf28eba38bbc364502e80cd95b",
+  "hex_sha256": "44a2d387efca1a61e8ec29f14778514abe7b82257b6b4f62803b7fa72a6230ff",
+  "hdmi": {
+    "width": 1920,
+    "height": 1080,
+    "pixel_clock_mhz": 148.75,
+    "serial_clock_mhz": 743.75,
+    "source_pair_clock_mhz": 74.375,
+    "raster_total": [
+      2200,
+      1125
+    ],
+    "expected_refresh_hz": 60.101010101010104,
+    "native640_trial_reverted": true
+  },
+  "denoise": {
+    "input_median": [
+      3,
+      3
+    ],
+    "filter_domain": "640x480 RGB tensor before CNN, reference and contour",
+    "channels": "independent RGB",
+    "border": "replicate",
+    "contour_h_threshold": 64,
+    "contour_s_threshold": 96,
+    "previous_h_threshold": 32,
+    "previous_s_threshold": 40,
+    "gaussian_comparison_retained": true,
+    "default_gaussian_active": false
+  },
+  "rtl": {
+    "point_gaussian_median_2d_oracle": "pass",
+    "median_complete_frames": 9,
+    "contour_vectors": 10240,
+    "contour_1080p_modes_banks_errors": "pass",
+    "capture_backpressure_errors_recovery": "pass",
+    "triple_bank_leases": "pass"
+  },
+  "build": {
+    "map": "pass",
+    "interface": "pass",
+    "pnr": "pass",
+    "pgm": "pass",
+    "xlr": 58216,
+    "xlr_available": 60800,
+    "ram": 255,
+    "ram_available": 256,
+    "dsp": 113,
+    "dsp_available": 160,
+    "min_setup_ns": 0.013,
+    "min_hold_ns": 0.026
+  },
+  "observation_seconds": 120.0364739120123,
+  "committed_hz": 30.04946480050766,
+  "live_ok": true,
+  "max_underflows": 0,
+  "max_read_errors": 0,
+  "max_rejects": 0,
+  "visual_quality_accepted": false,
+  "visual_feedback": "仍有较多噪点；进一步确认只有左侧原图存在雪花",
+  "flash_modified": false,
+  "limitations": [
+    "Synthetic-noise metrics do not establish real-camera quality.",
+    "Median removes single-pixel detail; higher gradient thresholds omit weak contours.",
+    "Pure random-noise RGB RMSE is slightly higher than the source Gaussian; combined contour false positives decrease."
+  ]
+}

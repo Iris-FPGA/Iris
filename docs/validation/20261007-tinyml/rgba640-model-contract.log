@@ -1,0 +1,5 @@
+make: Entering directory '/home/noir/Documents/workspace/Iris/firmware/tinyml_style'
+g++ -std=c++17 -DIRIS_MODEL_RGBA=1 -I/home/noir/Documents/workspace/tinyml/tinyml_hello_world/Ti60F225_tinyml_hello_world/embedded_sw/SapphireSoc/software/standalone/tinyml_ypd/src -I/home/noir/Documents/workspace/tinyml/tinyml_hello_world/Ti60F225_tinyml_hello_world/embedded_sw/SapphireSoc/software/standalone/tinyml_ypd/src/tensorflow/third_party/flatbuffers/include -I/home/noir/Documents/workspace/Iris/iris_ws/RISC-V/rgba640 check_model.cc src/model.cc -o build/check-model-rgba640
+build/check-model-rgba640
+PASS: 5960 model bytes; INT8 NHWC 1x480x640x4; Conv2D v3 x6, Add v2 x2, ResizeNearestNeighbor v2 x2; 2x resize with unchanged quantization and both flags false
+make: Leaving directory '/home/noir/Documents/workspace/Iris/firmware/tinyml_style'

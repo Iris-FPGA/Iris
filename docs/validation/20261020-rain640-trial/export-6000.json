@@ -1,0 +1,28 @@
+{
+  "model_sha256": "6ea1b519faf2a408ec0d4680f4b3e1a0ae6044834d72ba1f8add7249a2269b7b",
+  "model_bytes": 5832,
+  "checkpoint_sha256": "e1633fcd7496865e929d266bed6529c4d6b89966ec4c42b2b6f099c2a4dd7936",
+  "candidate": "c448_lowdec_skip_r0",
+  "bn_fold_max_abs": 0.000244140625,
+  "input_shape": [
+    1,
+    480,
+    640,
+    3
+  ],
+  "output_shape": [
+    1,
+    480,
+    640,
+    3
+  ],
+  "input_quantization": [
+    1.0,
+    -128
+  ],
+  "output_quantization": [
+    1.5150625705718994,
+    -101
+  ],
+  "hardware_proven": false
+}

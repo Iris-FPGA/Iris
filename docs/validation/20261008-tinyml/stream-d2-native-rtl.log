@@ -1,0 +1,4 @@
+CNN bit-exact W=640 H=480 D=2 pixels=76800 cycles=2779885
+CNN bit-exact W=640 H=480 D=2 pixels=76800 cycles=2779914
+PASS streaming CNN independent integer oracle and frame restart
+tests/video/tb_stream_cnn.sv:88: $finish called at 55599700000 (1ps)

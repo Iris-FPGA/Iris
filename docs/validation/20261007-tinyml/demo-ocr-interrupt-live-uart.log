@@ -1,0 +1,42 @@
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x0 cpuAR=0x0x80ca80 fbAR=0x0x1d2800
+arb cpuAW=0x0x70fffc fbAW=0x0x395000 rdCnt cpu/fb=2238/31801 rresp=0
+arb ARhand=34258 rdDone=34258 AWhand=477 wrDone=477
+lastAR addr=0x0x8080c0 len=3 size=4 burst=1 | lastAW addr=0x0x94000 len=127
+Core 0 Hardware Settings:
+  Accelerator Active: 1
+  UUID: 0x4923687a
+  AXI DW: 128
+  AXI_DB_W: 16
+  Cache Enabled: 1
+  Cache Depth: 512
+  Conv Depthw Mode: 2
+  Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:2
+  Add Mode: 2
+  FC Mode: 0
+  Mul Mode: 0
+  LR Mode: 0
+  Min-Max Mode: 0
+  Reshape Mode: 0
+IRIS nodes OK: flatbuffer
+IRIS nodes OK: init
+IRIS prepare node 0 @0x0xe28174IRIS prepare node 1 @0x0xe28190IRIS prepare node 2 @0x0xe281acIRIS prepare node 3 @0x0xe281c8IRIS prepare node 4 @0x0xe281e4IRIS prepare node 5 @0x0xe28200IRIS prepare node 6 @0x0xe2821cIRIS prepare node 7 @0x0xe28238IRIS prepare node 8 @0x0xe28254IRIS prepare node 9 @0x0xe28270DDR arena: base=0x0xa28400 capacity=4194304 used=3688092
+IRIS LIVE: 640x480 paired camera/style; no CPU image processing; SRAM only
+IRIS LIVE before capture: input_view=0x0xe27db8 output_view=0x0xe27d78 eval23=0x0xb54400
+IRIS LIVE after capture: input_data=0x0xa28400 output_data=0x0xa28400 eval23=0x0xb54400
+IRIS CTRL before input copy: intr=0x0/0x0 ops=0x8276e4
+IRIS CTRL after input copy: intr=0x0/0x0 ops=0x8276e4
+IRIS LIVE DMA node=0 tensor=15 output=0x0xc80400
+IRIS LIVE DMA node=1 tensor=16 output=0x0xabe400
+IRIS LIVE DMA node=2 tensor=17 output=0x0xa28400
+IRIS LIVE DMA node=3 tensor=18 output=0x0xa4dc00
+IRIS LIVE DMA node=4 tensor=19 output=0x0xa73400
+IRIS LIVE DMA node=5 tensor=20 output=0x0xa28400
+IRIS LIVE DMA node=6 tensor=21 output=0x0xb54400
+IRIS LIVE DMA node=7 tensor=22 output=0x0xa28400
+IRIS LIVE DMA node=8 tensor=23 output=0x0xb54400
+IRIS LIVE DMA node=9 tensor=24 output=0x0xa28400
+IRIS CONV input=0xa28400 output=0xc80400 shape=480x640x4 out=480x640x4 intr=0x0/0x0

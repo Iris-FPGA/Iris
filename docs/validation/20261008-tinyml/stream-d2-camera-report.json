@@ -1,0 +1,29 @@
+{
+  "scope": "one camera pair exported through hardware DMA CI/UART; no JTAG DDR pixel reads",
+  "elf_sha256": "d1560d41e84c6e56997dc22f652b14aadbbcbd4dea87db7ab67d6923867676e8",
+  "bit_sha256": "73bee165bc40d9141e8c567a46c1a0fda6c84aa9bb2a61ff0f5b2868288ee02a",
+  "serial_ddr": false,
+  "snapshot_files": {
+    "input": {
+      "path": "/home/noir/Documents/workspace/Iris/docs/validation/20261008-tinyml/stream-d2-camera-input.bin",
+      "sha256": "ccfcf2f4a20d9f98c938679e71ebe706f8e96ff623ee6c9da3a15d41c146d609"
+    },
+    "output": {
+      "path": "/home/noir/Documents/workspace/Iris/docs/validation/20261008-tinyml/stream-d2-camera-output.bin",
+      "sha256": "7ec54ec2e3a0d4db12a9bdf9cf26329c55db12045577067e34ba4bcf98db3eaa"
+    }
+  },
+  "dummy_bad": {
+    "input": 0,
+    "output": 0
+  },
+  "load": "5100 bytes written at address 0x00800000\ndownloaded 5100 bytes in 0.126471s (39.380 KiB/s)\n",
+  "capture_audit": {
+    "source_dummy": 0,
+    "bus_dummy": 0,
+    "serial_ddr": 0
+  },
+  "snapshot_pair": 0,
+  "snapshot_displayed_count": 1,
+  "export_ok": true
+}

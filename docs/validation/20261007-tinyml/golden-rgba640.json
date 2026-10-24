@@ -1,0 +1,23 @@
+{
+  "model_sha256": "21ad447851ae878b135dee2480c33c41862e7fcc4c5889878f4fefbcb26aea47",
+  "tensorflow_version": "2.20.0",
+  "resolver": "BUILTIN_REF",
+  "fixture": "x*256/640,y*256/480,16px checker,zero fourth channel; uint8 minus128",
+  "input_shape": [
+    1,
+    480,
+    640,
+    4
+  ],
+  "input_sha256": "b8427d4683d4a9fb96b967220b6629fd260c7e8a831c9a42753763ebafc055b4",
+  "output_bytes": 1228800,
+  "output_sha256": "828b3c885079d22f515ac4c6ac2d00e5d5aed96dd01259ba00c059192e5a8962",
+  "output_fnv1a": "0x3830f80b",
+  "board_parity": true,
+  "board_evidence": "rgba640-static-strict-debug.json",
+  "board_parity_scope": "one deterministic static fixture, optimized RGBA640 model; not original-teacher equality or fresh-frame throughput",
+  "board_bit_sha256": "885b2f7dfa6abd83eeecc348f692e2930b17606b3a4afdf11b24a586d324d23b",
+  "board_elf_sha256": "f401788c351982363f7265f0b43c609e1d126a9cbc85482eb36da4c3b8dd3556",
+  "invoke_seconds": 1.37987371,
+  "fresh_frame_fps": null
+}

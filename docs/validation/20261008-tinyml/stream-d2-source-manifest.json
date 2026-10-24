@@ -1,0 +1,9 @@
+{
+  "iris_ws/src/cnn/iris_stream_conv.v": "c5c211e3e79a30497e824faf0e1269264f5bb134a54061a77ff32107e9b01976",
+  "iris_ws/src/cnn/iris_stream_cnn.v": "848f9e15ccb731cca0cf1c44b371f5f8c72e31c89afe993d5344652f3453bd5f",
+  "iris_ws/src/cnn/tinyml_subsystem.v": "b65e2f46f720efcd083ba1b0e41094bfe139d862f192e58542735a2ed0ead79c",
+  "iris_ws/src/top.v": "6224ec0b422b478e491cd3ea394b20c4b1cd4a3f52da3a3c487e7c632caee57c",
+  "firmware/stream_style/main.c": "377dfceb77f36969e5fd734b8c9c483c5d694ac799513136caf0fd855b0adcbc",
+  "firmware/stream_style/stream_model.h": "6b6b36bc2267cb070d9985b9d8f531d06b33246aec3a2463e0d0e6bed8af13d0",
+  "one_last_kiss_style/models/micro4_d2_rgba_640_int8.tflite": "e4a45f1d9314654565f3300978d8a7b8843fc0c0687c454c4b6e3b47e0f05386"
+}

@@ -1,0 +1,10 @@
+{
+  "halt": "",
+  "load": "306804 bytes written at address 0x00800000\ndownloaded 306804 bytes in 7.071400s (42.370 KiB/s)\n",
+  "start": "",
+  "reg pc force": "pc (/32): 0x008001f4\n",
+  "reg mcause force": "mcause (/32): 0x00000002\n",
+  "reg mepc force": "mepc (/32): 0x00001000\n",
+  "reg mtval force": "mtval (/32): 0x203c213a\n",
+  "mdw 0x84dfe8 8": "0x0084dfe8: 00000003 00000000 00000000 00000000 00000000 00000000 00000000 00000000 \n"
+}

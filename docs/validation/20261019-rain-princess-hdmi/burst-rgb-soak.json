@@ -1,0 +1,339 @@
+{
+  "source": "burst-rgb-soak-uart.log",
+  "bit_sha256": "6ee41aeab508f75deff0e38da5e5edfd48798328c4ec71e508cb35ccd82e05b8",
+  "samples": [
+    {
+      "sequence": 667,
+      "pair": 0,
+      "invoke_ticks": 35453283,
+      "displayed": 667,
+      "captures": 668,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 668,
+      "pair": 1,
+      "invoke_ticks": 35452667,
+      "displayed": 668,
+      "captures": 669,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 669,
+      "pair": 2,
+      "invoke_ticks": 35457662,
+      "displayed": 669,
+      "captures": 670,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 670,
+      "pair": 0,
+      "invoke_ticks": 35454003,
+      "displayed": 670,
+      "captures": 671,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 671,
+      "pair": 1,
+      "invoke_ticks": 35456053,
+      "displayed": 671,
+      "captures": 672,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 672,
+      "pair": 2,
+      "invoke_ticks": 35453838,
+      "displayed": 672,
+      "captures": 673,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 673,
+      "pair": 0,
+      "invoke_ticks": 35455637,
+      "displayed": 673,
+      "captures": 674,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 674,
+      "pair": 1,
+      "invoke_ticks": 35456327,
+      "displayed": 674,
+      "captures": 675,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 675,
+      "pair": 2,
+      "invoke_ticks": 35456085,
+      "displayed": 675,
+      "captures": 676,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 676,
+      "pair": 0,
+      "invoke_ticks": 35454408,
+      "displayed": 676,
+      "captures": 677,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 677,
+      "pair": 1,
+      "invoke_ticks": 35448732,
+      "displayed": 677,
+      "captures": 678,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 678,
+      "pair": 2,
+      "invoke_ticks": 35443870,
+      "displayed": 678,
+      "captures": 679,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 679,
+      "pair": 0,
+      "invoke_ticks": 35446155,
+      "displayed": 679,
+      "captures": 680,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 680,
+      "pair": 1,
+      "invoke_ticks": 35452515,
+      "displayed": 680,
+      "captures": 681,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 681,
+      "pair": 2,
+      "invoke_ticks": 35459095,
+      "displayed": 681,
+      "captures": 682,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 682,
+      "pair": 0,
+      "invoke_ticks": 35461773,
+      "displayed": 682,
+      "captures": 683,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 683,
+      "pair": 1,
+      "invoke_ticks": 35457448,
+      "displayed": 683,
+      "captures": 684,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 684,
+      "pair": 2,
+      "invoke_ticks": 35459482,
+      "displayed": 684,
+      "captures": 685,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 685,
+      "pair": 0,
+      "invoke_ticks": 35453579,
+      "displayed": 685,
+      "captures": 686,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 686,
+      "pair": 1,
+      "invoke_ticks": 35448094,
+      "displayed": 686,
+      "captures": 687,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 687,
+      "pair": 2,
+      "invoke_ticks": 35443313,
+      "displayed": 687,
+      "captures": 688,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 688,
+      "pair": 0,
+      "invoke_ticks": 35446230,
+      "displayed": 688,
+      "captures": 689,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 689,
+      "pair": 1,
+      "invoke_ticks": 35454722,
+      "displayed": 689,
+      "captures": 690,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 690,
+      "pair": 2,
+      "invoke_ticks": 35449416,
+      "displayed": 690,
+      "captures": 691,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 691,
+      "pair": 0,
+      "invoke_ticks": 35454005,
+      "displayed": 691,
+      "captures": 692,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 692,
+      "pair": 1,
+      "invoke_ticks": 35454743,
+      "displayed": 692,
+      "captures": 693,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 693,
+      "pair": 2,
+      "invoke_ticks": 35453919,
+      "displayed": 693,
+      "captures": 694,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 694,
+      "pair": 0,
+      "invoke_ticks": 35453356,
+      "displayed": 694,
+      "captures": 695,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 695,
+      "pair": 1,
+      "invoke_ticks": 35457770,
+      "displayed": 695,
+      "captures": 696,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 696,
+      "pair": 2,
+      "invoke_ticks": 35458475,
+      "displayed": 696,
+      "captures": 697,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 697,
+      "pair": 0,
+      "invoke_ticks": 35454400,
+      "displayed": 697,
+      "captures": 698,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 698,
+      "pair": 1,
+      "invoke_ticks": 35455605,
+      "displayed": 698,
+      "captures": 699,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 699,
+      "pair": 2,
+      "invoke_ticks": 35454073,
+      "displayed": 699,
+      "captures": 700,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    }
+  ],
+  "all_errors_zero": true,
+  "sequence_contiguous": true,
+  "stop_seen": false
+}

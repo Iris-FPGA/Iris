@@ -1,0 +1,85 @@
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x40 cpuAR=0x0x808300 fbAR=0x0x20f000
+arb cpuAW=0x0x70fffc fbAW=0x0x19d000 rdCnt cpu/fb=2257/37723 rresp=0
+arb ARhand=40256 rdDone=40256 AWhand=2437 wrDone=2437
+lastAR addr=0x0x808340 len=3 size=4 burst=1 | lastAW addr=0x0x499000 len=127
+Core 0 Hardware Settings:
+  Accelerator Active: 1
+  UUID: 0x4923687a
+  AXI DW: 128
+  AXI_DB_W: 16
+  Cache Enabled: 1
+  Cache Depth: 512
+  Conv Depthw Mode: 2
+  Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:2
+  Add Mode: 2
+  FC Mode: 0
+  Mul Mode: 0
+  LR Mode: 0
+  Min-Max Mode: 0
+  Reshape Mode: 0
+IRIS nodes OK: flatbuffer
+IRIS nodes OK: init
+IRIS prepare node 0 @0x0xe28474IRIS prepare node 1 @0x0xe28490IRIS prepare node 2 @0x0xe284acIRIS prepare node 3 @0x0xe284c8IRIS prepare node 4 @0x0xe284e4IRIS prepare node 5 @0x0xe28500IRIS prepare node 6 @0x0xe2851cIRIS prepare node 7 @0x0xe28538IRIS prepare node 8 @0x0xe28554IRIS prepare node 9 @0x0xe28570DDR arena: base=0x0xa28700 capacity=4194304 used=3688092
+IRIS LIVE: 640x480 paired camera/style; no CPU image processing; SRAM only
+IRIS LIVE before capture: input_view=0x0xe280b8 output_view=0x0xe28078 eval23=0x0xb54700
+IRIS LIVE after capture: input_data=0x0xa28700 output_data=0x0xa28700 eval23=0x0xb54700
+IRIS CAPTURE AUDIT source_dummy=0 bus_dummy=0 serial_ddr=0
+IRIS CTRL before input copy: intr=0x0/0x0 ops=0x827ad4
+IRIS CTRL after input copy: intr=0x0/0x0 ops=0x827ad4
+IRIS LIVE DMA node=0 tensor=15 output=0x0xc80700
+IRIS LIVE DMA node=1 tensor=16 output=0x0xabe700
+IRIS LIVE DMA node=2 tensor=17 output=0x0xa28700
+IRIS LIVE DMA node=3 tensor=18 output=0x0xa4df00
+IRIS LIVE DMA node=4 tensor=19 output=0x0xa73700
+IRIS LIVE DMA node=5 tensor=20 output=0x0xa28700
+IRIS LIVE DMA node=6 tensor=21 output=0x0xb54700
+IRIS LIVE DMA node=7 tensor=22 output=0x0xa28700
+IRIS LIVE DMA node=8 tensor=23 output=0x0xb54700
+IRIS LIVE DMA node=9 tensor=24 output=0x0xa28700
+0; CONV_2D; STANDARD; ticks=135869810 cache_hit_raw=0 cache_miss_raw=0
+1; CONV_2D; STANDARD; ticks=41814885 cache_hit_raw=0 cache_miss_raw=0
+2; CONV_2D; STANDARD; ticks=19624707 cache_hit_raw=0 cache_miss_raw=0
+3; CONV_2D; STANDARD; ticks=3132691 cache_hit_raw=0 cache_miss_raw=0
+4; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=778461 cache_hit_raw=0 cache_miss_raw=0
+5; ADD; STANDARD; ticks=664010 cache_hit_raw=0 cache_miss_raw=0
+6; CONV_2D; STANDARD; ticks=6272172 cache_hit_raw=0 cache_miss_raw=0
+7; RESIZE_NEAREST_NEIGHBOR; IRIS_RESIZE_HW; ticks=3099416 cache_hit_raw=0 cache_miss_raw=0
+8; ADD; STANDARD; ticks=2622628 cache_hit_raw=0 cache_miss_raw=0
+9; CONV_2D; STANDARD; ticks=6612940 cache_hit_raw=0 cache_miss_raw=0
+IRIS LIVE frame=1 pair=0 Invoke_ticks=220517449 displayed=1 captures=1 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=2 pair=1 Invoke_ticks=258684809 displayed=2 captures=2 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=3 pair=0 Invoke_ticks=258673140 displayed=3 captures=3 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=4 pair=1 Invoke_ticks=259206881 displayed=4 captures=4 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=5 pair=0 Invoke_ticks=259245188 displayed=5 captures=5 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=6 pair=1 Invoke_ticks=259224590 displayed=6 captures=6 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=7 pair=0 Invoke_ticks=259087805 displayed=7 captures=7 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=8 pair=1 Invoke_ticks=258677868 displayed=8 captures=8 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=9 pair=0 Invoke_ticks=258647403 displayed=9 captures=9 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=10 pair=1 Invoke_ticks=258988469 displayed=10 captures=10 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=11 pair=0 Invoke_ticks=259244739 displayed=11 captures=11 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=12 pair=1 Invoke_ticks=259245956 displayed=12 captures=12 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=13 pair=0 Invoke_ticks=259243673 displayed=13 captures=13 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=14 pair=1 Invoke_ticks=258670756 displayed=14 captures=14 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=15 pair=0 Invoke_ticks=258677906 displayed=15 captures=15 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=16 pair=1 Invoke_ticks=258736023 displayed=16 captures=16 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=17 pair=0 Invoke_ticks=259193129 displayed=17 captures=17 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=18 pair=1 Invoke_ticks=259265184 displayed=18 captures=18 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=19 pair=0 Invoke_ticks=259239455 displayed=19 captures=19 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=20 pair=1 Invoke_ticks=258950563 displayed=20 captures=20 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=21 pair=0 Invoke_ticks=258684385 displayed=21 captures=21 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=22 pair=1 Invoke_ticks=258674585 displayed=22 captures=22 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=23 pair=0 Invoke_ticks=259102848 displayed=23 captures=23 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=24 pair=1 Invoke_ticks=259267666 displayed=24 captures=24 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=25 pair=0 Invoke_ticks=259269023 displayed=25 captures=25 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=26 pair=1 Invoke_ticks=259172399 displayed=26 captures=26 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=27 pair=0 Invoke_ticks=258663539 displayed=27 captures=27 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=28 pair=1 Invoke_ticks=258597021 displayed=28 captures=28 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=29 pair=0 Invoke_ticks=258813968 displayed=29 captures=29 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=30 pair=1 Invoke_ticks=259191715 displayed=30 captures=30 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=31 pair=0 Invoke_ticks=259334022 displayed=31 captures=31 underflow=0 readerr=0 rejects=0
+IRIS LIVE frame=32 pair=1 Invoke_ticks=259227902 displayed=32 captures=32 underflow=0 readerr=0 rejects=0
+

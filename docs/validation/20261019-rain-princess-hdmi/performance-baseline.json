@@ -1,0 +1,510 @@
+{
+  "layers": [
+    {
+      "node": 0,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        128,
+        128,
+        3
+      ],
+      "output": [
+        1,
+        128,
+        128,
+        8
+      ],
+      "baseline_seconds": 0.02316986,
+      "filter": [
+        8,
+        3,
+        3,
+        3
+      ],
+      "macs": 3538944
+    },
+    {
+      "node": 1,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        128,
+        128,
+        8
+      ],
+      "output": [
+        1,
+        64,
+        64,
+        16
+      ],
+      "baseline_seconds": 0.18938985,
+      "filter": [
+        16,
+        3,
+        3,
+        8
+      ],
+      "macs": 4718592
+    },
+    {
+      "node": 2,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        64,
+        64,
+        16
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.19603823,
+      "filter": [
+        32,
+        3,
+        3,
+        16
+      ],
+      "macs": 4718592
+    },
+    {
+      "node": 3,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.23940982,
+      "filter": [
+        32,
+        3,
+        3,
+        32
+      ],
+      "macs": 9437184
+    },
+    {
+      "node": 4,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.23964389,
+      "filter": [
+        32,
+        3,
+        3,
+        32
+      ],
+      "macs": 9437184
+    },
+    {
+      "node": 5,
+      "op": "ADD",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.00080663
+    },
+    {
+      "node": 6,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.23937546,
+      "filter": [
+        32,
+        3,
+        3,
+        32
+      ],
+      "macs": 9437184
+    },
+    {
+      "node": 7,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.23964311,
+      "filter": [
+        32,
+        3,
+        3,
+        32
+      ],
+      "macs": 9437184
+    },
+    {
+      "node": 8,
+      "op": "ADD",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.00080227
+    },
+    {
+      "node": 9,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.23930988,
+      "filter": [
+        32,
+        3,
+        3,
+        32
+      ],
+      "macs": 9437184
+    },
+    {
+      "node": 10,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.23960527,
+      "filter": [
+        32,
+        3,
+        3,
+        32
+      ],
+      "macs": 9437184
+    },
+    {
+      "node": 11,
+      "op": "ADD",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.00080787
+    },
+    {
+      "node": 12,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.23935945,
+      "filter": [
+        32,
+        3,
+        3,
+        32
+      ],
+      "macs": 9437184
+    },
+    {
+      "node": 13,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.23969859,
+      "filter": [
+        32,
+        3,
+        3,
+        32
+      ],
+      "macs": 9437184
+    },
+    {
+      "node": 14,
+      "op": "ADD",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.0008075
+    },
+    {
+      "node": 15,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.23938883,
+      "filter": [
+        32,
+        3,
+        3,
+        32
+      ],
+      "macs": 9437184
+    },
+    {
+      "node": 16,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.23982351,
+      "filter": [
+        32,
+        3,
+        3,
+        32
+      ],
+      "macs": 9437184
+    },
+    {
+      "node": 17,
+      "op": "ADD",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "baseline_seconds": 0.00080376
+    },
+    {
+      "node": 18,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "input": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "output": [
+        1,
+        64,
+        64,
+        32
+      ],
+      "baseline_seconds": 0.00469973
+    },
+    {
+      "node": 19,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        64,
+        64,
+        32
+      ],
+      "output": [
+        1,
+        64,
+        64,
+        16
+      ],
+      "baseline_seconds": 0.78702103,
+      "filter": [
+        16,
+        3,
+        3,
+        32
+      ],
+      "macs": 18874368
+    },
+    {
+      "node": 20,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "input": [
+        1,
+        64,
+        64,
+        16
+      ],
+      "output": [
+        1,
+        128,
+        128,
+        16
+      ],
+      "baseline_seconds": 0.00670184
+    },
+    {
+      "node": 21,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        128,
+        128,
+        16
+      ],
+      "output": [
+        1,
+        128,
+        128,
+        8
+      ],
+      "baseline_seconds": 0.77171159,
+      "filter": [
+        8,
+        3,
+        3,
+        16
+      ],
+      "macs": 18874368
+    },
+    {
+      "node": 22,
+      "op": "CONV_2D",
+      "input": [
+        1,
+        128,
+        128,
+        8
+      ],
+      "output": [
+        1,
+        128,
+        128,
+        3
+      ],
+      "baseline_seconds": 0.02231945,
+      "filter": [
+        3,
+        3,
+        3,
+        8
+      ],
+      "macs": 3538944
+    }
+  ],
+  "total_macs": 148635648,
+  "baseline_invoke_seconds": 4.40078197,
+  "note": "Complete original model; no retraining/distillation. Layer timing from first live square-camera frame."
+}

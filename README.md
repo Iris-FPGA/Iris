@@ -5,14 +5,6 @@
 - 工具链：Efinity `2026.1.132.4.5`
 - 板卡：Ti60F225_DemoBoard_v4
 
-## 已实现
-
-- **L0**：HDMI 1080p60 彩条、UART 回环、LED。
-- **摄像头接入**：SC431HAI（J4/MIPI CSI-2）→ 灰度实时画面到 HDMI（240×135 放大 8×），
-  I²C 初始化 + sensor ID 校验。详见
-  [`docs/摄像头接入_MIPI_CSI2_纪要.md`](docs/摄像头接入_MIPI_CSI2_纪要.md)。
-
-> ⚠️ 关键：CSI RX IP 必须用 `efx_csi2_rx` **5.9**（`ip/csi_rx_59/`），新版（如 5.17）解析不出 `vs`，画面会变成雪花。
 
 ## 目录结构
 
@@ -59,6 +51,10 @@ git clone https://github.com/FinResect/Iris.git
 
 生成 `iris_ws/outflow/iris_ws.bit` 与 `iris_ws.hex`。
 
+需要用 **KEY3 切换 One Last Kiss 轮廓增强版 / Rain Princess** 时，使用
+[双镜像构建及烧录说明](firmware/style_switch/README.md)。两个原有风格各自保留，
+切换会暂时中断 HDMI；普通 `build-iris` 仍构建单镜像。
+
 ### 4. 烧录
 
 ```bash
@@ -74,6 +70,8 @@ git clone https://github.com/FinResect/Iris.git
 | `setup-usb` | 安装 USB udev 规则并重载 |
 | `80-efx-pgm.rules` | udev 规则文件（给 Efinix 下载器节点授权） |
 | `build-iris` | 编译
+| `build-style-switch` | 构建两种现有风格及独立启动固件，生成 KEY3 切换用 Flash 镜像 |
+| `sync-style-switch` | 核对双镜像清单、时序及哈希后烧录 Flash 并回读校验 |
 | `sync-iris` | 烧录：默认 `jtag_bridge`，可传 `jtag`（SRAM）/`active`（需外接下载器） |
 | `clean-iris` | 清理编译产物（`outflow/`、`work_*/`） |
 | `efinity-env` | 共享 helper：解析 `EFINITY_HOME` 并 source `setup.sh` |
@@ -84,7 +82,3 @@ git clone https://github.com/FinResect/Iris.git
 - **`active` 模式报 `could not get flash device`**：`active` 是 SPI 直连，板载 USB 下载器不支持；用 `jtag_bridge`（flash）或 `jtag`（SRAM）。
 - **`Unsupported JTAG Bridge version: 0.0`**：`jtag_bridge` 需先加载 JTAG Bridge 位流，`sync-iris` 已自动处理。
 - **`setup.sh` 打印 `libstdc++` 警告**：仅为提示，不影响运行。
-
-## 双模式视频输出
-
-Flash 固件默认 1080p60 RGB；短按 KEY3 切换到放大的 3840×2160p30 YCbCr420，再按返回。KEY2 保留拍照，KEY0/1 保留曝光补偿。4K 模式要求兼容显示器，当前实板验证范围为内部时序和串口往返切换。详见 [双模式实现与验证](docs/1080p60与4K30双模式实板验证.md)。

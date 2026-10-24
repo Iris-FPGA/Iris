@@ -1,0 +1,2 @@
+PASS contour: 10240 vectors, independent 5x5 convolution, borders, modes, saturation and pipeline
+tests/video/tb_style_contour.sv:25: $finish called at 102501000 (1ps)

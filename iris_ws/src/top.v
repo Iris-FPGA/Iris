@@ -4,7 +4,22 @@
 //   debayer (display domain) -> RGB888 -> TMDS/HDMI 1080p.
 //=====================================================================
 
-module top
+module top #(
+    // Original camera diagnostic configuration defaults to its periodic log.
+    // The style project selects 0 through Efinity top-params and uses the CPU
+    // console; retain the legacy implementation for diagnostic builds.
+    parameter ENABLE_STYLE_DEMO = 0,
+    parameter ENABLE_TINYML_RGB = 0,
+    parameter ENABLE_TENSOR_BURST = 0,
+    parameter ENABLE_RAIN_BACKEND = 0,
+    parameter ENABLE_STREAM_CNN = 0,
+    parameter ENABLE_STYLE_VISIBILITY = 0,
+    parameter ENABLE_STYLE_CONTOUR = 0,
+    parameter ENABLE_STYLE_SWITCH = 0,
+    parameter STREAM_DILATION = 2,
+    parameter [24:0] STYLE_SCALE_Q24 = 25'd20591742,
+    parameter ENABLE_LEGACY_UART_LOG = 1
+)
 (
     ////////////////////////    CLOCK     ////////////////////////
     input                       gpio_clk_27m,     // 27MHz board clock (UART + LED)
@@ -58,6 +73,13 @@ module top
 
     ////////////////////////    KEYS      ////////////////////////
     input  [3:0]                key_i,     // active-low, pull-up (KEY0..KEY3)
+
+    // Optional dual-image Flash configuration interface (no extra wires).
+    (* syn_peri_port = 0 *) output [1:0] cfg_CBSEL,
+    (* syn_peri_port = 0 *) output cfg_ENA, cfg_CONFIG,
+    (* syn_peri_port = 0 *) input cfg_ERROR,
+    (* syn_peri_port = 0 *) output flash_sclk, flash_cs_n, flash_mosi,
+    (* syn_peri_port = 0 *) input flash_miso,
 
     ////////////////////////    HDMI TX   ////////////////////////
     input                       hdmi_tx_locked,
@@ -130,7 +152,17 @@ module top
     (* syn_peri_port = 0 *) input           io_cam_sda_IN,
     (* syn_peri_port = 0 *) output          io_cam_sda_OUT,
     (* syn_peri_port = 0 *) output          io_cam_sda_OE,
-    (* syn_peri_port = 0 *) output          o_cam_rst
+    (* syn_peri_port = 0 *) output          o_cam_rst,
+
+    ////////////////////////    JTAG_USER1 (Sapphire debug)  ////////////////////////
+    input                       jtag_inst1_TCK,
+    input                       jtag_inst1_TDI,
+    output                      jtag_inst1_TDO,
+    input                       jtag_inst1_SEL,
+    input                       jtag_inst1_CAPTURE,
+    input                       jtag_inst1_SHIFT,
+    input                       jtag_inst1_UPDATE,
+    input                       jtag_inst1_RESET
 );
 
 //=====================================================================
@@ -273,14 +305,14 @@ wire         fb_wlast;
 wire         fb_wvalid;
 wire         fb_wready;
 
-wire [7:0]   fb_rid8;
+wire [7:0]   arb_s0_rid;
 wire [127:0] fb_rdata;
 wire         fb_rlast;
 wire         fb_rvalid;
 wire         fb_rready;
 wire [1:0]   fb_rresp;
 wire [5:0]   fb_rid;
-wire [7:0]   fb_bid8;
+wire [7:0]   arb_s0_bid;
 wire [5:0]   fb_bid;
 wire         fb_bvalid;
 wire         fb_bready;
@@ -289,24 +321,6 @@ wire [1:0]   fb_bresp;
 wire [15:0]  fb_vout;
 wire         fb_hs, fb_vs, fb_de;
 wire         fb_wr_sw;
-// KEY3 / UART '4' or '1' requests a mode; commit only at a display VS.
-wire rx_valid;wire [7:0] rx_data;
-wire mode_key;
-reg requested_4k;
-key_pulse #(.REP_MS(0)) u_mode_key (
- .clk(gpio_clk_27m),.rst_n(video_rst_n),.key_in(key_i[3]),.pulse(mode_key)
-);
-always @(posedge gpio_clk_27m or negedge video_rst_n)begin
- if(!video_rst_n)requested_4k<=0;
- else if(rx_valid&&rx_data==8'h34)requested_4k<=1;
- else if(rx_valid&&rx_data==8'h31)requested_4k<=0;
- else if(mode_key)requested_4k<=~requested_4k;
-end
-wire hdmi_mode_half,hdmi_mode;
-video_mode_commit u_mode_commit(
- .read_clk(hdmi_tx_half_clk),.pixel_clk(hdmi_tx_slow_clk),.rst_n(video_rst_n),
- .request_4k(requested_4k),.read_vs(fb_vs),.read_4k(hdmi_mode_half),.pixel_4k(hdmi_mode)
-);
 
 frame_buffer #(
     .I_VID_WIDTH    (32),
@@ -336,7 +350,7 @@ frame_buffer #(
     .o_de           (fb_de),
     .vout           (fb_vout),
 
-    .H_FRONT_PORCH  (hdmi_mode_half ? 13'd1144 : 13'd44),
+    .H_FRONT_PORCH  (13'd44),
     .H_SYNC         (13'd22),
     .H_VALID        (13'd960),
     .H_BACK_PORCH   (13'd74),
@@ -395,8 +409,8 @@ frame_buffer #(
     .o_wr_sw             (fb_wr_sw)
 );
 
-assign fb_rid = fb_rid8[5:0];
-assign fb_bid = fb_bid8[5:0];
+assign fb_rid = arb_s0_rid[5:0];
+assign fb_bid = arb_s0_bid[5:0];
 
 //=====================================================================
 // Display: debayer (74.25MHz, RGGB) then 2 -> 1 expansion to 148.5MHz
@@ -443,62 +457,52 @@ always @(posedge hdmi_tx_half_clk or negedge video_rst_n) begin
     else if (awb_upd)    awb_upd_tgl <= ~awb_upd_tgl;
 end
 
-wire dbg_vs_o_1080,dbg_hs_o_1080,dbg_de_o_1080,dbg_val_o_1080;
-wire dbg_vs_o_4k,dbg_hs_o_4k,dbg_de_o_4k,dbg_val_o_4k;
-wire [47:0] dbg_rgb_1080,dbg_rgb_4k;
-assign dbg_vs_o=hdmi_mode_half?dbg_vs_o_4k:dbg_vs_o_1080;
-assign dbg_hs_o=hdmi_mode_half?dbg_hs_o_4k:dbg_hs_o_1080;
-assign dbg_de_o=hdmi_mode_half?dbg_de_o_4k:dbg_de_o_1080;
-assign dbg_val_o=hdmi_mode_half?dbg_val_o_4k:dbg_val_o_1080;
-assign dbg_rgb=hdmi_mode_half?dbg_rgb_4k:dbg_rgb_1080;
-debayer_top_2to1 u_debayer_1080 (
-    .in_pclk     (hdmi_tx_half_clk),
-    .in_rstn     (video_rst_n && !hdmi_mode_half),
-    .raw_vs_i    (fb_vs),
-    .raw_hs_i    (fb_hs),
-    .raw_de_i    (fb_de),
-    .raw_valid_i (fb_de),
-    .raw_datax4_i(fb_vout),
-    // Linear demosaic; per-channel display gains follow the stats tap.
-    .i_r_gain    (3'd4),
-    .i_g_gain    (3'd4),
-    .i_b_gain    (3'd4),
-    .rgb_vs_o    (dbg_vs_o_1080),
-    .rgb_hs_o    (dbg_hs_o_1080),
-    .rgb_de_o    (dbg_de_o_1080),
-    .rgb_valid_o (dbg_val_o_1080),
-    .rgb_datax2_o(dbg_rgb_1080)
+wire raw_clean_hs,raw_clean_vs,raw_clean_de;
+wire [15:0] raw_clean;
+camera_raw_denoise_2px u_raw_denoise (
+ .clk(hdmi_tx_half_clk),.rst_n(video_rst_n),
+ .i_hs(fb_hs),.i_vs(fb_vs),.i_de(fb_de),.i_raw(fb_vout),
+ .o_hs(raw_clean_hs),.o_vs(raw_clean_vs),.o_de(raw_clean_de),.o_raw(raw_clean)
 );
-debayer_top_2to1 #(.H_TOTAL(2200)) u_debayer_4k (
+debayer_top_2to1 u_debayer (
     .in_pclk     (hdmi_tx_half_clk),
-    .in_rstn     (video_rst_n && hdmi_mode_half),
-    .raw_vs_i    (fb_vs),
-    .raw_hs_i    (fb_hs),
-    .raw_de_i    (fb_de),
-    .raw_valid_i (fb_de),
-    .raw_datax4_i(fb_vout),
+    .in_rstn     (video_rst_n),
+    .raw_vs_i    (raw_clean_vs),
+    .raw_hs_i    (raw_clean_hs),
+    .raw_de_i    (raw_clean_de),
+    .raw_valid_i (raw_clean_de),
+    .raw_datax4_i(raw_clean),
     // Linear demosaic; per-channel display gains follow the stats tap.
     .i_r_gain    (3'd4),
     .i_g_gain    (3'd4),
     .i_b_gain    (3'd4),
-    .rgb_vs_o    (dbg_vs_o_4k),
-    .rgb_hs_o    (dbg_hs_o_4k),
-    .rgb_de_o    (dbg_de_o_4k),
-    .rgb_valid_o (dbg_val_o_4k),
-    .rgb_datax2_o(dbg_rgb_4k)
+    .rgb_vs_o    (dbg_vs_o),
+    .rgb_hs_o    (dbg_hs_o),
+    .rgb_de_o    (dbg_de_o),
+    .rgb_valid_o (dbg_val_o),
+    .rgb_datax2_o(dbg_rgb)
 );
 
 // phase-insensitive 2->1 expansion: async FIFO 74.25MHz -> 148.5MHz
 wire display_hs, display_vs, display_de;
 wire [47:0] display_rgb;
+wire camera_hs,camera_vs,camera_de;
+wire [47:0] camera_rgb;
+camera_denoise_2px u_camera_denoise (
+ .clk(hdmi_tx_half_clk),.rst_n(video_rst_n),
+ .i_hs(dbg_hs_o),.i_vs(dbg_vs_o),.i_de(dbg_de_o),.i_rgb(dbg_rgb),
+ .o_hs(camera_hs),.o_vs(camera_vs),.o_de(camera_de),.o_rgb(camera_rgb)
+);
 rgb_display_2px u_display_color (
     .clk(hdmi_tx_half_clk), .rst_n(video_rst_n),
-    .i_hs(dbg_hs_o), .i_vs(dbg_vs_o), .i_de(dbg_de_o), .i_rgb(dbg_rgb),
+    .i_hs(camera_hs), .i_vs(camera_vs), .i_de(camera_de), .i_rgb(camera_rgb),
     .i_r_gain(awb_r_gain), .i_g_gain(awb_g_gain), .i_b_gain(awb_b_gain),
     .i_black_r(black_r), .i_black_g(black_g), .i_black_b(black_b),
     .o_hs(display_hs), .o_vs(display_vs), .o_de(display_de), .o_rgb(display_rgb)
 );
-wire [50:0] af_din = {display_hs, display_vs, display_de, display_rgb};
+wire style_display_hs,style_display_vs,style_display_de;
+wire [47:0] style_display_rgb;
+wire [50:0] af_din = {style_display_hs, style_display_vs, style_display_de, style_display_rgb};
 wire [50:0] af_dout;
 wire        af_wfull, af_rempty;
 reg         af_rinc;
@@ -545,7 +549,8 @@ wire [23:0] p_second = ew[23:0];
 wire [23:0] exp_px   = rphase ? p_first : p_second;
 
 reg [23:0] px_r;
-reg        hs_r, vs_r, de_r;
+reg hs_r,vs_r,de_r;
+
 always @(posedge hdmi_tx_slow_clk or negedge video_rst_n) begin
     if (!video_rst_n) begin
         px_r <= 24'd0;
@@ -620,11 +625,13 @@ wire        key1_up;          // KEY1 pressed: exposure comp up (brighter)
 wire [23:0] px_osd;
 wire [11:0] cam_width, cam_height, hdmi_width, hdmi_height;
 wire cam_size_toggle, hdmi_size_toggle;
-wire hdmi_out_hs,hdmi_out_vs,hdmi_out_de;
-wire [11:0] hdmi_word_width;
-assign hdmi_width=hdmi_mode ? {hdmi_word_width[10:0],1'b0} : hdmi_word_width;
 wire [7:0] hdmi_fps;
 wire hdmi_upd;
+wire style_frame_commit_pulse;
+wire [11:0] style_centifps;
+wire style_rate_toggle;
+wire [7:0] style_fps;
+wire style_fps_upd;
 video_size_meter #(.PIXELS_PER_CLOCK(4), .USE_HSYNC(1)) u_camera_size (
     .clk(mipi_pixel_clk), .rst_n(video_rst_n),
     .i_hs(fb_ihs), .i_vs(fb_ivs), .i_de(fb_ide),
@@ -632,19 +639,23 @@ video_size_meter #(.PIXELS_PER_CLOCK(4), .USE_HSYNC(1)) u_camera_size (
 );
 video_size_meter #(.PIXELS_PER_CLOCK(1), .USE_HSYNC(0)) u_hdmi_size (
     .clk(hdmi_tx_slow_clk), .rst_n(video_rst_n),
-    .i_hs(hdmi_out_hs), .i_vs(hdmi_out_vs), .i_de(hdmi_out_de),
-    .o_width(hdmi_word_width), .o_height(hdmi_height), .o_toggle(hdmi_size_toggle)
+    .i_hs(hs_r), .i_vs(vs_r), .i_de(de_r),
+    .o_width(hdmi_width), .o_height(hdmi_height), .o_toggle(hdmi_size_toggle)
 );
 reg [2:0] hdmi_vs_sync;
 always @(posedge core_clk or negedge video_rst_n) begin
     if (!video_rst_n) hdmi_vs_sync<=0;
-    else hdmi_vs_sync<={hdmi_vs_sync[1:0],hdmi_out_vs};
+    else hdmi_vs_sync<={hdmi_vs_sync[1:0],vs_r};
 end
 fps_counter #(.CLK_FREQ_HZ(100_000_000)) u_fps_hdmi (
     .clk(core_clk), .rst_n(video_rst_n), .frame_pulse(hdmi_vs_sync[2]),
     .fps(hdmi_fps), .upd_toggle(hdmi_upd)
 );
-osd_video_status u_video_status (
+fps_counter #(.CLK_FREQ_HZ(100_000_000)) u_fps_style (
+    .clk(core_clk), .rst_n(video_rst_n), .frame_pulse(style_frame_commit_pulse),
+    .fps(style_fps), .upd_toggle(style_fps_upd)
+);
+osd_video_status #(.ENABLE_STYLE_FPS(ENABLE_STYLE_DEMO),.STYLE_FRACTIONAL(ENABLE_TINYML_RGB)) u_video_status (
     .clk(hdmi_tx_slow_clk), .rst_n(video_rst_n),
     .i_hs(hs_r), .i_vs(vs_r), .i_de(de_r), .i_rgb(px_r),
     .i_cam_width(cam_width), .i_cam_height(cam_height), .i_cam_toggle(cam_size_toggle),
@@ -652,11 +663,15 @@ osd_video_status u_video_status (
     .i_cam_fps(sens_fps), .i_wr_fps(wr_fps), .i_hdmi_fps(hdmi_fps),
     .i_wb_locked(wb_locked), .i_black_g(black_g),
     .i_cam_fps_upd(sens_upd), .i_wr_fps_upd(wr_upd), .i_hdmi_fps_upd(hdmi_upd),
+    .i_style_fps(style_fps), .i_style_fps_upd(style_fps_upd),
+    .i_style_centifps(style_centifps),.i_style_rate_upd(style_rate_toggle),
     .o_rgb(px_osd)
 );
 
 // AE status line below the fps digits: E=xxx G=x S=x W=xx
 wire [23:0] px_osd_ae;
+// Overlay status after the split composite, including in style mode.
+wire [23:0] presentation_rgb = px_osd_ae;
 osd_ae #(
     .X_START (16),
     .Y_START (48)
@@ -676,9 +691,9 @@ osd_ae #(
     .o_rgb     (px_osd_ae)
 );
 
-wire [9:0] tmds_data0, rgb_tmds0;
-wire [9:0] tmds_data1, rgb_tmds1;
-wire [9:0] tmds_data2, rgb_tmds2;
+wire [9:0] tmds_data0;
+wire [9:0] tmds_data1;
+wire [9:0] tmds_data2;
 wire [9:0] tmds_clk;
 
 assign tmds_data0_TX_OE = 1'b1;
@@ -695,40 +710,17 @@ dvi_encoder dvi_encoder_m0
 (
     .pixelclk   (hdmi_tx_slow_clk),
     .rstin      (~video_rst_n),
-    .blue_din   (SWAP_RB   ? px_osd_ae[23:16] : px_osd_ae[7:0]),
-    .green_din  (px_osd_ae[15:8]),
-    .red_din    (SWAP_RB   ? px_osd_ae[7:0]   : px_osd_ae[23:16]),
+    .blue_din   (SWAP_RB   ? presentation_rgb[23:16] : presentation_rgb[7:0]),
+    .green_din  (presentation_rgb[15:8]),
+    .red_din    (SWAP_RB   ? presentation_rgb[7:0]   : presentation_rgb[23:16]),
     .hsync      (SWAP_HSVS ? vs_r : hs_r),
     .vsync      (SWAP_HSVS ? hs_r : vs_r),
     .de         (de_r),
-    .tmds_data0 (rgb_tmds0),
-    .tmds_data1 (rgb_tmds1),
-    .tmds_data2 (rgb_tmds2),
+    .tmds_data0 (tmds_data0),
+    .tmds_data1 (tmds_data1),
+    .tmds_data2 (tmds_data2),
     .tmds_clk   (tmds_clk)
 );
-
-wire upscale_hs,upscale_vs,upscale_de,upscale_started;
-wire [23:0] upscale_channels;
-wire [11:0] upscale_x,upscale_y;
-wire [9:0] yuv_tmds0,yuv_tmds1,yuv_tmds2;
-upscale_420 u_upscale (
- .clk(hdmi_tx_slow_clk),.rst_n(video_rst_n),.enable(hdmi_mode),
- .i_hs(hs_r),.i_vs(vs_r),.i_de(de_r),.i_rgb(px_osd_ae),
- .o_hs(upscale_hs),.o_vs(upscale_vs),.o_de(upscale_de),.o_channels(upscale_channels),
- .o_x(upscale_x),.o_y(upscale_y),.o_started(upscale_started)
-);
-hdmi_420_tx u_hdmi_420 (
- .clk(hdmi_tx_slow_clk),.rst_n(video_rst_n&&hdmi_mode),
- .i_hs(upscale_hs),.i_vs(upscale_vs),.i_de(upscale_de),
- .i_channels(upscale_channels),.i_x(upscale_x),.i_y(upscale_y),
- .ch0(yuv_tmds0),.ch1(yuv_tmds1),.ch2(yuv_tmds2)
-);
-assign hdmi_out_hs=hdmi_mode?upscale_hs:hs_r;
-assign hdmi_out_vs=hdmi_mode?upscale_vs:vs_r;
-assign hdmi_out_de=hdmi_mode?upscale_de:de_r;
-assign tmds_data0=hdmi_mode?yuv_tmds0:rgb_tmds0;
-assign tmds_data1=hdmi_mode?yuv_tmds1:rgb_tmds1;
-assign tmds_data2=hdmi_mode?yuv_tmds2:rgb_tmds2;
 
 assign tmds_clk_o   = ~tmds_clk;
 assign tmds_data0_o = ~tmds_data0;
@@ -754,11 +746,21 @@ clock_frequency_meter u_sensor_byte_meter (
 //=====================================================================
 // UART: RX echo + AE status log injection (ae_uart_log wins while a
 // line is in progress; the echo FIFO is gated off then and buffered)
+//
+// The physical TX pin is shared: the Sapphire CPU console (100 MHz) is the
+// only TX source in the dedicated RGB TinyML configuration, saving the
+// legacy echo FIFO. Other configurations retain KEY3 console selection.
+// RX fans out to both UARTs always.
 //=====================================================================
+wire iris_uart_txd;
+wire soc_uart_txd;
+assign txd = (ENABLE_TINYML_RGB || ENABLE_STYLE_SWITCH) ? soc_uart_txd : key_i[3] ? soc_uart_txd : iris_uart_txd;
 wire        RdEmpty;
 wire        tx_valid;
+wire        rx_valid;
 wire        tx_req;
 wire [7:0]  tx_data;
+wire [7:0]  rx_data;
 wire [7:0]  RdDNum;
 wire        fifo_dv;
 wire [7:0]  fifo_data;
@@ -778,12 +780,16 @@ key_pulse #(.REP_MS(0)) u_capture_key (
  .clk(gpio_clk_27m),.rst_n(video_rst_n),.key_in(key_i[2]),.pulse(capture_key)
 );
 wire [7:0] cal_data;
-colour_capture u_colour_capture (
+generate if (!ENABLE_TINYML_RGB) begin : g_colour_capture
+colour_capture #(.STEP(ENABLE_STYLE_DEMO ? 40 : 20)) u_colour_capture (
  .video_clk(hdmi_tx_half_clk),.uart_clk(gpio_clk_27m),.rst_n(video_rst_n),
  .i_vs(dbg_vs_o),.i_de(dbg_de_o),.i_rgb(dbg_rgb),
  .i_capture(capture_key),.rx_valid(rx_valid),.rx_data(rx_data),.log_active(log_gate),.tx_req(tx_req),
  .tx_valid(cal_dv),.tx_data(cal_data),.tx_gate(cal_gate),.o_ready(cal_ready)
 );
+end else begin : g_no_colour_capture
+ assign cal_dv=0;assign cal_gate=0;assign cal_data=0;assign cal_ready=0;
+end endgenerate
 assign tx_valid  = cal_dv | log_dv | fifo_dv;
 assign tx_data   = cal_dv ? cal_data : log_dv ? log_data : fifo_data;
 assign fifo_pop  = tx_req & (~RdEmpty) & (~log_gate) & (~cal_gate);
@@ -818,7 +824,7 @@ uart_rx_tx #(
     .clk        (gpio_clk_27m),
     .rst_n      (mipi_pll_locked),
     .rxd        (rxd),
-    .txd        (txd),
+    .txd        (iris_uart_txd),
     .tx_valid   (tx_valid),
     .tx_data    (tx_data),
     .tx_req     (tx_req),
@@ -826,21 +832,8 @@ uart_rx_tx #(
     .rx_data    (rx_data)
 );
 
-// Resolution is published with a frame toggle; sample its stable payload only
-// after the toggle has crossed into the UART clock domain.
-reg [2:0] output_size_sync,output_mode_sync;
-reg [11:0] output_width_uart,output_height_uart;
-always @(posedge gpio_clk_27m or negedge video_rst_n)begin
- if(!video_rst_n)begin output_size_sync<=0;output_mode_sync<=0;output_width_uart<=0;output_height_uart<=0;end
- else begin
-  output_size_sync<={output_size_sync[1:0],hdmi_size_toggle};
-  output_mode_sync<={output_mode_sync[1:0],hdmi_mode};
-  if(output_size_sync[2]!=output_size_sync[1])begin
-   output_width_uart<=hdmi_width;output_height_uart<=hdmi_height;
-  end
- end
-end
-ae_uart_log #(.VIDEO_STATUS(1)) u_ae_log (
+generate if (ENABLE_LEGACY_UART_LOG) begin : g_legacy_uart_log
+ae_uart_log u_ae_log (
     .i_pause   (cal_gate),
     .clk       (gpio_clk_27m),
     .rst_n     (mipi_pll_locked),
@@ -856,13 +849,17 @@ ae_uart_log #(.VIDEO_STATUS(1)) u_ae_log (
     .i_sensor_readback(sensor_readback),
     .i_cam_fps (sens_fps), .i_wr_fps(wr_fps), .i_hdmi_fps(hdmi_fps),
     .i_byte_hz (sensor_byte_hz), .i_cam_period(cam_period_cycles),
-    .i_4k(output_mode_sync[2]),.i_output_width(output_width_uart),.i_output_height(output_height_uart),
     .tx_req    (tx_req),
     .tx_valid  (log_dv),
     .tx_data   (log_data),
     .tx_gate   (log_gate),
     .fifo_act  (fifo_act)
 );
+end else begin : g_no_legacy_uart_log
+    assign log_dv = 1'b0;
+    assign log_data = 8'd0;
+    assign log_gate = 1'b0;
+end endgenerate
 
 //=====================================================================
 // SC431HAI I2C bring-up
@@ -944,39 +941,686 @@ key_pulse u_key1 (
     .pulse (key1_up)
 );
 
-// KEY2 now freezes a calibration thumbnail; KEY3 has no calibration action.
+// KEY2 freezes a calibration thumbnail. The optional Flash pair uses KEY3.
+wire [31:0] style_switch_status;
+wire style_switch_request;
+wire boot_spi_sclk, boot_spi_cs_n, boot_spi_mosi;
+assign flash_sclk = ENABLE_STYLE_SWITCH && ENABLE_TINYML_RGB ? boot_spi_sclk : 1'b0;
+assign flash_cs_n = ENABLE_STYLE_SWITCH && ENABLE_TINYML_RGB ? boot_spi_cs_n : 1'b1;
+assign flash_mosi = ENABLE_STYLE_SWITCH && ENABLE_TINYML_RGB ? boot_spi_mosi : 1'b0;
+generate if (ENABLE_STYLE_SWITCH) begin : g_style_switch
+    iris_style_switch #(.CURRENT_IMAGE(ENABLE_TINYML_RGB ? 1 : 0)) u_switch (
+        .clk(gpio_clk_27m), .rst_n(core_pll_locked), .key_n(key_i[3]),
+        .config_error(cfg_ERROR), .request_toggle(style_switch_request),
+        .cbsel(cfg_CBSEL), .ena(cfg_ENA), .config_request(cfg_CONFIG),
+        .status(style_switch_status)
+    );
+end else begin : g_no_style_switch
+    assign cfg_CBSEL=0; assign cfg_ENA=0; assign cfg_CONFIG=0;
+    assign style_switch_status=0;
+end endgenerate
 
 
 assign io_cam_scl_OE = ~cam_scl_padoen;
 assign io_cam_sda_OE = ~cam_sda_padoen;
 
 //=====================================================================
+// TinyML subsystem: Sapphire SoC + TinyML accelerator (core_clk domain)
+//   rst_n is gated by DDR calibration so neither master can touch DDR
+//   before the controller is ready (docs/TinyML_移植进度与待办.md #2).
+//=====================================================================
+wire tinyml_rst_n = core_pll_locked & ddr_pll_locked & ddr_cal_done;
+
+// CPU AXI master (converted from the SoC half-duplex io_ddrA port)
+wire [7:0]   cpu_awid;
+wire [31:0]  cpu_awaddr;
+wire [7:0]   cpu_awlen;
+wire [2:0]   cpu_awsize;
+wire [1:0]   cpu_awburst;
+wire         cpu_awlock;
+wire         cpu_awvalid;
+wire         cpu_awready;
+wire [127:0] cpu_wdata;
+wire [15:0]  cpu_wstrb;
+wire         cpu_wlast;
+wire         cpu_wvalid;
+wire         cpu_wready;
+wire [7:0]   cpu_bid;
+wire [1:0]   cpu_bresp;
+wire         cpu_bvalid;
+wire         cpu_bready;
+wire [7:0]   cpu_arid;
+wire [31:0]  cpu_araddr;
+wire [7:0]   cpu_arlen;
+wire [2:0]   cpu_arsize;
+wire [1:0]   cpu_arburst;
+wire         cpu_arlock;
+wire         cpu_arvalid;
+wire         cpu_arready;
+wire [127:0] cpu_rdata;
+wire [7:0]   cpu_rid;
+wire [1:0]   cpu_rresp;
+wire         cpu_rlast;
+wire         cpu_rvalid;
+wire         cpu_rready;
+
+// TinyML accelerator AXI master
+wire [7:0]   acc_awid;
+wire [31:0]  acc_awaddr;
+wire [7:0]   acc_awlen;
+wire [2:0]   acc_awsize;
+wire [1:0]   acc_awburst;
+wire         acc_awlock;
+wire         acc_awvalid;
+wire         acc_awready;
+wire [127:0] acc_wdata;
+wire [15:0]  acc_wstrb;
+wire         acc_wlast;
+wire         acc_wvalid;
+wire         acc_wready;
+wire [7:0]   acc_bid;
+wire [1:0]   acc_bresp;
+wire         acc_bvalid;
+wire         acc_bready;
+wire [7:0]   acc_arid;
+wire [31:0]  acc_araddr;
+wire [7:0]   acc_arlen;
+wire [2:0]   acc_arsize;
+wire [1:0]   acc_arburst;
+wire         acc_arlock;
+wire         acc_arvalid;
+wire         acc_arready;
+wire [127:0] acc_rdata;
+wire [7:0]   acc_rid;
+wire [1:0]   acc_rresp;
+wire         acc_rlast;
+wire         acc_rvalid;
+wire         acc_rready;
+
+// merged master -> axi_atype_bridge
+wire [7:0]   mem_awid;
+wire [27:0]  mem_awaddr;
+wire [7:0]   mem_awlen;
+wire [2:0]   mem_awsize;
+wire [1:0]   mem_awburst;
+wire         mem_awlock;
+wire         mem_awvalid;
+wire         mem_awready;
+wire [127:0] mem_wdata;
+wire [15:0]  mem_wstrb;
+wire         mem_wlast;
+wire         mem_wvalid;
+wire         mem_wready;
+wire [7:0]   mem_bid;
+wire [1:0]   mem_bresp;
+wire         mem_bvalid;
+wire         mem_bready;
+wire [7:0]   mem_arid;
+wire [27:0]  mem_araddr;
+wire [7:0]   mem_arlen;
+wire [2:0]   mem_arsize;
+wire [1:0]   mem_arburst;
+wire         mem_arlock;
+wire         mem_arvalid;
+wire         mem_arready;
+wire [127:0] mem_rdata;
+wire [7:0]   mem_rid;
+wire [1:0]   mem_rresp;
+wire         mem_rlast;
+wire         mem_rvalid;
+wire         mem_rready;
+wire [7:0]   mem_wid;
+wire [31:0]  dbg_arb_ar_addr;
+wire [7:0]   dbg_arb_ar_len;
+wire [2:0]   dbg_arb_ar_size;
+wire [1:0]   dbg_arb_ar_burst;
+wire [31:0]  dbg_arb_aw_addr;
+wire [7:0]   dbg_arb_aw_len;
+wire [1:0]   dbg_arb_bresp;
+wire [1:0]   dbg_arb_rresp;
+wire [15:0]  dbg_arb_rd_cnt;
+wire [15:0]  dbg_arb_wr_cnt;
+wire [7:0]   dbg_arb_rd_err_cnt;
+wire [7:0]   dbg_arb_wr_err_cnt;
+wire [7:0]   dbg_arb_state;
+wire [31:0]  dbg_arb_cpu_ar_addr;
+wire [31:0]  dbg_arb_fb_ar_addr;
+wire [31:0]  dbg_arb_cpu_aw_addr;
+wire [31:0]  dbg_arb_fb_aw_addr;
+wire [15:0]  dbg_arb_cpu_rd_cnt;
+wire [15:0]  dbg_arb_fb_rd_cnt;
+wire [15:0]  dbg_arb_m_ar_cnt;
+wire [15:0]  dbg_arb_m_aw_cnt;
+
+// Style demo extends the CPU DDR channel; accelerator routing is unchanged.
+wire [7:0] raw_cpu_awid;
+wire [31:0] raw_cpu_awaddr;
+wire [7:0] raw_cpu_awlen;
+wire [2:0] raw_cpu_awsize;
+wire [1:0] raw_cpu_awburst;
+wire raw_cpu_awlock;
+wire raw_cpu_awvalid;
+wire [127:0] raw_cpu_wdata;
+wire [15:0] raw_cpu_wstrb;
+wire raw_cpu_wlast;
+wire raw_cpu_wvalid;
+wire raw_cpu_bready;
+wire [7:0] raw_cpu_arid;
+wire [31:0] raw_cpu_araddr;
+wire [7:0] raw_cpu_arlen;
+wire [2:0] raw_cpu_arsize;
+wire [1:0] raw_cpu_arburst;
+wire raw_cpu_arlock;
+wire raw_cpu_arvalid;
+wire raw_cpu_rready;
+wire raw_cpu_awready;
+wire raw_cpu_wready;
+wire [7:0] raw_cpu_bid;
+wire [1:0] raw_cpu_bresp;
+wire raw_cpu_bvalid;
+wire raw_cpu_arready;
+wire [127:0] raw_cpu_rdata;
+wire [7:0] raw_cpu_rid;
+wire [1:0] raw_cpu_rresp;
+wire raw_cpu_rlast;
+wire raw_cpu_rvalid;
+wire [31:0] style_awaddr;
+wire [7:0] style_awlen;
+wire style_awvalid;
+wire [127:0] style_wdata;
+wire style_wlast;
+wire style_wvalid;
+wire style_bready;
+wire [31:0] style_araddr;
+wire [7:0] style_arlen;
+wire style_arvalid;
+wire style_rready;
+wire style_awready;
+wire style_wready;
+wire [1:0] style_bresp;
+wire style_bvalid;
+wire style_arready;
+wire [127:0] style_rdata;
+wire [1:0] style_rresp;
+wire style_rlast;
+wire style_rvalid;
+wire [15:0] style_paddr;
+wire style_psel,style_penable,style_pwrite;
+wire [31:0] style_pwdata,style_prdata;
+wire style_ddr_serial;
+reg [31:0] style_bus_write_dummy_bad;
+always @(posedge core_clk or negedge tinyml_rst_n)begin
+ if(!tinyml_rst_n)style_bus_write_dummy_bad<=0;
+ else if(!ENABLE_TINYML_RGB && mem_wvalid && mem_wready && mem_wid==8'h10)
+  style_bus_write_dummy_bad<=style_bus_write_dummy_bad+
+   {31'd0,mem_wdata[31:24]!=8'h80}+{31'd0,mem_wdata[63:56]!=8'h80}+
+   {31'd0,mem_wdata[95:88]!=8'h80}+{31'd0,mem_wdata[127:120]!=8'h80};
+end
+
+tinyml_subsystem #(.ENABLE_STYLE_DEMO(ENABLE_STYLE_DEMO),.ENABLE_STREAM_CNN(ENABLE_STREAM_CNN),
+    .STREAM_DILATION(STREAM_DILATION),.TENSOR_BURST_DMA(ENABLE_TENSOR_BURST),
+    .TENSOR_RGB_ONLY(ENABLE_TINYML_RGB && ENABLE_TENSOR_BURST),
+    .ENABLE_RAIN_BACKEND(ENABLE_RAIN_BACKEND),.ENABLE_STYLE_SWITCH(ENABLE_STYLE_SWITCH)) u_tinyml_subsystem (
+    .boot_spi_sclk(boot_spi_sclk),.boot_spi_cs_n(boot_spi_cs_n),
+    .boot_spi_mosi(boot_spi_mosi),.boot_spi_miso(flash_miso),
+    .style_switch_status(style_switch_status),.style_switch_request(style_switch_request),
+    .style_paddr(style_paddr),.style_psel(style_psel),.style_penable(style_penable),
+    .style_pwrite(style_pwrite),.style_pwdata(style_pwdata),.style_prdata(style_prdata),
+    .clk              (core_clk),
+    .rst_n            (tinyml_rst_n),
+    .uart_txd         (soc_uart_txd),
+    .uart_rxd_async   (rxd),
+    .jtag_inst1_TCK   (jtag_inst1_TCK),
+    .jtag_inst1_TDI   (jtag_inst1_TDI),
+    .jtag_inst1_TDO   (jtag_inst1_TDO),
+    .jtag_inst1_SEL   (jtag_inst1_SEL),
+    .jtag_inst1_CAPTURE(jtag_inst1_CAPTURE),
+    .jtag_inst1_SHIFT (jtag_inst1_SHIFT),
+    .jtag_inst1_UPDATE(jtag_inst1_UPDATE),
+    .jtag_inst1_RESET (jtag_inst1_RESET),
+    .cpu_awid         (raw_cpu_awid),
+    .cpu_awaddr       (raw_cpu_awaddr),
+    .cpu_awlen        (raw_cpu_awlen),
+    .cpu_awsize       (raw_cpu_awsize),
+    .cpu_awburst      (raw_cpu_awburst),
+    .cpu_awlock       (raw_cpu_awlock),
+    .cpu_awvalid      (raw_cpu_awvalid),
+    .cpu_awready      (raw_cpu_awready),
+    .cpu_wdata        (raw_cpu_wdata),
+    .cpu_wstrb        (raw_cpu_wstrb),
+    .cpu_wlast        (raw_cpu_wlast),
+    .cpu_wvalid       (raw_cpu_wvalid),
+    .cpu_wready       (raw_cpu_wready),
+    .cpu_bid          (raw_cpu_bid),
+    .cpu_bresp        (raw_cpu_bresp),
+    .cpu_bvalid       (raw_cpu_bvalid),
+    .cpu_bready       (raw_cpu_bready),
+    .cpu_arid         (raw_cpu_arid),
+    .cpu_araddr       (raw_cpu_araddr),
+    .cpu_arlen        (raw_cpu_arlen),
+    .cpu_arsize       (raw_cpu_arsize),
+    .cpu_arburst      (raw_cpu_arburst),
+    .cpu_arlock       (raw_cpu_arlock),
+    .cpu_arvalid      (raw_cpu_arvalid),
+    .cpu_arready      (raw_cpu_arready),
+    .cpu_rdata        (raw_cpu_rdata),
+    .cpu_rid          (raw_cpu_rid),
+    .cpu_rresp        (raw_cpu_rresp),
+    .cpu_rlast        (raw_cpu_rlast),
+    .cpu_rvalid       (raw_cpu_rvalid),
+    .cpu_rready       (raw_cpu_rready),
+    .acc_awid         (acc_awid),
+    .acc_awaddr       (acc_awaddr),
+    .acc_awlen        (acc_awlen),
+    .acc_awsize       (acc_awsize),
+    .acc_awburst      (acc_awburst),
+    .acc_awlock       (acc_awlock),
+    .acc_awvalid      (acc_awvalid),
+    .acc_awready      (acc_awready),
+    .acc_wdata        (acc_wdata),
+    .acc_wstrb        (acc_wstrb),
+    .acc_wlast        (acc_wlast),
+    .acc_wvalid       (acc_wvalid),
+    .acc_wready       (acc_wready),
+    .acc_bid          (acc_bid),
+    .acc_bresp        (acc_bresp),
+    .acc_bvalid       (acc_bvalid),
+    .acc_bready       (acc_bready),
+    .acc_arid         (acc_arid),
+    .acc_araddr       (acc_araddr),
+    .acc_arlen        (acc_arlen),
+    .acc_arsize       (acc_arsize),
+    .acc_arburst      (acc_arburst),
+    .acc_arlock       (acc_arlock),
+    .acc_arvalid      (acc_arvalid),
+    .acc_arready      (acc_arready),
+    .acc_rdata        (acc_rdata),
+    .acc_rid          (acc_rid),
+    .acc_rresp        (acc_rresp),
+    .acc_rlast        (acc_rlast),
+    .acc_rvalid       (acc_rvalid),
+    .acc_rready       (acc_rready),
+    .subsystem_rst    (),
+    .accel_cmd_int    (),
+    .dbg_arb_ar_addr  (dbg_arb_ar_addr),
+    .dbg_arb_ar_len   (dbg_arb_ar_len),
+    .dbg_arb_ar_size  (dbg_arb_ar_size),
+    .dbg_arb_ar_burst (dbg_arb_ar_burst),
+    .dbg_arb_aw_addr  (dbg_arb_aw_addr),
+    .dbg_arb_aw_len   (dbg_arb_aw_len),
+    .dbg_arb_bresp    (dbg_arb_bresp),
+    .dbg_arb_rresp    (dbg_arb_rresp),
+    .dbg_arb_rd_cnt   (dbg_arb_rd_cnt),
+    .dbg_arb_wr_cnt   (dbg_arb_wr_cnt),
+    .dbg_arb_rd_err_cnt(dbg_arb_rd_err_cnt),
+    .dbg_arb_wr_err_cnt(dbg_arb_wr_err_cnt),
+    .dbg_arb_state    (dbg_arb_state),
+    .dbg_arb_cpu_ar_addr(dbg_arb_cpu_ar_addr),
+    .dbg_arb_fb_ar_addr (dbg_arb_fb_ar_addr),
+    .dbg_arb_cpu_aw_addr(dbg_arb_cpu_aw_addr),
+    .dbg_arb_fb_aw_addr (dbg_arb_fb_aw_addr),
+    .dbg_arb_cpu_rd_cnt (dbg_arb_cpu_rd_cnt),
+    .dbg_arb_fb_rd_cnt  (dbg_arb_fb_rd_cnt),
+    .dbg_arb_m_ar_cnt   (dbg_arb_m_ar_cnt),
+    .dbg_arb_m_aw_cnt   (dbg_arb_m_aw_cnt)
+);
+
+
+reg [3:0] arb_rst_pipe;
+generate if(ENABLE_STYLE_DEMO)begin : g_style_demo
+iris_style_demo #(.SCALE_Q24(STYLE_SCALE_Q24),.ENABLE_VISIBILITY(ENABLE_STYLE_VISIBILITY),.ENABLE_CONTOUR(ENABLE_STYLE_CONTOUR),.TINYML_RGB(ENABLE_TINYML_RGB)) u_style_demo(
+ .clk(core_clk),.video_clk(hdmi_tx_half_clk),.rst_n(arb_rst_pipe[3]),
+ .paddr(style_paddr),.psel(style_psel),.penable(style_penable),.pwrite(style_pwrite),
+ .pwdata(style_pwdata),.prdata(style_prdata),
+ .bus_write_dummy_bad(style_bus_write_dummy_bad),.ddr_serial_enable(style_ddr_serial),
+ .frame_commit_pulse(style_frame_commit_pulse),
+ .ai_centifps(style_centifps),.ai_rate_toggle(style_rate_toggle),
+ .i_hs(display_hs),.i_vs(display_vs),.i_de(display_de),.i_rgb(display_rgb),
+ .o_hs(style_display_hs),.o_vs(style_display_vs),.o_de(style_display_de),.o_rgb(style_display_rgb),
+ .awaddr(style_awaddr),
+ .awlen(style_awlen),
+ .awvalid(style_awvalid),
+ .wdata(style_wdata),
+ .wlast(style_wlast),
+ .wvalid(style_wvalid),
+ .bready(style_bready),
+ .araddr(style_araddr),
+ .arlen(style_arlen),
+ .arvalid(style_arvalid),
+ .rready(style_rready),
+ .awready(style_awready),
+ .wready(style_wready),
+ .bresp(style_bresp),
+ .bvalid(style_bvalid),
+ .arready(style_arready),
+ .rdata(style_rdata),
+ .rresp(style_rresp),
+ .rlast(style_rlast),
+ .rvalid(style_rvalid)
+);
+axi_cpu_style_mux u_style_mux(
+ .clk(core_clk),.rst_n(arb_rst_pipe[3]),
+ .cpu_awid(raw_cpu_awid),
+ .cpu_awaddr(raw_cpu_awaddr),
+ .cpu_awlen(raw_cpu_awlen),
+ .cpu_awsize(raw_cpu_awsize),
+ .cpu_awburst(raw_cpu_awburst),
+ .cpu_awlock(raw_cpu_awlock),
+ .cpu_awvalid(raw_cpu_awvalid),
+ .cpu_wdata(raw_cpu_wdata),
+ .cpu_wstrb(raw_cpu_wstrb),
+ .cpu_wlast(raw_cpu_wlast),
+ .cpu_wvalid(raw_cpu_wvalid),
+ .cpu_bready(raw_cpu_bready),
+ .cpu_arid(raw_cpu_arid),
+ .cpu_araddr(raw_cpu_araddr),
+ .cpu_arlen(raw_cpu_arlen),
+ .cpu_arsize(raw_cpu_arsize),
+ .cpu_arburst(raw_cpu_arburst),
+ .cpu_arlock(raw_cpu_arlock),
+ .cpu_arvalid(raw_cpu_arvalid),
+ .cpu_rready(raw_cpu_rready),
+ .cpu_awready(raw_cpu_awready),
+ .cpu_wready(raw_cpu_wready),
+ .cpu_bid(raw_cpu_bid),
+ .cpu_bresp(raw_cpu_bresp),
+ .cpu_bvalid(raw_cpu_bvalid),
+ .cpu_arready(raw_cpu_arready),
+ .cpu_rdata(raw_cpu_rdata),
+ .cpu_rid(raw_cpu_rid),
+ .cpu_rresp(raw_cpu_rresp),
+ .cpu_rlast(raw_cpu_rlast),
+ .cpu_rvalid(raw_cpu_rvalid),
+ .style_awaddr(style_awaddr),
+ .style_awlen(style_awlen),
+ .style_awvalid(style_awvalid),
+ .style_wdata(style_wdata),
+ .style_wlast(style_wlast),
+ .style_wvalid(style_wvalid),
+ .style_bready(style_bready),
+ .style_araddr(style_araddr),
+ .style_arlen(style_arlen),
+ .style_arvalid(style_arvalid),
+ .style_rready(style_rready),
+ .style_awready(style_awready),
+ .style_wready(style_wready),
+ .style_bresp(style_bresp),
+ .style_bvalid(style_bvalid),
+ .style_arready(style_arready),
+ .style_rdata(style_rdata),
+ .style_rresp(style_rresp),
+ .style_rlast(style_rlast),
+ .style_rvalid(style_rvalid),
+ .m_awid(cpu_awid),
+ .m_awaddr(cpu_awaddr),
+ .m_awlen(cpu_awlen),
+ .m_awsize(cpu_awsize),
+ .m_awburst(cpu_awburst),
+ .m_awlock(cpu_awlock),
+ .m_awvalid(cpu_awvalid),
+ .m_wdata(cpu_wdata),
+ .m_wstrb(cpu_wstrb),
+ .m_wlast(cpu_wlast),
+ .m_wvalid(cpu_wvalid),
+ .m_bready(cpu_bready),
+ .m_arid(cpu_arid),
+ .m_araddr(cpu_araddr),
+ .m_arlen(cpu_arlen),
+ .m_arsize(cpu_arsize),
+ .m_arburst(cpu_arburst),
+ .m_arlock(cpu_arlock),
+ .m_arvalid(cpu_arvalid),
+ .m_rready(cpu_rready),
+ .m_awready(cpu_awready),
+ .m_wready(cpu_wready),
+ .m_bid(cpu_bid),
+ .m_bresp(cpu_bresp),
+ .m_bvalid(cpu_bvalid),
+ .m_arready(cpu_arready),
+ .m_rdata(cpu_rdata),
+ .m_rid(cpu_rid),
+ .m_rresp(cpu_rresp),
+ .m_rlast(cpu_rlast),
+ .m_rvalid(cpu_rvalid)
+);
+end else begin : g_no_style_demo
+assign cpu_awid=raw_cpu_awid;
+assign cpu_awaddr=raw_cpu_awaddr;
+assign cpu_awlen=raw_cpu_awlen;
+assign cpu_awsize=raw_cpu_awsize;
+assign cpu_awburst=raw_cpu_awburst;
+assign cpu_awlock=raw_cpu_awlock;
+assign cpu_awvalid=raw_cpu_awvalid;
+assign cpu_wdata=raw_cpu_wdata;
+assign cpu_wstrb=raw_cpu_wstrb;
+assign cpu_wlast=raw_cpu_wlast;
+assign cpu_wvalid=raw_cpu_wvalid;
+assign cpu_bready=raw_cpu_bready;
+assign cpu_arid=raw_cpu_arid;
+assign cpu_araddr=raw_cpu_araddr;
+assign cpu_arlen=raw_cpu_arlen;
+assign cpu_arsize=raw_cpu_arsize;
+assign cpu_arburst=raw_cpu_arburst;
+assign cpu_arlock=raw_cpu_arlock;
+assign cpu_arvalid=raw_cpu_arvalid;
+assign cpu_rready=raw_cpu_rready;
+assign raw_cpu_awready=cpu_awready;
+assign raw_cpu_wready=cpu_wready;
+assign raw_cpu_bid=cpu_bid;
+assign raw_cpu_bresp=cpu_bresp;
+assign raw_cpu_bvalid=cpu_bvalid;
+assign raw_cpu_arready=cpu_arready;
+assign raw_cpu_rdata=cpu_rdata;
+assign raw_cpu_rid=cpu_rid;
+assign raw_cpu_rresp=cpu_rresp;
+assign raw_cpu_rlast=cpu_rlast;
+assign raw_cpu_rvalid=cpu_rvalid;
+assign style_prdata=0;
+assign style_ddr_serial=0;
+assign {style_display_hs,style_display_vs,style_display_de,style_display_rgb}={display_hs,display_vs,display_de,display_rgb};
+assign style_frame_commit_pulse=1'b0;
+assign style_centifps=0;assign style_rate_toggle=0;
+end endgenerate
+//=====================================================================
+// Shared-DDR arbiter: video frame buffer + CPU + TinyML accelerator
+//   -> single AXI4 master -> axi_atype_bridge -> efx_ddr3_axi
+//=====================================================================
+// Async assert / synchronous release for the shared-path reset: video_rst_n
+// and tinyml_rst_n are ANDs of asynchronous lock signals; releasing the
+// arbiter FSMs off a raw edge risks metastable wr/rd owner state.
+wire arb_rst_n_raw = video_rst_n & tinyml_rst_n;
+always @(posedge core_clk or negedge arb_rst_n_raw) begin
+    if (!arb_rst_n_raw) arb_rst_pipe <= 4'd0;
+    else                arb_rst_pipe <= {arb_rst_pipe[2:0], 1'b1};
+end
+
+axi_ddr_arbiter #(
+    .DW  (128),
+    .IDW (8),
+    .MAW (28)
+) u_axi_ddr_arbiter (
+    .clk       (core_clk),
+    .rst_n     (arb_rst_pipe[3]),
+    // S0: video frame buffer
+    .s0_awid   ({2'b0, fb_awid}),
+    .s0_awaddr ({4'b0, fb_awaddr}),
+    .s0_awlen  (fb_awlen),
+    .s0_awsize (fb_awsize),
+    .s0_awburst(fb_awburst),
+    .s0_awlock (fb_awlock),
+    .s0_awvalid(fb_awvalid),
+    .s0_awready(fb_awready),
+    .s0_wdata  (fb_wdata),
+    .s0_wstrb  (fb_wstrb),
+    .s0_wlast  (fb_wlast),
+    .s0_wvalid (fb_wvalid),
+    .s0_wready (fb_wready),
+    .s0_bid    (arb_s0_bid),
+    .s0_bresp  (fb_bresp),
+    .s0_bvalid (fb_bvalid),
+    .s0_bready (fb_bready),
+    .s0_arid   ({2'b0, fb_arid}),
+    .s0_araddr ({4'b0, fb_araddr}),
+    .s0_arlen  (fb_arlen),
+    .s0_arsize (fb_arsize),
+    .s0_arburst(fb_arburst),
+    .s0_arlock (fb_arlock),
+    .s0_arvalid(fb_arvalid),
+    .s0_arready(fb_arready),
+    .s0_rdata  (fb_rdata),
+    .s0_rid    (arb_s0_rid),
+    .s0_rresp  (fb_rresp),
+    .s0_rlast  (fb_rlast),
+    .s0_rvalid (fb_rvalid),
+    .s0_rready (fb_rready),
+    // S1: Sapphire CPU
+    .s1_awid   (cpu_awid),
+    .s1_awaddr (cpu_awaddr),
+    .s1_awlen  (cpu_awlen),
+    .s1_awsize (cpu_awsize),
+    .s1_awburst(cpu_awburst),
+    .s1_awlock (cpu_awlock),
+    .s1_awvalid(cpu_awvalid),
+    .s1_awready(cpu_awready),
+    .s1_wdata  (cpu_wdata),
+    .s1_wstrb  (cpu_wstrb),
+    .s1_wlast  (cpu_wlast),
+    .s1_wvalid (cpu_wvalid),
+    .s1_wready (cpu_wready),
+    .s1_bid    (cpu_bid),
+    .s1_bresp  (cpu_bresp),
+    .s1_bvalid (cpu_bvalid),
+    .s1_bready (cpu_bready),
+    .s1_arid   (cpu_arid),
+    .s1_araddr (cpu_araddr),
+    .s1_arlen  (cpu_arlen),
+    .s1_arsize (cpu_arsize),
+    .s1_arburst(cpu_arburst),
+    .s1_arlock (cpu_arlock),
+    .s1_arvalid(cpu_arvalid),
+    .s1_arready(cpu_arready),
+    .s1_rdata  (cpu_rdata),
+    .s1_rid    (cpu_rid),
+    .s1_rresp  (cpu_rresp),
+    .s1_rlast  (cpu_rlast),
+    .s1_rvalid (cpu_rvalid),
+    .s1_rready (cpu_rready),
+    // S2: TinyML accelerator
+    .s2_awid   (acc_awid),
+    .s2_awaddr (acc_awaddr),
+    .s2_awlen  (acc_awlen),
+    .s2_awsize (acc_awsize),
+    .s2_awburst(acc_awburst),
+    .s2_awlock (acc_awlock),
+    .s2_awvalid(acc_awvalid),
+    .s2_awready(acc_awready),
+    .s2_wdata  (acc_wdata),
+    .s2_wstrb  (acc_wstrb),
+    .s2_wlast  (acc_wlast),
+    .s2_wvalid (acc_wvalid),
+    .s2_wready (acc_wready),
+    .s2_bid    (acc_bid),
+    .s2_bresp  (acc_bresp),
+    .s2_bvalid (acc_bvalid),
+    .s2_bready (acc_bready),
+    .s2_arid   (acc_arid),
+    .s2_araddr (acc_araddr),
+    .s2_arlen  (acc_arlen),
+    .s2_arsize (acc_arsize),
+    .s2_arburst(acc_arburst),
+    .s2_arlock (acc_arlock),
+    .s2_arvalid(acc_arvalid),
+    .s2_arready(acc_arready),
+    .s2_rdata  (acc_rdata),
+    .s2_rid    (acc_rid),
+    .s2_rresp  (acc_rresp),
+    .s2_rlast  (acc_rlast),
+    .s2_rvalid (acc_rvalid),
+    .s2_rready (acc_rready),
+    // merged master
+    .m_awid    (mem_awid),
+    .m_awaddr  (mem_awaddr),
+    .m_awlen   (mem_awlen),
+    .m_awsize  (mem_awsize),
+    .m_awburst (mem_awburst),
+    .m_awlock  (mem_awlock),
+    .m_awvalid (mem_awvalid),
+    .m_awready (mem_awready),
+    .m_wdata   (mem_wdata),
+    .m_wstrb   (mem_wstrb),
+    .m_wlast   (mem_wlast),
+    .m_wvalid  (mem_wvalid),
+    .m_wready  (mem_wready),
+    .m_bid     (mem_bid),
+    .m_bresp   (mem_bresp),
+    .m_bvalid  (mem_bvalid),
+    .m_bready  (mem_bready),
+    .m_arid    (mem_arid),
+    .m_araddr  (mem_araddr),
+    .m_arlen   (mem_arlen),
+    .m_arsize  (mem_arsize),
+    .m_arburst (mem_arburst),
+    .m_arlock  (mem_arlock),
+    .m_arvalid (mem_arvalid),
+    .m_arready (mem_arready),
+    .m_rdata   (mem_rdata),
+    .m_rid     (mem_rid),
+    .m_rresp   (mem_rresp),
+    .m_rlast   (mem_rlast),
+    .m_rvalid  (mem_rvalid),
+    .m_rready  (mem_rready),
+    .m_wid     (mem_wid),
+    .dbg_last_ar_addr (dbg_arb_ar_addr),
+    .dbg_last_ar_len  (dbg_arb_ar_len),
+    .dbg_last_ar_size (dbg_arb_ar_size),
+    .dbg_last_ar_burst(dbg_arb_ar_burst),
+    .dbg_last_aw_addr (dbg_arb_aw_addr),
+    .dbg_last_aw_len  (dbg_arb_aw_len),
+    .dbg_last_bresp   (dbg_arb_bresp),
+    .dbg_last_rresp   (dbg_arb_rresp),
+    .dbg_rd_cnt       (dbg_arb_rd_cnt),
+    .dbg_wr_cnt       (dbg_arb_wr_cnt),
+    .dbg_rd_err_cnt   (dbg_arb_rd_err_cnt),
+    .dbg_wr_err_cnt   (dbg_arb_wr_err_cnt),
+    .dbg_state        (dbg_arb_state),
+    .dbg_cpu_ar_addr  (dbg_arb_cpu_ar_addr),
+    .dbg_fb_ar_addr   (dbg_arb_fb_ar_addr),
+    .dbg_cpu_aw_addr  (dbg_arb_cpu_aw_addr),
+    .dbg_fb_aw_addr   (dbg_arb_fb_aw_addr),
+    .dbg_cpu_rd_cnt   (dbg_arb_cpu_rd_cnt),
+    .dbg_fb_rd_cnt    (dbg_arb_fb_rd_cnt),
+    .dbg_m_ar_cnt     (dbg_arb_m_ar_cnt),
+    .dbg_m_aw_cnt     (dbg_arb_m_aw_cnt)
+);
+
+//=====================================================================
 // AXI4 -> shared-address bridge (frame buffer -> DDR3 soft controller)
 //=====================================================================
 axi_atype_bridge #(
-    .IDW (4),
+    .IDW (8),
     .AW  (28)
 ) u_axi_atype_bridge (
     .clk         (core_clk),
     .rst_n       (core_pll_locked & ddr_pll_locked),
+    .serial_enable(style_ddr_serial),
 
-    .s_awid      (fb_awid[3:0]),
-    .s_awaddr    (fb_awaddr),
-    .s_awlen     (fb_awlen),
-    .s_awsize    (fb_awsize),
-    .s_awburst   (fb_awburst),
-    .s_awlock    (fb_awlock),
-    .s_awvalid   (fb_awvalid),
-    .s_awready   (fb_awready),
+    .s_awid      (mem_awid),
+    .s_awaddr    (mem_awaddr),
+    .s_awlen     (mem_awlen),
+    .s_awsize    (mem_awsize),
+    .s_awburst   (mem_awburst),
+    .s_awlock    (mem_awlock),
+    .s_awvalid   (mem_awvalid),
+    .s_awready   (mem_awready),
 
-    .s_arid      (fb_arid[3:0]),
-    .s_araddr    (fb_araddr),
-    .s_arlen     (fb_arlen),
-    .s_arsize    (fb_arsize),
-    .s_arburst   (fb_arburst),
-    .s_arlock    (fb_arlock),
-    .s_arvalid   (fb_arvalid),
-    .s_arready   (fb_arready),
+    .s_arid      (mem_arid),
+    .s_araddr    (mem_araddr),
+    .s_arlen     (mem_arlen),
+    .s_arsize    (mem_arsize),
+    .s_arburst   (mem_arburst),
+    .s_arlock    (mem_arlock),
+    .s_arvalid   (mem_arvalid),
+    .s_arready   (mem_arready),
 
     .m_aid       (ddr_ax_aid),
     .m_aaddr     (ddr_ax_aaddr),
@@ -988,11 +1632,11 @@ axi_atype_bridge #(
     .m_avalid    (ddr_ax_avalid),
     .m_aready    (ddr_ax_aready),
 
-    .bvalid      (fb_bvalid),
-    .bready      (fb_bready),
-    .rvalid      (fb_rvalid),
-    .rlast       (fb_rlast),
-    .rready      (fb_rready)
+    .bvalid      (mem_bvalid),
+    .bready      (mem_bready),
+    .rvalid      (mem_rvalid),
+    .rlast       (mem_rlast),
+    .rready      (mem_rready)
 );
 
 //=====================================================================
@@ -1046,24 +1690,24 @@ efx_ddr3_axi u_efx_ddr3_axi (
     .axi_aready       (ddr_ax_aready),
     .axi_atype        (ddr_ax_atype),
 
-    .axi_wid          ({2'b0, fb_awid}),
-    .axi_wdata        (fb_wdata),
-    .axi_wstrb        (fb_wstrb),
-    .axi_wlast        (fb_wlast),
-    .axi_wvalid       (fb_wvalid),
-    .axi_wready       (fb_wready),
+    .axi_wid          (mem_wid),
+    .axi_wdata        (mem_wdata),
+    .axi_wstrb        (mem_wstrb),
+    .axi_wlast        (mem_wlast),
+    .axi_wvalid       (mem_wvalid),
+    .axi_wready       (mem_wready),
 
-    .axi_rid          (fb_rid8),
-    .axi_rdata        (fb_rdata),
-    .axi_rlast        (fb_rlast),
-    .axi_rvalid       (fb_rvalid),
-    .axi_rready       (fb_rready),
-    .axi_rresp        (fb_rresp),
+    .axi_rid          (mem_rid),
+    .axi_rdata        (mem_rdata),
+    .axi_rlast        (mem_rlast),
+    .axi_rvalid       (mem_rvalid),
+    .axi_rready       (mem_rready),
+    .axi_rresp        (mem_rresp),
 
-    .axi_bid          (fb_bid8),
-    .axi_bresp        (fb_bresp),
-    .axi_bvalid       (fb_bvalid),
-    .axi_bready       (fb_bready),
+    .axi_bid          (mem_bid),
+    .axi_bresp        (mem_bresp),
+    .axi_bvalid       (mem_bvalid),
+    .axi_bready       (mem_bready),
 
     .shift            (pll_shift),
     .shift_sel        (pll_shift_sel),
@@ -1100,6 +1744,6 @@ end
 assign led[0] = (sens_fps != wr_fps);
 assign led[1] = wr_fps[5];
 assign led[2] = cal_ready;
-assign led[3] = hdmi_mode; // lit = 4K30 4:2:0 mode
+assign led[3] = ENABLE_STYLE_SWITCH ? ENABLE_TINYML_RGB != 0 : sens_fps[5];
 
 endmodule

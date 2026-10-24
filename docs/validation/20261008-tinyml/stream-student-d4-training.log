@@ -1,0 +1,118 @@
+2026-10-08 08:37:22.625941: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-08 08:37:22.649279: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-10-08 08:37:23.709685: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+/home/noir/Documents/workspace/Iris/.venv-style/lib/python3.11/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+teacher train pairs 0
+teacher train pairs 10
+teacher train pairs 20
+teacher train pairs 30
+teacher train pairs 40
+teacher train pairs 50
+teacher train pairs 60
+teacher train pairs 70
+{"step": 0, "elapsed_s": 0.5, "loss": {"micro4_d4": 1.3034448623657227}}
+{"step": 100, "elapsed_s": 0.79, "loss": {"micro4_d4": 0.9698557257652283}}
+{"step": 200, "elapsed_s": 1.06, "loss": {"micro4_d4": 0.7895819544792175}}
+{"step": 300, "elapsed_s": 1.32, "loss": {"micro4_d4": 0.5065971612930298}}
+{"step": 400, "elapsed_s": 1.57, "loss": {"micro4_d4": 0.37838879227638245}}
+{"step": 500, "elapsed_s": 1.86, "loss": {"micro4_d4": 0.2960868775844574}}
+{"step": 600, "elapsed_s": 2.15, "loss": {"micro4_d4": 0.1977904736995697}}
+{"step": 700, "elapsed_s": 2.45, "loss": {"micro4_d4": 0.16132059693336487}}
+{"step": 800, "elapsed_s": 2.75, "loss": {"micro4_d4": 0.1334059089422226}}
+{"step": 900, "elapsed_s": 3.02, "loss": {"micro4_d4": 0.12405654788017273}}
+{"step": 1000, "elapsed_s": 3.3, "loss": {"micro4_d4": 0.10874828696250916}}
+{"step": 1100, "elapsed_s": 3.58, "loss": {"micro4_d4": 0.0954115241765976}}
+{"step": 1200, "elapsed_s": 3.87, "loss": {"micro4_d4": 0.10091407597064972}}
+{"step": 1300, "elapsed_s": 4.15, "loss": {"micro4_d4": 0.11350055038928986}}
+{"step": 1400, "elapsed_s": 4.41, "loss": {"micro4_d4": 0.10291677713394165}}
+{"step": 1500, "elapsed_s": 4.69, "loss": {"micro4_d4": 0.08947280049324036}}
+{"step": 1600, "elapsed_s": 4.96, "loss": {"micro4_d4": 0.08380888402462006}}
+{"step": 1700, "elapsed_s": 5.24, "loss": {"micro4_d4": 0.0842294916510582}}
+{"step": 1800, "elapsed_s": 5.51, "loss": {"micro4_d4": 0.11728820204734802}}
+{"step": 1900, "elapsed_s": 5.78, "loss": {"micro4_d4": 0.09568601101636887}}
+{"step": 2000, "elapsed_s": 6.07, "loss": {"micro4_d4": 0.10128676146268845}}
+{"step": 2100, "elapsed_s": 6.37, "loss": {"micro4_d4": 0.09190475940704346}}
+{"step": 2200, "elapsed_s": 6.66, "loss": {"micro4_d4": 0.09859640896320343}}
+{"step": 2300, "elapsed_s": 6.94, "loss": {"micro4_d4": 0.12466416507959366}}
+{"step": 2400, "elapsed_s": 7.19, "loss": {"micro4_d4": 0.09507837891578674}}
+{"step": 2500, "elapsed_s": 7.44, "loss": {"micro4_d4": 0.08477654308080673}}
+{"step": 2600, "elapsed_s": 7.7, "loss": {"micro4_d4": 0.08131428807973862}}
+{"step": 2700, "elapsed_s": 7.98, "loss": {"micro4_d4": 0.08736231923103333}}
+{"step": 2800, "elapsed_s": 8.26, "loss": {"micro4_d4": 0.08875992894172668}}
+{"step": 2900, "elapsed_s": 8.54, "loss": {"micro4_d4": 0.08808373659849167}}
+{"step": 3000, "elapsed_s": 8.82, "loss": {"micro4_d4": 0.10354392975568771}}
+{"step": 3100, "elapsed_s": 9.06, "loss": {"micro4_d4": 0.08171381056308746}}
+{"step": 3200, "elapsed_s": 9.31, "loss": {"micro4_d4": 0.0830857902765274}}
+{"step": 3300, "elapsed_s": 9.59, "loss": {"micro4_d4": 0.0825723186135292}}
+{"step": 3400, "elapsed_s": 9.87, "loss": {"micro4_d4": 0.08334475755691528}}
+{"step": 3500, "elapsed_s": 10.17, "loss": {"micro4_d4": 0.09175480157136917}}
+{"step": 3600, "elapsed_s": 10.46, "loss": {"micro4_d4": 0.08629375696182251}}
+{"step": 3700, "elapsed_s": 10.74, "loss": {"micro4_d4": 0.0968032106757164}}
+{"step": 3800, "elapsed_s": 11.02, "loss": {"micro4_d4": 0.08019302785396576}}
+{"step": 3900, "elapsed_s": 11.3, "loss": {"micro4_d4": 0.08051316440105438}}
+{"step": 4000, "elapsed_s": 11.59, "loss": {"micro4_d4": 0.14428646862506866}}
+{"step": 4100, "elapsed_s": 11.89, "loss": {"micro4_d4": 0.11008717864751816}}
+{"step": 4200, "elapsed_s": 12.15, "loss": {"micro4_d4": 0.10066112875938416}}
+{"step": 4300, "elapsed_s": 12.43, "loss": {"micro4_d4": 0.08767247200012207}}
+{"step": 4400, "elapsed_s": 12.72, "loss": {"micro4_d4": 0.09287607669830322}}
+{"step": 4500, "elapsed_s": 13.01, "loss": {"micro4_d4": 0.08524991571903229}}
+{"step": 4600, "elapsed_s": 13.28, "loss": {"micro4_d4": 0.08980852365493774}}
+{"step": 4700, "elapsed_s": 13.53, "loss": {"micro4_d4": 0.08134029805660248}}
+{"step": 4800, "elapsed_s": 13.79, "loss": {"micro4_d4": 0.08065127581357956}}
+{"step": 4900, "elapsed_s": 14.09, "loss": {"micro4_d4": 0.08234033733606339}}
+{"step": 5000, "elapsed_s": 14.37, "loss": {"micro4_d4": 0.08255957067012787}}
+{"step": 5100, "elapsed_s": 14.67, "loss": {"micro4_d4": 0.0800284743309021}}
+{"step": 5200, "elapsed_s": 14.95, "loss": {"micro4_d4": 0.08788636326789856}}
+{"step": 5300, "elapsed_s": 15.21, "loss": {"micro4_d4": 0.09119965136051178}}
+{"step": 5400, "elapsed_s": 15.49, "loss": {"micro4_d4": 0.08326847851276398}}
+{"step": 5500, "elapsed_s": 15.76, "loss": {"micro4_d4": 0.08351065218448639}}
+{"step": 5600, "elapsed_s": 16.05, "loss": {"micro4_d4": 0.08927387744188309}}
+{"step": 5700, "elapsed_s": 16.33, "loss": {"micro4_d4": 0.08058944344520569}}
+{"step": 5800, "elapsed_s": 16.58, "loss": {"micro4_d4": 0.09237345308065414}}
+{"step": 5900, "elapsed_s": 16.82, "loss": {"micro4_d4": 0.08250068128108978}}
+{"step": 6000, "elapsed_s": 17.1, "loss": {"micro4_d4": 0.08399844914674759}}
+{"step": 6100, "elapsed_s": 17.37, "loss": {"micro4_d4": 0.08089008927345276}}
+{"step": 6200, "elapsed_s": 17.66, "loss": {"micro4_d4": 0.08013970404863358}}
+{"step": 6300, "elapsed_s": 17.94, "loss": {"micro4_d4": 0.09097587317228317}}
+{"step": 6400, "elapsed_s": 18.23, "loss": {"micro4_d4": 0.09695979952812195}}
+{"step": 6500, "elapsed_s": 18.52, "loss": {"micro4_d4": 0.08254244923591614}}
+{"step": 6600, "elapsed_s": 18.81, "loss": {"micro4_d4": 0.08145241439342499}}
+{"step": 6700, "elapsed_s": 19.09, "loss": {"micro4_d4": 0.08008433878421783}}
+{"step": 6800, "elapsed_s": 19.38, "loss": {"micro4_d4": 0.08648987114429474}}
+{"step": 6900, "elapsed_s": 19.63, "loss": {"micro4_d4": 0.08559012413024902}}
+{"step": 7000, "elapsed_s": 19.92, "loss": {"micro4_d4": 0.0842687264084816}}
+{"step": 7100, "elapsed_s": 20.2, "loss": {"micro4_d4": 0.07849413901567459}}
+{"step": 7200, "elapsed_s": 20.48, "loss": {"micro4_d4": 0.0936245396733284}}
+{"step": 7300, "elapsed_s": 20.75, "loss": {"micro4_d4": 0.08942456543445587}}
+{"step": 7400, "elapsed_s": 21.0, "loss": {"micro4_d4": 0.08054852485656738}}
+{"step": 7500, "elapsed_s": 21.25, "loss": {"micro4_d4": 0.08436086773872375}}
+{"step": 7600, "elapsed_s": 21.52, "loss": {"micro4_d4": 0.08969374746084213}}
+{"step": 7700, "elapsed_s": 21.8, "loss": {"micro4_d4": 0.07894746214151382}}
+{"step": 7800, "elapsed_s": 22.1, "loss": {"micro4_d4": 0.0843181386590004}}
+{"step": 7900, "elapsed_s": 22.4, "loss": {"micro4_d4": 0.08208364993333817}}
+{"step": 8000, "elapsed_s": 22.69, "loss": {"micro4_d4": 0.08347471058368683}}
+{"step": 8100, "elapsed_s": 22.97, "loss": {"micro4_d4": 0.08049990236759186}}
+{"step": 8200, "elapsed_s": 23.24, "loss": {"micro4_d4": 0.07850085943937302}}
+{"step": 8300, "elapsed_s": 23.52, "loss": {"micro4_d4": 0.08021868020296097}}
+{"step": 8400, "elapsed_s": 23.8, "loss": {"micro4_d4": 0.08705201745033264}}
+{"step": 8500, "elapsed_s": 24.06, "loss": {"micro4_d4": 0.08065450191497803}}
+{"step": 8600, "elapsed_s": 24.31, "loss": {"micro4_d4": 0.08164967596530914}}
+{"step": 8700, "elapsed_s": 24.57, "loss": {"micro4_d4": 0.07929440587759018}}
+{"step": 8800, "elapsed_s": 24.84, "loss": {"micro4_d4": 0.08060666173696518}}
+{"step": 8900, "elapsed_s": 25.14, "loss": {"micro4_d4": 0.08069047331809998}}
+{"step": 9000, "elapsed_s": 25.43, "loss": {"micro4_d4": 0.0792761892080307}}
+{"step": 9100, "elapsed_s": 25.69, "loss": {"micro4_d4": 0.08499497175216675}}
+{"step": 9200, "elapsed_s": 25.95, "loss": {"micro4_d4": 0.09287562221288681}}
+{"step": 9300, "elapsed_s": 26.23, "loss": {"micro4_d4": 0.07845094054937363}}
+{"step": 9400, "elapsed_s": 26.52, "loss": {"micro4_d4": 0.07604935765266418}}
+{"step": 9500, "elapsed_s": 26.81, "loss": {"micro4_d4": 0.08004222065210342}}
+{"step": 9600, "elapsed_s": 27.1, "loss": {"micro4_d4": 0.08896732330322266}}
+{"step": 9700, "elapsed_s": 27.37, "loss": {"micro4_d4": 0.08038769662380219}}
+{"step": 9800, "elapsed_s": 27.64, "loss": {"micro4_d4": 0.08162705600261688}}
+{"step": 9900, "elapsed_s": 27.89, "loss": {"micro4_d4": 0.08822593092918396}}

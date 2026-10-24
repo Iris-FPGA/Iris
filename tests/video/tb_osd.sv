@@ -17,7 +17,7 @@ initial begin
   $fatal(1,"OSD BCD/snapshot mismatch");
  if(dut.digits[7]!==16'h0016 || dut.wb_locked!==1)$fatal(1,"Colour calibration OSD");
  white=0;black=0;
- for(y=0;y<130;y=y+1)begin
+ for(y=0;y<170;y=y+1)begin
   de=1;
   for(x=0;x<384;x=x+1)begin
    #1;

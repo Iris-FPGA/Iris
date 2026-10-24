@@ -1,0 +1,2 @@
+PASS CNN/resize CI decoding, vendor rejection, DMA ownership and abort drain
+tests/video/tb_stream_subsystem.sv:54: $finish called at 780000 (1ps)

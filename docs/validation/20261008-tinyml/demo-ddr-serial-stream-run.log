@@ -1,0 +1,57 @@
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x40 cpuAR=0x0x808300 fbAR=0x0xd7800
+arb cpuAW=0x0x70fffc fbAW=0x0x5b2000 rdCnt cpu/fb=2256/48778 rresp=0
+arb ARhand=51249 rdDone=51249 AWhand=57472 wrDone=57472
+lastAR addr=0x0x808340 len=3 size=4 burst=1 | lastAW addr=0x0x2a3800 len=127
+Core 0 Hardware Settings:
+Accelerator Active: 1
+UUID: 0x4923687a
+AXI DW: 128
+AXI_DB_W: 16
+Cache Enabled: 1
+Cache Depth: 512
+Conv Depthw Mode: 2
+Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:2
+Add Mode: 2
+FC Mode: 0
+Mul Mode: 0
+LR Mode: 0
+Min-Max Mode: 0
+Reshape Mode: 0
+IRIS nodes OK: flatbuffer
+IRIS nodes OK: init
+IRIS prepare node 0 @0x0xe287f4IRIS prepare node 1 @0x0xe28810IRIS prepare node 2 @0x0xe2882cIRIS prepare node 3 @0x0xe28848IRIS prepare node 4 @0x0xe28864IRIS prepare node 5 @0x0xe28880IRIS prepare node 6 @0x0xe2889cIRIS prepare node 7 @0x0xe288b8IRIS prepare node 8 @0x0xe288d4IRIS prepare node 9 @0x0xe288f0DDR arena: base=0x0xa28a80 capacity=4194304 used=3688092
+IRIS LIVE: 640x480 paired camera/style; no CPU image processing; SRAM only
+IRIS LIVE before capture: input_view=0x0xe28438 output_view=0x0xe283f8 eval23=0x0xb54a80
+IRIS LIVE after capture: input_data=0x0xa28a80 output_data=0x0xa28a80 eval23=0x0xb54a80
+IRIS CAPTURE AUDIT source_dummy=0 bus_dummy=0 serial_ddr=1
+IRIS STREAM input bytes=1228800 baud=500000
+received input 1228800
+IRIS STREAM END input dummy_bad=22612
+IRIS STOP: camera hardware stream failed
+{
+  "scope": "one camera pair exported through hardware DMA CI/UART; no JTAG DDR pixel reads",
+  "elf_sha256": "c2c897b86ec1d9109d56007299e33ba815f61d313c6148a648cbc0f1ce288c89",
+  "bit_sha256": "6154be006cff81f8b880de856c001aeaa9fcccd0b2194a28f8161633d1d909c9",
+  "serial_ddr": true,
+  "snapshot_files": {
+    "input": {
+      "path": "/home/noir/Documents/workspace/Iris/docs/validation/20261008-tinyml/demo-ddr-serial-stream-input.bin",
+      "sha256": "7a7a0bd3f490f993a6797e66dfc0d214d1dd82e0dbbb511b7cbf0c55cbbd1f55"
+    }
+  },
+  "dummy_bad": {
+    "input": 22612
+  },
+  "load": "163316 bytes written at address 0x00800000\n4 bytes written at address 0x00827e00\n2108 bytes written at address 0x00827e10\ndownloaded 165428 bytes in 3.938229s (41.021 KiB/s)\n",
+  "capture_audit": {
+    "source_dummy": 0,
+    "bus_dummy": 0,
+    "serial_ddr": 1
+  },
+  "stop_reason": "IRIS STOP: camera hardware stream failed",
+  "export_ok": false
+}

@@ -1,0 +1,7 @@
+{
+  "bit_sha256": "c75e58608e469c12b8d084dcdfe736be9bc7ea28054553e78827a6fa0ce2a47b",
+  "model_sha256": "e4a45f1d9314654565f3300978d8a7b8843fc0c0687c454c4b6e3b47e0f05386",
+  "project": "/tmp/iris-stream-project/iris_ws",
+  "source_manifest": "stream-d2-fps-source-manifest.json",
+  "style_scale_q24": 20596120
+}

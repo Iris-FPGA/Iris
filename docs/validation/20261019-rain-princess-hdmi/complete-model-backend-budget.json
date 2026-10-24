@@ -1,0 +1,763 @@
+{
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "clock_hz": 100000000,
+  "target_fresh_fps": 30,
+  "frame_budget_ms": 33.333333333333336,
+  "total_nominal_macs": 148635648,
+  "required_macs_per_second": 4459069440,
+  "required_average_macs_per_clock": 44.5906944,
+  "conv_only_optimistic_bounds": {
+    "8x2": {
+      "cycles": 9732096,
+      "ms_at_100MHz": 97.32096,
+      "fps_upper_bound": 10.27527882996633
+    },
+    "16x4": {
+      "cycles": 2727936,
+      "ms_at_100MHz": 27.27936,
+      "fps_upper_bound": 36.6577515015015
+    },
+    "8x8": {
+      "cycles": 2506752,
+      "ms_at_100MHz": 25.06752,
+      "fps_upper_bound": 39.892258986928105
+    },
+    "32x2": {
+      "cycles": 3686400,
+      "ms_at_100MHz": 36.864,
+      "fps_upper_bound": 27.12673611111111
+    }
+  },
+  "layers": [
+    {
+      "node": 0,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          128,
+          128,
+          3
+        ],
+        [
+          8,
+          3,
+          3,
+          3
+        ],
+        [
+          8
+        ]
+      ],
+      "output_shape": [
+        1,
+        128,
+        128,
+        8
+      ],
+      "nominal_macs": 3538944,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 589824,
+        "16x4": 294912,
+        "8x8": 147456,
+        "32x2": 589824
+      },
+      "activation_read_write_bytes_without_reuse": 180224
+    },
+    {
+      "node": 1,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          128,
+          128,
+          8
+        ],
+        [
+          16,
+          3,
+          3,
+          8
+        ],
+        [
+          16
+        ]
+      ],
+      "output_shape": [
+        1,
+        64,
+        64,
+        16
+      ],
+      "nominal_macs": 4718592,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 294912,
+        "16x4": 147456,
+        "8x8": 73728,
+        "32x2": 294912
+      },
+      "activation_read_write_bytes_without_reuse": 196608
+    },
+    {
+      "node": 2,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          64,
+          64,
+          16
+        ],
+        [
+          32,
+          3,
+          3,
+          16
+        ],
+        [
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "nominal_macs": 4718592,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 294912,
+        "16x4": 73728,
+        "8x8": 73728,
+        "32x2": 147456
+      },
+      "activation_read_write_bytes_without_reuse": 98304
+    },
+    {
+      "node": 3,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          3,
+          3,
+          32
+        ],
+        [
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "nominal_macs": 9437184,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 589824,
+        "16x4": 147456,
+        "8x8": 147456,
+        "32x2": 147456
+      },
+      "activation_read_write_bytes_without_reuse": 65536
+    },
+    {
+      "node": 4,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          3,
+          3,
+          32
+        ],
+        [
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "nominal_macs": 9437184,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 589824,
+        "16x4": 147456,
+        "8x8": 147456,
+        "32x2": 147456
+      },
+      "activation_read_write_bytes_without_reuse": 65536
+    },
+    {
+      "node": 5,
+      "op": "ADD",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "activation_read_write_bytes_without_reuse": 98304
+    },
+    {
+      "node": 6,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          3,
+          3,
+          32
+        ],
+        [
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "nominal_macs": 9437184,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 589824,
+        "16x4": 147456,
+        "8x8": 147456,
+        "32x2": 147456
+      },
+      "activation_read_write_bytes_without_reuse": 65536
+    },
+    {
+      "node": 7,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          3,
+          3,
+          32
+        ],
+        [
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "nominal_macs": 9437184,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 589824,
+        "16x4": 147456,
+        "8x8": 147456,
+        "32x2": 147456
+      },
+      "activation_read_write_bytes_without_reuse": 65536
+    },
+    {
+      "node": 8,
+      "op": "ADD",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "activation_read_write_bytes_without_reuse": 98304
+    },
+    {
+      "node": 9,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          3,
+          3,
+          32
+        ],
+        [
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "nominal_macs": 9437184,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 589824,
+        "16x4": 147456,
+        "8x8": 147456,
+        "32x2": 147456
+      },
+      "activation_read_write_bytes_without_reuse": 65536
+    },
+    {
+      "node": 10,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          3,
+          3,
+          32
+        ],
+        [
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "nominal_macs": 9437184,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 589824,
+        "16x4": 147456,
+        "8x8": 147456,
+        "32x2": 147456
+      },
+      "activation_read_write_bytes_without_reuse": 65536
+    },
+    {
+      "node": 11,
+      "op": "ADD",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "activation_read_write_bytes_without_reuse": 98304
+    },
+    {
+      "node": 12,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          3,
+          3,
+          32
+        ],
+        [
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "nominal_macs": 9437184,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 589824,
+        "16x4": 147456,
+        "8x8": 147456,
+        "32x2": 147456
+      },
+      "activation_read_write_bytes_without_reuse": 65536
+    },
+    {
+      "node": 13,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          3,
+          3,
+          32
+        ],
+        [
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "nominal_macs": 9437184,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 589824,
+        "16x4": 147456,
+        "8x8": 147456,
+        "32x2": 147456
+      },
+      "activation_read_write_bytes_without_reuse": 65536
+    },
+    {
+      "node": 14,
+      "op": "ADD",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "activation_read_write_bytes_without_reuse": 98304
+    },
+    {
+      "node": 15,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          3,
+          3,
+          32
+        ],
+        [
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "nominal_macs": 9437184,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 589824,
+        "16x4": 147456,
+        "8x8": 147456,
+        "32x2": 147456
+      },
+      "activation_read_write_bytes_without_reuse": 65536
+    },
+    {
+      "node": 16,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          32,
+          3,
+          3,
+          32
+        ],
+        [
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "nominal_macs": 9437184,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 589824,
+        "16x4": 147456,
+        "8x8": 147456,
+        "32x2": 147456
+      },
+      "activation_read_write_bytes_without_reuse": 65536
+    },
+    {
+      "node": 17,
+      "op": "ADD",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          1,
+          32,
+          32,
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        32,
+        32
+      ],
+      "activation_read_write_bytes_without_reuse": 98304
+    },
+    {
+      "node": 18,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "input_shapes": [
+        [
+          1,
+          32,
+          32,
+          32
+        ],
+        [
+          2
+        ]
+      ],
+      "output_shape": [
+        1,
+        64,
+        64,
+        32
+      ],
+      "activation_read_write_bytes_without_reuse": 163840
+    },
+    {
+      "node": 19,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          64,
+          64,
+          32
+        ],
+        [
+          16,
+          3,
+          3,
+          32
+        ],
+        [
+          16
+        ]
+      ],
+      "output_shape": [
+        1,
+        64,
+        64,
+        16
+      ],
+      "nominal_macs": 18874368,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 1179648,
+        "16x4": 294912,
+        "8x8": 294912,
+        "32x2": 294912
+      },
+      "activation_read_write_bytes_without_reuse": 196608
+    },
+    {
+      "node": 20,
+      "op": "RESIZE_NEAREST_NEIGHBOR",
+      "input_shapes": [
+        [
+          1,
+          64,
+          64,
+          16
+        ],
+        [
+          2
+        ]
+      ],
+      "output_shape": [
+        1,
+        128,
+        128,
+        16
+      ],
+      "activation_read_write_bytes_without_reuse": 327680
+    },
+    {
+      "node": 21,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          128,
+          128,
+          16
+        ],
+        [
+          8,
+          3,
+          3,
+          16
+        ],
+        [
+          8
+        ]
+      ],
+      "output_shape": [
+        1,
+        128,
+        128,
+        8
+      ],
+      "nominal_macs": 18874368,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 1179648,
+        "16x4": 294912,
+        "8x8": 294912,
+        "32x2": 589824
+      },
+      "activation_read_write_bytes_without_reuse": 393216
+    },
+    {
+      "node": 22,
+      "op": "CONV_2D",
+      "input_shapes": [
+        [
+          1,
+          128,
+          128,
+          8
+        ],
+        [
+          3,
+          3,
+          3,
+          8
+        ],
+        [
+          3
+        ]
+      ],
+      "output_shape": [
+        1,
+        128,
+        128,
+        3
+      ],
+      "nominal_macs": 3538944,
+      "ideal_cycles_by_parallelism": {
+        "8x2": 294912,
+        "16x4": 147456,
+        "8x8": 147456,
+        "32x2": 294912
+      },
+      "activation_read_write_bytes_without_reuse": 180224
+    }
+  ],
+  "scope": "Arithmetic bounds only; excludes Add, Resize, quantization/control, weight loads, DDR stalls, camera acquisition and display synchronization; no FPGA fit/timing claim."
+}

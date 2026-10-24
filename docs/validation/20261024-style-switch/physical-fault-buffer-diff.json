@@ -1,0 +1,82 @@
+[
+  {
+    "kind": "input",
+    "row": 0,
+    "changed_bytes": 1332,
+    "mean_abs_delta": 18.2015625,
+    "unique_bytes": [
+      161,
+      159
+    ]
+  },
+  {
+    "kind": "input",
+    "row": 120,
+    "changed_bytes": 1298,
+    "mean_abs_delta": 9.773046875,
+    "unique_bytes": [
+      181,
+      180
+    ]
+  },
+  {
+    "kind": "input",
+    "row": 240,
+    "changed_bytes": 1697,
+    "mean_abs_delta": 14.198828125,
+    "unique_bytes": [
+      220,
+      226
+    ]
+  },
+  {
+    "kind": "input",
+    "row": 360,
+    "changed_bytes": 1677,
+    "mean_abs_delta": 11.039453125,
+    "unique_bytes": [
+      218,
+      219
+    ]
+  },
+  {
+    "kind": "output",
+    "row": 0,
+    "changed_bytes": 1228,
+    "mean_abs_delta": 1.3296875,
+    "unique_bytes": [
+      46,
+      46
+    ]
+  },
+  {
+    "kind": "output",
+    "row": 120,
+    "changed_bytes": 1178,
+    "mean_abs_delta": 1.05078125,
+    "unique_bytes": [
+      36,
+      35
+    ]
+  },
+  {
+    "kind": "output",
+    "row": 240,
+    "changed_bytes": 1222,
+    "mean_abs_delta": 0.96015625,
+    "unique_bytes": [
+      32,
+      30
+    ]
+  },
+  {
+    "kind": "output",
+    "row": 360,
+    "changed_bytes": 1310,
+    "mean_abs_delta": 1.18515625,
+    "unique_bytes": [
+      33,
+      32
+    ]
+  }
+]

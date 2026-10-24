@@ -1,0 +1,5 @@
+make: Entering directory '/mnt/mydata/Iris/dev/fastnst/firmware/tinyml_style'
+g++ -std=c++17 -DIRIS_MODEL_RGBA=0 -DIRIS_MODEL_RAIN_PRINCESS=0 -I/mnt/mydata/Iris/dev/tinyml/tinyml_hello_world/Ti60F225_tinyml_hello_world/embedded_sw/SapphireSoc/software/standalone/tinyml_ypd/src -I/mnt/mydata/Iris/dev/tinyml/tinyml_hello_world/Ti60F225_tinyml_hello_world/embedded_sw/SapphireSoc/software/standalone/tinyml_ypd/src/tensorflow/third_party/flatbuffers/include -I/mnt/mydata/Iris/dev/fastnst/iris_ws/RISC-V check_model.cc src/model.cc -o build/original/check-model-original
+build/original/check-model-original
+PASS: 125336 model bytes; INT8 NHWC 1x128x128x3; Conv2D v3 x16, Add v2 x5, ResizeNearestNeighbor v2 x2; 2x resize with unchanged quantization and both flags false
+make: Leaving directory '/mnt/mydata/Iris/dev/fastnst/firmware/tinyml_style'

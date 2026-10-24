@@ -1,0 +1,23 @@
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x40 cpuAR=0x0x8084cc fbAR=0x0x270800
+arb cpuAW=0x0xf0fffc fbAW=0x0x156800 rdCnt cpu/fb=26983/43434 rresp=0
+arb ARhand=8325 rdDone=8327 AWhand=53347 wrDone=53347
+lastAR addr=0x0x808524 len=0 size=1 burst=2 | lastAW addr=0x0x1fa000 len=63
+Core 0 Hardware Settings:
+  Accelerator Active: 1
+  UUID: 0x4923687a
+  AXI DW: 128
+  AXI_DB_W: 16
+  Cache Enabled: 1
+  Cache Depth: 512
+  Conv Depthw Mode: 2
+  Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:2
+  Add Mode: 2
+  FC Mode: 0
+  Mul Mode: 0
+  LR Mode: 0
+  Min-Max Mode: 0
+  Reshape Mode: 0

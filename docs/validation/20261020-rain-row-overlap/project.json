@@ -1,0 +1,36 @@
+{
+  "scope": "live camera + complete 128x128 RGB TinyML; 1920x1080 HDMI split",
+  "source_project": "/mnt/mydata/Iris/dev/fastnst/iris_ws",
+  "project": "/mnt/mydata/Iris/dev/fastnst/firmware/tinyml_style/build/rain_row_overlap/iris_ws",
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "accelerator_sha256": "fcfd9d22df0ae3781dd2cc914886938b0c072be775cf7aea1ea425ad36f0d28d",
+  "in_parallel": 8,
+  "out_parallel": 8,
+  "cache_depth_override": 1024,
+  "add_mode_override": "LITE",
+  "live_rgb": true,
+  "tensor_burst_dma": true,
+  "rain_row_backend": true,
+  "tensor_resize_channels": [
+    16,
+    32
+  ],
+  "tensor_copy_channels": [
+    3,
+    16,
+    32
+  ],
+  "source_sha256": {
+    "src/top.v": "83a27a330f78bab26bc10154eb15dbede54ac8a0d2f1b80aac98e77f4d47ce93",
+    "src/cnn/tinyml_subsystem.v": "31c9647ffdb647ddc26b7393095a462c0525eec679645c56f06ecac7a542d927",
+    "src/cnn/iris_resize2x.v": "7e23ab01cd976263bb6cf7edcb9820d77448d786bb238e6b0b13b5a0671e77a6",
+    "src/cnn/iris_style_capture.v": "c95c378a4d2c6d1b9cb98e121872170e9b46f5bedd1b87431d673827018457ac",
+    "src/cnn/iris_tinyml_video.v": "44c19240a8cadeea2c24c72c6204d17a5765b69a0ed7a25cf60f18a2b0bd5b64",
+    "src/cnn/iris_style_demo.v": "b2b1a30a7f8f7f9bd8ae60f1b45fe8dfeec61b5a93484e47be40ca025c3371bc",
+    "src/cnn/iris_rain_conv.v": "46a906074f91b8e0b57cf59cbf5441c9ef783ea2d0568c0eb28ef8b005d93154",
+    "src/cnn/iris_rain_add.v": "124af7a6a79d4494ec077021a032e4378ab62244a96bec469509dc66811566a2",
+    "src/cnn/iris_rain_backend.v": "45f6e60edc282728843cd516f9b558ad6452332e6baa2e3fd19cb271481df197"
+  },
+  "reset_behavior": "OCR JAL x0,0; load ELF at 0x00800000 with OpenOCD",
+  "hardware_execution_verified": false
+}

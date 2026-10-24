@@ -1,0 +1,22 @@
+WARNING: The system libstdc++.so is more recent (version 36) than the copy shipped with the Efinity software (version 32).
+The Efinity software may not function correctly on this system.
+To avoid potential compatibility issues, please back up and remove "/home/noir/Applications/efinity/2026.1/lib/libstdc++.so.6"
+
+[Runtime] SpinalHDL dev    git head : a69f4b9a329be784802c37cd8038b7dc9aec3094
+[Runtime] JVM max memory : 7976.0MiB
+[Runtime] Current date : 2026.10.07 05:15:32
+[Progress] at 0.000 : Elaborate components
+[Info] No CounterService was found. Generating legacy counters and timer
+[Progress] at 1.722 : Checks and transforms
+[Progress] at 2.207 : Generate Verilog to hardware/netlist
+[Warning] toplevel/system_ddr_ddrLogic_ddrAToAxi3_patchArw_translated_thrown_fifo/fifo/logic_ram : Mem[4*16 bits].readAsync can only be write first into Verilog
+[Warning] toplevel/system_riscvJtag_debug_logic_dm/logic_progbufX_mem : Mem[2*32 bits].readAsync can only be write first into Verilog
+[Warning] 520 signals were pruned. You can call printPruned on the backend report to get more informations.
+[Done] at 2.512
+[gen] ipm log: /home/noir/.efinity/log/20261007T051459/efxIP.log
+MKDIR /home/noir/.efinity/log/20261007T051459
+[gen] generating SapphireSoc (efx_soc 3.4.1) into /home/noir/Documents/workspace/Iris/iris_ws/ip/SapphireSoc
+================================================
+[gen] result: ResultCode.SUCCESS
+[gen] applied official CLI options: ['--lowArea', '3', '--noDdrAClock']
+[gen] ip/SapphireSoc: EfxSapphireSoc.v_toplevel_system_ramA_logic_ram_symbol0.bin, EfxSapphireSoc.v_toplevel_system_ramA_logic_ram_symbol1.bin, EfxSapphireSoc.v_toplevel_system_ramA_logic_ram_symbol2.bin, EfxSapphireSoc.v_toplevel_system_ramA_logic_ram_symbol3.bin, SapphireSoc.v, SapphireSoc_define.vh, SapphireSoc_tmpl.v, SapphireSoc_tmpl.vhd, ipm, iris_generator_manifest.json, iris_generator_options.json, settings.json, source

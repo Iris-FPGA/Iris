@@ -1,0 +1,86 @@
+{
+  "source": "pipeline-hybrid-soak-uart.log",
+  "samples": [
+    {
+      "sequence": 2726,
+      "pair": 1,
+      "invoke_ticks": 36312324,
+      "displayed": 2726,
+      "captures": 2727,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 2727,
+      "pair": 2,
+      "invoke_ticks": 36312585,
+      "displayed": 2727,
+      "captures": 2728,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 2728,
+      "pair": 0,
+      "invoke_ticks": 36309019,
+      "displayed": 2728,
+      "captures": 2729,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 2729,
+      "pair": 1,
+      "invoke_ticks": 36302655,
+      "displayed": 2729,
+      "captures": 2730,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 2730,
+      "pair": 2,
+      "invoke_ticks": 36304856,
+      "displayed": 2730,
+      "captures": 2731,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 2731,
+      "pair": 0,
+      "invoke_ticks": 36308964,
+      "displayed": 2731,
+      "captures": 2732,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 2732,
+      "pair": 1,
+      "invoke_ticks": 36307769,
+      "displayed": 2732,
+      "captures": 2733,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    },
+    {
+      "sequence": 2733,
+      "pair": 2,
+      "invoke_ticks": 36315243,
+      "displayed": 2733,
+      "captures": 2734,
+      "underflow": 0,
+      "readerr": 0,
+      "rejects": 0
+    }
+  ],
+  "all_errors_zero": true
+}

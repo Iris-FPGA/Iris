@@ -1,0 +1,23 @@
+{
+  "scope": "offline display reference; raw CNN unmodified",
+  "raw_output_sha256": "7ec54ec2e3a0d4db12a9bdf9cf26329c55db12045577067e34ba4bcf98db3eaa",
+  "mode": 2,
+  "contour_guidance": true,
+  "thicken_kernel": [
+    1,
+    1
+  ],
+  "scale": 1.2276244163513184,
+  "preview": "docs/validation/20261017-vivid-neural-colour/cnn-gain-12.png",
+  "gradient_kernel": "Gaussian3 convolved with Sobel3, 5x5",
+  "threshold": 20,
+  "gain": 2,
+  "ink_cap": 128,
+  "colour_source": "CNN only",
+  "saturation_q2": 12,
+  "colour_quantization": false,
+  "raw_mean_chroma": 15.0203515625,
+  "previous_mean_chroma": 4.361041666666667,
+  "visible_mean_chroma": 45.0610546875,
+  "pixels_with_chroma_loss": 0
+}

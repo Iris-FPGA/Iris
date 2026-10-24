@@ -1,0 +1,15 @@
+PASS contour: 10240 vectors, independent 5x5 convolution, borders, modes, saturation and pipeline
+tests/video/tb_style_contour.sv:25: $finish called at 102501000 (1ps)
+FATAL: tests/video/tb_style_panels.sv:104: panel mismatch tx=       1132 ty=        301 got=1b4e9e98cbfbf ref=1a8dddd80b3b3
+       Time: 5337528000  Scope: tb_style_panels
+Traceback (most recent call last):
+  File "/home/noir/Documents/workspace/Iris/tests/video/run_style_contour_tests.py", line 98, in <module>
+    if a.negative is not None:panels(tmp,a.negative,2,3)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/noir/Documents/workspace/Iris/tests/video/run_style_contour_tests.py", line 91, in panels
+    simulate(exe,[f'+CONTOUR_REF={expected}'])
+  File "/home/noir/Documents/workspace/Iris/tests/video/run_style_contour_tests.py", line 46, in simulate
+    subprocess.run(cmd+[str(dest),*args],cwd=ROOT,check=True)
+  File "/home/noir/miniconda3/envs/isaaclab/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['vvp', '/tmp/iris-contour-tests-_lww0i48/panel-0-2-3', '+CONTOUR_REF=/tmp/iris-contour-tests-_lww0i48/panel-0-2-3.mem']' returned non-zero exit status 1.

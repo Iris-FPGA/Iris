@@ -1,0 +1,37 @@
+{
+  "requested_at": "2026-10-24T14:37:00+08:00",
+  "scope": "User cancelled dual-style switching; restore complete pre-test single-style Flash backup",
+  "style": "One Last Kiss 640x480 contour",
+  "flash_source": "firmware/tinyml_style/build/style-switch-20261024/flash-before.hex",
+  "flash_decoded_bytes": 8388608,
+  "flash_file_sha256": "e0d6980c80233a00a24f794156bdb0025eb0c8d8a0e50560a3be170116a11af9",
+  "source_identity_verified": true,
+  "flash_readback_verified": true,
+  "sram_original_loaded": true,
+  "hdmi_acceptance": "pending",
+  "status": "Original full Flash restored and verified; original single-style FPGA running; awaiting physical HDMI confirmation",
+  "source_original_image_generated": "2026-10-20 23:28:49",
+  "passive_original_bit_sha256": "2acefc9acc7093b76ee23f165e7ec9a6029a3a35e968699359c76cc69883f48f",
+  "program_retry": true,
+  "program_log": "restore-single-flash.log",
+  "uart_observation": {
+    "scope": "Controller progress only; does not prove live camera or physical HDMI",
+    "samples": 43,
+    "first": [
+      1,
+      1,
+      0,
+      0,
+      0
+    ],
+    "last": [
+      660,
+      660,
+      0,
+      0,
+      0
+    ],
+    "stop_seen": false
+  },
+  "restored_at": "2026-10-24T14:46:37.101324+08:00"
+}

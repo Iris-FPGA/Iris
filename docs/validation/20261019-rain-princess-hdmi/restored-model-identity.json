@@ -1,0 +1,8 @@
+{
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "model_bytes": 125336,
+  "model_symbol": "rain_princess_int8_model_data",
+  "project_manifest": "/mnt/mydata/Iris/dev/fastnst/firmware/tinyml_style/build/rain_princess_rect_8x2_hybrid/iris_ws/tinyml-project.json",
+  "elf_sha256": "f4b1e9dd4b76ae9c3b4863c2387e5f8561d48bd4e9e3538a468fe5656cac7a8a",
+  "bit_sha256": "c27d94d85e2241605e71a31c466f388f4198f5326bd0c7f9dcbc806b46fd3be3"
+}

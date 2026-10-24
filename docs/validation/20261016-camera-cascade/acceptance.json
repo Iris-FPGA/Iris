@@ -1,0 +1,11 @@
+{
+  "visual_quality_accepted": false,
+  "visual_feedback": "画面异常或变得太模糊；用户要求恢复 AI 参数并专注原生相机画面",
+  "retired": true,
+  "flash_modified": false,
+  "scope": "Retired median + two Gaussian tensor-filter experiment",
+  "bit_sha256": "38cb4d06c62831c1931d06290e186c834351ebf20b9b2f4f25ba65a3eaaa9ffa",
+  "committed_hz": 30.047133437885826,
+  "live_ok": true,
+  "observation_seconds": 120.03788614302175
+}

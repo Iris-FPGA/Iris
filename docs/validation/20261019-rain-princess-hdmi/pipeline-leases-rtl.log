@@ -1,0 +1,2 @@
+PASS triple-bank leases: concurrent capture/inference/display, stable mailboxes, VS release, bank 2, rejection guards
+tests/video/tb_style_pipeline.sv:70: $finish called at 1070000 (1ps)

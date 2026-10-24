@@ -1,0 +1,31 @@
+Iris style static bring-up; STRICT HARDWARE DISPATCH
+Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS
+DDR coher: fails=0 bad@0x0x0 got=0x0x0 exp=0x0x0
+DDR coher pass2: fails=0
+arb state=0x0x41 cpuAR=0x0x808040 fbAR=0x0x27a800
+arb cpuAW=0x0x70fffc fbAW=0x0x192800 rdCnt cpu/fb=2248/12836 rresp=0
+arb ARhand=15352 rdDone=15352 AWhand=18861 wrDone=18861
+lastAR addr=0x0x808080 len=3 size=4 burst=1 | lastAW addr=0x0x493800 len=127
+Core 0 Hardware Settings:
+  Accelerator Active: 1
+  UUID: 0x4923687a
+  AXI DW: 128
+  AXI_DB_W: 16
+  Cache Enabled: 1
+  Cache Depth: 512
+  Conv Depthw Mode: 2
+  Conv Depthw Input Cnt:4; Conv Depthw Output Cnt:2
+  Add Mode: 2
+  FC Mode: 0
+  Mul Mode: 0
+  LR Mode: 0
+  Min-Max Mode: 0
+  Reshape Mode: 0
+IRIS nodes OK: flatbuffer
+IRIS nodes OK: init
+IRIS prepare node 0 @0x0xe27ff4IRIS prepare node 1 @0x0xe28010IRIS prepare node 2 @0x0xe2802cIRIS prepare node 3 @0x0xe28048IRIS prepare node 4 @0x0xe28064IRIS prepare node 5 @0x0xe28080IRIS prepare node 6 @0x0xe2809cIRIS prepare node 7 @0x0xe280b8IRIS prepare node 8 @0x0xe280d4IRIS prepare node 9 @0x0xe280f0DDR arena: base=0x0xa28280 capacity=4194304 used=3688092
+IRIS LIVE: 640x480 paired camera/style; no CPU image processing; SRAM only
+IRIS LIVE before capture: input_view=0x0xe27c38 output_view=0x0xe27bf8 eval23=0x0xb54280
+IRIS LIVE after capture: input_data=0x0xa28280 output_data=0x0xa28280 eval23=0x0xb54280
+IRIS STOP: camera input DMA transport failed
+

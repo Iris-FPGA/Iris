@@ -1,0 +1,8 @@
+IRIS STREAM CNN: 640x480 C4; Conv3s2/Conv3d2/Conv1/NN2x hardware; SRAM only
+IRIS CAPTURE AUDIT source_dummy=0 bus_dummy=0 serial_ddr=0
+IRIS STREAM input bytes=1228800 baud=500000
+IRIS STREAM END input dummy_bad=0
+IRIS LIVE frame=1 pair=1 Invoke_ticks=1818729 displayed=1506 captures=1507 underflow=0 readerr=0 rejects=0
+IRIS STREAM output bytes=1228800 baud=500000
+IRIS STREAM END output dummy_bad=0
+IRIS STREAM DONE pair=1 displayed=1506

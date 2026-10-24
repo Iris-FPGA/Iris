@@ -1,0 +1,2 @@
+PASS ink: 4096 independent RGB cases, all modes, saturation, valid and pipeline
+tests/video/tb_style_ink.sv:20: $finish called at 41011000 (1ps)

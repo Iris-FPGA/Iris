@@ -1,0 +1,12 @@
+{
+  "experiment": "cache reset/configuration guard; same FPGA bit and model",
+  "guard_ticks": 1000,
+  "clint_hz": 100000000,
+  "guard_microseconds": 10,
+  "fpga_bit": "/home/noir/Documents/workspace/Iris/firmware/tinyml_style/build/rgba640-observer-camera.bit",
+  "fpga_sha256": "e2f362607a439f52946b82515a2bc653078f0d2fede07b7fb28c911423685050",
+  "guard_elf_sha256": "a3bb8030f00a664c65906475f5bca8596e5bfbd226c8de5645d12bdf506b67c3",
+  "baseline_elf_sha256": "80a806869623c862316f5ac3c5472117b0d8751e4adbe8c7933d913a4ff071ce",
+  "flash_modified": false,
+  "internal_vendor_reset_duration": "not documented or proven"
+}

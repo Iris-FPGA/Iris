@@ -1,0 +1,88 @@
+{
+  "target_fresh_fps": 30,
+  "live_target_achieved": true,
+  "model_sha256": "26852af8672516371f19b05e0dcd06ba6c533c13d9cc78fcf2b65b3f838729c5",
+  "model_changed": false,
+  "model_profile": "rain_princess",
+  "native_tensor": [
+    128,
+    128,
+    3
+  ],
+  "hdmi": [
+    1920,
+    1080
+  ],
+  "panels": [
+    960,
+    1080
+  ],
+  "core_clock_hz": 100000000,
+  "baseline_fresh_fps": 2.7178086617629424,
+  "fresh_fps": 30.050505317620654,
+  "speedup": 11.056887756818023,
+  "measured_frames": 180,
+  "excluded_startup_frames": 5,
+  "median_invoke_ms": 31.77482,
+  "max_invoke_ms": 31.833,
+  "mean_fresh_period_ms": 33.27731062857143,
+  "min_fresh_period_ms": 33.27629,
+  "max_fresh_period_ms": 33.27849,
+  "steady_profile_ms_by_op": {
+    "CONV_2D": 27.844070000000002,
+    "ADD": 2.1956300000000004,
+    "RESIZE_NEAREST_NEIGHBOR": 1.10357
+  },
+  "fps_method": "100 MHz CLINT between VS-acknowledged complete new frame commits; UART receipt timing unused",
+  "output_exact_reference": true,
+  "different_output_bytes": 0,
+  "output_bytes": 49152,
+  "all_errors_zero": true,
+  "strict_hardware_dispatch": true,
+  "flash_written": false,
+  "cpu_left_running": true,
+  "resources": {
+    "xlr": 55169,
+    "xlr_capacity": 60800,
+    "ram": 252,
+    "ram_capacity": 256,
+    "dsp": 143,
+    "dsp_capacity": 160
+  },
+  "timing": {
+    "setup_min_ns": 0.013,
+    "hold_min_ns": 0.026,
+    "model": "I3",
+    "tool": "Efinity 2026.1"
+  },
+  "artifacts": {
+    "bit": "firmware/tinyml_style/build/rain_row_overlap/iris_ws/outflow/iris_ws.bit",
+    "elf": "firmware/tinyml_style/build/rain_row_direct_live/tinyml_style.elf",
+    "bit_sha256": "49c105582a13a05a4bd4881e459b5399255ff1cdca8f7823456050d754d04702",
+    "elf_sha256": "81f75223325d48a087451a25cc91c1a03ccd22b89688c2f125ec7004a04d6f93"
+  },
+  "source_sha256": {
+    "src/top.v": "83a27a330f78bab26bc10154eb15dbede54ac8a0d2f1b80aac98e77f4d47ce93",
+    "src/cnn/tinyml_subsystem.v": "31c9647ffdb647ddc26b7393095a462c0525eec679645c56f06ecac7a542d927",
+    "src/cnn/iris_resize2x.v": "7e23ab01cd976263bb6cf7edcb9820d77448d786bb238e6b0b13b5a0671e77a6",
+    "src/cnn/iris_style_capture.v": "c95c378a4d2c6d1b9cb98e121872170e9b46f5bedd1b87431d673827018457ac",
+    "src/cnn/iris_tinyml_video.v": "44c19240a8cadeea2c24c72c6204d17a5765b69a0ed7a25cf60f18a2b0bd5b64",
+    "src/cnn/iris_style_demo.v": "b2b1a30a7f8f7f9bd8ae60f1b45fe8dfeec61b5a93484e47be40ca025c3371bc",
+    "src/cnn/iris_rain_conv.v": "46a906074f91b8e0b57cf59cbf5441c9ef783ea2d0568c0eb28ef8b005d93154",
+    "src/cnn/iris_rain_add.v": "124af7a6a79d4494ec077021a032e4378ab62244a96bec469509dc66811566a2",
+    "src/cnn/iris_rain_backend.v": "45f6e60edc282728843cd516f9b558ad6452332e6baa2e3fd19cb271481df197"
+  },
+  "evidence": {
+    "live": "live-debug.json",
+    "parity": "reference-parity.json",
+    "rtl": "rtl-results.json",
+    "backpressure": "backpressure.log",
+    "baseline": "../20261019-rain-princess-hdmi/burst-rgb-performance.json",
+    "soak": "soak-report.json",
+    "soak_parity": "soak-reference-parity.json"
+  },
+  "end_to_end_latency_reduction_verified": false,
+  "soak_fresh_fps": 30.047704118166227,
+  "soak_consecutive_frames": 3600,
+  "soak_exact_reference": true
+}

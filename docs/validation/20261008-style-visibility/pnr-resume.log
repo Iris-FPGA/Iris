@@ -1,0 +1,2 @@
+Running: efx_run_pnr.py iris_ws --prj /tmp/iris-style-visibility-project/iris_ws/iris_ws.xml --family Titanium --device Ti60F225 --timing_model I3 --dir /tmp/iris-style-visibility-project/iris_ws/ip/csi_rx_59 --dir /tmp/iris-style-visibility-project/iris_ws/ip/SapphireSoc --output_dir outflow --work_dir work_pnr --opt sdc_file=iris_ws.pt.sdc
+[92m   pnr :	PASS [0m

@@ -1,0 +1,12 @@
+{
+  "model_sha256": "e4a45f1d9314654565f3300978d8a7b8843fc0c0687c454c4b6e3b47e0f05386",
+  "input_sha256": "4eff2f2219ef49a0648ba62a6e4ae5553a1bd4b73be21471512d23273dff5049",
+  "reference_sha256": "f471254e03d7145dc31a3885ffa415f15f639a3de992493726f00fd85860a6f3",
+  "shape": [
+    12,
+    16,
+    4
+  ],
+  "tflite_layer_parity": [],
+  "hardware_proven": false
+}

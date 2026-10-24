@@ -11,6 +11,10 @@ echo "==> map";              efx_run --prj iris_ws -f map
 echo "==> interface";        efx_run --prj iris_ws -f interface
 echo "==> 修复 sdc 时钟周期"
 sed -i 's|<USER_PERIOD> -name CLK_25M|40.000 -name CLK_25M|; s|<USER_PERIOD> -name gpio_clk_27m|37.037 -name gpio_clk_27m|' outflow/iris_ws.pt.sdc
+# core_clk stays at its true 10.000 ns (100 MHz).  The TinyML-integrated
+# design used to close at only a few ps of margin before the arbiter got
+# output pipeline slices; plain pnr is used again (effort=5/TIMING_3
+# measured worse than default on this design).
 cat constraints/video_domains.sdc >> outflow/iris_ws.pt.sdc
 # Define input clocks before any generated PHY/UART delay uses them.
 python3 - <<'PY'

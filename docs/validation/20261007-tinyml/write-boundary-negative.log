@@ -1,0 +1,191 @@
+[95000] Phase P: pipelined CPU writes under concurrent video/accelerator traffic
+[2085000] FAIL: model: W beat without active write burst
+[2095000] FAIL: model: W beat without active write burst
+[2115000] FAIL: model: W beat without active write burst
+[2155000] FAIL: model: W payload mismatch
+   beat 0 addr 00900100 got ff6ffecf00900130ff6ffecf00900130 exp ff6ffeff00900100ff6ffeff00900100
+[2155000] FAIL: model: WLAST at wrong beat
+[2175000] FAIL: model: W beat without active write burst
+[2185000] FAIL: model: W beat without active write burst
+[2205000] FAIL: model: W beat without active write burst
+[2215000] FAIL: model: W beat without active write burst
+[2225000] FAIL: model: W beat without active write burst
+[2235000] FAIL: model: W beat without active write burst
+[2245000] FAIL: model: W beat without active write burst
+[2255000] FAIL: model: W beat without active write burst
+[2265000] FAIL: model: W beat without active write burst
+[2305000] FAIL: model: W payload mismatch
+   beat 0 addr 00900200 got ff6ffbff00900400ff6ffbff00900400 exp ff6ffdff00900200ff6ffdff00900200
+[2315000] FAIL: model: W payload mismatch
+   beat 1 addr 00900200 got ff6ffbef00900410ff6ffbef00900410 exp ff6ffdef00900210ff6ffdef00900210
+[2325000] FAIL: model: W payload mismatch
+   beat 2 addr 00900200 got ff6ffbdf00900420ff6ffbdf00900420 exp ff6ffddf00900220ff6ffddf00900220
+[2335000] FAIL: model: W payload mismatch
+   beat 3 addr 00900200 got ff6ffbcf00900430ff6ffbcf00900430 exp ff6ffdcf00900230ff6ffdcf00900230
+[2335000] FAIL: model: WLAST at wrong beat
+[2355000] FAIL: model: W beat without active write burst
+[2365000] FAIL: model: W beat without active write burst
+[2375000] FAIL: model: W beat without active write burst
+[2385000] FAIL: model: W beat without active write burst
+[2395000] FAIL: model: W beat without active write burst
+[2405000] FAIL: model: W beat without active write burst
+[2415000] FAIL: model: W beat without active write burst
+[2425000] FAIL: model: W beat without active write burst
+[2465000] FAIL: model: W payload mismatch
+   beat 0 addr 00900300 got ff6ff9ff00900600ff6ff9ff00900600 exp ff6ffcff00900300ff6ffcff00900300
+[2475000] FAIL: model: W beat without active write burst
+[2485000] FAIL: model: W beat without active write burst
+[2495000] FAIL: model: W beat without active write burst
+[2505000] FAIL: model: W beat without active write burst
+[2515000] FAIL: model: W beat without active write burst
+[2525000] FAIL: model: W beat without active write burst
+[2535000] FAIL: model: W beat without active write burst
+[2545000] FAIL: model: W beat without active write burst
+[2555000] FAIL: model: W beat without active write burst
+[2575000] FAIL: model: W beat without active write burst
+[2585000] FAIL: model: W beat without active write burst
+[2625000] FAIL: model: W payload mismatch
+   beat 0 addr 00900400 got ff6ff78f00900870ff6ff78f00900870 exp ff6ffbff00900400ff6ffbff00900400
+[2625000] FAIL: model: WLAST at wrong beat
+[2655000] FAIL: model: W beat without active write burst
+[2665000] FAIL: model: W beat without active write burst
+[2675000] FAIL: model: W beat without active write burst
+[2695000] FAIL: model: W beat without active write burst
+[2705000] FAIL: model: W beat without active write burst
+[2715000] FAIL: model: W beat without active write burst
+[2735000] FAIL: model: W beat without active write burst
+[2745000] FAIL: model: W beat without active write burst
+[2785000] FAIL: model: W payload mismatch
+   beat 0 addr 00900500 got ff6ff4cf00900b30ff6ff4cf00900b30 exp ff6ffaff00900500ff6ffaff00900500
+[2795000] FAIL: model: W payload mismatch
+   beat 1 addr 00900500 got ff6ff4bf00900b40ff6ff4bf00900b40 exp ff6ffaef00900510ff6ffaef00900510
+[2805000] FAIL: model: W payload mismatch
+   beat 2 addr 00900500 got ff6ff4af00900b50ff6ff4af00900b50 exp ff6ffadf00900520ff6ffadf00900520
+[2815000] FAIL: model: W payload mismatch
+   beat 3 addr 00900500 got ff6ff49f00900b60ff6ff49f00900b60 exp ff6ffacf00900530ff6ffacf00900530
+[2825000] FAIL: model: W payload mismatch
+   beat 4 addr 00900500 got ff6ff48f00900b70ff6ff48f00900b70 exp ff6ffabf00900540ff6ffabf00900540
+[2825000] FAIL: model: WLAST at wrong beat
+[2835000] FAIL: model: W beat without active write burst
+[2845000] FAIL: model: W beat without active write burst
+[2855000] FAIL: model: W beat without active write burst
+[2865000] FAIL: model: W beat without active write burst
+[2875000] FAIL: model: W beat without active write burst
+[2885000] FAIL: model: W beat without active write burst
+[2895000] FAIL: model: W beat without active write burst
+[2905000] FAIL: model: W beat without active write burst
+[2945000] FAIL: model: W payload mismatch
+   beat 0 addr 00900600 got ff6ff1cf00900e30ff6ff1cf00900e30 exp ff6ff9ff00900600ff6ff9ff00900600
+[2945000] FAIL: model: extra W beat after WLAST
+[2955000] FAIL: model: W payload mismatch
+   beat 1 addr 00900600 got ff6ff1bf00900e40ff6ff1bf00900e40 exp ff6ff9ef00900610ff6ff9ef00900610
+[2955000] FAIL: model: extra W beat after WLAST
+[2965000] FAIL: model: W payload mismatch
+   beat 2 addr 00900600 got ff6ff1af00900e50ff6ff1af00900e50 exp ff6ff9df00900620ff6ff9df00900620
+[2965000] FAIL: model: extra W beat after WLAST
+[2975000] FAIL: model: W payload mismatch
+   beat 3 addr 00900600 got ff6ff19f00900e60ff6ff19f00900e60 exp ff6ff9cf00900630ff6ff9cf00900630
+[2975000] FAIL: model: extra W beat after WLAST
+[2985000] FAIL: model: W payload mismatch
+   beat 4 addr 00900600 got ff6ff18f00900e70ff6ff18f00900e70 exp ff6ff9bf00900640ff6ff9bf00900640
+[2985000] FAIL: model: WLAST at wrong beat
+[2995000] FAIL: model: W beat without active write burst
+[3005000] FAIL: model: W beat without active write burst
+[3025000] FAIL: model: W beat without active write burst
+[3035000] FAIL: model: W beat without active write burst
+[3045000] FAIL: model: W beat without active write burst
+[3055000] FAIL: model: W beat without active write burst
+[3065000] FAIL: model: W beat without active write burst
+[3105000] FAIL: model: W payload mismatch
+   beat 0 addr 00900700 got ff6feedf00901120ff6feedf00901120 exp ff6ff8ff00900700ff6ff8ff00900700
+[3115000] FAIL: model: W payload mismatch
+   beat 1 addr 00900700 got ff6feecf00901130ff6feecf00901130 exp ff6ff8ef00900710ff6ff8ef00900710
+[3125000] FAIL: model: W payload mismatch
+   beat 2 addr 00900700 got ff6feebf00901140ff6feebf00901140 exp ff6ff8df00900720ff6ff8df00900720
+[3165000] FAIL: model: W payload mismatch
+   beat 3 addr 00900700 got ff6feeaf00901150ff6feeaf00901150 exp ff6ff8cf00900730ff6ff8cf00900730
+[3165000] FAIL: model: extra W beat after WLAST
+[3175000] FAIL: model: W payload mismatch
+   beat 4 addr 00900700 got ff6fee9f00901160ff6fee9f00901160 exp ff6ff8bf00900740ff6ff8bf00900740
+[3175000] FAIL: model: extra W beat after WLAST
+[3185000] FAIL: model: W payload mismatch
+   beat 5 addr 00900700 got ff6fee8f00901170ff6fee8f00901170 exp ff6ff8af00900750ff6ff8af00900750
+[3185000] FAIL: model: WLAST at wrong beat
+[3195000] FAIL: model: W beat without active write burst
+[3205000] FAIL: model: W beat without active write burst
+[3225000] FAIL: model: W beat without active write burst
+[3235000] FAIL: model: W beat without active write burst
+[3245000] FAIL: model: W beat without active write burst
+[3285000] FAIL: model: W payload mismatch
+   beat 0 addr 00900800 got ff6febff00901400ff6febff00901400 exp ff6ff7ff00900800ff6ff7ff00900800
+[3295000] FAIL: model: W payload mismatch
+   beat 1 addr 00900800 got ff6febef00901410ff6febef00901410 exp ff6ff7ef00900810ff6ff7ef00900810
+[3305000] FAIL: model: W payload mismatch
+   beat 2 addr 00900800 got ff6febdf00901420ff6febdf00901420 exp ff6ff7df00900820ff6ff7df00900820
+[3315000] FAIL: model: W payload mismatch
+   beat 3 addr 00900800 got ff6febcf00901430ff6febcf00901430 exp ff6ff7cf00900830ff6ff7cf00900830
+[3325000] FAIL: model: W payload mismatch
+   beat 4 addr 00900800 got ff6febbf00901440ff6febbf00901440 exp ff6ff7bf00900840ff6ff7bf00900840
+[3335000] FAIL: model: W payload mismatch
+   beat 5 addr 00900800 got ff6febaf00901450ff6febaf00901450 exp ff6ff7af00900850ff6ff7af00900850
+[3345000] FAIL: model: W payload mismatch
+   beat 6 addr 00900800 got ff6feb9f00901460ff6feb9f00901460 exp ff6ff79f00900860ff6ff79f00900860
+[3355000] FAIL: model: W payload mismatch
+   beat 7 addr 00900800 got ff6feb8f00901470ff6feb8f00901470 exp ff6ff78f00900870ff6ff78f00900870
+[3365000] FAIL: model: W beat without active write burst
+[3385000] FAIL: model: W beat without active write burst
+[3395000] FAIL: model: W beat without active write burst
+[3405000] FAIL: model: W beat without active write burst
+[3445000] FAIL: model: W payload mismatch
+   beat 0 addr 00900900 got ff6fe9cf00901630ff6fe9cf00901630 exp ff6ff6ff00900900ff6ff6ff00900900
+[3455000] FAIL: model: W beat without active write burst
+[3465000] FAIL: model: W beat without active write burst
+[3475000] FAIL: model: W beat without active write burst
+[3485000] FAIL: model: W beat without active write burst
+[3505000] FAIL: model: W beat without active write burst
+[3515000] FAIL: model: W beat without active write burst
+[3525000] FAIL: model: W beat without active write burst
+[3535000] FAIL: model: W beat without active write burst
+[3545000] FAIL: model: W beat without active write burst
+[3555000] FAIL: model: W beat without active write burst
+[3565000] FAIL: model: W beat without active write burst
+[3605000] FAIL: model: W payload mismatch
+   beat 0 addr 00900a00 got ff6fe6df00901920ff6fe6df00901920 exp ff6ff5ff00900a00ff6ff5ff00900a00
+[3615000] FAIL: model: W payload mismatch
+   beat 1 addr 00900a00 got ff6fe6cf00901930ff6fe6cf00901930 exp ff6ff5ef00900a10ff6ff5ef00900a10
+[3615000] FAIL: model: WLAST at wrong beat
+[3635000] FAIL: model: W beat without active write burst
+[3645000] FAIL: model: W beat without active write burst
+[3655000] FAIL: model: W beat without active write burst
+[3665000] FAIL: model: W beat without active write burst
+[3675000] FAIL: model: W beat without active write burst
+[3685000] FAIL: model: W beat without active write burst
+[3705000] FAIL: model: W beat without active write burst
+[3715000] FAIL: model: W beat without active write burst
+[3725000] FAIL: model: W beat without active write burst
+[3765000] FAIL: model: W payload mismatch
+   beat 0 addr 00900b00 got ff6fe3ff00901c00ff6fe3ff00901c00 exp ff6ff4ff00900b00ff6ff4ff00900b00
+[3775000] FAIL: model: W payload mismatch
+   beat 1 addr 00900b00 got ff6fe3ef00901c10ff6fe3ef00901c10 exp ff6ff4ef00900b10ff6ff4ef00900b10
+[3785000] FAIL: model: W payload mismatch
+   beat 2 addr 00900b00 got ff6fe3df00901c20ff6fe3df00901c20 exp ff6ff4df00900b20ff6ff4df00900b20
+[3795000] FAIL: model: W payload mismatch
+   beat 3 addr 00900b00 got ff6fe3cf00901c30ff6fe3cf00901c30 exp ff6ff4cf00900b30ff6ff4cf00900b30
+[3795000] FAIL: model: WLAST at wrong beat
+[3805000] FAIL: model: W beat without active write burst
+[3815000] FAIL: model: W beat without active write burst
+[3835000] FAIL: model: W beat without active write burst
+[3845000] FAIL: model: W beat without active write burst
+[3855000] FAIL: model: W beat without active write burst
+[3865000] FAIL: model: W beat without active write burst
+[3875000] FAIL: model: W beat without active write burst
+[3885000] FAIL: model: W beat without active write burst
+[3925000] FAIL: model: W payload mismatch
+   beat 0 addr 00900c00 got ff6fe1ff00901e00ff6fe1ff00901e00 exp ff6ff3ff00900c00ff6ff3ff00900c00
+[3935000] FAIL: model: W beat without active write burst
+[3945000] FAIL: model: W beat without active write burst
+[3955000] FAIL: model: W beat without active write burst
+[3965000] FAIL: model: W beat without active write burst
+FAIL: tb_axi_ddr_arbiter timeout
+FATAL: tests/video/tb_axi_ddr_arbiter.sv:977: tb_axi_ddr_arbiter timeout
+       Time: 50000000000  Scope: tb_axi_ddr_arbiter

@@ -1,0 +1,59 @@
+
+Elitestek FPGA Placement and Routing.
+Version: 2026.1.132.5.14 
+Date: Fri Oct 16 22:31:38 2026
+
+Copyright (C) 2013 - 2026 Efinix, Inc. All rights reserved.
+ 
+Family: Titanium 
+Device: Ti60F225
+Top-level Entity Name: iris_ws
+
+---------- IO Interface Summary (begin) ----------
+
++------------------------+--------------+
+| Missing Interface Pins | Input/Output |
++------------------------+--------------+
+|    jtag_inst1_DRCK     |    Input     |
+|     jtag_inst1_TMS     |    Input     |
+|   jtag_inst1_RUNTEST   |    Input     |
+|        mipi_fb         |    Input     |
+|           FB           |    Input     |
+|    i_cam_ck_LP_P_IN    |    Input     |
+|    i_cam_ck_LP_N_IN    |    Input     |
++------------------------+--------------+
+
+----------- IO Interface Summary (end) ----------
+
+
+---------- Module Resource Usage Distribution Estimates (begin) ----------
+
+'Module Resource Usage Distribution Estimates' table printed in: outflow/iris_ws.hier_util.rpt
+
+----------- Module Resource Usage Distribution Estimates (end) ----------
+
+Elapsed time for packing: 0 hours 0 minutes 3 seconds
+---------- Resource Summary (begin) ----------
+Inputs: 112 / 1703 (6.58%)
+Outputs: 259 / 2267 (11.42%)
+Global Clocks (GBUF): 14 / 32 (43.75%)
+Regional Clocks (RBUF): 1 / 32 (3.12%)
+	RBUF: Core: 0 / 16 (0.00%)
+	RBUF: Periphery: 1 / 8 (12.50%)
+	RBUF: Multi-Region: 0 / 8 (0.00%)
+XLRs: 58336 / 60800 (95.95%)
+	XLRs needed for LUT4: 24491 / 60800 (40.28%)
+	XLRs needed for LUT4 + FF: 9727 / 60800 (16.00%)
+	XLRs needed for COMB4: 0 / 60800 (0.00%)
+	XLRs needed for COMB4 + FF: 0 / 60800 (0.00%)
+	XLRs needed for Adder: 5693 / 60800 (9.36%)
+	XLRs needed for Adder + FF: 1979 / 60800 (3.25%)
+	XLRs needed for SRL8: 697 / 14720 (4.74%)
+	XLRs needed for SRL8 + FF: 0 / 14720 (0.00%)
+	XLRs needed for FF: 15749 / 60800 (25.90%)
+	XLRs needed for Routing: 0 / 60800 (0.00%)
+Memory Blocks: 256 / 256 (100.00%)
+DSP Blocks: 114 / 160 (71.25%)
+---------- Resource Summary (end) ----------
+
+Elapsed time for placement: 0 hours 1 minutes 15 seconds

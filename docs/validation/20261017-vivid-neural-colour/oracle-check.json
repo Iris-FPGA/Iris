@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "total_pixels": 614400,
+  "previews": [
+    {
+      "preview": "docs/validation/20261017-vivid-neural-colour/default-camera-comparison.png",
+      "pixels": 307200,
+      "mismatched_pixels": 0,
+      "saturation_q2": 16
+    },
+    {
+      "preview": "docs/validation/20261017-vivid-neural-colour/default-strokes-comparison.png",
+      "pixels": 307200,
+      "mismatched_pixels": 0,
+      "saturation_q2": 16
+    }
+  ]
+}

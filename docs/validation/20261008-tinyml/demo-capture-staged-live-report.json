@@ -1,0 +1,167 @@
+{
+  "scope": "SRAM live camera/style demo; no Flash boot acceptance",
+  "elf_sha256": "80a806869623c862316f5ac3c5472117b0d8751e4adbe8c7933d913a4ff071ce",
+  "bit_sha256": "b1152a34dcabc33085b48d5b46452747863ab2ddd3965e2ab29ac16e8e1e34f8",
+  "attached": false,
+  "frames": [
+    {
+      "sequence": 1,
+      "pair": 0,
+      "invoke_ticks": 220552177,
+      "displayed": 1,
+      "captures": 1,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 2.5619580969796516
+    },
+    {
+      "sequence": 2,
+      "pair": 1,
+      "invoke_ticks": 258826754,
+      "displayed": 2,
+      "captures": 2,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 5.265894939977443
+    },
+    {
+      "sequence": 3,
+      "pair": 0,
+      "invoke_ticks": 258662046,
+      "displayed": 3,
+      "captures": 3,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 8.001762339990819
+    },
+    {
+      "sequence": 4,
+      "pair": 1,
+      "invoke_ticks": 258672598,
+      "displayed": 4,
+      "captures": 4,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 10.721637105976697
+    },
+    {
+      "sequence": 5,
+      "pair": 0,
+      "invoke_ticks": 259150471,
+      "displayed": 5,
+      "captures": 5,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 13.457542243995704
+    },
+    {
+      "sequence": 6,
+      "pair": 1,
+      "invoke_ticks": 259290288,
+      "displayed": 6,
+      "captures": 6,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 16.20940364897251
+    },
+    {
+      "sequence": 7,
+      "pair": 0,
+      "invoke_ticks": 259234408,
+      "displayed": 7,
+      "captures": 7,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 18.94528493299731
+    },
+    {
+      "sequence": 8,
+      "pair": 1,
+      "invoke_ticks": 259083562,
+      "displayed": 8,
+      "captures": 8,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 21.681127375981305
+    },
+    {
+      "sequence": 9,
+      "pair": 0,
+      "invoke_ticks": 258696494,
+      "displayed": 9,
+      "captures": 9,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 24.401060482981848
+    },
+    {
+      "sequence": 10,
+      "pair": 1,
+      "invoke_ticks": 258615752,
+      "displayed": 10,
+      "captures": 10,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 27.136912837973796
+    },
+    {
+      "sequence": 11,
+      "pair": 0,
+      "invoke_ticks": 258884967,
+      "displayed": 11,
+      "captures": 11,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 29.85684646698064
+    },
+    {
+      "sequence": 12,
+      "pair": 1,
+      "invoke_ticks": 259244270,
+      "displayed": 12,
+      "captures": 12,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 32.60871050399146
+    },
+    {
+      "sequence": 13,
+      "pair": 0,
+      "invoke_ticks": 259246214,
+      "displayed": 13,
+      "captures": 13,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 35.36056695197476
+    },
+    {
+      "sequence": 14,
+      "pair": 1,
+      "invoke_ticks": 259241675,
+      "displayed": 14,
+      "captures": 14,
+      "underflows": 0,
+      "read_errors": 0,
+      "rejects": 0,
+      "host_elapsed": 38.0964450709871
+    }
+  ],
+  "reset": "",
+  "load": "162372 bytes written at address 0x00800000\n4 bytes written at address 0x00827a50\n2108 bytes written at address 0x00827a60\ndownloaded 164484 bytes in 3.916686s (41.011 KiB/s)\n",
+  "observation_seconds": 40.098292811977444,
+  "observed_committed_pair_hz": 0.3658417809580074,
+  "live_ok": true
+}
