@@ -176,8 +176,9 @@ extern "C" int main() {
   if(!live_input || !live_output || live_input->type!=kTfLiteInt8 || live_output->type!=kTfLiteInt8)
     Stop("live eval tensor binding failed");
 #endif
-  MicroPrintf("IRIS LIVE: %ux%ux%u paired camera/style; strict hardware; SRAM only\n\r",
-              kIrisWidth,kIrisHeight,kIrisChannels);
+  MicroPrintf("IRIS LIVE: %ux%ux%u paired camera/style; strict hardware; %s\n\r",
+              kIrisWidth,kIrisHeight,kIrisChannels,
+              IRIS_FLASH_BOOT ? "standalone Flash" : "SRAM only");
   const uintptr_t input_banks[3]={0x03000000u,0x03200000u,0x03800000u};
   const uintptr_t output_banks[3]={0x03400000u,0x03600000u,0x03a00000u};
   auto start_capture=[&](uint32_t bank) {

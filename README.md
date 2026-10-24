@@ -51,6 +51,10 @@ git clone https://github.com/FinResect/Iris.git
 
 生成 `iris_ws/outflow/iris_ws.bit` 与 `iris_ws.hex`。
 
+需要用 **KEY3 切换 One Last Kiss 轮廓增强版 / Rain Princess** 时，使用
+[双镜像构建及烧录说明](firmware/style_switch/README.md)。两个原有风格各自保留，
+切换会暂时中断 HDMI；普通 `build-iris` 仍构建单镜像。
+
 ### 4. 烧录
 
 ```bash
@@ -66,6 +70,8 @@ git clone https://github.com/FinResect/Iris.git
 | `setup-usb` | 安装 USB udev 规则并重载 |
 | `80-efx-pgm.rules` | udev 规则文件（给 Efinix 下载器节点授权） |
 | `build-iris` | 编译
+| `build-style-switch` | 构建两种现有风格及独立启动固件，生成 KEY3 切换用 Flash 镜像 |
+| `sync-style-switch` | 核对双镜像清单、时序及哈希后烧录 Flash 并回读校验 |
 | `sync-iris` | 烧录：默认 `jtag_bridge`，可传 `jtag`（SRAM）/`active`（需外接下载器） |
 | `clean-iris` | 清理编译产物（`outflow/`、`work_*/`） |
 | `efinity-env` | 共享 helper：解析 `EFINITY_HOME` 并 source `setup.sh` |

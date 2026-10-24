@@ -9,8 +9,14 @@ from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--project-dir',type=Path,help='install into this Efinity project')
-a=p.parse_args();fw=root/'firmware/stream_style';out=fw/'build'
-payload=(out/'stream_style-live.bin').read_bytes()
+p.add_argument('--payload',type=Path,help='preserve an existing live firmware binary')
+p.add_argument('--output-dir',type=Path,help='keep generated boot files separate from the usual firmware build')
+a=p.parse_args();fw=root/'firmware/stream_style';out=(a.output_dir or fw/'build').resolve()
+out.mkdir(parents=True,exist_ok=True)
+payload_path=(a.payload or fw/'build/stream_style-live.bin').resolve()
+payload=payload_path.read_bytes()
+if payload_path!=out/'stream_style-live.bin':
+ (out/'stream_style-live.bin').write_bytes(payload)
 if not payload or len(payload)%4:raise SystemExit('Live firmware must be nonempty and word aligned')
 fnv=0x811c9dc5
 for b in payload:fnv=((fnv^b)*0x01000193)&0xffffffff
@@ -32,6 +38,7 @@ if len(ram)!=16384:raise SystemExit('Boot image exceeds OCR capacity')
 lanes=[''.join(f'{v:08b}\n' for v in ram[lane::4]) for lane in range(4)]
 assert bytes(int(lanes[i%4].splitlines()[i//4],2) for i in range(16384))==ram
 manifest={'scope':'project RAM initializer only; no programming',
+ 'payload_source':str(payload_path),
  'payload_bytes':len(payload),'payload_fnv1a':f'{fnv:08x}',
  'payload_sha256':hashlib.sha256(payload).hexdigest(),
  'boot_bytes':len(boot),'boot_sha256':hashlib.sha256(boot).hexdigest(),

@@ -21,13 +21,18 @@
 // (docs/TinyML_移植进度与待办.md #2).
 //=====================================================================
 module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0,ENABLE_STREAM_CNN=0,STREAM_DILATION=2,
-                         TENSOR_BURST_DMA=0,TENSOR_RGB_ONLY=0,ENABLE_RAIN_BACKEND=0) (
+                         TENSOR_BURST_DMA=0,TENSOR_RGB_ONLY=0,ENABLE_RAIN_BACKEND=0,
+                         ENABLE_STYLE_SWITCH=0) (
     input  wire        clk,             // core_clk 100 MHz (system/peri/memory)
     input  wire        rst_n,           // active-low, gated by DDR cal (see above)
 
     // board console UART (async pin level)
     output wire        uart_txd,
     input  wire        uart_rxd_async,
+    output wire        boot_spi_sclk, boot_spi_cs_n, boot_spi_mosi,
+    input wire         boot_spi_miso,
+    input wire [31:0]  style_switch_status,
+    output reg         style_switch_request,
 
     // JTAG_USER1 tap (bound by iris_ws.peri.xml jtag_info)
     input  wire        jtag_inst1_TCK,
@@ -189,6 +194,26 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0,ENABLE_STREAM_CNN=0,STRE
     wire [15:0] apb0_paddr, apb1_paddr;
     wire        apb0_psel, apb0_penable, apb0_pwrite, apb1_psel, apb1_penable, apb1_pwrite;
     wire [31:0] apb0_pwdata, apb1_pwdata;
+    // Sapphire's generated SPI controller samples two peripheral clocks after
+    // its late-sampling edge. Preserve MISO across that edge; direct pin input
+    // otherwise captures the next Flash bit (JEDEC EF6017 becomes DEC02E).
+    reg [2:0] boot_spi_miso_delay;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) boot_spi_miso_delay<=3'b111;
+        else boot_spi_miso_delay<={boot_spi_miso_delay[1:0],boot_spi_miso};
+    end
+    reg [31:0] switch_sync1, switch_sync2;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            style_switch_request<=0; switch_sync1<=0; switch_sync2<=0;
+        end else if (ENABLE_STYLE_SWITCH) begin
+            switch_sync1<=style_switch_status; switch_sync2<=switch_sync1;
+            // Service/test access follows the same sequencer as KEY3.
+            if (apb1_psel && apb1_penable && apb1_pwrite &&
+                apb1_paddr[6:2]==28 && apb1_pwdata==32'h49525357)
+                style_switch_request<=~style_switch_request;
+        end
+    end
     wire [31:0] apb0_prdata = ENABLE_STYLE_DEMO ? style_prdata : 32'd0;
     assign style_paddr=apb0_paddr;
     assign style_psel=apb0_psel;
@@ -228,6 +253,7 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0,ENABLE_STREAM_CNN=0,STRE
             5'd25: apb1_prdata = accel_obs[6];
             5'd26: apb1_prdata = accel_obs[7];
             5'd27: apb1_prdata = accel_obs[8];
+            5'd28: apb1_prdata = ENABLE_STYLE_SWITCH ? switch_sync2 : 0;
             default: apb1_prdata = 32'hDEAD_0000 | {27'd0, apb1_paddr[6:2]};
         endcase
     end
@@ -314,15 +340,15 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0,ENABLE_STREAM_CNN=0,STRE
         .userInterruptA          (accel_cmd_int),
         .userInterruptB          (1'b0),
 
-        // SPI0 / I2C0: read inputs idle, transmit side unused
-        .system_spi_0_io_sclk_write        (),
-        .system_spi_0_io_ss                (),
-        .system_spi_0_io_data_0_write      (),
+        // SPI0 reads the Rain Princess firmware from the shared boot Flash.
+        .system_spi_0_io_sclk_write        (boot_spi_sclk),
+        .system_spi_0_io_ss                (boot_spi_cs_n),
+        .system_spi_0_io_data_0_write      (boot_spi_mosi),
         .system_spi_0_io_data_0_writeEnable(),
         .system_spi_0_io_data_0_read       (1'b0),
         .system_spi_0_io_data_1_write      (),
         .system_spi_0_io_data_1_writeEnable(),
-        .system_spi_0_io_data_1_read       (1'b0),
+        .system_spi_0_io_data_1_read       (ENABLE_STYLE_SWITCH ? boot_spi_miso_delay[2] : 1'b0),
         .system_spi_0_io_data_2_write      (),
         .system_spi_0_io_data_2_writeEnable(),
         .system_spi_0_io_data_2_read       (1'b0),

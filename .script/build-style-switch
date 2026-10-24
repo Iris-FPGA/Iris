@@ -1,0 +1,218 @@
+#!/usr/bin/env python3
+"""Build a standalone KEY3-selectable pair of the existing style pipelines.
+
+No board access. Export EFINITY_HOME and RISCV_PREFIX first. The selected Python
+must provide numpy, flatbuffers and tflite for unchanged Rain weight packing.
+"""
+import argparse
+import copy
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import xml.etree.ElementTree as ET
+
+ROOT = Path(__file__).resolve().parents[1]
+NS = 'http://www.efinixinc.com/enf_proj'
+PT = 'http://www.efinixinc.com/peri_design_db'
+FLASH_OFFSET = 0x600000
+FLASH_BYTES = 0x800000
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def run(*args, **kwargs):
+    subprocess.run([str(x) for x in args], check=True, **kwargs)
+
+
+def install_ram(project, data):
+    if len(data) > 16384:
+        raise ValueError('boot exceeds existing 16 KiB OCR')
+    boot = data
+    data = data.ljust(16384, b'\0')
+    for base in (project/'ip/SapphireSoc', project/'ip/SapphireSoc/source/hardware/netlist'):
+        for lane in range(4):
+            (base/f'EfxSapphireSoc.v_toplevel_system_ramA_logic_ram_symbol{lane}.bin').write_text(
+                ''.join(f'{b:08b}\n' for b in data[lane::4]))
+    def record(address, kind, block):
+        raw = bytes([len(block), address >> 8, address & 255, kind])+block
+        return ':'+(raw+bytes([-sum(raw) & 255])).hex().upper()+'\n'
+    image = record(0, 4, bytes.fromhex('f900'))
+    image += ''.join(record(i, 0, boot[i:i+16]) for i in range(0,len(boot),16))
+    image += record(0, 1, b'')
+    (project/'ref_files/bootloader_16MB/SapphireSoc/bootloader.hex').write_text(image)
+
+
+def configure(project, rain):
+    ET.register_namespace('efx', NS)
+    path = project/'iris_ws.xml'
+    tree = ET.parse(path)
+    synth = tree.find(f'.//{{{NS}}}synthesis')
+    ET.SubElement(synth, f'{{{NS}}}dynparam', name='ENABLE_STYLE_SWITCH', value='1')
+    # Preserve the validated 100 MHz placement for each complete pipeline.
+    if rain:
+        tree.find(f'.//{{{NS}}}param[@name="seed"]').set('value', '4')
+        tree.find(f'.//{{{NS}}}param[@name="placer_effort_level"]').set('value', '3')
+    tree.write(path, encoding='unicode', xml_declaration=True)
+    ET.register_namespace('efxpt', PT)
+    peri = project/'iris_ws.peri.xml'
+    tree = ET.parse(peri)
+    ctrl = next(n for n in tree.iter() if n.tag.endswith('}ctrl') and n.get('name')=='cfg')
+    ctrl.set('is_remote_update_enable', 'true')
+    ctrl.set('clock_name', 'gpio_clk_27m')
+    if rain:
+        # External board Flash uses dual-purpose package GPIO in user mode.
+        # These four resources are unused by the existing video project.
+        output = next(n for n in tree.iter() if n.tag.endswith('}comp_gpio') and n.get('name')=='led[0]')
+        inp = next(n for n in tree.iter() if n.tag.endswith('}comp_gpio') and n.get('name')=='key_i[0]')
+        parent = next(n for n in tree.iter() if output in list(n))
+        for name, pin, is_input in (
+            ('flash_sclk', 'GPIOL_N_01', False),
+            ('flash_cs_n', 'GPIOL_P_01', False),
+            ('flash_mosi', 'GPIOL_P_03', False),
+            ('flash_miso', 'GPIOL_N_03', True)):
+            node = copy.deepcopy(inp if is_input else output)
+            node.set('name', name); node.set('gpio_def', pin)
+            node.set('bus_name', ''); node.set('io_standard', '1.8 V LVCMOS')
+            cfg = list(node)[0]
+            cfg.set('name', name); cfg.set('clock_name', '')
+            if not is_input:
+                cfg.set('register_option', 'none')
+            for attr in ('pullup_ena_name', 'dyn_delay_en_name', 'dyn_delay_reset_name', 'dyn_delay_ctrl_name'):
+                if attr in cfg.attrib: cfg.set(attr, '')
+            # Efinity's schema puts all comp_gpio entries before bus entries.
+            last_gpio = max(i for i,n in enumerate(parent) if n.tag.endswith('}comp_gpio'))
+            parent.insert(last_gpio+1, node)
+    tree.write(peri, encoding='unicode', xml_declaration=True)
+
+
+def prepare(out, python, prefix):
+    if out.exists():
+        raise ValueError('prepare requires a new output directory')
+    out.mkdir(parents=True)
+    fw = ROOT/'firmware/tinyml_style'
+    bp = ROOT/'iris_ws/embedded_sw/SapphireSoc'
+    # Preserve the deployed controller byte for byte to keep its scheduling
+    # and model parameters fixed while validating the new configuration path.
+    stream_payload = ROOT/'firmware/style_switch/one_last_kiss_contour.bin'
+    stream_receipt = json.loads(stream_payload.with_suffix('.json').read_text())
+    if digest(stream_payload) != stream_receipt['sha256']:
+        raise ValueError('preserved One Last Kiss firmware differs from its receipt')
+    if digest(ROOT/'firmware/stream_style/stream_model.h') != stream_receipt['parameters_sha256']:
+        raise ValueError('One Last Kiss parameters differ from the preserved firmware')
+    run(python, ROOT/'.script/compile-rain-backend.py',
+        ROOT/'one_last_kiss_style/models/rain-princess-cropped_style_int8.tflite', out/'weights')
+    run(ROOT/'.script/build-tinyml-firmware', 'MODEL_PROFILE=rain_princess', 'LIVE_DEMO=1',
+        'LIVE_PIPELINE=1', 'RAIN_BACKEND=1', 'FLASH_BOOT=1',
+        'RAIN_BACKEND_DIR='+str(out/'weights'), 'OBJDIR='+str(out/'firmware'),
+        'STANDALONE='+str(bp/'software/standalone'),
+        'BSP_PATH='+str(bp/'bsp/efinix/EfxSapphireSoc'), 'RISCV_BIN='+prefix,
+        'DDR_BASE=0x00800000', 'DDR_BYTES=0x02000000', 'STRICT_DISPATCH=1', '-j8')
+    payload = (out/'firmware/tinyml_style.bin').read_bytes()
+    if not payload or FLASH_OFFSET+len(payload)>FLASH_BYTES:
+        raise ValueError('Rain firmware does not fit its reserved Flash region')
+    hash_value = 0x811c9dc5
+    for value in payload: hash_value = ((hash_value ^ value)*0x01000193) & 0xffffffff
+    (out/'rain-firmware.hex').write_text(''.join(f'{v:02X}\n' for v in payload))
+    boot = ROOT/'firmware/style_switch'
+    run(prefix+'gcc', '-Os', '-nostdlib', '-march=rv32im_zicsr_zifencei', '-mabi=ilp32',
+        '-msmall-data-limit=0', '-ffreestanding', '-fno-builtin', '-ffunction-sections',
+        '-I'+str(bp/'bsp/efinix/EfxSapphireSoc/include'),
+        '-I'+str(bp/'software/standalone/driver'), '-DPAYLOAD_BYTES='+str(len(payload)),
+        '-DPAYLOAD_OFFSET='+str(FLASH_OFFSET), '-DPAYLOAD_FNV='+str(hash_value)+'u',
+        '-T'+str(boot/'flash_boot.ld'), boot/'flash_boot_start.S', boot/'flash_boot.c',
+        '-Wl,--gc-sections', '-lgcc', '-o', out/'flash_boot.elf')
+    run(prefix+'objcopy', '-O', 'binary', out/'flash_boot.elf', out/'flash_boot.bin')
+    stream = out/'stream/iris_ws'
+    stream.parent.mkdir()
+    shutil.copytree(ROOT/'iris_ws', stream,
+                    ignore=shutil.ignore_patterns('outflow', 'work_*', 'iris_ws.pt.sdc'))
+    run(ROOT/'.script/build-stream-boot', '--project-dir', stream,
+        '--payload', stream_payload, '--output-dir', out/'stream-firmware',
+        env={**os.environ, 'RISCV_PREFIX': prefix})
+    rain = out/'rain/iris_ws'
+    run(sys.executable, ROOT/'.script/prepare-tinyml-project.py', '--live-rgb',
+        '--burst-dma', '--rain-backend', '--parameters',
+        ROOT/'iris_ws/RISC-V/rain_princess_8x2_lite_cache1024', '--output', rain)
+    configure(stream, False); configure(rain, True)
+    install_ram(rain, (out/'flash_boot.bin').read_bytes())
+    metadata_path = rain/'tinyml-project.json'
+    metadata = json.loads(metadata_path.read_text())
+    metadata['reset_behavior'] = 'OCR read-only SPI loader; audited complete ELF binary from Flash to 0x00800000'
+    metadata['firmware_flash_offset'] = FLASH_OFFSET
+    metadata['firmware_sha256'] = digest(out/'firmware/tinyml_style.bin')
+    metadata_path.write_text(json.dumps(metadata, indent=2)+'\n')
+    manifest = {'scope': 'standalone dual-image KEY3 switch; not yet programmed',
+                'default': 'One Last Kiss contour', 'alternate': 'Rain Princess',
+                'flash_bytes': FLASH_BYTES, 'rain_firmware_offset': FLASH_OFFSET,
+                'rain_firmware_bytes': len(payload), 'rain_firmware_fnv': f'{hash_value:08x}',
+                'rain_firmware_sha256': digest(out/'firmware/tinyml_style.bin'),
+                'stream_firmware_sha256': digest(stream_payload),
+                'stream_firmware_bytes': stream_receipt['bytes'],
+                'stream_firmware_fnv': stream_receipt['fnv1a'],
+                'rain_model_sha256': digest(ROOT/'one_last_kiss_style/models/rain-princess-cropped_style_int8.tflite'),
+                'stream_parameters_sha256': digest(ROOT/'firmware/stream_style/stream_model.h'),
+                'projects': {'stream': str(stream), 'rain': str(rain)},
+                'key': 'KEY3; release after each press; 20 ms debounce; no repeat',
+                'switch_interrupts_hdmi': True, 'hardware_verified': False}
+    (out/'manifest.json').write_text(json.dumps(manifest, indent=2)+'\n')
+
+
+def package(out, efinity):
+    manifest = json.loads((out/'manifest.json').read_text())
+    for project in manifest['projects'].values():
+        run(sys.executable, ROOT/'.script/check-iris-timing', Path(project)/'outflow/iris_ws.timing.rpt')
+    if digest(out/'firmware/tinyml_style.bin')!=manifest['rain_firmware_sha256']:
+        raise ValueError('firmware changed after the bootloader was bound to it')
+    if digest(out/'stream-firmware/stream_style-live.bin')!=manifest['stream_firmware_sha256']:
+        raise ValueError('preserved One Last Kiss firmware changed after preparation')
+    merger = efinity/'pgm/bin/multi_image_merger.py'
+    command = [efinity/'bin/python3', merger, '-m', 'selectable_flash_image', '-t', 'internal']
+    for project in manifest['projects'].values():
+        command += ['-ifile', Path(project)/'outflow/iris_ws.hex']
+    run('bash', '-c', 'source "$1"; shift; exec "$@"', 'iris-image-merger',
+        ROOT/'.script/efinity-env', *command, '-o', out/'style-images.hex')
+    # The vendor creates the internal reconfiguration table and image addresses.
+    # Add user data after it without altering that table or either bitstream.
+    image = bytes.fromhex((out/'style-images.hex').read_text())
+    # AN 010 requires active configuration for internal reconfiguration.
+    # A JTAG/passive startup image can run the CPU but cannot qualify KEY3.
+    (out/'style-switch-start.bit').unlink(missing_ok=True)
+    manifest.pop('start_bit_sha256', None)
+    manifest['requires_flash_cold_boot'] = True
+    payload = (out/'firmware/tinyml_style.bin').read_bytes()
+    if len(image)>FLASH_OFFSET or len(payload)!=manifest['rain_firmware_bytes']:
+        raise ValueError('overlapping image/payload ranges')
+    data = image.ljust(FLASH_OFFSET, b'\xff')+payload
+    if len(data)>FLASH_BYTES: raise ValueError('combined image exceeds board Flash')
+    (out/'style-switch.hex').write_text(''.join(f'{v:02X}\n' for v in data))
+    manifest['combined_bytes'] = len(data)
+    manifest['combined_sha256'] = digest(out/'style-switch.hex')
+    manifest['flash_boot_sha256'] = digest(out/'flash_boot.bin')
+    manifest['bit_sha256'] = {name: digest(Path(p)/'outflow/iris_ws.bit') for name,p in manifest['projects'].items()}
+    manifest['rtl_sha256'] = {name: {source: digest(Path(project)/source) for source in
+                                   ('src/top.v','src/cnn/tinyml_subsystem.v','src/iris_style_switch.v')}
+                              for name,project in manifest['projects'].items()}
+    (out/'manifest.json').write_text(json.dumps(manifest, indent=2)+'\n')
+    print(json.dumps(manifest, indent=2))
+
+
+if __name__ == '__main__':
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--output', type=Path, required=True)
+    p.add_argument('--model-python', default=sys.executable)
+    p.add_argument('--stage', choices=['prepare', 'build', 'package', 'all'], default='all')
+    a = p.parse_args()
+    out = a.output.resolve()
+    prefix = os.environ.get('RISCV_PREFIX', 'riscv-none-elf-')
+    efinity = Path(os.environ['EFINITY_HOME'])
+    if a.stage in ('prepare', 'all'): prepare(out, a.model_python, prefix)
+    if a.stage in ('build', 'all'):
+        for name in ('stream','rain'):
+            run(ROOT/'.script/build-iris', env={**os.environ, 'IRIS_PROJ_DIR': str(out/name/'iris_ws')})
+    if a.stage in ('package','all'): package(out, efinity)

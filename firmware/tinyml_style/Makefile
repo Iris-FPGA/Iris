@@ -7,6 +7,7 @@ MODEL_PROFILE ?= original
 LIVE_DEMO ?= 0
 LIVE_SNAPSHOT ?= 0
 LIVE_PIPELINE ?= 0
+FLASH_BOOT ?= 0
 RAIN_BACKEND ?= 0
 RAIN_BACKEND_DIR ?= $(CURDIR)/build/rain_row_backend
 ifeq ($(RAIN_BACKEND),1)
@@ -100,6 +101,7 @@ CXXFLAGS += $(CFLAGS) -std=c++11 -fstrict-aliasing -fno-rtti -fno-exceptions \
  -fno-threadsafe-statics -fno-use-cxa-atexit
 CFLAGS += -DIRIS_RAIN_BACKEND=$(RAIN_BACKEND) -I$(RAIN_BACKEND_DIR)
 CXXFLAGS += -DIRIS_RAIN_BACKEND=$(RAIN_BACKEND) -I$(RAIN_BACKEND_DIR)
+CXXFLAGS += -DIRIS_FLASH_BOOT=$(FLASH_BOOT)
 
 # Same source groups as the official tinyml_ypd Makefile; no example models/main.
 VENDOR_GROUPS := platform/*/*.cc platform/*/*.c platform/*/*/*.cc platform/*/*/*.c \

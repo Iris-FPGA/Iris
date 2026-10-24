@@ -15,6 +15,7 @@ module top #(
     parameter ENABLE_STREAM_CNN = 0,
     parameter ENABLE_STYLE_VISIBILITY = 0,
     parameter ENABLE_STYLE_CONTOUR = 0,
+    parameter ENABLE_STYLE_SWITCH = 0,
     parameter STREAM_DILATION = 2,
     parameter [24:0] STYLE_SCALE_Q24 = 25'd20591742,
     parameter ENABLE_LEGACY_UART_LOG = 1
@@ -72,6 +73,13 @@ module top #(
 
     ////////////////////////    KEYS      ////////////////////////
     input  [3:0]                key_i,     // active-low, pull-up (KEY0..KEY3)
+
+    // Optional dual-image Flash configuration interface (no extra wires).
+    (* syn_peri_port = 0 *) output [1:0] cfg_CBSEL,
+    (* syn_peri_port = 0 *) output cfg_ENA, cfg_CONFIG,
+    (* syn_peri_port = 0 *) input cfg_ERROR,
+    (* syn_peri_port = 0 *) output flash_sclk, flash_cs_n, flash_mosi,
+    (* syn_peri_port = 0 *) input flash_miso,
 
     ////////////////////////    HDMI TX   ////////////////////////
     input                       hdmi_tx_locked,
@@ -746,7 +754,7 @@ clock_frequency_meter u_sensor_byte_meter (
 //=====================================================================
 wire iris_uart_txd;
 wire soc_uart_txd;
-assign txd = ENABLE_TINYML_RGB ? soc_uart_txd : key_i[3] ? soc_uart_txd : iris_uart_txd;
+assign txd = (ENABLE_TINYML_RGB || ENABLE_STYLE_SWITCH) ? soc_uart_txd : key_i[3] ? soc_uart_txd : iris_uart_txd;
 wire        RdEmpty;
 wire        tx_valid;
 wire        rx_valid;
@@ -933,7 +941,24 @@ key_pulse u_key1 (
     .pulse (key1_up)
 );
 
-// KEY2 now freezes a calibration thumbnail; KEY3 has no calibration action.
+// KEY2 freezes a calibration thumbnail. The optional Flash pair uses KEY3.
+wire [31:0] style_switch_status;
+wire style_switch_request;
+wire boot_spi_sclk, boot_spi_cs_n, boot_spi_mosi;
+assign flash_sclk = ENABLE_STYLE_SWITCH && ENABLE_TINYML_RGB ? boot_spi_sclk : 1'b0;
+assign flash_cs_n = ENABLE_STYLE_SWITCH && ENABLE_TINYML_RGB ? boot_spi_cs_n : 1'b1;
+assign flash_mosi = ENABLE_STYLE_SWITCH && ENABLE_TINYML_RGB ? boot_spi_mosi : 1'b0;
+generate if (ENABLE_STYLE_SWITCH) begin : g_style_switch
+    iris_style_switch #(.CURRENT_IMAGE(ENABLE_TINYML_RGB ? 1 : 0)) u_switch (
+        .clk(gpio_clk_27m), .rst_n(core_pll_locked), .key_n(key_i[3]),
+        .config_error(cfg_ERROR), .request_toggle(style_switch_request),
+        .cbsel(cfg_CBSEL), .ena(cfg_ENA), .config_request(cfg_CONFIG),
+        .status(style_switch_status)
+    );
+end else begin : g_no_style_switch
+    assign cfg_CBSEL=0; assign cfg_ENA=0; assign cfg_CONFIG=0;
+    assign style_switch_status=0;
+end endgenerate
 
 
 assign io_cam_scl_OE = ~cam_scl_padoen;
@@ -1135,7 +1160,10 @@ end
 tinyml_subsystem #(.ENABLE_STYLE_DEMO(ENABLE_STYLE_DEMO),.ENABLE_STREAM_CNN(ENABLE_STREAM_CNN),
     .STREAM_DILATION(STREAM_DILATION),.TENSOR_BURST_DMA(ENABLE_TENSOR_BURST),
     .TENSOR_RGB_ONLY(ENABLE_TINYML_RGB && ENABLE_TENSOR_BURST),
-    .ENABLE_RAIN_BACKEND(ENABLE_RAIN_BACKEND)) u_tinyml_subsystem (
+    .ENABLE_RAIN_BACKEND(ENABLE_RAIN_BACKEND),.ENABLE_STYLE_SWITCH(ENABLE_STYLE_SWITCH)) u_tinyml_subsystem (
+    .boot_spi_sclk(boot_spi_sclk),.boot_spi_cs_n(boot_spi_cs_n),
+    .boot_spi_mosi(boot_spi_mosi),.boot_spi_miso(flash_miso),
+    .style_switch_status(style_switch_status),.style_switch_request(style_switch_request),
     .style_paddr(style_paddr),.style_psel(style_psel),.style_penable(style_penable),
     .style_pwrite(style_pwrite),.style_pwdata(style_pwdata),.style_prdata(style_prdata),
     .clk              (core_clk),
@@ -1716,6 +1744,6 @@ end
 assign led[0] = (sens_fps != wr_fps);
 assign led[1] = wr_fps[5];
 assign led[2] = cal_ready;
-assign led[3] = sens_fps[5];
+assign led[3] = ENABLE_STYLE_SWITCH ? ENABLE_TINYML_RGB != 0 : sens_fps[5];
 
 endmodule
