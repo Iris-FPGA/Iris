@@ -51,7 +51,7 @@ endfunction
 reg [23:0] reference_rgb;
 always @(negedge clk) if (valid) begin
     expected_x=count%640; expected_y=(count/640)%480;
-    sx=240+(expected_x*9)/4; sy=(expected_y*9)/4;
+    sx=(!GAUSSIAN && !MEDIAN) ? expected_x*3 : 240+(expected_x*9)/4; sy=(expected_y*9)/4;
     reference_rgb=MEDIAN ? median_reference[pattern*307200+expected_y*640+expected_x] : reference_pixel(sx,sy);
     expected={8'h80,reference_rgb[7:0]^8'h80,reference_rgb[15:8]^8'h80,reference_rgb[23:16]^8'h80};
     if (ox!==expected_x || oy!==expected_y || rgba!==expected ||

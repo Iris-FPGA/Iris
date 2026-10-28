@@ -2,7 +2,7 @@
 // The native row renderer runs ahead of this reader in the same scanline.
 // One synchronous read port and the previous word cover pairs crossing a
 // source-word boundary; no second read port or duplicated frame is needed.
-module iris_style_split_scaler(
+module iris_style_split_scaler #(parameter FULL_WIDTH=0)(
  input wire clk,rst_n,i_hs,i_vs,i_de,i_have_frame,i_good,
  input wire [10:0] i_x,
  input wire i_source_valid,input wire [8:0] i_source_addr,
@@ -13,8 +13,8 @@ module iris_style_split_scaler(
 reg [47:0] pair_q,previous_pair;
 reg [9:0] source_x;
 reg [3:0] phase;
-wire inside_image=i_de && i_x>=120 && i_x<840;
-wire [9:0] second_x=source_x+(phase>=5);
+wire inside_image=i_de && (FULL_WIDTH ? i_x<960 : (i_x>=120 && i_x<840));
+wire [9:0] second_x=source_x+(FULL_WIDTH ? (phase==4'd2) : (phase>=5));
 wire [8:0] read_addr=inside_image ? second_x[9:1] : 9'd0;
 reg first_odd_q,second_odd_q,cross_q,inside_q;
 reg hs_q,vs_q,de_q;
@@ -31,7 +31,7 @@ always @(posedge clk or negedge rst_n)begin
  end else begin
   if(inside_image)begin
    source_x<=source_x+(phase!=0);
-   phase<=phase==0 ? 4'd8 : phase-1'b1;
+   phase<=phase==0 ? (FULL_WIDTH ? 4'd2 : 4'd8) : phase-1'b1;
   end else begin source_x<=0;phase<=0;end
   previous_pair<=pair_q;
   first_odd_q<=source_x[0];second_odd_q<=second_x[0];

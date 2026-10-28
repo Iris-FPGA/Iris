@@ -327,7 +327,7 @@ frame_buffer #(
     .O_VID_WIDTH    (16),
     .AXI_DATA_WIDTH (128),
     .AXI_ADDR_WIDTH (28),
-    .WR_FIFO_DEPTH  (1024),
+    .WR_FIFO_DEPTH  (512),
     .RD_FIFO_DEPTH  (1024),
     .START_ADDR     (28'h0000000),
     .BURST_LEN      (8'd127),

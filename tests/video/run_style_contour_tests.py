@@ -106,18 +106,31 @@ def unit(tmp,**overrides):
                [f'-Ptb_style_contour.{key}={value}' for key,value in overrides.items()])
     simulate(exe,[f'+IN={a}',f'+REF={b}',f'+COUNT={len(stim)}'])
 
-def panels(tmp,negative,first,second,first_bank=0,second_bank=1,native_camera=1):
-    images=[];y=np.arange(480)[:,None];x=np.arange(640)[None,:]
+def blend_image(prev_img, curr_img):
+    delta=np.abs(curr_img-prev_img).max(axis=-1,keepdims=True)
+    return np.where(delta<16,(prev_img+curr_img+1)//2,
+           np.where(delta<36,(prev_img+3*curr_img+2)//4,
+           np.where(delta<64,(prev_img+7*curr_img+4)//8,curr_img)))
+
+def panels(tmp,negative,first,second,first_bank=0,second_bank=1,native_camera=1,interp=0):
+    images=[];sources=[];neurals=[];y=np.arange(480)[:,None];x=np.arange(640)[None,:]
+    base_step=np.where(y%4==0,8,np.where(y%4==1,23,np.where(y%4==2,48,96)))
     for pair,mode in zip((first_bank,second_bank),(first,second)):
-        source=np.stack([(y*3+x*7+c*43+pair*23)%256 for c in range(3)],axis=-1)
+        source=np.stack([(y*3+x*7+c*43+pair*(base_step+c*2 if interp else 23))%256 for c in range(3)],axis=-1)
         neural=(source+31)%256
         grey=(source[:,:,0]+2*source[:,:,1]+source[:,:,2]+2)//4
+        sources.append(source);neurals.append(neural)
         images.append(render(neural,gradient_image(grey,negative and pair==first_bank),mode,source))
-    expected=tmp/f'panel-{negative}-{first}-{second}.mem'
+    if interp:
+        source_interp=blend_image(sources[0],sources[1])
+        neural_interp=blend_image(neurals[0],neurals[1])
+        grey_interp=(source_interp[:,:,0]+2*source_interp[:,:,1]+source_interp[:,:,2]+2)//4
+        images.append(render(neural_interp,gradient_image(grey_interp,False),second,source_interp))
+    expected=tmp/f'panel-{negative}-{first}-{second}-{interp}.mem'
     expected.write_text(''.join(f'{int(r):02x}{int(g):02x}{int(b):02x}\n' for image in images for r,g,b in image.reshape(-1,3)))
-    exe=tmp/f'panel-{negative}-{first}-{second}'
+    exe=tmp/f'panel-{negative}-{first}-{second}-{interp}'
     compile_tb('tb_style_panels',['tests/video/tb_style_panels.sv','iris_ws/src/cnn/iris_style_contour_panels.v','iris_ws/src/cnn/iris_style_split_scaler.v','iris_ws/src/cnn/iris_style_contour.v','iris_ws/src/cnn/iris_style_dequant.v'],exe,
-        ['-DTEST_CONTOUR','-Ptb_style_panels.CONTOUR=1','-Ptb_style_panels.VISIBILITY=1',f'-Ptb_style_panels.NEGATIVE={negative}',f'-Ptb_style_panels.FIRST_MODE={first}',f'-Ptb_style_panels.SECOND_MODE={second}',f'-Ptb_style_panels.FIRST_BANK={first_bank}',f'-Ptb_style_panels.SECOND_BANK={second_bank}',f'-Ptb_style_panels.NATIVE_CAMERA={native_camera}'])
+        ['-DTEST_CONTOUR','-Ptb_style_panels.CONTOUR=1','-Ptb_style_panels.VISIBILITY=1',f'-Ptb_style_panels.NEGATIVE={negative}',f'-Ptb_style_panels.FIRST_MODE={first}',f'-Ptb_style_panels.SECOND_MODE={second}',f'-Ptb_style_panels.FIRST_BANK={first_bank}',f'-Ptb_style_panels.SECOND_BANK={second_bank}',f'-Ptb_style_panels.NATIVE_CAMERA={native_camera}',f'-Ptb_style_panels.INTERP={interp}'])
     simulate(exe,[f'+CONTOUR_REF={expected}'])
 
 if __name__=='__main__':
@@ -132,3 +145,4 @@ if __name__=='__main__':
             if a.negative is not None:panels(tmp,a.negative,2,3)
             else:
                 for case in [(0,2,3),(0,3,0),(1,2,1)]:panels(tmp,*case)
+                panels(tmp,0,2,3,interp=1)

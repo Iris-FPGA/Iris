@@ -1,23 +1,23 @@
 `timescale 1ns/1ps
-module tb_style_panels #(parameter NEGATIVE=0,parameter VISIBILITY=0,parameter CONTOUR=0,parameter FIRST_MODE=2,parameter SECOND_MODE=1,parameter FIRST_BANK=0,parameter SECOND_BANK=1,parameter NATIVE_CAMERA=0);
+module tb_style_panels #(parameter NEGATIVE=0,parameter VISIBILITY=0,parameter CONTOUR=0,parameter FIRST_MODE=2,parameter SECOND_MODE=1,parameter FIRST_BANK=0,parameter SECOND_BANK=1,parameter NATIVE_CAMERA=0,parameter INTERP=0);
 reg clk=0,video_clk=0,rst_n=0;
 always #5 clk=~clk;
 always #7 video_clk=~video_clk;
 reg commit_toggle=0,i_hs=0,i_vs=0,i_de=0;
 reg [1:0] commit_pair=FIRST_BANK;
 reg [47:0] i_rgb=48'h123456abcdef;
-wire commit_ack,have_frame,o_hs,o_vs,o_de,arvalid,rready;
+wire commit_ack,interp_step_toggle,have_frame,o_hs,o_vs,o_de,arvalid,rready;
 wire [1:0] active_pair;
 reg [1:0] visibility_mode=FIRST_MODE;reg visibility_toggle=FIRST_MODE!=2;wire visibility_ack;
-integer expected_mode=FIRST_MODE;
+integer expected_mode=FIRST_MODE,expected_interp=0;
 wire [47:0] o_rgb;wire [31:0] underflows,read_errors,araddr;wire [7:0] arlen;
 reg arready=0,rvalid=0,rlast=0;reg [1:0] rresp=0;reg [127:0] rdata=0;
 `ifdef TEST_CONTOUR
-iris_style_contour_panels #(.ENABLE_VISIBILITY(1),.SCALE_Q24(20596120),.NATIVE_CAMERA_LEFT(NATIVE_CAMERA)) dut(.*);
+iris_style_contour_panels #(.ENABLE_VISIBILITY(1),.SCALE_Q24(20596120),.NATIVE_CAMERA_LEFT(NATIVE_CAMERA),.ENABLE_INTERP(INTERP)) dut(.*);
 `else
-iris_style_panels #(.ENABLE_VISIBILITY(VISIBILITY),.SCALE_Q24(VISIBILITY ? 20596120 : 20591742)) dut(.*);
+iris_style_panels #(.ENABLE_VISIBILITY(VISIBILITY),.SCALE_Q24(VISIBILITY ? 20596120 : 20591742),.ENABLE_INTERP(INTERP)) dut(.*);
 `endif
-reg [23:0] contour_reference[0:614399];reg [1023:0] contour_path;
+reg [23:0] contour_reference[0:921599];reg [1023:0] contour_path;
 initial if(CONTOUR)begin
  if(!$value$plusargs("CONTOUR_REF=%s",contour_path))$fatal(1,"contour reference missing");
  $readmemh(contour_path,contour_reference);
@@ -25,7 +25,30 @@ end
 integer cyc=0,beat=0,burst_len=0;reg servicing=0;
 reg [31:0] address;
 function [7:0] colour(input integer y,input integer x,input integer c,input integer style,input integer pair);
- colour=(y*3+x*7+c*43+style*31+pair*23)%256;
+ integer step;
+ begin
+  step=INTERP ? ((y%4==0 ? 8 : y%4==1 ? 23 : y%4==2 ? 48 : 96)+c*2) : 23;
+  colour=(y*3+x*7+c*43+style*31+pair*step)%256;
+ end
+endfunction
+function [7:0] colour_eval(input integer y,input integer x,input integer c,input integer style,input integer pair,input integer is_interp);
+ integer u0[0:2],u1[0:2],d[0:2],delta,k;
+ begin
+  if(!is_interp)colour_eval=colour(y,x,c,style,pair);
+  else begin
+   delta=0;
+   for(k=0;k<3;k=k+1)begin
+    u0[k]=colour(y,x,k,style,FIRST_BANK);
+    u1[k]=colour(y,x,k,style,SECOND_BANK);
+    d[k]=u1[k]>=u0[k] ? (u1[k]-u0[k]) : (u0[k]-u1[k]);
+    if(d[k]>delta)delta=d[k];
+   end
+   if(delta<16)colour_eval=(u0[c]+u1[c]+1)>>1;
+   else if(delta<36)colour_eval=(u0[c]+3*u1[c]+2)>>2;
+   else if(delta<64)colour_eval=(u0[c]+7*u1[c]+4)>>3;
+   else colour_eval=u1[c];
+  end
+ end
 endfunction
 function [127:0] memory_word(input reg [31:0] a);
  integer offset,pair,style,y,x;
@@ -66,18 +89,18 @@ integer tx=0,ty=0,checked=0;
 localparam DELAY=2;
 reg [50:0] reference[0:DELAY-1];
 reg check_enable=0;
-function [23:0] rgb(input integer y,input integer x,input integer style,input integer pair);
+function [23:0] rgb(input integer y,input integer x,input integer style,input integer pair,input integer is_interp);
  integer val,minimum,ink,threshold,ny,nx;reg [23:0] v;
  begin
   v=0;
   for(integer c=0;c<3;c=c+1)begin
-   val=colour(y,x,c,style,pair);
+   val=colour_eval(y,x,c,style,pair,is_interp);
    if(style)begin
     if(VISIBILITY && !CONTOUR && expected_mode>=2)begin
      ny=y<479 && !(NEGATIVE && pair==FIRST_BANK && y==9) ? y+1 : y;nx=x>0 ? x-1 : x;
-     if(colour(ny,x,c,style,pair)<val)val=colour(ny,x,c,style,pair);
-     if(colour(y,nx,c,style,pair)<val)val=colour(y,nx,c,style,pair);
-     if(colour(ny,nx,c,style,pair)<val)val=colour(ny,nx,c,style,pair);
+     if(colour_eval(ny,x,c,style,pair,is_interp)<val)val=colour_eval(ny,x,c,style,pair,is_interp);
+     if(colour_eval(y,nx,c,style,pair,is_interp)<val)val=colour_eval(y,nx,c,style,pair,is_interp);
+     if(colour_eval(ny,nx,c,style,pair,is_interp)<val)val=colour_eval(ny,nx,c,style,pair,is_interp);
     end
     val=$rtoi(val*(VISIBILITY ? 1.2276244163513184 : 1.2273634672164917)+0.5);if(val>255)val=255;
    end
@@ -89,7 +112,7 @@ function [23:0] rgb(input integer y,input integer x,input integer style,input in
    ink=minimum<threshold ? (threshold-minimum)*(expected_mode==3 ? 8 : 4) : 0;
    for(integer c=0;c<3;c=c+1)v[c*8+:8]=v[c*8+:8]>ink ? v[c*8+:8]-ink : 0;
   end
-  rgb=style && CONTOUR && expected_mode>=2 ? contour_reference[(pair==FIRST_BANK ? 0 : 307200)+y*640+x] : v;
+  rgb=style && CONTOUR && expected_mode>=2 ? contour_reference[(is_interp ? 614400 : pair==FIRST_BANK ? 0 : 307200)+y*640+x] : v;
  end
 endfunction
 reg [47:0] expected;
@@ -97,11 +120,11 @@ integer source_y,source_x;
 always @(posedge video_clk)begin
  expected=0;
  source_y=ty*4/9;
- if(have_frame && i_de && tx>=240 && tx<1680)begin
-  source_x=(tx-240)*4/9;
-  expected[47:24]=rgb(source_y,source_x,source_x>=320,active_pair);
-  source_x=(tx-239)*4/9;
-  expected[23:0]=rgb(source_y,source_x,source_x>=320,active_pair);
+ if(have_frame && i_de && (CONTOUR && NATIVE_CAMERA ? tx<1920 : (tx>=240 && tx<1680)))begin
+  source_x=CONTOUR && NATIVE_CAMERA ? tx/3 : (tx-240)*4/9;
+  expected[47:24]=rgb(source_y,source_x,source_x>=320,active_pair,expected_interp);
+  source_x=CONTOUR && NATIVE_CAMERA ? (tx+1)/3 : (tx-239)*4/9;
+  expected[23:0]=rgb(source_y,source_x,source_x>=320,active_pair,expected_interp);
   if(NEGATIVE && active_pair==FIRST_BANK && source_y==10)expected=0;
   if(CONTOUR && NATIVE_CAMERA && tx<960)expected=i_rgb;
  end
@@ -147,10 +170,17 @@ initial begin
  // the old mailbox until the display acknowledges the new frame boundary.
  check_enable=0;i_de=0;i_vs=0;repeat(8)@(negedge video_clk);
  if(VISIBILITY)expected_mode=SECOND_MODE;
+ expected_interp=INTERP;
  check_enable=1;frame();
- if(active_pair!=SECOND_BANK || underflows!=2*NEGATIVE || read_errors!=NEGATIVE)$fatal(1,"pair transition");
+ if(active_pair!=SECOND_BANK || dut.interp_phase!=INTERP || interp_step_toggle!=0 || underflows!=2*NEGATIVE || read_errors!=NEGATIVE)$fatal(1,"pair transition");
  if(VISIBILITY && (visibility_ack!=(FIRST_MODE==2) || dut.mode_live!=SECOND_MODE))$fatal(1,"mode request missed VS");
+ if(INTERP)begin
+  check_enable=0;i_de=0;i_vs=0;repeat(8)@(negedge video_clk);
+  expected_interp=0;
+  check_enable=1;frame();
+  if(active_pair!=SECOND_BANK || dut.interp_phase!=0 || interp_step_toggle!=1 || underflows!=2*NEGATIVE || read_errors!=NEGATIVE)$fatal(1,"interp true frame transition");
+ end
  $display("PASS single split image %d samples, pixel oracle, source seam, pairing",checked);$finish;
 end
-initial begin #50000000;$fatal(1,"panel timeout");end
+initial begin #80000000;$fatal(1,"panel timeout");end
 endmodule

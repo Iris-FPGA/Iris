@@ -1,7 +1,7 @@
 // APB0 control plane for paired camera/style presentation.
 // Three DDR input/output pairs. Capture, inference and VS-pending display
 // retain independent bank leases; config writes never change an active lease.
-module iris_style_demo #(parameter [24:0] SCALE_Q24=25'd20591742,parameter ENABLE_VISIBILITY=0,parameter ENABLE_CONTOUR=0,parameter TINYML_RGB=0)(
+module iris_style_demo #(parameter [24:0] SCALE_Q24=25'd20591742,parameter ENABLE_VISIBILITY=0,parameter ENABLE_CONTOUR=0,parameter TINYML_RGB=0,parameter ENABLE_INTERP=1)(
  input wire clk,video_clk,rst_n,
  input wire [15:0] paddr,input wire psel,penable,pwrite,
  input wire [31:0] pwdata,output reg [31:0] prdata,
@@ -29,16 +29,16 @@ reg [2:0] visibility_ack_sync;
 wire visibility_pending=visibility_toggle!=visibility_ack_sync[2];
 wire cap_busy,cap_done,cap_error,capture_enable;
 wire [31:0] capture_write_dummy_bad;
-wire commit_ack,video_have;
+wire commit_ack,interp_step_toggle,video_have;
 wire [1:0] video_pair;
-reg [2:0] ack_sync,have_sync;
+reg [2:0] ack_sync,step_sync,have_sync;
 reg [1:0] pair_sync1,pair_sync2;
-reg ack_previous,done_previous;
+reg ack_previous,step_previous,done_previous;
 reg [31:0] displayed_count,captured_count,rejected_count;
 reg [31:0] rate_age;
 wire pending_commit=commit_toggle!=ack_sync[2];
-// Each VS-confirmed bank change counts once, on either toggle edge.
-assign frame_commit_pulse=ack_sync[2]^ack_previous;
+// Each VS-confirmed bank change or 60 Hz interpolated->true sub-frame step pulses OSD FPS.
+assign frame_commit_pulse=(ack_sync[2]^ack_previous) | (step_sync[2]^step_previous);
 wire write_reg=psel && penable && pwrite;
 wire [31:0] underflows,read_errors;
 wire valid,sof,eol,eof;wire [31:0] rgba;
@@ -78,10 +78,12 @@ iris_tinyml_panels u_panels(
  .araddr(araddr),.arlen(arlen),.arvalid(arvalid),.arready(arready),
  .rdata(rdata),.rresp(rresp),.rlast(rlast),.rvalid(rvalid),.rready(rready));
 assign visibility_ack=visibility_toggle;
+assign interp_step_toggle=1'b0;
 end else if(ENABLE_CONTOUR)begin : g_contour
-iris_style_contour_panels #(.SCALE_Q24(SCALE_Q24),.ENABLE_VISIBILITY(ENABLE_VISIBILITY)) u_panels(
+iris_style_contour_panels #(.SCALE_Q24(SCALE_Q24),.ENABLE_VISIBILITY(ENABLE_VISIBILITY),.ENABLE_INTERP(ENABLE_INTERP)) u_panels(
  .clk(clk),.video_clk(video_clk),.rst_n(rst_n),
  .commit_toggle(commit_toggle),.commit_pair(commit_pair),.commit_ack(commit_ack),
+ .interp_step_toggle(interp_step_toggle),
  .active_pair(video_pair),.have_frame(video_have),
  .visibility_mode(visibility_mode),.visibility_toggle(visibility_toggle),.visibility_ack(visibility_ack),
  .i_hs(i_hs),.i_vs(i_vs),.i_de(i_de),.i_rgb(i_rgb),
@@ -91,9 +93,10 @@ iris_style_contour_panels #(.SCALE_Q24(SCALE_Q24),.ENABLE_VISIBILITY(ENABLE_VISI
  .rdata(rdata),.rresp(rresp),.rlast(rlast),.rvalid(rvalid),.rready(rready)
 );
 end else begin : g_legacy
-iris_style_panels #(.SCALE_Q24(SCALE_Q24),.ENABLE_VISIBILITY(ENABLE_VISIBILITY)) u_panels(
+iris_style_panels #(.SCALE_Q24(SCALE_Q24),.ENABLE_VISIBILITY(ENABLE_VISIBILITY),.ENABLE_INTERP(ENABLE_INTERP)) u_panels(
  .clk(clk),.video_clk(video_clk),.rst_n(rst_n),
  .commit_toggle(commit_toggle),.commit_pair(commit_pair),.commit_ack(commit_ack),
+ .interp_step_toggle(interp_step_toggle),
  .active_pair(video_pair),.have_frame(video_have),
  .visibility_mode(visibility_mode),.visibility_toggle(visibility_toggle),.visibility_ack(visibility_ack),
  .i_hs(i_hs),.i_vs(i_vs),.i_de(i_de),.i_rgb(i_rgb),
@@ -135,7 +138,7 @@ always @(posedge clk or negedge rst_n)begin
  if(!rst_n)begin
   pair_cfg<=0;capture_pair<=0;commit_pair<=0;inference_pair<=0;
   capture_request<=0;commit_toggle<=0;inference_busy<=0;captured_valid<=0;
-  ack_sync<=0;pair_sync1<=0;pair_sync2<=0;have_sync<=0;ack_previous<=0;done_previous<=0;
+  ack_sync<=0;step_sync<=0;pair_sync1<=0;pair_sync2<=0;have_sync<=0;ack_previous<=0;step_previous<=0;done_previous<=0;
   displayed_count<=0;captured_count<=0;rejected_count<=0;
   ai_centifps<=0;ai_rate_toggle<=0;rate_age<=0;
   ddr_serial_enable<=0;
@@ -147,10 +150,11 @@ always @(posedge clk or negedge rst_n)begin
    else if(ai_centifps!=0)begin ai_centifps<=0;ai_rate_toggle<=~ai_rate_toggle;end
   end
   ack_sync<={ack_sync[1:0],commit_ack};
+  step_sync<={step_sync[1:0],interp_step_toggle};
   visibility_ack_sync<={visibility_ack_sync[1:0],visibility_ack};
   pair_sync1<=video_pair;pair_sync2<=pair_sync1;
   have_sync<={have_sync[1:0],video_have};
-  ack_previous<=ack_sync[2];done_previous<=cap_done;
+  ack_previous<=ack_sync[2];step_previous<=step_sync[2];done_previous<=cap_done;
   if(ack_sync[2]!=ack_previous)displayed_count<=displayed_count+1'b1;
   if(cap_done && !done_previous && !cap_error)begin
    captured_count<=captured_count+1'b1;captured_valid[capture_pair]<=1;

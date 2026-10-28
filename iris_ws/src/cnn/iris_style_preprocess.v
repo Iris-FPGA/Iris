@@ -184,16 +184,16 @@ wire [23:0] selected_rgb = first_selected ? i_rgb[47:24] : i_rgb[23:0];
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         vs_d <= 0; de_d <= 0; frame_active <= 0; src_x <= 0; src_y <= 0;
-        next_x <= 240; next_y <= 0; phase_x <= 0; phase_y <= 0;
+        next_x <= 0; next_y <= 0; phase_x <= 0; phase_y <= 0;
         dst_x <= 0; dst_y <= 0;
         o_valid <= 0; o_rgba <= 0; o_sof <= 0; o_eol <= 0; o_eof <= 0;
         o_x <= 0; o_y <= 0;
     end else begin
         vs_d <= i_vs; de_d <= i_de;
         o_valid <= 0; o_sof <= 0; o_eol <= 0; o_eof <= 0;
-        if (frame_start || !enable) begin
-            frame_active <= frame_start && enable;
-            src_x <= 0; src_y <= 0; next_x <= 240; next_y <= 0;
+        if (i_vs || !enable) begin
+            frame_active <= i_vs && enable;
+            src_x <= 0; src_y <= 0; next_x <= 0; next_y <= 0;
             dst_x <= 0; dst_y <= 0; phase_x <= 0; phase_y <= 0;
         end else if (i_de && frame_active) begin
             src_x <= src_x + 12'd2;
@@ -208,11 +208,11 @@ always @(posedge clk or negedge rst_n) begin
                 o_eol <= dst_x == 639;
                 o_eof <= dst_x == 639 && dst_y == 479;
                 dst_x <= dst_x + 10'd1;
-                next_x <= next_x + (phase_x == 3 ? 12'd3 : 12'd2);
+                next_x <= next_x + 12'd3;
                 phase_x <= phase_x + 2'd1;
             end
         end else begin
-            src_x <= 0; next_x <= 240; dst_x <= 0; phase_x <= 0;
+            src_x <= 0; next_x <= 0; dst_x <= 0; phase_x <= 0;
             if (de_d) begin
                 src_y <= src_y + 12'd1;
                 if (row_selected) begin

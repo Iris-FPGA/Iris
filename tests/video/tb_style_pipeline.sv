@@ -7,11 +7,13 @@ reg [15:0] paddr=0;
 reg psel=0,penable=0,pwrite=0;
 reg [31:0] pwdata=0;
 wire [31:0] prdata;
-reg cap_busy=0,cap_done=0,commit_ack=0,video_have=0;
+reg cap_busy=0,cap_done=0,commit_ack=0,interp_step_toggle=0,video_have=0;
 reg [1:0] video_pair=0;
+wire frame_commit_pulse;
 iris_style_demo dut(.clk(clk),.video_clk(clk),.rst_n(rst_n),
  .paddr(paddr),.psel(psel),.penable(penable),.pwrite(pwrite),
- .pwdata(pwdata),.prdata(prdata),.bus_write_dummy_bad(32'd0));
+ .pwdata(pwdata),.prdata(prdata),.bus_write_dummy_bad(32'd0),
+ .frame_commit_pulse(frame_commit_pulse));
 task tick;begin @(posedge clk);#1;@(negedge clk);end endtask
 task write_reg(input integer index,input reg [31:0] value);
  begin paddr=index*4;pwdata=value;psel=1;penable=1;pwrite=1;tick();psel=0;penable=0;pwrite=0;tick();end
@@ -23,11 +25,11 @@ endtask
 task acknowledge(input integer bank);
  begin video_pair=bank;video_have=1;commit_ack=dut.commit_toggle;repeat(6)tick();end
 endtask
-integer rejected;
+ integer rejected,step_pulses;
 initial begin
  force dut.cap_busy=cap_busy;force dut.cap_done=cap_done;force dut.cap_error=1'b0;
  force dut.capture_write_dummy_bad=32'd0;
- force dut.commit_ack=commit_ack;force dut.video_pair=video_pair;force dut.video_have=video_have;
+ force dut.commit_ack=commit_ack;force dut.interp_step_toggle=interp_step_toggle;force dut.video_pair=video_pair;force dut.video_have=video_have;
  force dut.underflows=32'd0;force dut.read_errors=32'd0;
  repeat(4)tick();rst_n=1;repeat(3)tick();
  paddr=64;#1;if(prdata!==32'h49500301)$fatal(1,"pipeline registers alias legacy APB");
@@ -66,6 +68,9 @@ initial begin
  if(dut.pair_sync2!=2 || dut.displayed_count!=3)$fatal(1,"third bank identity truncated across CDC");
  rejected=dut.rejected_count;select_bank(3);write_reg(18,7);write_reg(0,3);
  if(dut.rejected_count!=rejected+3 || dut.pair_cfg!=2)$fatal(1,"invalid bank or combined command accepted");
+ step_pulses=0;interp_step_toggle=~interp_step_toggle;
+ for(integer i=0;i<6;i=i+1)begin @(posedge clk);#1;if(frame_commit_pulse)step_pulses=step_pulses+1;@(negedge clk);end
+ if(step_pulses!=1 || dut.displayed_count!=3)$fatal(1,"interp step pulse/displayed_count mismatch");
  $display("PASS triple-bank leases: concurrent capture/inference/display, stable mailboxes, VS release, bank 2, rejection guards");
  $finish;
 end

@@ -34,4 +34,10 @@ with tempfile.TemporaryDirectory(prefix='iris-pipeline-tests-') as directory:
             'iris_ws/src/cnn/iris_style_dequant.v', 'iris_ws/src/cnn/iris_style_ink.v'],
             exe, ['-Ptb_style_panels.FIRST_BANK=2', '-Ptb_style_panels.SECOND_BANK=0'])
         simulate(exe, [])
+        exe = tmp / 'split-third-bank-interp'
+        compile_tb('tb_style_panels', ['tests/video/tb_style_panels.sv',
+            'iris_ws/src/cnn/iris_style_panels.v', 'iris_ws/src/cnn/iris_style_split_scaler.v',
+            'iris_ws/src/cnn/iris_style_dequant.v', 'iris_ws/src/cnn/iris_style_ink.v'],
+            exe, ['-Ptb_style_panels.FIRST_BANK=2', '-Ptb_style_panels.SECOND_BANK=0', '-Ptb_style_panels.INTERP=1'])
+        simulate(exe, [])
         panels(tmp, 1, 2, 1, first_bank=0, second_bank=2)
