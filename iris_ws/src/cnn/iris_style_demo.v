@@ -1,7 +1,7 @@
 // APB0 control plane for paired camera/style presentation.
 // Three DDR input/output pairs. Capture, inference and VS-pending display
 // retain independent bank leases; config writes never change an active lease.
-module iris_style_demo #(parameter [24:0] SCALE_Q24=25'd20591742,parameter ENABLE_VISIBILITY=0,parameter ENABLE_CONTOUR=0,parameter TINYML_RGB=0,parameter ENABLE_INTERP=1)(
+module iris_style_demo #(parameter [24:0] SCALE_Q24=25'd20591742,parameter ENABLE_VISIBILITY=0,parameter ENABLE_CONTOUR=0,parameter TINYML_RGB=0,parameter ENABLE_INTERP=1,parameter HEIGHT=720)(
  input wire clk,video_clk,rst_n,
  input wire [15:0] paddr,input wire psel,penable,pwrite,
  input wire [31:0] pwdata,output reg [31:0] prdata,
@@ -41,28 +41,28 @@ wire pending_commit=commit_toggle!=ack_sync[2];
 assign frame_commit_pulse=(ack_sync[2]^ack_previous) | (step_sync[2]^step_previous);
 wire write_reg=psel && penable && pwrite;
 wire [31:0] underflows,read_errors;
-wire valid,sof,eol,eof;wire [31:0] rgba;
+wire valid,dual,sof,eol,eof;wire [31:0] rgba,rgba_b;
 wire [9:0] pixel_x;wire [8:0] pixel_y;
 generate if(TINYML_RGB)begin : g_rgb_capture
 iris_tinyml_preprocess u_preprocess(
  .clk(video_clk),.rst_n(rst_n),.enable(capture_enable),
  .i_vs(i_vs),.i_de(i_de),.i_rgb(i_rgb),
  .o_valid(valid),.o_word(rgba),.o_sof(sof),.o_eof(eof));
-assign eol=0;assign pixel_x=0;assign pixel_y=0;
+assign dual=0;assign rgba_b=0;assign eol=0;assign pixel_x=0;assign pixel_y=0;
 end else begin : g_rgba_capture
-iris_style_preprocess u_preprocess(
+iris_style_preprocess #(.HEIGHT(HEIGHT)) u_preprocess(
  .clk(video_clk),.rst_n(rst_n),.enable(capture_enable),
  .i_vs(i_vs),.i_de(i_de),.i_rgb(i_rgb),
- .o_valid(valid),.o_rgba(rgba),.o_sof(sof),.o_eol(eol),.o_eof(eof),.o_x(pixel_x),.o_y(pixel_y)
+ .o_valid(valid),.o_rgba(rgba),.o_dual(dual),.o_rgba_b(rgba_b),.o_sof(sof),.o_eol(eol),.o_eof(eof),.o_x(pixel_x),.o_y(pixel_y)
 );
 end endgenerate
-iris_style_capture #(.FRAME_WORDS(TINYML_RGB ? 3072 : 76800),
+iris_style_capture #(.FRAME_WORDS(TINYML_RGB ? 3072 : (HEIGHT*160)),
  .FIFO_AW(TINYML_RGB ? 5 : 8),.BURST_BITS(TINYML_RGB ? 2 : 4),.AUDIT_DUMMY(!TINYML_RGB),
  .STAGING_STYLE(TINYML_RGB ? "hybrid" : "registers")) u_capture(
  .clk(clk),.video_clk(video_clk),.rst_n(rst_n),.request(capture_request),.pair(capture_pair),
  .busy(cap_busy),.done(cap_done),.error(cap_error),.capture_enable(capture_enable),
  .write_dummy_bad(capture_write_dummy_bad),
- .i_vs(i_vs),.i_valid(valid),.i_sof(sof),.i_eof(eof),.i_rgba(rgba),
+ .i_vs(i_vs),.i_valid(valid),.i_sof(sof),.i_eof(eof),.i_rgba(rgba),.i_dual(dual),.i_rgba_b(rgba_b),
  .awaddr(awaddr),.awlen(awlen),.awvalid(awvalid),.awready(awready),
  .wdata(wdata),.wlast(wlast),.wvalid(wvalid),.wready(wready),
  .bresp(bresp),.bvalid(bvalid),.bready(bready)
@@ -80,7 +80,7 @@ iris_tinyml_panels u_panels(
 assign visibility_ack=visibility_toggle;
 assign interp_step_toggle=1'b0;
 end else if(ENABLE_CONTOUR)begin : g_contour
-iris_style_contour_panels #(.SCALE_Q24(SCALE_Q24),.ENABLE_VISIBILITY(ENABLE_VISIBILITY),.ENABLE_INTERP(ENABLE_INTERP)) u_panels(
+iris_style_contour_panels #(.SCALE_Q24(SCALE_Q24),.ENABLE_VISIBILITY(ENABLE_VISIBILITY),.ENABLE_INTERP(ENABLE_INTERP),.HEIGHT(HEIGHT)) u_panels(
  .clk(clk),.video_clk(video_clk),.rst_n(rst_n),
  .commit_toggle(commit_toggle),.commit_pair(commit_pair),.commit_ack(commit_ack),
  .interp_step_toggle(interp_step_toggle),

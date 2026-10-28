@@ -6,6 +6,8 @@ always #7 video_clk=~video_clk;
 reg request=0,i_vs=0,i_valid=0,i_sof=0,i_eof=0;
 reg [1:0] pair=0;
 reg [31:0] i_rgba=0;
+reg i_dual=0;
+reg [31:0] i_rgba_b=0;
 wire busy,done,error,capture_enable,awvalid,wvalid,wlast,bready;
 wire [31:0] awaddr;wire [7:0] awlen;wire [127:0] wdata;
 wire [31:0] write_dummy_bad;

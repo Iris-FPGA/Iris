@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module tb_style_panels #(parameter NEGATIVE=0,parameter VISIBILITY=0,parameter CONTOUR=0,parameter FIRST_MODE=2,parameter SECOND_MODE=1,parameter FIRST_BANK=0,parameter SECOND_BANK=1,parameter NATIVE_CAMERA=0,parameter INTERP=0);
+module tb_style_panels #(parameter NEGATIVE=0,parameter VISIBILITY=0,parameter CONTOUR=0,parameter FIRST_MODE=2,parameter SECOND_MODE=1,parameter FIRST_BANK=0,parameter SECOND_BANK=1,parameter NATIVE_CAMERA=0,parameter INTERP=0,parameter HEIGHT=480);
 reg clk=0,video_clk=0,rst_n=0;
 always #5 clk=~clk;
 always #7 video_clk=~video_clk;
@@ -13,7 +13,7 @@ integer expected_mode=FIRST_MODE,expected_interp=0;
 wire [47:0] o_rgb;wire [31:0] underflows,read_errors,araddr;wire [7:0] arlen;
 reg arready=0,rvalid=0,rlast=0;reg [1:0] rresp=0;reg [127:0] rdata=0;
 `ifdef TEST_CONTOUR
-iris_style_contour_panels #(.ENABLE_VISIBILITY(1),.SCALE_Q24(20596120),.NATIVE_CAMERA_LEFT(NATIVE_CAMERA),.ENABLE_INTERP(INTERP)) dut(.*);
+iris_style_contour_panels #(.ENABLE_VISIBILITY(1),.SCALE_Q24(20596120),.NATIVE_CAMERA_LEFT(NATIVE_CAMERA),.ENABLE_INTERP(INTERP),.HEIGHT(HEIGHT)) dut(.*);
 `else
 iris_style_panels #(.ENABLE_VISIBILITY(VISIBILITY),.SCALE_Q24(VISIBILITY ? 20596120 : 20591742),.ENABLE_INTERP(INTERP)) dut(.*);
 `endif

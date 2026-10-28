@@ -14,6 +14,7 @@ module iris_style_capture #(
     output wire capture_enable,
     input wire i_vs, i_valid, i_sof, i_eof,
     input wire [31:0] i_rgba,
+    input wire i_dual, input wire [31:0] i_rgba_b,
     output reg [31:0] awaddr,
     output wire [7:0] awlen,
     output wire awvalid, input wire awready,
@@ -30,7 +31,7 @@ reg [95:0] pack;
 wire fifo_full, fifo_empty;
 wire [FIFO_AW:0] fifo_level;
 wire [129:0] fifo_dout;
-wire pack_word = enabled && i_valid && pack_count==3;
+wire pack_word = enabled && i_valid && !i_dual && pack_count==3;
 wire fifo_push = !fifo_full && (pack_word || error_token);
 wire [129:0] fifo_din = error_token ? {2'b11,128'd0} :
                                       {1'b0,i_eof,i_rgba,pack};
@@ -48,13 +49,18 @@ always @(posedge video_clk or negedge rst_n) begin
             if(error_token && !fifo_full)error_token<=0;
             if(enabled && i_valid)begin
                 if(i_sof)saw_sof<=1;
-                case(pack_count)
-                    0:pack[31:0]<=i_rgba;
-                    1:pack[63:32]<=i_rgba;
-                    2:pack[95:64]<=i_rgba;
-                endcase
-                pack_count<=pack_count+1'b1;
-                if((pack_word && fifo_full) || (i_eof && pack_count!=3))begin
+                if(i_dual)begin
+                    pack[63:0]<={i_rgba_b,i_rgba};
+                    pack_count<=2'd2;
+                end else begin
+                    case(pack_count)
+                        0:pack[31:0]<=i_rgba;
+                        1:pack[63:32]<=i_rgba;
+                        2:pack[95:64]<=i_rgba;
+                    endcase
+                    pack_count<=pack_count+1'b1;
+                end
+                if((pack_word && fifo_full) || (i_eof && (i_dual || pack_count!=3)))begin
                     enabled<=0;failed<=1;error_token<=1;
                 end else if(i_eof)enabled<=0;
             end

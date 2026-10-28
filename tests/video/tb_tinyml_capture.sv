@@ -14,7 +14,7 @@ iris_tinyml_preprocess sample(.clk(video_clk),.rst_n(rst_n),.enable(enable),
 iris_style_capture #(.FRAME_WORDS(3072),.FIFO_AW(5),.BURST_BITS(2),.AUDIT_DUMMY(0),.STAGING_STYLE(STAGING_STYLE)) capture(
  .clk(clk),.video_clk(video_clk),.rst_n(rst_n),.request(request),.pair(2'd2),
  .busy(busy),.done(done),.error(error),.write_dummy_bad(audit),.capture_enable(enable),
- .i_vs(vs),.i_valid(valid),.i_sof(sof),.i_eof(eof),.i_rgba(word),
+ .i_vs(vs),.i_valid(valid),.i_sof(sof),.i_eof(eof),.i_rgba(word),.i_dual(1'b0),.i_rgba_b(32'd0),
  .awaddr(awaddr),.awlen(awlen),.awvalid(awvalid),.awready(awready),
  .wdata(wdata),.wvalid(wvalid),.wlast(wlast),.wready(wready),
  .bresp(2'd0),.bvalid(bvalid),.bready(bready));

@@ -3,9 +3,9 @@ module tb_style_preprocess #(parameter GAUSSIAN=1,parameter MEDIAN=0,parameter S
 reg clk=0; always #5 clk=~clk;
 reg rst_n=0, enable=1, vs=0, de=0;
 reg [47:0] rgb=0;
-wire valid,sof,eol,eof; wire [31:0] rgba;
+wire valid,dual,sof,eol,eof; wire [31:0] rgba,rgba_b;
 wire [9:0] ox; wire [8:0] oy;
-iris_style_preprocess #(.ENABLE_GAUSSIAN(GAUSSIAN),.ENABLE_MEDIAN(MEDIAN),.ENABLE_SMOOTH(SMOOTH)) dut(clk,rst_n,enable,vs,de,rgb,valid,rgba,sof,eol,eof,ox,oy);
+iris_style_preprocess #(.ENABLE_GAUSSIAN(GAUSSIAN),.ENABLE_MEDIAN(MEDIAN),.ENABLE_SMOOTH(SMOOTH),.HEIGHT(480)) dut(clk,rst_n,enable,vs,de,rgb,valid,rgba,dual,rgba_b,sof,eol,eof,ox,oy);
 integer count=0, frames=0, expected_x, expected_y, sx,sy;
 integer pattern=0;
 reg [23:0] median_reference[0:2457599];

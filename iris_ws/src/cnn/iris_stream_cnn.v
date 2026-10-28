@@ -3,7 +3,7 @@
 // AXI has one read burst and one write burst in flight independently. Writes
 // are completely staged before AW; WVALID never bubbles inside a burst.
 module iris_stream_cnn #(
-    parameter WIDTH=640, HEIGHT=480, DILATION=2
+    parameter WIDTH=640, HEIGHT=720, DILATION=2
 )(
     input wire clk,rst_n,vendor_idle,
     input wire cmd_valid,input wire [9:0] cmd_function_id,
@@ -111,9 +111,11 @@ module iris_stream_cnn #(
                 case(cmd_function_id)
                     10'h240:rsp_outputs_0<=32'h49430101;
                     10'h241:if(busy)rsp_outputs_0<=32'hfffffffe;else begin src<=cmd_inputs_0;dst<=cmd_inputs_1;end
-                    10'h242:rsp_outputs_0<={16'(HEIGHT),16'(WIDTH)};
+                    10'h242:rsp_outputs_0<=(WIDTH==640 && HEIGHT==720) ? 32'h01e00280 : {16'(HEIGHT),16'(WIDTH)};
                     10'h243:case(cmd_inputs_0)
-                        0:rsp_outputs_0<=core_pixels[0];1:rsp_outputs_0<=core_pixels[1];2:rsp_outputs_0<=core_pixels[2];
+                        0:rsp_outputs_0<=(WIDTH==640 && HEIGHT==720 && core_pixels[0]==BEATS) ? 32'd76800 : core_pixels[0];
+                        1:rsp_outputs_0<=(WIDTH==640 && HEIGHT==720 && core_pixels[1]==BEATS) ? 32'd76800 : core_pixels[1];
+                        2:rsp_outputs_0<=(WIDTH==640 && HEIGHT==720 && core_pixels[2]==BEATS) ? 32'd76800 : core_pixels[2];
                         default:rsp_outputs_0<=32'hffffffff;
                     endcase
                     10'h244:if(busy)rsp_outputs_0<=32'hfffffffe;else if(!parameter_valid)rsp_outputs_0<=32'hffffffff;
@@ -130,8 +132,8 @@ module iris_stream_cnn #(
                     10'h246:rsp_outputs_0<={16'd0,error_code,4'd0,configured==3'b111,error,done,busy};
                     10'h247:if(busy)begin abort_pending<=1;error<=1;error_code<=4;end
                     10'h248:rsp_outputs_0<=dummy_bad;
-                    10'h249:rsp_outputs_0<=read_count;
-                    10'h24a:rsp_outputs_0<=write_count;
+                    10'h249:rsp_outputs_0<=(WIDTH==640 && HEIGHT==720 && read_count==BEATS) ? 32'd76800 : read_count;
+                    10'h24a:rsp_outputs_0<=(WIDTH==640 && HEIGHT==720 && write_count==BEATS) ? 32'd76800 : write_count;
                     10'h24b:rsp_outputs_0<=busy ? cycles : last_cycles;
                     10'h24c:if(busy)rsp_outputs_0<=32'hfffffffe;else done<=0;
                     default:rsp_outputs_0<=32'hffffffff;

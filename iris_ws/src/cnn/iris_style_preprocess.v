@@ -6,14 +6,16 @@
 // Input RGB is after display color correction and before any OSD.
 // This tap cannot backpressure video; its consumer must abort a frame on
 // overflow and only publish a complete, committed frame to the CPU.
-module iris_style_preprocess #(parameter ENABLE_GAUSSIAN=0,parameter ENABLE_MEDIAN=0,parameter ENABLE_SMOOTH=0)(
+module iris_style_preprocess #(parameter ENABLE_GAUSSIAN=0,parameter ENABLE_MEDIAN=0,parameter ENABLE_SMOOTH=0,parameter HEIGHT=720)(
     input wire clk, input wire rst_n, input wire enable,
     input wire i_vs, input wire i_de, input wire [47:0] i_rgb,
     output wire o_valid, output wire [31:0] o_rgba,
+    output wire o_dual, output wire [31:0] o_rgba_b,
     output wire o_sof, output wire o_eol, output wire o_eof,
     output wire [9:0] o_x, output wire [8:0] o_y
 );
 generate if(ENABLE_MEDIAN)begin : g_median
+    assign o_dual=1'b0;assign o_rgba_b=32'd0;
     wire valid,sof,eol,eof;
     wire [31:0] rgba;
     wire [9:0] x;
@@ -22,9 +24,9 @@ generate if(ENABLE_MEDIAN)begin : g_median
     wire [31:0] median_rgba;
     wire [9:0] median_x;
     wire [8:0] median_y;
-    iris_style_point_preprocess u_sample(
+    iris_style_point_preprocess #(.HEIGHT(480)) u_sample(
         .clk(clk),.rst_n(rst_n),.enable(enable),.i_vs(i_vs),.i_de(i_de),.i_rgb(i_rgb),
-        .o_valid(valid),.o_rgba(rgba),.o_sof(sof),.o_eol(eol),.o_eof(eof),.o_x(x),.o_y(y));
+        .o_valid(valid),.o_rgba(rgba),.o_dual(),.o_rgba_b(),.o_sof(sof),.o_eol(eol),.o_eof(eof),.o_x(x),.o_y(y));
     iris_style_window_filter u_filter(
         .clk(clk),.rst_n(rst_n),.clear(!enable || i_vs),
         .i_valid(valid),.i_rgba(rgba),.i_x(x),.i_y(y),.i_eof(eof),
@@ -48,9 +50,12 @@ generate if(ENABLE_MEDIAN)begin : g_median
         assign o_x=median_x;assign o_y=median_y;
     end
 end else if(ENABLE_GAUSSIAN)begin : g_gaussian
-    iris_style_gaussian_preprocess u_filter(.*);
+    assign o_dual=1'b0;assign o_rgba_b=32'd0;
+    iris_style_gaussian_preprocess u_filter(
+        .clk(clk),.rst_n(rst_n),.enable(enable),.i_vs(i_vs),.i_de(i_de),.i_rgb(i_rgb),
+        .o_valid(o_valid),.o_rgba(o_rgba),.o_sof(o_sof),.o_eol(o_eol),.o_eof(o_eof),.o_x(o_x),.o_y(o_y));
 end else begin : g_point
-    iris_style_point_preprocess u_point(.*);
+    iris_style_point_preprocess #(.HEIGHT(HEIGHT)) u_point(.*);
 end endgenerate
 endmodule
 
@@ -164,46 +169,65 @@ end
 endmodule
 
 // Optional point-sampled reference/bypass for comparing denoising quality.
-module iris_style_point_preprocess (
+module iris_style_point_preprocess #(parameter HEIGHT=720)(
     input wire clk, input wire rst_n, input wire enable,
     input wire i_vs, input wire i_de, input wire [47:0] i_rgb,
     output reg o_valid, output reg [31:0] o_rgba,
+    output reg o_dual, output reg [31:0] o_rgba_b,
     output reg o_sof, output reg o_eol, output reg o_eof,
     output reg [9:0] o_x, output reg [8:0] o_y
 );
 reg vs_d, de_d, frame_active;
 reg [11:0] src_x, src_y, next_x, next_y;
 reg [1:0] phase_x, phase_y;
-reg [9:0] dst_x;
-reg [8:0] dst_y;
+reg [9:0] dst_x, dst_y;
 wire frame_start = i_vs && !vs_d;
-wire row_selected = src_y == next_y && dst_y < 480;
+wire row_selected = HEIGHT == 720 ? (phase_y != 2'd2 && dst_y < 10'd720) : (src_y == next_y && dst_y < 10'd480);
 wire first_selected = src_x == next_x;
 wire second_selected = src_x + 12'd1 == next_x;
-wire [23:0] selected_rgb = first_selected ? i_rgb[47:24] : i_rgb[23:0];
+wire [23:0] selected_rgb = HEIGHT == 720 ? (phase_x == 2'd1 ? i_rgb[23:0] : i_rgb[47:24]) :
+                           (first_selected ? i_rgb[47:24] : i_rgb[23:0]);
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         vs_d <= 0; de_d <= 0; frame_active <= 0; src_x <= 0; src_y <= 0;
         next_x <= 0; next_y <= 0; phase_x <= 0; phase_y <= 0;
         dst_x <= 0; dst_y <= 0;
-        o_valid <= 0; o_rgba <= 0; o_sof <= 0; o_eol <= 0; o_eof <= 0;
+        o_valid <= 0; o_rgba <= 0; o_dual <= 0; o_rgba_b <= 0;
+        o_sof <= 0; o_eol <= 0; o_eof <= 0;
         o_x <= 0; o_y <= 0;
     end else begin
         vs_d <= i_vs; de_d <= i_de;
-        o_valid <= 0; o_sof <= 0; o_eol <= 0; o_eof <= 0;
+        o_valid <= 0; o_dual <= 0; o_sof <= 0; o_eol <= 0; o_eof <= 0;
         if (i_vs || !enable) begin
             frame_active <= i_vs && enable;
             src_x <= 0; src_y <= 0; next_x <= 0; next_y <= 0;
             dst_x <= 0; dst_y <= 0; phase_x <= 0; phase_y <= 0;
         end else if (i_de && frame_active) begin
             src_x <= src_x + 12'd2;
-            if (row_selected && dst_x < 640 && (first_selected || second_selected)) begin
+            if (HEIGHT == 720) begin
+                if (row_selected && src_x >= 12'd960 && dst_x < 10'd640) begin
+                    o_valid <= 1'b1;
+                    o_dual <= phase_x == 2'd0;
+                    o_rgba <= {8'h80, selected_rgb[7:0] ^ 8'h80,
+                                      selected_rgb[15:8] ^ 8'h80,
+                                      selected_rgb[23:16] ^ 8'h80};
+                    o_rgba_b <= {8'h80, i_rgb[7:0] ^ 8'h80,
+                                        i_rgb[15:8] ^ 8'h80,
+                                        i_rgb[23:16] ^ 8'h80};
+                    o_x <= dst_x; o_y <= dst_y[8:0];
+                    o_sof <= dst_x == 10'd0 && dst_y == 10'd0;
+                    o_eol <= dst_x == 10'd639;
+                    o_eof <= dst_x == 10'd639 && dst_y == 10'd719;
+                    dst_x <= dst_x + (phase_x == 2'd0 ? 10'd2 : 10'd1);
+                    phase_x <= phase_x == 2'd2 ? 2'd0 : (phase_x + 2'd1);
+                end
+            end else if (row_selected && dst_x < 640 && (first_selected || second_selected)) begin
                 o_valid <= 1;
                 // Lowest address byte is R; dummy channel's uint8 value is 0.
                 o_rgba <= {8'h80, selected_rgb[7:0] ^ 8'h80,
                                   selected_rgb[15:8] ^ 8'h80,
                                   selected_rgb[23:16] ^ 8'h80};
-                o_x <= dst_x; o_y <= dst_y;
+                o_x <= dst_x; o_y <= dst_y[8:0];
                 o_sof <= dst_x == 0 && dst_y == 0;
                 o_eol <= dst_x == 639;
                 o_eof <= dst_x == 639 && dst_y == 479;
@@ -215,8 +239,11 @@ always @(posedge clk or negedge rst_n) begin
             src_x <= 0; next_x <= 0; dst_x <= 0; phase_x <= 0;
             if (de_d) begin
                 src_y <= src_y + 12'd1;
-                if (row_selected) begin
-                    dst_y <= dst_y + 9'd1;
+                if (HEIGHT == 720) begin
+                    phase_y <= phase_y == 2'd2 ? 2'd0 : (phase_y + 2'd1);
+                    if (row_selected) dst_y <= dst_y + 10'd1;
+                end else if (row_selected) begin
+                    dst_y <= dst_y + 10'd1;
                     next_y <= next_y + (phase_y == 3 ? 12'd3 : 12'd2);
                     phase_y <= phase_y + 2'd1;
                 end
