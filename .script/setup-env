@@ -2,26 +2,176 @@
 set -eo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+PATH_DIR="$ROOT_DIR/path"
+mkdir -p "$PATH_DIR"
 
-# 1) 解析 EFINITY_HOME（环境变量 → Iris/path/efinity_home → 提示并保存）
+echo "============================================================"
+echo "         Iris FPGA & AI 流式处理环境一键配置脚本            "
+echo "============================================================"
+
+# ------------------------------------------------------------------
+# 1) Efinity FPGA 工具链环境
+# ------------------------------------------------------------------
+echo "==> [1/4] 配置 Efinity 工具链环境..."
 source "$SCRIPT_DIR/efinity-env"
 
-# 2) 确认工具可用
 if ! command -v efx_run >/dev/null 2>&1; then
     echo "❌ 未找到 efx_run，EFINITY_HOME 可能不正确：$EFINITY_HOME" >&2
     exit 1
 fi
+echo "   ✅ Efinity 工具链就绪: $EFINITY_HOME"
 
-# 3) 安装 USB udev 规则（需 sudo）
-"$SCRIPT_DIR/setup-usb"
+# ------------------------------------------------------------------
+# 2) RISC-V 交叉编译器环境 (用于编译片上软核启动及流式固件)
+# ------------------------------------------------------------------
+echo "==> [2/4] 配置 RISC-V 交叉编译器..."
+RISCV_CONF="$PATH_DIR/riscv_toolchain"
+RISCV_PREFIX=""
 
-# 4) 版本校验与汇总
-proj_ver="$(grep -o 'sw_version="[^"]*"' "$SCRIPT_DIR/../iris_ws/iris_ws.xml" 2>/dev/null | head -1 | cut -d'"' -f2)"
-tool_ver="$(tr -d '[:space:]' < "$EFINITY_HOME/scripts/sw_version.txt" 2>/dev/null)"
-echo "==> EFINITY_HOME : $EFINITY_HOME"
-echo "==> 工具版本     : ${tool_ver:-未知}"
-echo "==> 工程版本     : ${proj_ver:-未知}"
-if [[ -n "$proj_ver" && -n "$tool_ver" && "$proj_ver" != "$tool_ver" ]]; then
-    echo "⚠️  版本不一致：工程 $proj_ver / 工具 $tool_ver，建议使用与工程相同的 Efinity 版本。"
+if [[ -s "$RISCV_CONF" ]]; then
+    CANDIDATE="$(<"$RISCV_CONF")"
+    if [[ -x "${CANDIDATE}gcc" || -x "${CANDIDATE}riscv-none-elf-gcc" ]]; then
+        RISCV_PREFIX="$CANDIDATE"
+    fi
 fi
-echo "==> 环境配置完成"
+
+if [[ -z "$RISCV_PREFIX" && -n "${RISCV_PREFIX:-}" ]]; then
+    if command -v "${RISCV_PREFIX}gcc" >/dev/null 2>&1; then
+        RISCV_PREFIX="$RISCV_PREFIX"
+    fi
+fi
+
+if [[ -z "$RISCV_PREFIX" ]]; then
+    SEARCH_PATHS=(
+        "/home/fin-resect/efinity/efinity-riscv-ide-2026.1/toolchain/bin/riscv-none-elf-"
+        "${EFINITY_HOME}/../efinity-riscv-ide-2026.1/toolchain/bin/riscv-none-elf-"
+        "${EFINITY_HOME}/toolchain/bin/riscv-none-elf-"
+        "/opt/efinity/efinity-riscv-ide-2026.1/toolchain/bin/riscv-none-elf-"
+    )
+    for sp in "${SEARCH_PATHS[@]}"; do
+        if [[ -x "${sp}gcc" ]]; then
+            RISCV_PREFIX="$sp"
+            break
+        fi
+    done
+fi
+
+if [[ -z "$RISCV_PREFIX" ]]; then
+    for candidate_name in "riscv-none-elf-" "riscv64-unknown-elf-" "riscv32-unknown-elf-" "riscv32-esp-elf-"; do
+        if command -v "${candidate_name}gcc" >/dev/null 2>&1; then
+            RISCV_PREFIX="$candidate_name"
+            break
+        fi
+    done
+fi
+
+if [[ -z "$RISCV_PREFIX" ]]; then
+    echo "未自动定位到 RISC-V 交叉编译器 (如 riscv-none-elf-gcc)"
+    read -rp "请输入 RISC-V toolchain prefix (例如 /opt/toolchain/bin/riscv-none-elf-): " RISCV_PREFIX
+fi
+
+if [[ -n "$RISCV_PREFIX" ]]; then
+    printf '%s\n' "$RISCV_PREFIX" > "$RISCV_CONF"
+    gcc_bin="${RISCV_PREFIX}gcc"
+    if [[ ! -x "$gcc_bin" && -x "${RISCV_PREFIX}riscv-none-elf-gcc" ]]; then
+        gcc_bin="${RISCV_PREFIX}riscv-none-elf-gcc"
+    fi
+    gcc_ver="$("$gcc_bin" -dumpversion 2>/dev/null || echo "已就绪")"
+    echo "   ✅ RISC-V 交叉编译器就绪: $RISCV_PREFIX (GCC $gcc_ver)"
+else
+    echo "❌ 未能配置 RISC-V 交叉编译器，固件编译功能将受限" >&2
+fi
+
+# ------------------------------------------------------------------
+# 3) Python AI / 模型量化与导出环境 (PyTorch + CUDA + TFLite)
+# ------------------------------------------------------------------
+echo "==> [3/4] 配置 Python AI 与量化依赖环境..."
+PYTHON_CONF="$PATH_DIR/python_bin"
+PYTHON_BIN=""
+
+if [[ -s "$PYTHON_CONF" ]]; then
+    CANDIDATE="$(<"$PYTHON_CONF")"
+    if [[ -x "$CANDIDATE" ]]; then
+        PYTHON_BIN="$CANDIDATE"
+    fi
+fi
+
+if [[ -z "$PYTHON_BIN" ]]; then
+    # 优先检测已有的 PyTorch + CUDA 专用环境
+    if [[ -x "/home/fin-resect/miniconda3/envs/yolo/bin/python" ]]; then
+        PYTHON_BIN="/home/fin-resect/miniconda3/envs/yolo/bin/python"
+    elif [[ -x "$ROOT_DIR/.venv/bin/python" ]]; then
+        PYTHON_BIN="$ROOT_DIR/.venv/bin/python"
+    else
+        PYTHON_BIN="$(command -v python3 || echo "")"
+    fi
+fi
+
+# 确保核心依赖已满足（隔离 Efinity 的 PYTHONHOME / PYTHONPATH 污染）
+run_py() {
+    env -u PYTHONHOME -u PYTHONPATH -u LD_LIBRARY_PATH "$PYTHON_BIN" "$@"
+}
+
+check_deps() {
+    run_py -c "import numpy, PIL, tflite, flatbuffers; print('ok')" >/dev/null 2>&1
+}
+
+if [[ -n "$PYTHON_BIN" ]] && check_deps; then
+    echo "   ✅ 核心量化依赖 (numpy, pillow, tflite, flatbuffers) 校验通过: $PYTHON_BIN"
+else
+    echo "   ⚠️  当前 Python ($PYTHON_BIN) 缺少核心依赖，正在尝试自动安装..."
+    if [[ -n "$PYTHON_BIN" ]]; then
+        pip_bin="$(dirname "$PYTHON_BIN")/pip"
+        if [[ -x "$pip_bin" ]]; then
+            env -u PYTHONHOME -u PYTHONPATH -u LD_LIBRARY_PATH "$pip_bin" install -q tflite flatbuffers numpy pillow || true
+        else
+            env -u PYTHONHOME -u PYTHONPATH -u LD_LIBRARY_PATH pip install --user -q tflite flatbuffers numpy pillow || true
+        fi
+    fi
+fi
+
+# 写入持久化配置
+if [[ -n "$PYTHON_BIN" ]]; then
+    printf '%s\n' "$PYTHON_BIN" > "$PYTHON_CONF"
+    torch_info="$(run_py -c "
+try:
+    import torch
+    print(f'PyTorch {torch.__version__} (CUDA={torch.cuda.is_available()})')
+except Exception as e:
+    print('未安装 (仅 CPU 推理)')
+" 2>/dev/null || echo "未检测")"
+    echo "   ✅ Python 运行环境就绪: $PYTHON_BIN ($torch_info)"
+fi
+
+# ------------------------------------------------------------------
+# 4) USB udev 下载器权限
+# ------------------------------------------------------------------
+echo "==> [4/4] 校验 USB 下载器规则..."
+if [[ -f "/etc/udev/rules.d/80-efx-pgm.rules" ]]; then
+    echo "   ✅ udev 规则已存在于 /etc/udev/rules.d/80-efx-pgm.rules"
+else
+    echo "   提示：安装 USB 规则需要 sudo 权限..."
+    "$SCRIPT_DIR/setup-usb" || echo "   ⚠️  未能自动写入 udev 规则，请稍后手动运行 .script/setup-usb"
+fi
+
+# ------------------------------------------------------------------
+# 总结与状态报告
+# ------------------------------------------------------------------
+echo ""
+echo "============================================================"
+echo "                     环境就绪自检报告                       "
+echo "============================================================"
+proj_ver="$(grep -o 'sw_version="[^"]*"' "$ROOT_DIR/iris_ws/iris_ws.xml" 2>/dev/null | head -1 | cut -d'"' -f2)"
+tool_ver="$(tr -d '[:space:]' < "$EFINITY_HOME/scripts/sw_version.txt" 2>/dev/null || echo "未知")"
+echo " 1. Efinity 主目录   : $EFINITY_HOME (工具版本: $tool_ver, 工程版本: $proj_ver)"
+echo " 2. RISC-V 编译器   : $RISCV_PREFIX"
+echo " 3. Python AI 环境   : $PYTHON_BIN"
+echo " 4. 路径持久化目录   : $PATH_DIR (已被 .gitignore 自动忽略)"
+echo "============================================================"
+echo "环境配置已完成！后续日常操作推荐指令："
+echo "   全量编译比特流    : .script/build-iris"
+echo "   烧录至 FPGA Flash : .script/sync-iris"
+echo "   烧录至 FPGA SRAM  : .script/sync-iris jtag"
+echo "   清理编译中间文件  : .script/clean-iris"
+echo "============================================================"

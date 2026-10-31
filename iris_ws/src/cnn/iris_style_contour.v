@@ -3,12 +3,12 @@
 // Six clocks from the two-pixel RAM stream; borders replicate endpoints.
 module iris_style_contour #(
  parameter [24:0] SCALE_Q24=25'd20596120,
- // Q2 mix: 0=neural only, 3=75% camera, 4=camera only. Keep in 0..4.
- parameter SOURCE_MIX_Q2=3,
+ // Q2 mix: 0=neural only, 1=75% neural / 25% camera, 3=75% camera, 4=camera only. Keep in 0..4.
+ parameter SOURCE_MIX_Q2=1,
  // Q2 saturation: 4=1x, 5=1.25x, 6=1.5x. Keep in 0..8.
  parameter SATURATION_Q2=5,
  // 5=32 colour levels/channel; 8 disables posterization. Keep in 1..8.
- parameter COLOUR_BITS=5,
+ parameter COLOUR_BITS=8,
  parameter NORMAL_THRESHOLD=20,parameter NORMAL_INK_GAIN=2,parameter NORMAL_INK_CAP=128,
  parameter STRONG_THRESHOLD=40,parameter STRONG_INK_GAIN=4,parameter STRONG_INK_CAP=160
 )(

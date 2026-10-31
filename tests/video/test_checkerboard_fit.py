@@ -7,7 +7,7 @@ from pathlib import Path
 import tempfile
 
 root = Path(__file__).resolve().parents[2]
-loader = importlib.machinery.SourceFileLoader('checkerboard', str(root / '.script/calibrate-checkerboard'))
+loader = importlib.machinery.SourceFileLoader('checkerboard', str(root / 'docs/archive/legacy_scripts/calibrate-checkerboard'))
 spec = importlib.util.spec_from_loader(loader.name, loader)
 fit = importlib.util.module_from_spec(spec)
 loader.exec_module(fit)

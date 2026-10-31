@@ -20,9 +20,16 @@ if payload_path!=out/'stream_style-live.bin':
 if not payload or len(payload)%4:raise SystemExit('Live firmware must be nonempty and word aligned')
 fnv=0x811c9dc5
 for b in payload:fnv=((fnv^b)*0x01000193)&0xffffffff
-prefix=os.environ.get('RISCV_PREFIX') or next((v for v in (
-    'riscv-none-elf-','riscv64-unknown-elf-','riscv32-unknown-elf-','riscv32-esp-elf-')
-    if shutil.which(v+'gcc')),None)
+toolchain_conf=root/'path/riscv_toolchain'
+prefix=os.environ.get('RISCV_PREFIX')
+if not prefix and toolchain_conf.is_file():
+    saved=toolchain_conf.read_text().strip()
+    if saved:prefix=saved if not saved.endswith('/') else saved+'riscv-none-elf-'
+if not prefix:
+    default_toolchain='/home/fin-resect/efinity/efinity-riscv-ide-2026.1/toolchain/bin/riscv-none-elf-'
+    prefix=next((v for v in (
+        'riscv-none-elf-','riscv64-unknown-elf-','riscv32-unknown-elf-','riscv32-esp-elf-')
+        if shutil.which(v+'gcc')), None) or (default_toolchain if Path(default_toolchain+'gcc').exists() else None)
 if not prefix:raise SystemExit('Set RISCV_PREFIX to the installed RISC-V toolchain prefix')
 elf=out/'stream_boot.elf';binary=out/'stream_boot.bin';hexfile=out/'stream_boot.hex'
 cmd=[prefix+'gcc','-nostdlib','-march=rv32im_zicsr_zifencei','-mabi=ilp32',

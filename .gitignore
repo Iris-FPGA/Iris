@@ -1,7 +1,10 @@
 docs/Ti60F225_DemoBoard_v4_老版本
 docs/Ti60F225_DemoBoard_v4完整资料包-0927更新
 
+path/
 .path/
+.venv/
+.venv*/
 iris_ws/outflow/
 iris_ws/work_*/
 iris_ws/iris_ws.pt.sdc

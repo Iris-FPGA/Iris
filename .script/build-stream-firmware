@@ -8,9 +8,16 @@ p.add_argument('--parameters',type=Path,required=True)
 p.add_argument('--snapshot',action='store_true')
 a=p.parse_args();fw=root/'firmware/stream_style';out=fw/'build';out.mkdir(exist_ok=True)
 bp=root/'iris_ws/embedded_sw/SapphireSoc'
-prefix=os.environ.get('RISCV_PREFIX') or next((v for v in (
-    'riscv-none-elf-','riscv64-unknown-elf-','riscv32-unknown-elf-','riscv32-esp-elf-')
-    if shutil.which(v+'gcc')),None)
+toolchain_conf=root/'path/riscv_toolchain'
+prefix=os.environ.get('RISCV_PREFIX')
+if not prefix and toolchain_conf.is_file():
+    saved=toolchain_conf.read_text().strip()
+    if saved:prefix=saved if not saved.endswith('/') else saved+'riscv-none-elf-'
+if not prefix:
+    default_toolchain='/home/fin-resect/efinity/efinity-riscv-ide-2026.1/toolchain/bin/riscv-none-elf-'
+    prefix=next((v for v in (
+        'riscv-none-elf-','riscv64-unknown-elf-','riscv32-unknown-elf-','riscv32-esp-elf-')
+        if shutil.which(v+'gcc')), None) or (default_toolchain if Path(default_toolchain+'gcc').exists() else None)
 if not prefix:raise SystemExit('Set RISCV_PREFIX to the installed RISC-V toolchain prefix')
 suffix='snapshot' if a.snapshot else 'live';elf=out/('stream_style-'+suffix+'.elf')
 cmd=[prefix+'gcc','-O2','-g','-march=rv32im_zicsr_zifencei','-mabi=ilp32','-msmall-data-limit=0',
