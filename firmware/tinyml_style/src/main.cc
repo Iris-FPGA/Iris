@@ -71,7 +71,7 @@ extern "C" int main() {
 #if IRIS_STRICT_DISPATCH
   MicroPrintf("Iris style dual-model bring-up; STRICT HARDWARE DISPATCH\n\r");
   MicroPrintf("Styles: [0] Anime Sketch (5k) | [1] Monet (Oil Painting)\n\r");
-  MicroPrintf("Press SW1 (KEY0) anytime to switch styles in real time!\n\r");
+  MicroPrintf("Controls: SW0 = Style Switch | SW1 = Split/Full-Screen Switch\n\r");
 #else
   MicroPrintf("Iris style dual-model bring-up; NOT DISPATCH-ONLY\n\r");
 #endif
@@ -270,12 +270,28 @@ extern "C" int main() {
   uint64_t previous_commit=0;
 
   // Track button states (demo[23] bits 3:0 for KEY0..KEY3 / SW0..SW3)
+  // SW0 (KEY0, bit 0): Style switch (Anime Sketch <-> Monet)
+  // SW1 (KEY1, bit 1): Display mode switch:
+  //   Mode 0: Split Screen (Left 1080p Original | Right Style)
+  //   Mode 1: Full Screen 1080p Original
+  //   Mode 2: Full Screen Style
+  uint32_t active_display_mode = 0;
+  demo[24] = active_display_mode;
+  const char* mode_names[3] = {
+      "Split Screen (Left 1080p Original | Right Style)",
+      "Full Screen 1080p Original",
+      "Full Screen Style"
+  };
+
   uint32_t last_keys = demo[23] & 0x0Fu;
 
   for (uint32_t sequence=1;;++sequence) {
     // Check button press with edge detection
     const uint32_t keys_cur = demo[23] & 0x0Fu;
-    if (keys_cur && !last_keys) {
+    const uint32_t keys_pressed = keys_cur & ~last_keys;
+
+    // SW0 (KEY0, bit 0): Style switch
+    if (keys_pressed & 1u) {
       active_model = 1u - active_model;
 #if IRIS_RAIN_BACKEND
       if (active_model == 0) {
@@ -287,8 +303,18 @@ extern "C" int main() {
       }
 #endif
       MicroPrintf("\n\r====================================================\n\r");
-      MicroPrintf(">>> [BUTTON PRESSED: 0x%x] Switched to Style [%u]: %s <<<\n\r",
-                  keys_cur, active_model, style_names[active_model]);
+      MicroPrintf(">>> [SW0 PRESSED] Switched to Style [%u]: %s <<<\n\r",
+                  active_model, style_names[active_model]);
+      MicroPrintf("====================================================\n\r");
+    }
+
+    // SW1 (KEY1, bit 1): Display mode switch (0 -> 1 -> 2 -> 0)
+    if (keys_pressed & 2u) {
+      active_display_mode = (active_display_mode + 1u) % 3u;
+      demo[24] = active_display_mode;
+      MicroPrintf("\n\r====================================================\n\r");
+      MicroPrintf(">>> [SW1 PRESSED] Display Mode [%u]: %s <<<\n\r",
+                  active_display_mode, mode_names[active_display_mode]);
       MicroPrintf("====================================================\n\r");
     }
     last_keys = keys_cur;

@@ -33,6 +33,8 @@ wire [31:0] capture_write_dummy_bad;
 wire commit_ack,interp_step_toggle,video_have;
 wire [1:0] video_pair;
 reg [3:0] key_sync1, key_sync2;
+reg [1:0] display_mode;
+reg [1:0] display_mode_sync1, display_mode_sync2;
 reg [2:0] ack_sync,step_sync,have_sync;
 reg [1:0] pair_sync1,pair_sync2;
 reg ack_previous,step_previous,done_previous;
@@ -49,6 +51,7 @@ generate if(TINYML_RGB)begin : g_rgb_capture
 iris_tinyml_preprocess u_preprocess(
  .clk(video_clk),.rst_n(rst_n),.enable(capture_enable),
  .i_vs(i_vs),.i_de(i_de),.i_rgb(i_rgb),
+ .mode(display_mode_sync2),
  .o_valid(valid),.o_word(rgba),.o_sof(sof),.o_eof(eof));
 assign dual=0;assign rgba_b=0;assign eol=0;assign pixel_x=0;assign pixel_y=0;
 end else begin : g_rgba_capture
@@ -74,6 +77,7 @@ iris_tinyml_panels u_panels(
  .clk(clk),.video_clk(video_clk),.rst_n(rst_n),
  .commit_toggle(commit_toggle),.commit_pair(commit_pair),.commit_ack(commit_ack),
  .blend_mode(visibility_mode),
+ .display_mode(display_mode_sync2),
  .active_pair(video_pair),.have_frame(video_have),
  .i_hs(i_hs),.i_vs(i_vs),.i_de(i_de),.i_rgb(i_rgb),
  .o_hs(o_hs),.o_vs(o_vs),.o_de(o_de),.o_rgb(o_rgb),
@@ -135,12 +139,23 @@ always @*begin
   21:prdata={30'd0,commit_pair};
   22:prdata={20'd0,ai_centifps};
   23:prdata={28'd0, ~key_sync2};
+  24:prdata={30'd0, display_mode};
   default:prdata=0;
  endcase
+end
+always @(posedge video_clk or negedge rst_n)begin
+ if(!rst_n)begin
+  display_mode_sync1<=2'd0;
+  display_mode_sync2<=2'd0;
+ end else begin
+  display_mode_sync1<=display_mode;
+  display_mode_sync2<=display_mode_sync1;
+ end
 end
 always @(posedge clk or negedge rst_n)begin
  if(!rst_n)begin
   key_sync1<=4'b1111;key_sync2<=4'b1111;
+  display_mode<=2'd0;
   pair_cfg<=0;capture_pair<=0;commit_pair<=0;inference_pair<=0;
   capture_request<=0;commit_toggle<=0;inference_busy<=0;captured_valid<=0;
   ack_sync<=0;step_sync<=0;pair_sync1<=0;pair_sync2<=0;have_sync<=0;ack_previous<=0;step_previous<=0;done_previous<=0;
@@ -171,6 +186,7 @@ always @(posedge clk or negedge rst_n)begin
    end
    if((ENABLE_VISIBILITY || TINYML_RGB) && paddr[7:2]==13 && !visibility_pending)begin visibility_mode<=pwdata[1:0];visibility_toggle<=~visibility_toggle;end
    if(paddr[7:2]==12)ddr_serial_enable<=pwdata[0];
+   if(paddr[7:2]==24)display_mode<=pwdata[1:0];
    if(paddr[7:2]==1)begin
     if(pwdata<3)pair_cfg<=pwdata[1:0];
     else rejected_count<=rejected_count+1'b1;
