@@ -14,7 +14,12 @@
 #include "iris_dma_cache.h"
 #if IRIS_RAIN_BACKEND
 #include "iris_rain_backend.h"
+#include "rain_backend_anime_sketch.h"
+#include "rain_backend_monet.h"
 #endif
+#include "anime_sketch_int8_model_data.h"
+#include "monet_int8_model_data.h"
+
 extern "C" volatile uint32_t iris_result[8];
 
 namespace {
@@ -30,7 +35,9 @@ class IrisInterpreter : public tflite::MicroInterpreter {
 #else
 using IrisInterpreter=tflite::MicroInterpreter;
 #endif
-alignas(64) uint8_t tensor_arena[IRIS_ARENA_BYTES]
+
+// Allocate separate DDR arenas for the two models to avoid tensor re-allocation during runtime switching
+alignas(64) uint8_t tensor_arena[2][IRIS_ARENA_BYTES]
     __attribute__((section(".tinyml_arena")));
 
 [[noreturn]] void Stop(const char* reason) {
@@ -62,12 +69,11 @@ extern "C" int main() {
   iris_result[1] = 0;
   for(unsigned i=0;i<12;++i)iris_live_result[i]=0;
 #if IRIS_STRICT_DISPATCH
-  MicroPrintf("Iris style static bring-up; STRICT HARDWARE DISPATCH\n\r");
-  MicroPrintf("Resize: IRIS hardware; Conv/Add: reject fallback and OP_BYPASS\n\r");
+  MicroPrintf("Iris style dual-model bring-up; STRICT HARDWARE DISPATCH\n\r");
+  MicroPrintf("Styles: [0] Anime Sketch (5k) | [1] Monet (Oil Painting)\n\r");
+  MicroPrintf("Press SW1 (KEY0) anytime to switch styles in real time!\n\r");
 #else
-  MicroPrintf("Iris style static bring-up; NOT DISPATCH-ONLY\n\r");
-  MicroPrintf("ResizeNearestNeighbor: VENDOR SOFTWARE (2 nodes)\n\r");
-  MicroPrintf("Conv2D/Add: vendor dispatch permits CPU fallback; inspect every profile row\n\r");
+  MicroPrintf("Iris style dual-model bring-up; NOT DISPATCH-ONLY\n\r");
 #endif
   // DDR consistency probe (shared-path validation): pattern write/read in a
   // region far from video [0,0x5f4000) and from this image ([0x800000,...)).
@@ -103,21 +109,13 @@ extern "C" int main() {
       if (*reinterpret_cast<volatile uint32_t*>(base + i * 4) != 0x5A000000u + (i * 2654435761u)) fails2++;
     MicroPrintf("DDR coher pass2: fails=%u\n\r", fails2);
     if (fails || fails2) Stop("DDR consistency failed; inference must not run");
-    volatile uint32_t* bank = reinterpret_cast<volatile uint32_t*>(0xF8110000u);
-    MicroPrintf("arb state=0x%x cpuAR=0x%x fbAR=0x%x\n\r",
-                bank[0], bank[11], bank[12]);
-    MicroPrintf("arb cpuAW=0x%x fbAW=0x%x rdCnt cpu/fb=%u/%u rresp=%u\n\r",
-                bank[13], bank[14], bank[15] & 0xffff, bank[15] >> 16, bank[9]);
-    MicroPrintf("arb ARhand=%u rdDone=%u AWhand=%u wrDone=%u\n\r",
-                bank[17], bank[6], bank[18], bank[7]);
-    MicroPrintf("lastAR addr=0x%x len=%u size=%u burst=%u | lastAW addr=0x%x len=%u\n\r",
-                bank[1], bank[2] & 255, (bank[3] >> 2) & 7, bank[3] & 3,
-                bank[4], bank[5] & 255);
   }
 
-  if (!IrisModelContract()) Stop("model contract/schema mismatch");
+  if (!IrisModelContract(anime_sketch_int8_model_data, anime_sketch_int8_model_data_len))
+    Stop("anime_sketch model contract mismatch");
+  if (!IrisModelContract(monet_int8_model_data, monet_int8_model_data_len))
+    Stop("monet model contract mismatch");
   iris_result[1] = 1;
-
 
 #if defined(IRIS_VENDOR_CACHE_OVERRIDE)
   override_hw_accel_setting[0].cache_en=IRIS_VENDOR_CACHE_OVERRIDE;
@@ -126,9 +124,8 @@ extern "C" int main() {
 #if IRIS_RAIN_BACKEND
   if(opcode_R(CUSTOM0,0,76,0,0)!=0x49500101u)Stop("row backend ABI mismatch");
   hw_accel_setting[0].cache_en=0;
-  MicroPrintf("Iris 8x8 row-cached Conv and pipelined Add backend\n\r");
+  MicroPrintf("Iris 8x8 row-cached Conv and pipelined Add backend active\n\r");
 #else
-  // Requires a connected custom-instruction responder, even for discovery.
   init_accel(0);
   print_accel(0);
   if (accel_count < 1 || !hw_accel_setting[0].accel_active ||
@@ -144,18 +141,34 @@ extern "C" int main() {
     Stop("op registration failed");
   if (resolver.AddResizeNearestNeighbor() != kTfLiteOk) Stop("resize registration failed");
   static IrisProfiler profiler __attribute__((section(".tinyml_control")));
-  static IrisInterpreter interpreter __attribute__((section(".tinyml_control")))(
-      tflite::GetModel(IrisModelData), resolver,
-      tensor_arena, sizeof(tensor_arena), &reporter, &profiler);
-  if (interpreter.AllocateTensors() != kTfLiteOk) Stop("AllocateTensors failed");
+
+  static IrisInterpreter interpreter0 __attribute__((section(".tinyml_control")))(
+      tflite::GetModel(anime_sketch_int8_model_data), resolver,
+      tensor_arena[0], sizeof(tensor_arena[0]), &reporter, &profiler);
+  static IrisInterpreter interpreter1 __attribute__((section(".tinyml_control")))(
+      tflite::GetModel(monet_int8_model_data), resolver,
+      tensor_arena[1], sizeof(tensor_arena[1]), &reporter, &profiler);
+
+  if (interpreter0.AllocateTensors() != kTfLiteOk) Stop("interpreter0 AllocateTensors failed");
+  if (interpreter1.AllocateTensors() != kTfLiteOk) Stop("interpreter1 AllocateTensors failed");
   iris_result[1] = 3;
-  MicroPrintf("DDR arena: base=0x%x capacity=%u used=%u\n\r",
-              static_cast<unsigned>(reinterpret_cast<uintptr_t>(tensor_arena)),
-              static_cast<unsigned>(sizeof(tensor_arena)),
-              static_cast<unsigned>(interpreter.arena_used_bytes()));
-  auto* input = interpreter.input(0);
-  if (input->bytes != kIrisHeight * kIrisWidth * kIrisChannels || input->type != kTfLiteInt8)
-    Stop("unexpected input tensor");
+
+  MicroPrintf("DDR arena 0 [AnimeSketch]: base=0x%x capacity=%u used=%u\n\r",
+              static_cast<unsigned>(reinterpret_cast<uintptr_t>(tensor_arena[0])),
+              static_cast<unsigned>(sizeof(tensor_arena[0])),
+              static_cast<unsigned>(interpreter0.arena_used_bytes()));
+  MicroPrintf("DDR arena 1 [Monet]:       base=0x%x capacity=%u used=%u\n\r",
+              static_cast<unsigned>(reinterpret_cast<uintptr_t>(tensor_arena[1])),
+              static_cast<unsigned>(sizeof(tensor_arena[1])),
+              static_cast<unsigned>(interpreter1.arena_used_bytes()));
+
+  auto* input0 = interpreter0.input(0);
+  auto* input1 = interpreter1.input(0);
+  if (input0->bytes != kIrisHeight * kIrisWidth * kIrisChannels || input0->type != kTfLiteInt8)
+    Stop("unexpected input0 tensor");
+  if (input1->bytes != kIrisHeight * kIrisWidth * kIrisChannels || input1->type != kTfLiteInt8)
+    Stop("unexpected input1 tensor");
+
 #if IRIS_LIVE_DEMO
 #if !(IRIS_MODEL_RGBA || IRIS_MODEL_RAIN_PRINCESS) || !IRIS_STRICT_DISPATCH
 #error Live demo requires a supported camera model and strict hardware dispatch
@@ -164,49 +177,74 @@ extern "C" int main() {
   const uint32_t expected_abi = IRIS_MODEL_RAIN_PRINCESS ? 0x00030003u : 0x00030002u;
   if ((demo[0] >> 16) != 0x4953 || demo[9] != expected_abi || demo[16]!=0x49500301u)
     Stop("live camera/display hardware ABI absent");
-  auto* output = interpreter.output(0);
-  if (!output || output->bytes != input->bytes)
-    Stop("live tensor binding failed");
+
+  auto* output0 = interpreter0.output(0);
+  auto* output1 = interpreter1.output(0);
+  if (!output0 || output0->bytes != input0->bytes)
+    Stop("live tensor binding failed (0)");
+  if (!output1 || output1->bytes != input1->bytes)
+    Stop("live tensor binding failed (1)");
+
 #if IRIS_RAIN_BACKEND
-  // The complete graph uses hardware for every activation access. Bind its
-  // input and final output directly to the leased camera/display pair; the
-  // arena continues to own all intermediate tensors and residual lifetimes.
-  const auto* live_graph=tflite::GetModel(IrisModelData)->subgraphs()->Get(0);
-  auto* live_input=interpreter.EvalTensor(live_graph->inputs()->Get(0));
-  auto* live_output=interpreter.EvalTensor(live_graph->outputs()->Get(0));
-  if(!live_input || !live_output || live_input->type!=kTfLiteInt8 || live_output->type!=kTfLiteInt8)
-    Stop("live eval tensor binding failed");
+  const auto* live_graph0 = tflite::GetModel(anime_sketch_int8_model_data)->subgraphs()->Get(0);
+  auto* live_input0 = interpreter0.EvalTensor(live_graph0->inputs()->Get(0));
+  auto* live_output0 = interpreter0.EvalTensor(live_graph0->outputs()->Get(0));
+
+  const auto* live_graph1 = tflite::GetModel(monet_int8_model_data)->subgraphs()->Get(0);
+  auto* live_input1 = interpreter1.EvalTensor(live_graph1->inputs()->Get(0));
+  auto* live_output1 = interpreter1.EvalTensor(live_graph1->outputs()->Get(0));
+
+  if (!live_input0 || !live_output0 || live_input0->type != kTfLiteInt8 || live_output0->type != kTfLiteInt8)
+    Stop("live eval tensor binding 0 failed");
+  if (!live_input1 || !live_output1 || live_input1->type != kTfLiteInt8 || live_output1->type != kTfLiteInt8)
+    Stop("live eval tensor binding 1 failed");
 #endif
 
   // Hardware dequantizer contract hardcoded in the Ti60 video bitstream:
   // RGB = clip((INT8_code - (-89)) * 2.2834375)
   const float kHwScale = 2.283437490463257f;
   const float kHwZeroPoint = -89.0f;
-  const float model_scale = output->params.scale;
-  const int32_t model_zp = output->params.zero_point;
 
-  int8_t dequant_lut[256];
-  bool need_dequant_remap = false;
-  if (model_scale > 0.0f && (fabsf(model_scale - kHwScale) > 0.001f || model_zp != -89)) {
-    need_dequant_remap = true;
-    MicroPrintf("IRIS LIVE: Output dequant adaptation enabled (scale: %d/1000->%d/1000, zp: %d->%d)\n\r",
-                static_cast<int>(model_scale * 1000.0f), static_cast<int>(kHwScale * 1000.0f),
-                static_cast<int>(model_zp), static_cast<int>(kHwZeroPoint));
-    for (int i = 0; i < 256; ++i) {
-      int8_t code = static_cast<int8_t>(static_cast<uint8_t>(i));
-      float real = (static_cast<float>(code) - static_cast<float>(model_zp)) * model_scale;
-      float hw_val = real / kHwScale + kHwZeroPoint;
-      int rounded = static_cast<int>(roundf(hw_val));
-      if (rounded < -128) rounded = -128;
-      if (rounded > 127) rounded = 127;
-      dequant_lut[i] = static_cast<int8_t>(rounded);
+  int8_t dequant_lut[2][256];
+  bool need_dequant_remap[2] = {false, false};
+  const char* style_names[2] = {"Anime Sketch (5k)", "Monet (Oil Painting)"};
+
+  for (int m = 0; m < 2; ++m) {
+    auto* out = (m == 0) ? output0 : output1;
+    const float model_scale = out->params.scale;
+    const int32_t model_zp = out->params.zero_point;
+    if (model_scale > 0.0f && (fabsf(model_scale - kHwScale) > 0.001f || model_zp != -89)) {
+      need_dequant_remap[m] = true;
+      MicroPrintf("IRIS LIVE: [%s] Output dequant adaptation enabled (scale: %d/1000->%d/1000, zp: %d->%d)\n\r",
+                  style_names[m],
+                  static_cast<int>(model_scale * 1000.0f), static_cast<int>(kHwScale * 1000.0f),
+                  static_cast<int>(model_zp), static_cast<int>(kHwZeroPoint));
+      for (int i = 0; i < 256; ++i) {
+        int8_t code = static_cast<int8_t>(static_cast<uint8_t>(i));
+        float real = (static_cast<float>(code) - static_cast<float>(model_zp)) * model_scale;
+        float hw_val = real / kHwScale + kHwZeroPoint;
+        int rounded = static_cast<int>(roundf(hw_val));
+        if (rounded < -128) rounded = -128;
+        if (rounded > 127) rounded = 127;
+        dequant_lut[m][i] = static_cast<int8_t>(rounded);
+      }
+    } else {
+      MicroPrintf("IRIS LIVE: [%s] Output dequant matches bitstream contract natively.\n\r", style_names[m]);
     }
-  } else {
-    MicroPrintf("IRIS LIVE: Output dequant matches bitstream contract natively.\n\r");
   }
-  MicroPrintf("IRIS LIVE: %ux%ux%u paired camera/style; strict hardware; %s\n\r",
+
+  // Active style index: 0 = Anime Sketch, 1 = Monet
+  uint32_t active_model = 0;
+#if IRIS_RAIN_BACKEND
+  IrisRainSetModel(anime_sketch_int8_model_data, anime_sketch_rain_weights,
+                   anime_sketch_rain_filters, sizeof(anime_sketch_rain_filters) / sizeof(anime_sketch_rain_filters[0]));
+#endif
+
+  MicroPrintf("IRIS LIVE: %ux%ux%u dual-model paired camera/style; strict hardware; %s\n\r",
               kIrisWidth,kIrisHeight,kIrisChannels,
               IRIS_FLASH_BOOT ? "standalone Flash" : "SRAM only");
+  MicroPrintf("IRIS LIVE: Active Style: [0] %s\n\r", style_names[active_model]);
+
   const uintptr_t input_banks[3]={0x03000000u,0x03200000u,0x03800000u};
   const uintptr_t output_banks[3]={0x03400000u,0x03600000u,0x03a00000u};
   auto start_capture=[&](uint32_t bank) {
@@ -230,7 +268,31 @@ extern "C" int main() {
   const uint32_t initial_display=demo[19];
   const uint32_t initial_pair=(initial_display&4u) ? ((initial_display&3u)+1u)%3u : 0u;
   uint64_t previous_commit=0;
+
+  // Track button states (demo[23] bits 3:0 for KEY0..KEY3 / SW0..SW3)
+  uint32_t last_keys = demo[23] & 0x0Fu;
+
   for (uint32_t sequence=1;;++sequence) {
+    // Check button press with edge detection
+    const uint32_t keys_cur = demo[23] & 0x0Fu;
+    if (keys_cur && !last_keys) {
+      active_model = 1u - active_model;
+#if IRIS_RAIN_BACKEND
+      if (active_model == 0) {
+        IrisRainSetModel(anime_sketch_int8_model_data, anime_sketch_rain_weights,
+                         anime_sketch_rain_filters, sizeof(anime_sketch_rain_filters) / sizeof(anime_sketch_rain_filters[0]));
+      } else {
+        IrisRainSetModel(monet_int8_model_data, monet_rain_weights,
+                         monet_rain_filters, sizeof(monet_rain_filters) / sizeof(monet_rain_filters[0]));
+      }
+#endif
+      MicroPrintf("\n\r====================================================\n\r");
+      MicroPrintf(">>> [BUTTON PRESSED: 0x%x] Switched to Style [%u]: %s <<<\n\r",
+                  keys_cur, active_model, style_names[active_model]);
+      MicroPrintf("====================================================\n\r");
+    }
+    last_keys = keys_cur;
+
     uint64_t deadline=clint_getTime(BSP_CLINT)+SYSTEM_CLINT_HZ;
     while(demo[0]&32u)
       if(clint_getTime(BSP_CLINT)>deadline)Stop("display acknowledgement timeout");
@@ -257,15 +319,20 @@ extern "C" int main() {
     if(demo[10] || demo[11])Stop("camera payload audit failed");
     demo[18]=4u|pair;
     if(demo[18]!=(4u|pair) || demo[8]!=rejects)Stop("inference lease rejected");
-#if IRIS_LIVE_SNAPSHOT
-    if(sequence==1 && !IrisStreamTensorUart(input_address,kIrisHeight,kIrisWidth,kIrisChannels,"input"))
-      Stop("input hardware stream failed");
-#endif
+
+    IrisInterpreter* cur_interpreter = (active_model == 0) ? &interpreter0 : &interpreter1;
 #if IRIS_RAIN_BACKEND
-    live_input->data.int8=reinterpret_cast<int8_t*>(input_address);
-    live_output->data.int8=reinterpret_cast<int8_t*>(output_address);
-    input->data.int8=live_input->data.int8;output->data.int8=live_output->data.int8;
+    auto* cur_live_input = (active_model == 0) ? live_input0 : live_input1;
+    auto* cur_live_output = (active_model == 0) ? live_output0 : live_output1;
+    cur_live_input->data.int8=reinterpret_cast<int8_t*>(input_address);
+    cur_live_output->data.int8=reinterpret_cast<int8_t*>(output_address);
+    auto* input = cur_interpreter->input(0);
+    auto* output = cur_interpreter->output(0);
+    input->data.int8=cur_live_input->data.int8;
+    output->data.int8=cur_live_output->data.int8;
 #else
+    auto* input = cur_interpreter->input(0);
+    auto* output = cur_interpreter->output(0);
     if(!IrisCopyTensorDma(input_address,reinterpret_cast<uintptr_t>(input->data.int8),
                           kIrisHeight,kIrisWidth,kIrisChannels))Stop("input DMA failed");
 #endif
@@ -276,22 +343,23 @@ extern "C" int main() {
     iris_live_result[0]=2;
     profiler.Reset();
     const uint64_t begin=clint_getTime(BSP_CLINT);
-    if(interpreter.Invoke()!=kTfLiteOk)Stop("live Invoke failed");
+    if(cur_interpreter->Invoke()!=kTfLiteOk)Stop("live Invoke failed");
     const uint64_t ticks=clint_getTime(BSP_CLINT)-begin;
     IrisFlushCpuDataCache();IrisResetVendorCache();
 #if !IRIS_RAIN_BACKEND
     if(!IrisCopyTensorDma(reinterpret_cast<uintptr_t>(output->data.int8),output_address,
                           kIrisHeight,kIrisWidth,kIrisChannels))Stop("output DMA failed");
 #endif
-    if (need_dequant_remap) {
+    if (need_dequant_remap[active_model]) {
       uint32_t* out32 = reinterpret_cast<uint32_t*>(output_address);
       const size_t word_count = (kIrisHeight * kIrisWidth * kIrisChannels) / 4;
+      const int8_t* lut = dequant_lut[active_model];
       for (size_t i = 0; i < word_count; ++i) {
         uint32_t w = out32[i];
-        uint32_t b0 = static_cast<uint8_t>(dequant_lut[w & 0xFF]);
-        uint32_t b1 = static_cast<uint8_t>(dequant_lut[(w >> 8) & 0xFF]);
-        uint32_t b2 = static_cast<uint8_t>(dequant_lut[(w >> 16) & 0xFF]);
-        uint32_t b3 = static_cast<uint8_t>(dequant_lut[(w >> 24) & 0xFF]);
+        uint32_t b0 = static_cast<uint8_t>(lut[w & 0xFF]);
+        uint32_t b1 = static_cast<uint8_t>(lut[(w >> 8) & 0xFF]);
+        uint32_t b2 = static_cast<uint8_t>(lut[(w >> 16) & 0xFF]);
+        uint32_t b3 = static_cast<uint8_t>(lut[(w >> 24) & 0xFF]);
         out32[i] = b0 | (b1 << 8) | (b2 << 16) | (b3 << 24);
       }
       IrisFlushCpuDataCache();
@@ -316,8 +384,7 @@ extern "C" int main() {
     }
     previous_commit=committed;
     iris_live_result[0]=3;IrisFlushCpuDataCache();
-    // The row backend verifies each packed filter on its first use. Profile
-    // a warm frame so the operator times describe sustained HDMI throughput.
+    // Profile warm frame
     if(sequence==(IRIS_RAIN_BACKEND ? 3u : 1u))profiler.Print();
 #if IRIS_RAIN_BACKEND
     if(!IrisRainLogFrame(sequence,pair,static_cast<unsigned>(ticks),demo[4],demo[5],demo[6],demo[7],demo[8],frame_period))
@@ -326,49 +393,9 @@ extern "C" int main() {
     MicroPrintf("IRIS LIVE frame=%u pair=%u Invoke_ticks=%u displayed=%u captures=%u underflow=%u readerr=%u rejects=%u\n\r",
        sequence,pair,static_cast<unsigned>(ticks),demo[4],demo[5],demo[6],demo[7],demo[8]);
 #endif
-#if IRIS_LIVE_SNAPSHOT
-    if(!IrisStreamTensorUart(output_address,kIrisHeight,kIrisWidth,kIrisChannels,"output"))
-      Stop("output hardware stream failed");
-    MicroPrintf("IRIS STREAM DONE pair=%u displayed=%u\n\r",pair,demo[4]);
-    iris_live_result[0]=4;while(true){}
-#endif
   }
 #else
-  // Deterministic RGB fixture, already quantized with scale=1, zero_point=-128.
-  for (int y = 0; y < kIrisHeight; ++y) {
-    for (int x = 0; x < kIrisWidth; ++x) {
-      const int i = (y * kIrisWidth + x) * kIrisChannels;
-      input->data.int8[i] = static_cast<int8_t>(256 * x / kIrisWidth - 128);
-      input->data.int8[i + 1] = static_cast<int8_t>(256 * y / kIrisHeight - 128);
-      input->data.int8[i + 2] = static_cast<int8_t>((((x / 16) ^ (y / 16)) & 1) ? 127 : -128);
-      if (kIrisChannels == 4) input->data.int8[i + 3] = -128;
-    }
-  }
-  MicroPrintf("profile: node; op; vendor execution mode; CLINT ticks (printed after Invoke)\n\r");
-  profiler.Reset();
-  const uint64_t start = clint_getTime(BSP_CLINT);
-  if (interpreter.Invoke() != kTfLiteOk) Stop("Invoke failed");
-  const uint64_t ticks = clint_getTime(BSP_CLINT) - start;
-  profiler.Print();
-  const auto* output = interpreter.output(0);
-  uint32_t hash = 2166136261u;
-  for (size_t i = 0; i < output->bytes; ++i)
-    hash = (hash ^ output->data.uint8[i]) * 16777619u;
-  iris_result[2] = reinterpret_cast<uintptr_t>(output->data.int8);
-  iris_result[3] = output->bytes;
-  iris_result[4] = hash;
-  iris_result[5] = static_cast<uint32_t>(ticks);
-  iris_result[6] = static_cast<uint32_t>(ticks >> 32);
-  asm volatile("fence rw,rw" ::: "memory");
-  iris_result[0] = 2;
-  // Publish the descriptor to external DDR before OpenOCD reads it. The
-  // official driver uses the same Sapphire data-cache flush instruction.
-  IrisFlushCpuDataCache();
-  MicroPrintf("output bytes=%u FNV1a=0x%x (diagnostic, no golden parity claim)\n\r",
-              static_cast<unsigned>(output->bytes), hash);
-  MicroPrintf("CLINT ticks hi=0x%x lo=0x%x Hz=%u (excludes profile UART transmission)\n\r",
-              static_cast<unsigned>(ticks >> 32), static_cast<unsigned>(ticks), SYSTEM_CLINT_HZ);
-  ops_unload();
-  Stop("inference complete; validate output dump against the matching integer reference");
+  // Non-live static fixture mode
+  Stop("non-live static fixture mode not supported with dual models");
 #endif
 }

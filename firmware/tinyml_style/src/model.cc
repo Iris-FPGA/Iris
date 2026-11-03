@@ -1,4 +1,7 @@
 #include "model_config.h"
-// Preserve the generated model bytes while giving FlatBuffers/DMA alignment.
-alignas(16) extern const unsigned char IrisModelData[];
-#include IRIS_MODEL_SOURCE
+#include "anime_sketch_int8_model_data.h"
+#include "monet_int8_model_data.h"
+
+// Compile both model weights into the firmware image
+#include "anime_sketch_int8_model_data.cc"
+#include "monet_int8_model_data.cc"

@@ -1,6 +1,17 @@
 #pragma once
 #include <stdint.h>
 #include "tensorflow/lite/kernels/internal/types.h"
+
+#ifndef IRIS_RAIN_FILTER_DEFINED
+#define IRIS_RAIN_FILTER_DEFINED
+struct IrisRainFilter { uint32_t model_offset, packed_offset, bytes, filter_bytes, fnv; };
+#endif
+
+void IrisRainSetModel(const unsigned char* model_data,
+                      const unsigned char* rain_weights,
+                      const IrisRainFilter* rain_filters,
+                      unsigned filter_count);
+
 bool IrisRainConv(const tflite::ConvParams& params, const int32_t* multipliers,
                   const int32_t* shifts, const tflite::RuntimeShape& input_shape,
                   const int8_t* input, const tflite::RuntimeShape& filter_shape,

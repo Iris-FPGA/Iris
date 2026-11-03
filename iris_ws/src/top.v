@@ -916,7 +916,7 @@ ae_ctrl #(.NPX(1920 * 1080)) u_ae_ctrl (
     .ae_busy    (ae_busy),
     .ae_done    (ae_done),
     .i_tgt_up   (key1_up),
-    .i_tgt_dn   (key0_dn),
+    .i_tgt_dn   (ENABLE_STYLE_DEMO ? 1'b0 : key0_dn),
     .dbg_state  (ae_state),
     .dbg_exp    (ae_exp),
     .dbg_gain   (ae_gain),
@@ -1270,6 +1270,7 @@ reg [3:0] arb_rst_pipe;
 generate if(ENABLE_STYLE_DEMO)begin : g_style_demo
 iris_style_demo #(.SCALE_Q24(STYLE_SCALE_Q24),.ENABLE_VISIBILITY(ENABLE_STYLE_VISIBILITY),.ENABLE_CONTOUR(ENABLE_STYLE_CONTOUR),.TINYML_RGB(ENABLE_TINYML_RGB)) u_style_demo(
  .clk(core_clk),.video_clk(hdmi_tx_half_clk),.rst_n(arb_rst_pipe[3]),
+ .key_i(key_i),
  .paddr(style_paddr),.psel(style_psel),.penable(style_penable),.pwrite(style_pwrite),
  .pwdata(style_pwdata),.prdata(style_prdata),
  .bus_write_dummy_bad(style_bus_write_dummy_bad),.ddr_serial_enable(style_ddr_serial),

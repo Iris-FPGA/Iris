@@ -3,6 +3,7 @@
 // retain independent bank leases; config writes never change an active lease.
 module iris_style_demo #(parameter [24:0] SCALE_Q24=25'd20591742,parameter ENABLE_VISIBILITY=0,parameter ENABLE_CONTOUR=0,parameter TINYML_RGB=0,parameter ENABLE_INTERP=1,parameter HEIGHT=720)(
  input wire clk,video_clk,rst_n,
+ input wire [3:0] key_i,
  input wire [15:0] paddr,input wire psel,penable,pwrite,
  input wire [31:0] pwdata,output reg [31:0] prdata,
  input wire [31:0] bus_write_dummy_bad,output reg ddr_serial_enable,
@@ -31,6 +32,7 @@ wire cap_busy,cap_done,cap_error,capture_enable;
 wire [31:0] capture_write_dummy_bad;
 wire commit_ack,interp_step_toggle,video_have;
 wire [1:0] video_pair;
+reg [3:0] key_sync1, key_sync2;
 reg [2:0] ack_sync,step_sync,have_sync;
 reg [1:0] pair_sync1,pair_sync2;
 reg ack_previous,step_previous,done_previous;
@@ -132,11 +134,13 @@ always @*begin
   20:prdata={30'd0,capture_pair};
   21:prdata={30'd0,commit_pair};
   22:prdata={20'd0,ai_centifps};
+  23:prdata={28'd0, ~key_sync2};
   default:prdata=0;
  endcase
 end
 always @(posedge clk or negedge rst_n)begin
  if(!rst_n)begin
+  key_sync1<=4'b1111;key_sync2<=4'b1111;
   pair_cfg<=0;capture_pair<=0;commit_pair<=0;inference_pair<=0;
   capture_request<=0;commit_toggle<=0;inference_busy<=0;captured_valid<=0;
   ack_sync<=0;step_sync<=0;pair_sync1<=0;pair_sync2<=0;have_sync<=0;ack_previous<=0;step_previous<=0;done_previous<=0;
@@ -145,6 +149,7 @@ always @(posedge clk or negedge rst_n)begin
   ddr_serial_enable<=0;
   visibility_mode<=TINYML_RGB ? 2'd1 : ENABLE_VISIBILITY ? 2 : 0;visibility_toggle<=0;visibility_ack_sync<=0;
  end else begin
+  key_sync1<=key_i;key_sync2<=key_sync1;
   capture_request<=0;
   if(TINYML_RGB)begin
    if(rate_age<32'd3000000000)rate_age<=rate_age+1'b1;

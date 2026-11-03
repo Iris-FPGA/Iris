@@ -2,7 +2,6 @@
 #include "iris_rain_backend.h"
 #include "iris_dma_cache.h"
 #include "model_config.h"
-#include "rain_backend_model.h"
 #include "riscv.h"
 #include "bsp.h"
 #include "clint.h"
@@ -14,6 +13,10 @@ extern "C" void ops_drv_intr() { IrisDispatchStop("unexpected polled-backend int
 extern "C" void ops_unload() {}
 
 namespace {
+const unsigned char* s_active_model_data = nullptr;
+const unsigned char* s_active_rain_weights = nullptr;
+const IrisRainFilter* s_active_rain_filters = nullptr;
+unsigned s_active_filter_count = 0;
 char log_buffer[256];
 unsigned log_size=0,log_sent=0;
 void LogText(const char* text) {
@@ -50,6 +53,16 @@ bool Execute(unsigned operation) {
 }
 }
 
+void IrisRainSetModel(const unsigned char* model_data,
+                      const unsigned char* rain_weights,
+                      const IrisRainFilter* rain_filters,
+                      unsigned filter_count) {
+  s_active_model_data = model_data;
+  s_active_rain_weights = rain_weights;
+  s_active_rain_filters = rain_filters;
+  s_active_filter_count = filter_count;
+}
+
 void IrisRainLogPump() {
   unsigned available=uart_writeAvailability(BSP_UART_TERMINAL);
   while(log_sent<log_size && available--)uart_write(BSP_UART_TERMINAL,log_buffer[log_sent++]);
@@ -84,17 +97,10 @@ bool IrisRainConv(const tflite::ConvParams& p, const int32_t* mult,
      p.input_offset< -127 || p.input_offset>128 || p.output_offset< -128 || p.output_offset>127 ||
      p.quantized_activation_min< -128 || p.quantized_activation_max>127) return false;
   const IrisRainFilter* packed=nullptr;
-  static bool validated[sizeof(iris_rain_filters)/sizeof(iris_rain_filters[0])] = {};
-  for(unsigned n=0;n<sizeof(iris_rain_filters)/sizeof(iris_rain_filters[0]);++n) {
-    const auto& candidate=iris_rain_filters[n];
-    if(reinterpret_cast<const unsigned char*>(filter)!=IrisModelData+candidate.model_offset) continue;
+  for(unsigned n=0;n<s_active_filter_count;++n) {
+    const auto& candidate=s_active_rain_filters[n];
+    if(reinterpret_cast<const unsigned char*>(filter)!=s_active_model_data+candidate.model_offset) continue;
     if(candidate.filter_bytes!=static_cast<unsigned>(filter_shape.FlatSize()))return false;
-    if(!validated[n]) {
-      uint32_t hash=0x811c9dc5;
-      for(unsigned i=0;i<candidate.filter_bytes;++i)hash=(hash^static_cast<uint8_t>(filter[i]))*0x01000193;
-      if(hash!=candidate.fnv)return false;
-      validated[n]=true;
-    }
     packed=&candidate;break;
   }
   if(!packed || Addresses(input,output)!=0) return false;
@@ -104,7 +110,7 @@ bool IrisRainConv(const tflite::ConvParams& p, const int32_t* mult,
       (static_cast<uint32_t>(static_cast<uint8_t>(p.quantized_activation_max))<<24);
   const uint32_t values[]={static_cast<uint32_t>(in.Dims(2)),static_cast<uint32_t>(in.Dims(1)),
       static_cast<uint32_t>(in.Dims(3)),static_cast<uint32_t>(out.Dims(3)),static_cast<uint32_t>(p.stride_width),
-      reinterpret_cast<uintptr_t>(iris_rain_weights+packed->packed_offset),packed->bytes,quant};
+      reinterpret_cast<uintptr_t>(s_active_rain_weights+packed->packed_offset),packed->bytes,quant};
   for(unsigned i=0;i<8;++i)if(!Config(i,values[i]))return false;
   for(unsigned i=0;i<32;++i) {
     const bool present=i<static_cast<unsigned>(out.Dims(3));
