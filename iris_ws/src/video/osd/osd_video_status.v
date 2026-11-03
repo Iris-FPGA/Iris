@@ -18,17 +18,17 @@ module osd_video_status #(parameter ENABLE_STYLE_FPS=0,parameter STYLE_FRACTIONA
 );
 reg [1:0] wb_sync;
 reg wb_locked;
-reg [2:0] cam_sync, cf_sync, wf_sync, hf_sync, sf_sync;
+reg [2:0] cam_sync, cf_sync, wf_sync, hf_sync, sf_sync, sdisp_sync;
 reg [11:0] cam_w, cam_h;
-reg [7:0] cam_f, wr_f, hdmi_f;reg [11:0] style_f;
+reg [7:0] cam_f, wr_f, hdmi_f;reg [11:0] style_f;reg [7:0] style_disp_f;
 reg [11:0] x,y;
 reg de_d,vs_d;
 wire vs_rise=i_vs && !vs_d;
 always @(posedge clk or negedge rst_n) begin
  if (!rst_n) begin
   wb_sync<=0;wb_locked<=0;
-  cam_sync<=0; cf_sync<=0; wf_sync<=0; hf_sync<=0; sf_sync<=0;
-  cam_w<=0;cam_h<=0;cam_f<=0;wr_f<=0;hdmi_f<=0;style_f<=0;
+  cam_sync<=0; cf_sync<=0; wf_sync<=0; hf_sync<=0; sf_sync<=0; sdisp_sync<=0;
+  cam_w<=0;cam_h<=0;cam_f<=0;wr_f<=0;hdmi_f<=0;style_f<=0;style_disp_f<=0;
   x<=0;y<=0;de_d<=0;vs_d<=0;
  end else begin
   wb_sync<={wb_sync[0],i_wb_locked};
@@ -38,18 +38,20 @@ always @(posedge clk or negedge rst_n) begin
   wf_sync<={wf_sync[1:0],i_wr_fps_upd};
   hf_sync<={hf_sync[1:0],i_hdmi_fps_upd};
   sf_sync<={sf_sync[1:0],ENABLE_STYLE_FPS ? (STYLE_FRACTIONAL ? i_style_rate_upd : i_style_fps_upd) : 1'b0};
+  sdisp_sync<={sdisp_sync[1:0],ENABLE_STYLE_FPS ? i_style_fps_upd : 1'b0};
   if (cam_sync[2]^cam_sync[1]) begin cam_w<=i_cam_width;cam_h<=i_cam_height;end
   if (cf_sync[2]^cf_sync[1]) cam_f<=i_cam_fps;
   if (wf_sync[2]^wf_sync[1]) wr_f<=i_wr_fps;
   if (hf_sync[2]^hf_sync[1]) hdmi_f<=i_hdmi_fps;
   if (sf_sync[2]^sf_sync[1]) style_f<=STYLE_FRACTIONAL ? i_style_centifps : {4'd0,i_style_fps};
+  if (sdisp_sync[2]^sdisp_sync[1]) style_disp_f<=i_style_fps;
   vs_d<=i_vs;de_d<=i_de;
   if (vs_rise) y<=0; else if (de_d && !i_de) y<=y+1'b1;
   if (vs_rise || !i_de) x<=0; else x<=x+1'b1;
  end
 end
-reg [11:0] values [0:8];
-reg [15:0] digits [0:8];
+reg [11:0] values [0:9];
+reg [15:0] digits [0:9];
 reg [15:0] bcd,adjusted;
 reg [11:0] binary;
 reg [3:0] bits_left;
@@ -64,12 +66,13 @@ end
 always @(posedge clk or negedge rst_n) begin
  if (!rst_n) begin
   busy<=0;field<=0;bits_left<=0;bcd<=0;binary<=0;
-  for (n=0;n<9;n=n+1) begin values[n]<=0;digits[n]<=0;end
+  for (n=0;n<10;n=n+1) begin values[n]<=0;digits[n]<=0;end
  end else if (vs_rise && !busy) begin
   values[0]<=cam_w;values[1]<=cam_h;values[2]<={4'b0,cam_f};
   values[3]<={4'b0,wr_f};values[4]<=i_hdmi_width;values[5]<=i_hdmi_height;
   values[6]<={4'b0,hdmi_f};values[7]<={4'b0,i_black_g};
   values[8]<=style_f;
+  values[9]<={4'b0,style_disp_f};
   binary<=cam_w;bcd<=0;bits_left<=12;field<=0;busy<=1;
  end else if (busy) begin
   if (bits_left!=0) begin
@@ -77,7 +80,7 @@ always @(posedge clk or negedge rst_n) begin
    bits_left<=bits_left-1'b1;
   end else begin
    digits[field]<=bcd;
-   if (field==(ENABLE_STYLE_FPS ? 8 : 7)) busy<=0;
+   if (field==(ENABLE_STYLE_FPS ? (STYLE_FRACTIONAL ? 9 : 8) : 7)) busy<=0;
    else begin field<=field+1'b1;binary<=values[field+1'b1];bcd<=0;bits_left<=12;end
   end
  end
@@ -129,6 +132,9 @@ always @(*) begin
     5:ch=".";
     6,7:ch=decchar(digits[8],slot-4);
     9:ch="F";10:ch="P";11:ch="S";
+    14:ch="D";15:ch="I";16:ch="S";17:ch="P";
+    19,20:ch=decchar(digits[9],slot-17);
+    22:ch="F";23:ch="P";24:ch="S";
     default:ch=8'd32;
    endcase
   end else begin

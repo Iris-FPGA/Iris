@@ -71,6 +71,8 @@ module iris_tinyml_panels #(
  parameter [1:0] DEFAULT_BLEND = 2'd1
 )(
  input wire clk,video_clk,rst_n,commit_toggle,input wire [1:0] commit_pair,
+ input wire [25:0] scale_q24,
+ input wire signed [8:0] zero_point,
  output reg interp_step_toggle,
  input wire [1:0] blend_mode,
  input wire [1:0] display_mode,
@@ -197,10 +199,10 @@ wire [23:0] in_px1 = (blend_mode == 2'd0) ? (second_q ? pixels[47:24] : pixels[2
                      blend_rgb_step(pixels[23:0], pixels[47:24], step1);
 
 wire [23:0] styled0,styled1;
-iris_style_dequant #(.SCALE_Q24(26'd38309724),.ZERO_POINT(-89)) u_dequant0(
- .clk(video_clk),.rst_n(rst_n),.i_valid(1'b1),.i_rgba({8'd0,in_px0}),.o_valid(),.o_rgb(styled0));
-iris_style_dequant #(.SCALE_Q24(26'd38309724),.ZERO_POINT(-89)) u_dequant1(
- .clk(video_clk),.rst_n(rst_n),.i_valid(1'b1),.i_rgba({8'd0,in_px1}),.o_valid(),.o_rgb(styled1));
+iris_style_dequant u_dequant0(
+ .clk(video_clk),.rst_n(rst_n),.scale_q24(scale_q24),.zero_point(zero_point),.i_valid(1'b1),.i_rgba({8'd0,in_px0}),.o_valid(),.o_rgb(styled0));
+iris_style_dequant u_dequant1(
+ .clk(video_clk),.rst_n(rst_n),.scale_q24(scale_q24),.zero_point(zero_point),.i_valid(1'b1),.i_rgba({8'd0,in_px1}),.o_valid(),.o_rgb(styled1));
 reg [2:0] hs_pipe,vs_pipe,de_pipe,good_pipe,right_pipe,have_pipe;
 reg [47:0] camera0,camera1,camera2;
 

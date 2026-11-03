@@ -125,9 +125,23 @@ module iris_rain_backend(
     assign wvalid=write_state==W_DATA;
     assign wlast=write_beat==write_beats-1;
     assign bready=write_state==W_RESPONSE;
-    wire [15:0] pixels={8'd0,cfg[0][7:0]}*{8'd0,cfg[1][7:0]};
-    wire [19:0] input_bytes={4'd0,pixels}*cfg[2][5:0];
-    wire [19:0] output_bytes=({4'd0,pixels}>>(cfg[4]==2 ? 2 : 0))*cfg[3][5:0];
+    reg [15:0] pixels_r;
+    reg [19:0] input_bytes_r;
+    reg [19:0] output_bytes_r;
+    always @(posedge clk or negedge rst_n) begin
+        if(!rst_n) begin
+            pixels_r <= 16'd0;
+            input_bytes_r <= 20'd0;
+            output_bytes_r <= 20'd0;
+        end else begin
+            pixels_r <= {8'd0,cfg[0][7:0]}*{8'd0,cfg[1][7:0]};
+            input_bytes_r <= {4'd0,pixels_r}*cfg[2][5:0];
+            output_bytes_r <= ({4'd0,pixels_r}>>(cfg[4]==2 ? 2 : 0))*cfg[3][5:0];
+        end
+    end
+    wire [15:0] pixels=pixels_r;
+    wire [19:0] input_bytes=input_bytes_r;
+    wire [19:0] output_bytes=output_bytes_r;
     // Largest Conv weight layer is 9216 bytes, so retain fourteen bits.
     wire [13:0] expected_weights=14'd576*(cfg[2]==32 ? 4 : cfg[2]==16 ? 2 : 1)*
                                                     (cfg[3]==32 ? 4 : cfg[3]==16 ? 2 : 1);
@@ -180,7 +194,7 @@ module iris_rain_backend(
     integer j;
     always @(posedge clk or negedge rst_n)begin
         if(!rst_n)begin
-            busy<=0;done<=0;failed<=0;aborting<=0;phase<=IDLE;elapsed<=0;
+            busy<=0;done<=0;failed<=0;aborting<=0;phase<=IDLE;
             rsp_valid<=0;rsp_outputs_0<=0;source<=0;destination<=0;config_loaded<=0;params_loaded<=0;params_good<=0;
             araddr<=0;arlen<=0;arvalid<=0;awaddr<=0;awlen<=0;awvalid<=0;
             read_state<=R_IDLE;write_state<=W_IDLE;read_next<=0;write_next<=0;read_remaining<=0;
@@ -193,7 +207,6 @@ module iris_rain_backend(
         end else begin
             conv_start<=0;conv_abort<=0;row_ack<=0;
             if(rsp_valid && rsp_ready)rsp_valid<=0;
-            if(busy)elapsed<=elapsed+1'b1;
             if(input_fire)begin input_queue<=input_queue>>(input_step*8);input_count<=input_count-input_step;end
             if(conv_o_valid && busy && !failed)begin
                 if(output_count+output_step>=16)begin
@@ -318,7 +331,7 @@ module iris_rain_backend(
                     end
                     10'h264:if(busy || !vendor_idle)rsp_outputs_0<=32'hfffffffe;
                         else if(cmd_inputs_0<=1 && addresses_ok && (cmd_inputs_0==0 ? conv_ok : add_ok))begin
-                            busy<=1;done<=0;failed<=0;aborting<=0;elapsed<=0;rsp_outputs_0<=0;
+                            busy<=1;done<=0;failed<=0;aborting<=0;rsp_outputs_0<=0;
                             input_count<=0;input_queue<=0;output_count<=0;output_pack<=0;output_words<=0;output_row<=0;
                             output_bank<=0;write_bank<=0;
                             phase<=cmd_inputs_0==0 ? WEIGHTS : ADD_A;
@@ -337,6 +350,16 @@ module iris_rain_backend(
                     default:begin end
                 endcase
             end
+        end
+    end
+    always @(posedge clk or negedge rst_n) begin
+        if(!rst_n) begin
+            elapsed <= 32'd0;
+        end else begin
+            if(cmd_valid && cmd_ready && cmd_function_id == 10'h264)
+                elapsed <= 32'd0;
+            else if(busy)
+                elapsed <= elapsed + 1'b1;
         end
     end
 endmodule
