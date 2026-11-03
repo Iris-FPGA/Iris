@@ -17,3 +17,5 @@ firmware/stream_style/build/
 firmware/tinyml_style/build/
 .script/__pycache__/
 tests/video/__pycache__/
+model_input/*
+!model_input/README.md

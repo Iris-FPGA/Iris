@@ -1,18 +1,29 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-# jtag_bridge=经 JTAG 桥烧 SPI flash(掉电保持,默认) | jtag=写 SRAM(掉电丢失,快)
+# jtag_bridge=经 JTAG 桥烧 SPI flash(掉电保持,默认) | jtag=写 SRAM(掉电丢失,快,且自动装载固件)
 # active=SPI 直连(板载 USB 下载器不支持,需外接下载器接 J6) | passive
 MODE="${1:-jtag_bridge}"
+FIRMWARE_OPT="${2:-}"
 
 # jtag_bridge 需先让 FPGA 跑 JTAG Bridge 位流；Efinity 自带位流按 <IDCODE> 命名。
 # Ti60F225 的 IDCODE = 0x10660A79。可用 IRIS_BRIDGE_BIT 覆盖。
 BRIDGE_BIT="${IRIS_BRIDGE_BIT:-}"
 
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+IRIS_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "$SCRIPT_DIR/efinity-env"
 
-PROJ_DIR="${IRIS_PROJ_DIR:-$SCRIPT_DIR/../iris_ws}"
+# 自动优先使用最新编译的 8x8 硬件加速器工程目录
+if [[ -z "${IRIS_PROJ_DIR:-}" ]]; then
+    if [[ -f "$SCRIPT_DIR/../firmware/tinyml_style/build/rain_row_overlap/iris_ws/outflow/iris_ws.bit" ]]; then
+        PROJ_DIR="$SCRIPT_DIR/../firmware/tinyml_style/build/rain_row_overlap/iris_ws"
+    else
+        PROJ_DIR="$SCRIPT_DIR/../iris_ws"
+    fi
+else
+    PROJ_DIR="$IRIS_PROJ_DIR"
+fi
 cd "$PROJ_DIR"
 
 # Fail before touching the board when the compiled design misses timing.
@@ -37,6 +48,13 @@ if [[ "$MODE" == "jtag_bridge" || "$MODE" == "jtag_bridge_x8" ]]; then
     fi
 fi
 
+# 检查开发板 USB 连接
+if ! lsusb -d 0403:6011 >/dev/null 2>&1 && ! lsusb -d 0403:6010 >/dev/null 2>&1; then
+    echo "❌ 错误: 未检测到板载 FTDI 下载器 (0403:6011 / 6010)" >&2
+    echo "   请检查 Ti60 开发板电源是否已开启，以及 USB 数据线是否已稳固连接到主机！" >&2
+    exit 1
+fi
+
 echo "==> 烧录 mode=$MODE"
 program_log="$(mktemp -t iris-flash-program.XXXXXX)"
 if ! efx_run --prj iris_ws -f program --pgm_opts "mode=$MODE" | tee "$program_log"; then
@@ -55,7 +73,99 @@ if [[ "$MODE" == "jtag_bridge" || "$MODE" == "jtag_bridge_x8" ]]; then
     fi
 fi
 rm -f "$program_log"
-echo "烧录完成"
+echo "✅ FPGA 硬件位流烧录完成！"
+
 if [[ "$MODE" == "jtag_bridge" || "$MODE" == "jtag_bridge_x8" ]]; then
     echo "提示：请断电重上电，从 flash 启动刚烧入的设计"
+    exit 0
+fi
+
+# ==============================================================================
+# JTAG SRAM 模式: 自动通过 OpenOCD 加载 RISC-V 固件到 DDR3 (0x00800000) 并启动
+# ==============================================================================
+if [[ "$MODE" == "jtag" ]]; then
+    if [[ "${NO_ELF:-0}" == "1" || "${NO_FIRMWARE:-0}" == "1" || "$FIRMWARE_OPT" == "none" ]]; then
+        echo "提示: 已跳过 RISC-V 固件加载"
+        exit 0
+    fi
+
+    # 1. 查找目标固件 ELF
+    ELF_PATH=""
+    if [[ -n "$FIRMWARE_OPT" ]]; then
+        if [[ -f "$FIRMWARE_OPT" ]]; then
+            ELF_PATH="$FIRMWARE_OPT"
+        else
+            for candidate in \
+                "$IRIS_ROOT/firmware/tinyml_style/build/${FIRMWARE_OPT}_live/tinyml_style.elf" \
+                "$IRIS_ROOT/firmware/tinyml_style/build/${FIRMWARE_OPT}/tinyml_style.elf"; do
+                if [[ -f "$candidate" ]]; then
+                    ELF_PATH="$candidate"
+                    break
+                fi
+            done
+        fi
+    elif [[ -n "${IRIS_ELF:-}" && -f "$IRIS_ELF" ]]; then
+        ELF_PATH="$IRIS_ELF"
+    else
+        # 默认优先候选
+        CANDIDATES=(
+            "$IRIS_ROOT/firmware/tinyml_style/build/tinyml_style.elf"
+            "$IRIS_ROOT/firmware/tinyml_style/build/custom_live/tinyml_style.elf"
+            "$IRIS_ROOT/firmware/tinyml_style/build/monet_live/tinyml_style.elf"
+            "$IRIS_ROOT/firmware/tinyml_style/build/rain_row_direct_live/tinyml_style.elf"
+            "$IRIS_ROOT/firmware/tinyml_style/build/rain_princess_live/tinyml_style.elf"
+        )
+        for c in "${CANDIDATES[@]}"; do
+            if [[ -f "$c" ]]; then
+                ELF_PATH="$c"
+                break
+            fi
+        done
+    fi
+
+    if [[ -z "$ELF_PATH" || ! -f "$ELF_PATH" ]]; then
+        echo "提示: FPGA 位流已烧入 SRAM。未找到固件 ELF，若需启动 TinyML 推理，可运行:"
+        echo "      .script/build-firmware"
+        echo "      .script/sync-iris jtag"
+        exit 0
+    fi
+
+    # 2. 定位 OpenOCD
+    OPENOCD_BIN="/home/fin-resect/efinity/efinity-riscv-ide-2026.1/openocd/bin/openocd"
+    if [[ ! -x "$OPENOCD_BIN" ]]; then
+        OPENOCD_BIN="/home/fin-resect/efinity/2026.1/debugger/openocd/bin/openocd"
+    fi
+    if [[ ! -x "$OPENOCD_BIN" ]]; then
+        OPENOCD_BIN="$(command -v openocd || echo "")"
+    fi
+
+    if [[ -z "$OPENOCD_BIN" ]]; then
+        echo "⚠️ 警告: 未找到 OpenOCD，跳过固件装载" >&2
+        exit 0
+    fi
+
+    OPENOCD_FTDI="$SCRIPT_DIR/openocd_ftdi_iris.cfg"
+    OPENOCD_TI="$IRIS_ROOT/iris_ws/embedded_sw/SapphireSoc/bsp/efinix/EfxSapphireSoc/openocd/debug_ti.cfg"
+
+    echo ""
+    echo "==> 正在通过 OpenOCD 将 RISC-V 固件写入片外 DDR3 (0x00800000) 并启动..."
+    echo "    📦 固件: $ELF_PATH ($(ls -lh "$ELF_PATH" | awk '{print $5}'))"
+
+    openocd_log="$(mktemp -t iris-openocd.XXXXXX)"
+    if "$OPENOCD_BIN" -f "$OPENOCD_FTDI" -f "$OPENOCD_TI" \
+        -c "load_image {$ELF_PATH}; resume 0x00800000; shutdown" > "$openocd_log" 2>&1; then
+        echo "   ✅ RISC-V 固件已装载入 DDR3 并已启动运行！"
+        rm -f "$openocd_log"
+
+        UART_DEV="/dev/ttyUSB2"
+        if [[ -r "$UART_DEV" && -w "$UART_DEV" ]]; then
+            echo "📡 正在监听串口实时 AI 推理输出 ($UART_DEV, 115200)..."
+            stty -F "$UART_DEV" 115200 cs8 -cstopb -parenb -echo raw 2>/dev/null || true
+            timeout 3 cat "$UART_DEV" 2>/dev/null | grep -a --line-buffered "IRIS LIVE" | head -n 5 || true
+        fi
+    else
+        echo "⚠️ OpenOCD 固件加载未成功，日志如下:" >&2
+        cat "$openocd_log" >&2
+        rm -f "$openocd_log"
+    fi
 fi

@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <cmath>
 #include "bsp.h"
 #include "clint.h"
 #include "riscv.h"
@@ -176,6 +177,33 @@ extern "C" int main() {
   if(!live_input || !live_output || live_input->type!=kTfLiteInt8 || live_output->type!=kTfLiteInt8)
     Stop("live eval tensor binding failed");
 #endif
+
+  // Hardware dequantizer contract hardcoded in the Ti60 video bitstream:
+  // RGB = clip((INT8_code - (-89)) * 2.2834375)
+  const float kHwScale = 2.283437490463257f;
+  const float kHwZeroPoint = -89.0f;
+  const float model_scale = output->params.scale;
+  const int32_t model_zp = output->params.zero_point;
+
+  int8_t dequant_lut[256];
+  bool need_dequant_remap = false;
+  if (model_scale > 0.0f && (fabsf(model_scale - kHwScale) > 0.001f || model_zp != -89)) {
+    need_dequant_remap = true;
+    MicroPrintf("IRIS LIVE: Output dequant adaptation enabled (scale: %d/1000->%d/1000, zp: %d->%d)\n\r",
+                static_cast<int>(model_scale * 1000.0f), static_cast<int>(kHwScale * 1000.0f),
+                static_cast<int>(model_zp), static_cast<int>(kHwZeroPoint));
+    for (int i = 0; i < 256; ++i) {
+      int8_t code = static_cast<int8_t>(static_cast<uint8_t>(i));
+      float real = (static_cast<float>(code) - static_cast<float>(model_zp)) * model_scale;
+      float hw_val = real / kHwScale + kHwZeroPoint;
+      int rounded = static_cast<int>(roundf(hw_val));
+      if (rounded < -128) rounded = -128;
+      if (rounded > 127) rounded = 127;
+      dequant_lut[i] = static_cast<int8_t>(rounded);
+    }
+  } else {
+    MicroPrintf("IRIS LIVE: Output dequant matches bitstream contract natively.\n\r");
+  }
   MicroPrintf("IRIS LIVE: %ux%ux%u paired camera/style; strict hardware; %s\n\r",
               kIrisWidth,kIrisHeight,kIrisChannels,
               IRIS_FLASH_BOOT ? "standalone Flash" : "SRAM only");
@@ -255,6 +283,19 @@ extern "C" int main() {
     if(!IrisCopyTensorDma(reinterpret_cast<uintptr_t>(output->data.int8),output_address,
                           kIrisHeight,kIrisWidth,kIrisChannels))Stop("output DMA failed");
 #endif
+    if (need_dequant_remap) {
+      uint32_t* out32 = reinterpret_cast<uint32_t*>(output_address);
+      const size_t word_count = (kIrisHeight * kIrisWidth * kIrisChannels) / 4;
+      for (size_t i = 0; i < word_count; ++i) {
+        uint32_t w = out32[i];
+        uint32_t b0 = static_cast<uint8_t>(dequant_lut[w & 0xFF]);
+        uint32_t b1 = static_cast<uint8_t>(dequant_lut[(w >> 8) & 0xFF]);
+        uint32_t b2 = static_cast<uint8_t>(dequant_lut[(w >> 16) & 0xFF]);
+        uint32_t b3 = static_cast<uint8_t>(dequant_lut[(w >> 24) & 0xFF]);
+        out32[i] = b0 | (b1 << 8) | (b2 << 16) | (b3 << 24);
+      }
+      IrisFlushCpuDataCache();
+    }
     demo[18]=pair;  // Release the inference lease before requesting display.
     if(demo[18]&4u)Stop("inference lease release failed");
     iris_live_result[1]=sequence;iris_live_result[2]=input_address;

@@ -19,10 +19,17 @@
 constexpr int kIrisHeight = 480, kIrisWidth = 640, kIrisChannels = 4;
 constexpr int kIrisConvCount = 6, kIrisAddCount = 2;
 #elif IRIS_MODEL_RAIN_PRINCESS
+#if defined(IRIS_MODEL_HEADER)
+#include IRIS_MODEL_HEADER
+#define IrisModelData IRIS_MODEL_DATA_NAME
+#define IrisModelLength IRIS_MODEL_LEN_NAME
+#define IRIS_MODEL_SOURCE IRIS_MODEL_SOURCE_NAME
+#else
 #include "rain_princess_int8_model_data.h"
 #define IrisModelData rain_princess_int8_model_data
 #define IrisModelLength rain_princess_int8_model_data_len
 #define IRIS_MODEL_SOURCE "rain_princess_int8_model_data.cc"
+#endif
 constexpr int kIrisHeight = 128, kIrisWidth = 128, kIrisChannels = 3;
 constexpr int kIrisConvCount = 16, kIrisAddCount = 5;
 #else

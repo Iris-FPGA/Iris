@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Iris RISC-V 固件专用编译脚本 (build-firmware)
+#
+# 功能: 从指定输入文件夹读取模型文件，编译生成针对 Ti60 8x8 加速器的 RISC-V 固件
+# 用法: .script/build-firmware [输入目录] [模型代号]
+#   默认输入目录: Iris/model_input
+#   默认模型代号: 自动从输入目录中的文件名推导，若无则默认为 custom
+# ==============================================================================
+set -eo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+IRIS_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+if [[ -n "${1:-}" && -d "$1" ]]; then
+    INPUT_DIR="$1"
+    PROFILE="${2:-}"
+elif [[ -n "${1:-}" ]]; then
+    PROFILE="$1"
+    INPUT_DIR="${2:-$IRIS_ROOT/model_input}"
+else
+    INPUT_DIR="$IRIS_ROOT/model_input"
+    PROFILE=""
+fi
+
+echo "============================================================"
+echo "    Iris RISC-V 固件编译系统 (Ti60 8x8 硬件加速架构)"
+echo "============================================================"
+echo "📁 模型输入目录: $INPUT_DIR"
+
+if [[ ! -d "$INPUT_DIR" ]]; then
+    echo "❌ 错误: 输入目录不存在: $INPUT_DIR" >&2
+    echo "   请先创建目录并放入模型文件，或通过 export_model.py 自动部署" >&2
+    exit 1
+fi
+
+# 1. 自动推导模型 PROFILE (若用户未指定)
+if [[ -z "$PROFILE" ]]; then
+    # 优先使用最新修改的模型数据文件
+    CC_FILE="$(ls -t "$INPUT_DIR"/*_model_data.cc 2>/dev/null | head -n 1 || true)"
+    if [[ -n "$CC_FILE" && -f "$CC_FILE" ]]; then
+        STEM="$(basename "$CC_FILE" .cc)"
+        PROFILE="$(echo "$STEM" | sed -E 's/_int8_model_data$//' | sed -E 's/_model_data$//')"
+    fi
+fi
+if [[ -z "$PROFILE" ]]; then
+    TFLITE_FILE="$(ls -t "$INPUT_DIR"/*.tflite 2>/dev/null | head -n 1 || true)"
+    if [[ -n "$TFLITE_FILE" && -f "$TFLITE_FILE" ]]; then
+        PROFILE="$(basename "$TFLITE_FILE" .tflite | sed -E 's/_int8$//')"
+    fi
+fi
+PROFILE="${PROFILE:-custom}"
+echo "🎯 目标模型代号: $PROFILE"
+
+# 2. 检查并准备 8x8 硬件加速器权重头文件 (rain_backend_model.h)
+BACKEND_DIR="$IRIS_ROOT/firmware/tinyml_style/build/rain_row_backend"
+mkdir -p "$BACKEND_DIR"
+
+if [[ -f "$INPUT_DIR/rain_backend_model.h" ]]; then
+    cp -f "$INPUT_DIR/rain_backend_model.h" "$BACKEND_DIR/rain_backend_model.h"
+    [[ -f "$INPUT_DIR/weights.bin" ]] && cp -f "$INPUT_DIR/weights.bin" "$BACKEND_DIR/weights.bin"
+    echo "   ✅ 已装载 8x8 硬件加速器头文件: rain_backend_model.h"
+else
+    # 尝试从输入目录中的 .tflite 自动编译
+    TFLITE_SRC="$(find "$INPUT_DIR" -maxdepth 1 -name "*.tflite" | head -n 1)"
+    if [[ -n "$TFLITE_SRC" ]]; then
+        echo "   ℹ️ 未找到 rain_backend_model.h，正在从 $TFLITE_SRC 自动生成..."
+        python3 "$SCRIPT_DIR/compile-rain-backend.py" "$TFLITE_SRC" "$BACKEND_DIR"
+    else
+        echo "❌ 错误: $INPUT_DIR 中既无 rain_backend_model.h 也无 .tflite 模型！" >&2
+        exit 1
+    fi
+fi
+
+# 3. 检查并准备 RISC-V C 数组模型数据
+RISCV_MODEL_DIR="$IRIS_ROOT/iris_ws/RISC-V/$PROFILE"
+mkdir -p "$RISCV_MODEL_DIR"
+
+MATCHING_CC="$(find "$INPUT_DIR" -maxdepth 1 -name "${PROFILE}_int8_model_data.cc" | head -n 1)"
+MATCHING_H="$(find "$INPUT_DIR" -maxdepth 1 -name "${PROFILE}_int8_model_data.h" | head -n 1)"
+
+if [[ -n "$MATCHING_CC" && -n "$MATCHING_H" ]]; then
+    cp -f "$MATCHING_CC" "$RISCV_MODEL_DIR/${PROFILE}_int8_model_data.cc"
+    cp -f "$MATCHING_H" "$RISCV_MODEL_DIR/${PROFILE}_int8_model_data.h"
+else
+    ANY_CC="$(find "$INPUT_DIR" -maxdepth 1 -name "*_model_data.cc" | head -n 1)"
+    ANY_H="$(find "$INPUT_DIR" -maxdepth 1 -name "*_model_data.h" | head -n 1)"
+    if [[ -n "$ANY_CC" && -n "$ANY_H" ]]; then
+        cp -f "$ANY_CC" "$RISCV_MODEL_DIR/${PROFILE}_int8_model_data.cc"
+        cp -f "$ANY_H" "$RISCV_MODEL_DIR/${PROFILE}_int8_model_data.h"
+    else
+        echo "❌ 错误: $INPUT_DIR 中缺少 *_model_data.cc / *_model_data.h 模型数据！" >&2
+        exit 1
+    fi
+fi
+echo "   ✅ 已就绪 RISC-V 模型数据: $RISCV_MODEL_DIR/${PROFILE}_int8_model_data.cc"
+
+# 4. 定位交叉编译工具链
+RISCV_TOOLCHAIN="/home/fin-resect/efinity/efinity-riscv-ide-2026.1/toolchain/bin/riscv-none-elf-"
+if [[ ! -x "${RISCV_TOOLCHAIN}g++" ]]; then
+    RISCV_TOOLCHAIN="riscv-none-elf-"
+fi
+
+STANDALONE_DIR="$IRIS_ROOT/iris_ws/embedded_sw/SapphireSoc/software/standalone"
+BSP_DIR="$IRIS_ROOT/iris_ws/embedded_sw/SapphireSoc/bsp/efinix/EfxSapphireSoc"
+
+if [[ ! -d "$STANDALONE_DIR" || ! -d "$BSP_DIR" ]]; then
+    echo "❌ 错误: 找不到 SapphireSoc BSP 源码目录" >&2
+    exit 1
+fi
+
+# 5. 执行并行编译
+echo ""
+echo "==> 正在使用 RISC-V 交叉编译器构建固件 (8x8 加速支持)..."
+make -C "$IRIS_ROOT/firmware/tinyml_style" \
+    MODEL_PROFILE="$PROFILE" \
+    LIVE_DEMO=1 \
+    LIVE_PIPELINE=1 \
+    RAIN_BACKEND=1 \
+    OBJDIR="build/${PROFILE}_live" \
+    STANDALONE="$STANDALONE_DIR" \
+    BSP_PATH="$BSP_DIR" \
+    RISCV_BIN="$RISCV_TOOLCHAIN" \
+    DDR_BASE=0x00800000 \
+    DDR_BYTES=0x02000000 \
+    STRICT_DISPATCH=1 \
+    -j"$(nproc)"
+
+OUTPUT_ELF="$IRIS_ROOT/firmware/tinyml_style/build/${PROFILE}_live/tinyml_style.elf"
+
+if [[ ! -f "$OUTPUT_ELF" ]]; then
+    echo "❌ 固件生成失败！" >&2
+    exit 1
+fi
+
+# 建立便捷最新固件链接
+ln -sf "${PROFILE}_live/tinyml_style.elf" "$IRIS_ROOT/firmware/tinyml_style/build/tinyml_style.elf" 2>/dev/null || true
+
+ELF_SIZE="$(ls -lh "$OUTPUT_ELF" | awk '{print $5}')"
+
+echo ""
+echo "============================================================"
+echo "🎉 RISC-V 固件编译成功！"
+echo "📦 目标 ELF: $OUTPUT_ELF ($ELF_SIZE)"
+echo ""
+echo "🚀 接下来执行一键烧录并启动推理:"
+echo "   .script/sync-iris jtag"
+echo "============================================================"

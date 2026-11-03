@@ -71,6 +71,7 @@ generate if(TINYML_RGB)begin : g_tinyml_panels
 iris_tinyml_panels u_panels(
  .clk(clk),.video_clk(video_clk),.rst_n(rst_n),
  .commit_toggle(commit_toggle),.commit_pair(commit_pair),.commit_ack(commit_ack),
+ .blend_mode(visibility_mode),
  .active_pair(video_pair),.have_frame(video_have),
  .i_hs(i_hs),.i_vs(i_vs),.i_de(i_de),.i_rgb(i_rgb),
  .o_hs(o_hs),.o_vs(o_vs),.o_de(o_de),.o_rgb(o_rgb),
@@ -142,7 +143,7 @@ always @(posedge clk or negedge rst_n)begin
   displayed_count<=0;captured_count<=0;rejected_count<=0;
   ai_centifps<=0;ai_rate_toggle<=0;rate_age<=0;
   ddr_serial_enable<=0;
-  visibility_mode<=ENABLE_VISIBILITY ? 2 : 0;visibility_toggle<=0;visibility_ack_sync<=0;
+  visibility_mode<=TINYML_RGB ? 2'd1 : ENABLE_VISIBILITY ? 2 : 0;visibility_toggle<=0;visibility_ack_sync<=0;
  end else begin
   capture_request<=0;
   if(TINYML_RGB)begin
@@ -163,7 +164,7 @@ always @(posedge clk or negedge rst_n)begin
    if(TINYML_RGB && paddr[7:2]==22)begin
     ai_centifps<=pwdata[11:0];ai_rate_toggle<=~ai_rate_toggle;rate_age<=0;
    end
-   if(ENABLE_VISIBILITY && paddr[7:2]==13 && !visibility_pending)begin visibility_mode<=pwdata[1:0];visibility_toggle<=~visibility_toggle;end
+   if((ENABLE_VISIBILITY || TINYML_RGB) && paddr[7:2]==13 && !visibility_pending)begin visibility_mode<=pwdata[1:0];visibility_toggle<=~visibility_toggle;end
    if(paddr[7:2]==12)ddr_serial_enable<=pwdata[0];
    if(paddr[7:2]==1)begin
     if(pwdata<3)pair_cfg<=pwdata[1:0];

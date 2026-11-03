@@ -11,8 +11,8 @@ FLASH_BOOT ?= 0
 RAIN_BACKEND ?= 0
 RAIN_BACKEND_DIR ?= $(CURDIR)/build/rain_row_backend
 ifeq ($(RAIN_BACKEND),1)
-ifneq ($(MODEL_PROFILE),rain_princess)
-$(error RAIN_BACKEND requires MODEL_PROFILE=rain_princess)
+ifeq ($(filter $(MODEL_PROFILE),original rgba640),$(MODEL_PROFILE))
+$(error RAIN_BACKEND is not supported for $(MODEL_PROFILE))
 endif
 ifeq ($(wildcard $(RAIN_BACKEND_DIR)/rain_backend_model.h),)
 $(error Generate rain_backend_model.h with .script/compile-rain-backend.py first)
@@ -39,8 +39,28 @@ else
 OBJDIR ?= build/rain_princess
 endif
 STRICT_DISPATCH ?= 1
+else ifeq ($(MODEL_PROFILE),monet)
+MODEL_DIR ?= $(IRIS_ROOT)/iris_ws/RISC-V/monet
+MODEL_STEM := monet_int8
+MODEL_RGBA := 0
+MODEL_RAIN_PRINCESS := 1
+ifeq ($(LIVE_DEMO),1)
+OBJDIR ?= build/monet_live
 else
-$(error Unsupported MODEL_PROFILE $(MODEL_PROFILE); choose original, rgba640 or rain_princess)
+OBJDIR ?= build/monet
+endif
+STRICT_DISPATCH ?= 1
+else
+MODEL_DIR ?= $(IRIS_ROOT)/iris_ws/RISC-V/$(MODEL_PROFILE)
+MODEL_STEM ?= $(MODEL_PROFILE)_int8
+MODEL_RGBA := 0
+MODEL_RAIN_PRINCESS := 1
+ifeq ($(LIVE_DEMO),1)
+OBJDIR ?= build/$(MODEL_PROFILE)_live
+else
+OBJDIR ?= build/$(MODEL_PROFILE)
+endif
+STRICT_DISPATCH ?= 1
 endif
 OBJDIR ?= build
 HOST_CXX ?= g++
@@ -57,7 +77,7 @@ check-model: $(OBJDIR)/check-model-$(MODEL_PROFILE)
 	$<
 $(OBJDIR)/check-model-$(MODEL_PROFILE): Makefile check_model.cc src/model.cc src/model_contract.h src/model_config.h $(MODEL_DIR)/$(MODEL_STEM)_model_data.cc $(MODEL_DIR)/$(MODEL_STEM)_model_data.h
 	@mkdir -p $(OBJDIR)
-	$(HOST_CXX) -std=c++17 -DIRIS_MODEL_RGBA=$(MODEL_RGBA) -DIRIS_MODEL_RAIN_PRINCESS=$(MODEL_RAIN_PRINCESS) -I$(VENDOR_SRC) -I$(VENDOR_SRC)/tensorflow/third_party/flatbuffers/include -I$(MODEL_DIR) check_model.cc src/model.cc -o $@
+	$(HOST_CXX) -std=c++17 -DIRIS_MODEL_RGBA=$(MODEL_RGBA) -DIRIS_MODEL_RAIN_PRINCESS=$(MODEL_RAIN_PRINCESS) -DIRIS_MODEL_HEADER=\"$(MODEL_STEM)_model_data.h\" -DIRIS_MODEL_DATA_NAME=$(MODEL_STEM)_model_data -DIRIS_MODEL_LEN_NAME=$(MODEL_STEM)_model_data_len -DIRIS_MODEL_SOURCE_NAME=\"$(MODEL_STEM)_model_data.cc\" -I$(VENDOR_SRC) -I$(VENDOR_SRC)/tensorflow/third_party/flatbuffers/include -I$(MODEL_DIR) check_model.cc src/model.cc -o $@
 
 ifneq ($(MAKECMDGOALS),check-model)
 STANDALONE ?= $(VENDOR_STANDALONE)
@@ -93,7 +113,7 @@ CFLAGS += $(INCLUDES) -DOPTIMIZE_X -funroll-loops -mdiv -ffunction-sections -fda
  -DTF_LITE_STATIC_MEMORY -DTF_LITE_USE_GLOBAL_CMATH_FUNCTIONS \
  -DTF_LITE_USE_GLOBAL_MIN -DTF_LITE_USE_GLOBAL_MAX -DTF_LITE_DISABLE_X86_NEON \
  -DIRIS_TML_PROFILER_EVENTS=24 \
- -DIRIS_STRICT_DISPATCH=$(STRICT_DISPATCH) -DIRIS_ARENA_BYTES=$(ARENA_BYTES) -DIRIS_MODEL_RGBA=$(MODEL_RGBA) -DIRIS_MODEL_RAIN_PRINCESS=$(MODEL_RAIN_PRINCESS) -DIRIS_LIVE_DEMO=$(LIVE_DEMO) -DIRIS_LIVE_SNAPSHOT=$(LIVE_SNAPSHOT) -DIRIS_LIVE_PIPELINE=$(LIVE_PIPELINE)
+ -DIRIS_STRICT_DISPATCH=$(STRICT_DISPATCH) -DIRIS_ARENA_BYTES=$(ARENA_BYTES) -DIRIS_MODEL_RGBA=$(MODEL_RGBA) -DIRIS_MODEL_RAIN_PRINCESS=$(MODEL_RAIN_PRINCESS) -DIRIS_LIVE_DEMO=$(LIVE_DEMO) -DIRIS_LIVE_SNAPSHOT=$(LIVE_SNAPSHOT) -DIRIS_LIVE_PIPELINE=$(LIVE_PIPELINE) -DIRIS_MODEL_HEADER=\"$(MODEL_STEM)_model_data.h\" -DIRIS_MODEL_DATA_NAME=$(MODEL_STEM)_model_data -DIRIS_MODEL_LEN_NAME=$(MODEL_STEM)_model_data_len -DIRIS_MODEL_SOURCE_NAME=\"$(MODEL_STEM)_model_data.cc\"
 ifneq ($(strip $(VENDOR_CACHE_OVERRIDE)),)
 CFLAGS += -DIRIS_VENDOR_CACHE_OVERRIDE=$(VENDOR_CACHE_OVERRIDE)
 endif

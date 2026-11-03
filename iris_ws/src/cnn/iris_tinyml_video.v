@@ -54,8 +54,11 @@ endmodule
 // The model uses 128 square samples of the full rectangular camera raster.
 // Two line banks cache only the visible right half (64 RGB model pixels).
 // Adjacent pixel pairs allow exact 15x horizontal expansion at two pixels/clk.
-module iris_tinyml_panels(
+module iris_tinyml_panels #(
+ parameter [1:0] DEFAULT_BLEND = 2'd1
+)(
  input wire clk,video_clk,rst_n,commit_toggle,input wire [1:0] commit_pair,
+ input wire [1:0] blend_mode,
  output reg commit_ack,have_frame,output reg [1:0] active_pair,
  input wire i_hs,i_vs,i_de,input wire [47:0] i_rgb,
  output wire o_hs,o_vs,o_de,output wire [47:0] o_rgb,
@@ -84,13 +87,67 @@ reg [9:0] video_tag0,video_tag1;
 wire row_good=(model_row[0] ? video_tag1 : video_tag0)=={1'b1,active_pair,model_row};
 reg bank_q,second_q;
 wire [47:0] pixels=bank_q ? pixel1 : pixel0;
+
+function signed [7:0] blend_step;
+  input signed [7:0] a;
+  input signed [7:0] b;
+  input [1:0] step;
+  reg signed [9:0] sum;
+  begin
+    case(step)
+      2'd0: blend_step = a;
+      2'd1: begin
+        sum = (($signed(a) <<< 1) + $signed(a) + $signed(b) + 10'sd2) >>> 2;
+        blend_step = (sum < -128) ? -8'sd128 : (sum > 127) ? 8'sd127 : sum[7:0];
+      end
+      2'd2: begin
+        sum = ($signed(a) + $signed(b) + 10'sd1) >>> 1;
+        blend_step = (sum < -128) ? -8'sd128 : (sum > 127) ? 8'sd127 : sum[7:0];
+      end
+      default: begin
+        sum = ($signed(a) + ($signed(b) <<< 1) + $signed(b) + 10'sd2) >>> 2;
+        blend_step = (sum < -128) ? -8'sd128 : (sum > 127) ? 8'sd127 : sum[7:0];
+      end
+    endcase
+  end
+endfunction
+
+function [23:0] blend_rgb_step;
+  input [23:0] a;
+  input [23:0] b;
+  input [1:0] step;
+  begin
+    blend_rgb_step = {
+      blend_step(a[23:16], b[23:16], step),
+      blend_step(a[15:8],  b[15:8],  step),
+      blend_step(a[7:0],   b[7:0],   step)
+    };
+  end
+endfunction
+
+wire [1:0] step0 = (phase_x < 4'd4)  ? 2'd0 :
+                   (phase_x < 4'd8)  ? 2'd1 :
+                   (phase_x < 4'd12) ? 2'd2 : 2'd3;
+
+wire [1:0] step1 = (phase_x < 4'd3)  ? 2'd0 :
+                   (phase_x < 4'd7)  ? 2'd1 :
+                   (phase_x < 4'd11) ? 2'd2 : 2'd3;
+
+wire [23:0] in_px0 = (blend_mode == 2'd0) ? pixels[23:0] :
+                     blend_rgb_step(pixels[23:0], pixels[47:24], step0);
+
+wire [23:0] in_px1 = (blend_mode == 2'd0) ? (second_q ? pixels[47:24] : pixels[23:0]) :
+                     (phase_x == 4'd14)   ? pixels[47:24] :
+                     blend_rgb_step(pixels[23:0], pixels[47:24], step1);
+
 wire [23:0] styled0,styled1;
 iris_style_dequant #(.SCALE_Q24(26'd38309724),.ZERO_POINT(-89)) u_dequant0(
- .clk(video_clk),.rst_n(rst_n),.i_valid(1'b1),.i_rgba({8'd0,pixels[23:0]}),.o_valid(),.o_rgb(styled0));
+ .clk(video_clk),.rst_n(rst_n),.i_valid(1'b1),.i_rgba({8'd0,in_px0}),.o_valid(),.o_rgb(styled0));
 iris_style_dequant #(.SCALE_Q24(26'd38309724),.ZERO_POINT(-89)) u_dequant1(
- .clk(video_clk),.rst_n(rst_n),.i_valid(1'b1),.i_rgba({8'd0,second_q ? pixels[47:24] : pixels[23:0]}),.o_valid(),.o_rgb(styled1));
+ .clk(video_clk),.rst_n(rst_n),.i_valid(1'b1),.i_rgba({8'd0,in_px1}),.o_valid(),.o_rgb(styled1));
 reg [2:0] hs_pipe,vs_pipe,de_pipe,good_pipe,right_pipe,have_pipe;
 reg [47:0] camera0,camera1,camera2;
+
 assign o_hs=hs_pipe[2];assign o_vs=vs_pipe[2];assign o_de=de_pipe[2];
 assign o_rgb=!have_pipe[2] || !right_pipe[2] ? camera2 :
              good_pipe[2] ? {styled0,styled1} : 48'd0;

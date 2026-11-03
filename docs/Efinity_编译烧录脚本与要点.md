@@ -13,20 +13,23 @@
 | `.script/efinity-env` | 共享 helper：解析 `EFINITY_HOME` 并 `source setup.sh`（被 build/sync/setup-env 脚本 source） | 是 |
 | `.script/setup-env` | 一键环境配置：解析 `EFINITY_HOME` + 装 USB 规则 + 版本校验 | 是 |
 | `.script/build-iris` | 编译：map → interface → 修 sdc → pnr → pgm | 是 |
-| `.script/sync-iris` | 烧录：`efx_run -f program`，默认 `jtag_bridge`（经 JTAG 桥烧 flash），可传 `jtag`/`passive` | 是 |
+| `.script/build-firmware` | 固件编译：自动从 `model_input/` 读取模型参数并针对 8x8 矩阵加速架构构建 RISC-V ELF | 需 RISC-V 工具链 |
+| `.script/sync-iris` | 烧录：`jtag`（极速写 SRAM 并通过 OpenOCD 自动加载启动固件） / `jtag_bridge`（经 JTAG 桥烧 flash） | 是 |
 | `.script/clean-iris` | 清理编译产物（`outflow/`、`work_*/`、`iris_ws.pt.sdc`） | 否（纯 `rm`） |
 | `.script/setup-usb` | 安装 USB udev 规则并重载（需 sudo），给 Efinix 下载器节点授权 | 否 |
 | `.script/80-efx-pgm.rules` | udev 规则文件（无组 `MODE=0666`），由 `setup-usb` 安装 | 否 |
 
 工程目录：`iris_ws/`，顶层模块 `top`，工程文件 `iris_ws/iris_ws.xml`。
+模型输入目录：`model_input/`（放置待装载入固件的 INT8 模型与加速配置）。
 
 用法：
 
 ```bash
 .script/setup-env           # 首次/换机：一键环境配置（EFINITY_HOME + USB 规则），之后拔插一次
-.script/build-iris          # 全量编译，生成 bit/hex
+.script/build-iris          # 全量编译硬件，生成 bit/hex
+.script/build-firmware      # 编译 RISC-V 固件（自动从 model_input 加载模型生成 ELF）
 .script/sync-iris           # 默认 jtag_bridge：经 JTAG 桥烧 SPI flash（掉电保持）
-.script/sync-iris jtag      # 写 SRAM（掉电丢失，调试快）
+.script/sync-iris jtag      # 写 SRAM 并自动通过 OpenOCD 装载启动固件（调试快）
 .script/sync-iris active    # SPI 直连（板载 USB 下载器不支持，需外接下载器）
 .script/clean-iris          # 清掉编译产物
 ```
@@ -100,7 +103,7 @@ efx_run --prj iris_ws -f pgm
 | 模式 (`--pgm_opts mode=...`) | 用到的产物 | 说明 |
 |---|---|---|
 | `jtag_bridge`（默认） | `outflow/iris_ws.hex` | 经 **JTAG 桥**写 SPI flash，掉电保持、上电自启动（板载 USB 下载器的推荐方式） |
-| `jtag` | `outflow/iris_ws.bit` | 直接写 FPGA SRAM，掉电丢失，迭代快（**已验证可用**） |
+| `jtag` | `outflow/iris_ws.bit` (+ 固件 ELF) | 直接写 FPGA SRAM，掉电丢失，迭代快。`sync-iris jtag` 会在写完 SRAM 后**自动通过 OpenOCD 将 RISC-V 固件写入 DDR3 (0x00800000) 并启动运行** |
 | `active` | `outflow/iris_ws.hex` | SPI **直连** flash；板载 USB 下载器**不支持**，需外接下载器接到 `J6` 的 SPI 引脚并拉低 `CRESET_N` |
 | `passive` | `outflow/iris_ws.hex` | 由外部主控提供时钟/数据 |
 
@@ -109,6 +112,12 @@ efx_run --prj iris_ws -f pgm
 ```bash
 efx_run --prj iris_ws -f program --pgm_opts "mode=jtag_bridge"
 ```
+
+> **`sync-iris jtag` 固件联动机制**：
+> 在 8x8 硬件加速架构下，RISC-V 软核在上电复位时处于等待外部加载状态。为了避免用户手动分步调试的繁琐操作，`sync-iris jtag` 脚本将烧录分为两阶段：
+> 1. 第一阶段：通过 Efinity 的 `efx_run` 将硬件加速位流烧录至 Ti60 SRAM；
+> 2. 第二阶段：检测到固件 ELF 后，自动调用 OpenOCD 执行 `load_image {elf}; resume 0x00800000; shutdown`，直接将模型推理程序装入片外高速 DDR3 并拉起推理。若串口 `/dev/ttyUSB2` 可读，会自动监听 5 行实时性能数据反馈给用户。
+> 如仅需更新硬件位流而不装载固件，可传环境变量 `NO_ELF=1 .script/sync-iris jtag`。
 
 > 板卡用户手册 2.6：**默认连接 USB，通过 JTAG Bridge 编程 flash**。用 `active` 会报
 > `could not get flash device`（直连 SPI 读不到 flash），那是选错模式的预期现象，不是故障。
