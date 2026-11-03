@@ -76,6 +76,7 @@ generate if(TINYML_RGB)begin : g_tinyml_panels
 iris_tinyml_panels u_panels(
  .clk(clk),.video_clk(video_clk),.rst_n(rst_n),
  .commit_toggle(commit_toggle),.commit_pair(commit_pair),.commit_ack(commit_ack),
+ .interp_step_toggle(interp_step_toggle),
  .blend_mode(visibility_mode),
  .display_mode(display_mode_sync2),
  .active_pair(video_pair),.have_frame(video_have),
@@ -85,7 +86,6 @@ iris_tinyml_panels u_panels(
  .araddr(araddr),.arlen(arlen),.arvalid(arvalid),.arready(arready),
  .rdata(rdata),.rresp(rresp),.rlast(rlast),.rvalid(rvalid),.rready(rready));
 assign visibility_ack=visibility_toggle;
-assign interp_step_toggle=1'b0;
 end else if(ENABLE_CONTOUR)begin : g_contour
 iris_style_contour_panels #(.SCALE_Q24(SCALE_Q24),.ENABLE_VISIBILITY(ENABLE_VISIBILITY),.ENABLE_INTERP(ENABLE_INTERP),.HEIGHT(HEIGHT)) u_panels(
  .clk(clk),.video_clk(video_clk),.rst_n(rst_n),

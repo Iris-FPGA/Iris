@@ -71,6 +71,7 @@ module iris_tinyml_panels #(
  parameter [1:0] DEFAULT_BLEND = 2'd1
 )(
  input wire clk,video_clk,rst_n,commit_toggle,input wire [1:0] commit_pair,
+ output reg interp_step_toggle,
  input wire [1:0] blend_mode,
  input wire [1:0] display_mode,
  output reg commit_ack,have_frame,output reg [1:0] active_pair,
@@ -93,7 +94,11 @@ reg [7:0] phase_y;
 wire frame_start=i_vs && !vs_d;
 reg request_toggle;
 reg [6:0] request_row;
-reg [1:0] request_pair;
+reg [1:0] request_pair,request_prev_pair;
+reg [1:0] request_weight;
+reg [1:0] prev_pair;
+reg [2:0] display_tick;
+reg [2:0] measured_period;
 reg [9:0] tag0,tag1;
 reg [1:0] ready_toggle;
 reg [2:0] ready0_sync,ready1_sync;
@@ -139,6 +144,43 @@ function [23:0] blend_rgb_step;
   end
 endfunction
 
+function signed [7:0] blend_interp;
+  input signed [7:0] p0;
+  input signed [7:0] p1;
+  input [1:0] weight;
+  reg signed [10:0] sum;
+  begin
+    case(weight)
+      2'd0: blend_interp = p1;
+      2'd1: begin
+        sum = (($signed(p0) <<< 1) + $signed(p0) + $signed(p1) + 11'sd2) >>> 2;
+        blend_interp = (sum < -128) ? -8'sd128 : (sum > 127) ? 8'sd127 : sum[7:0];
+      end
+      2'd2: begin
+        sum = ($signed(p0) + $signed(p1) + 11'sd1) >>> 1;
+        blend_interp = (sum < -128) ? -8'sd128 : (sum > 127) ? 8'sd127 : sum[7:0];
+      end
+      default: begin
+        sum = ($signed(p0) + ($signed(p1) <<< 1) + $signed(p1) + 11'sd2) >>> 2;
+        blend_interp = (sum < -128) ? -8'sd128 : (sum > 127) ? 8'sd127 : sum[7:0];
+      end
+    endcase
+  end
+endfunction
+
+function [23:0] blend_pixel_interp;
+  input [23:0] px0;
+  input [23:0] px1;
+  input [1:0] weight;
+  begin
+    blend_pixel_interp = {
+      blend_interp(px0[23:16], px1[23:16], weight),
+      blend_interp(px0[15:8],  px1[15:8],  weight),
+      blend_interp(px0[7:0],   px1[7:0],   weight)
+    };
+  end
+endfunction
+
 wire [1:0] step0 = (phase_x < 4'd4)  ? 2'd0 :
                    (phase_x < 4'd8)  ? 2'd1 :
                    (phase_x < 4'd12) ? 2'd2 : 2'd3;
@@ -174,11 +216,24 @@ always @(posedge video_clk)begin
  pixel0<=line0[model_column];pixel1<=line1[model_column];
 end
 reg [31:0] video_underflows;
+wire new_commit = (commit_sync[2] != commit_ack);
+wire [1:0] next_pair = new_commit ? commit_pair : active_pair;
+wire [1:0] next_prev_pair = new_commit ? (have_frame ? active_pair : commit_pair) : prev_pair;
+wire [2:0] next_tick = new_commit ? 3'd0 : (display_tick < 3'd7 ? display_tick + 1'b1 : 3'd7);
+wire [2:0] cur_period = new_commit ? ((display_tick > 0 && display_tick < 7) ? display_tick : 3'd3) : measured_period;
+
+wire [1:0] video_weight =
+  (!have_frame || next_prev_pair == next_pair || cur_period <= 3'd1) ? 2'd0 :
+  (cur_period == 3'd2) ? (next_tick == 3'd0 ? 2'd2 : 2'd0) :
+  (cur_period == 3'd3) ? (next_tick == 3'd0 ? 2'd1 : next_tick == 3'd1 ? 2'd2 : 2'd0) :
+  (next_tick == 3'd0 ? 2'd1 : next_tick == 3'd1 ? 2'd2 : next_tick == 3'd2 ? 2'd3 : 2'd0);
+
 always @(posedge video_clk or negedge rst_n)begin
  if(!rst_n)begin
-  commit_sync<=0;commit_ack<=0;have_frame<=0;active_pair<=0;
+  commit_sync<=0;commit_ack<=0;have_frame<=0;active_pair<=0;prev_pair<=0;
+  interp_step_toggle<=0;display_tick<=0;measured_period<=3'd3;
   vs_d<=0;de_d<=0;x<=0;model_row<=0;model_column<=0;phase_x<=0;phase_y<=0;last_requested<=127;
-  request_toggle<=0;request_row<=0;request_pair<=0;
+  request_toggle<=0;request_row<=0;request_pair<=0;request_prev_pair<=0;request_weight<=0;
   ready0_sync<=0;ready1_sync<=0;video_tag0<=0;video_tag1<=0;bank_q<=0;second_q<=0;
   hs_pipe<=0;vs_pipe<=0;de_pipe<=0;good_pipe<=0;right_pipe<=0;have_pipe<=0;
   camera0<=0;camera1<=0;camera2<=0;video_underflows<=0;
@@ -190,11 +245,22 @@ always @(posedge video_clk or negedge rst_n)begin
   if(ready1_sync[2]!=ready1_sync[1])video_tag1<=tag1;
   if(frame_start)begin
    x<=0;model_row<=0;model_column<=0;phase_x<=0;phase_y<=0;last_requested<=127;
-   if(have_frame || commit_sync[2]!=commit_ack)begin
-    request_row<=0;request_pair<=commit_sync[2]!=commit_ack ? commit_pair : active_pair;
+   if(new_commit)begin
+    prev_pair<=have_frame ? active_pair : commit_pair;
+    active_pair<=commit_pair;have_frame<=1;commit_ack<=commit_sync[2];
+    measured_period<=(display_tick>0 && display_tick<7) ? display_tick : 3'd3;
+    display_tick<=3'd0;
+   end else if(have_frame)begin
+    if(display_tick<3'd7)display_tick<=display_tick+1'b1;
+    interp_step_toggle<=~interp_step_toggle;
+   end
+   if(have_frame || new_commit)begin
+    request_row<=0;
+    request_pair<=next_pair;
+    request_prev_pair<=next_prev_pair;
+    request_weight<=video_weight;
     request_toggle<=~request_toggle;
    end
-   if(commit_sync[2]!=commit_ack)begin active_pair<=commit_pair;have_frame<=1;commit_ack<=commit_sync[2];end
   end else if(i_de)begin
    x<=x+1'b1;
    if(display_mode == 2'd2) begin
@@ -212,7 +278,12 @@ always @(posedge video_clk or negedge rst_n)begin
    if(phase_y>=119)begin phase_y<=phase_y-8'd119;model_row<=model_row+1'b1;end
    else phase_y<=phase_y+8'd16;
    if(have_frame && model_row<127 && last_requested!=model_row)begin
-    request_row<=model_row+1'b1;request_pair<=active_pair;request_toggle<=~request_toggle;last_requested<=model_row;
+    request_row<=model_row+1'b1;
+    request_pair<=active_pair;
+    request_prev_pair<=prev_pair;
+    request_weight<=video_weight;
+    request_toggle<=~request_toggle;
+    last_requested<=model_row;
    end
   end
   bank_q<=model_row[0];second_q<=phase_x==14;
@@ -222,22 +293,41 @@ always @(posedge video_clk or negedge rst_n)begin
  end
 end
 
+function [127:0] blend_beat;
+  input [127:0] b0;
+  input [127:0] b1;
+  input [1:0] w;
+  integer idx;
+  begin
+    for (idx = 0; idx < 16; idx = idx + 1) begin
+      blend_beat[idx*8 +: 8] = blend_interp(b0[idx*8 +: 8], b1[idx*8 +: 8], w);
+    end
+  end
+endfunction
+
 localparam IDLE=0,ADDR=1,DATA=2,UNPACK=3,FINISH=4;
 reg [2:0] state;
 reg [2:0] request_sync;
-reg pending,read_bad;
+reg pending,read_bad,pass;
 reg [6:0] pending_row,row;
-reg [1:0] pending_pair,pair;
+reg [1:0] pending_pair,pending_prev_pair,pending_weight;
+reg [1:0] pair,prev_pair_q,cur_weight;
 reg [4:0] beat;
 reg [7:0] column;
 reg [4:0] byte_count;
 reg [143:0] reservoir;
 reg [23:0] previous_pixel;
+(* syn_ramstyle = "block_ram" *) reg [127:0] prev_beat[0:31];
+reg [127:0] prev_beat_reg;
+
 wire request_edge=request_sync[2]!=request_sync[1];
 assign arlen=0;assign arvalid=state==ADDR;assign rready=state==DATA;
+
+wire [127:0] beat_data = (cur_weight == 2'd0) ? rdata : blend_beat(prev_beat_reg, rdata, cur_weight);
 wire write_pixel=(state==UNPACK && byte_count>=3 && column!=0) || state==FINISH;
 wire [6:0] write_column=state==FINISH ? 7'd127 : column[6:0]-1'b1;
 wire [47:0] write_pair=state==FINISH ? {previous_pixel,previous_pixel} : {reservoir[23:0],previous_pixel};
+
 always @(posedge clk)begin
  if(write_pixel)begin
   if(row[0])line1[write_column]<=write_pair;else line0[write_column]<=write_pair;
@@ -249,22 +339,34 @@ always @(posedge video_clk or negedge rst_n)
  if(!rst_n)underflow_gray<=0;else underflow_gray<=(video_underflows>>1)^video_underflows;
 always @(posedge clk or negedge rst_n)begin
  if(!rst_n)begin
-  state<=IDLE;request_sync<=0;pending<=0;read_bad<=0;pending_row<=0;pending_pair<=0;pair<=0;
-  row<=0;beat<=0;column<=0;byte_count<=0;reservoir<=0;previous_pixel<=0;
+  state<=IDLE;request_sync<=0;pending<=0;read_bad<=0;pass<=1;
+  pending_row<=0;pending_pair<=0;pending_prev_pair<=0;pending_weight<=0;
+  pair<=0;prev_pair_q<=0;cur_weight<=0;
+  row<=0;beat<=0;column<=0;byte_count<=0;reservoir<=0;previous_pixel<=0;prev_beat_reg<=0;
   araddr<=0;tag0<=0;tag1<=0;ready_toggle<=0;read_errors<=0;underflows<=0;uf_sync1<=0;uf_sync2<=0;
  end else begin
   request_sync<={request_sync[1:0],request_toggle};
-  if(request_edge)begin pending<=1;pending_row<=request_row;pending_pair<=request_pair;end
+  if(request_edge)begin
+   pending<=1;
+   pending_row<=request_row;
+   pending_pair<=request_pair;
+   pending_prev_pair<=request_prev_pair;
+   pending_weight<=request_weight;
+  end
   uf_sync1<=underflow_gray;uf_sync2<=uf_sync1;
   for(k=31;k>=0;k=k-1)underflows[k]<=^(uf_sync2>>k);
+  prev_beat_reg<=prev_beat[beat];
   case(state)
    IDLE:if(pending)begin
-    row<=pending_row;pair<=pending_pair;pending<=request_edge;read_bad<=0;
+    row<=pending_row;pair<=pending_pair;prev_pair_q<=pending_prev_pair;cur_weight<=pending_weight;
+    pending<=request_edge;read_bad<=0;
     if(pending_row[0])begin tag1<=0;ready_toggle[1]<=~ready_toggle[1];end
     else begin tag0<=0;ready_toggle[0]<=~ready_toggle[0];end
-    beat<=0;column<=0;byte_count<=0;reservoir<=0;
-    araddr<=(pending_pair==2 ? 32'h03a00000 : pending_pair==1 ? 32'h03600000 : 32'h03400000)+
-            ({25'd0,pending_row}<<8)+({25'd0,pending_row}<<7);
+    beat<=0;column<=0;byte_count<=0;reservoir<=0;previous_pixel<=0;
+    pass<=(pending_weight==2'd0);
+    araddr<=(((pending_weight!=2'd0 ? pending_prev_pair : pending_pair)==2 ? 32'h03a00000 :
+              (pending_weight!=2'd0 ? pending_prev_pair : pending_pair)==1 ? 32'h03600000 : 32'h03400000)+
+             ({25'd0,pending_row}<<8)+({25'd0,pending_row}<<7));
     state<=ADDR;
    end
    ADDR:if(arready)state<=DATA;
@@ -272,11 +374,21 @@ always @(posedge clk or negedge rst_n)begin
     if(rresp!=0 || !rlast || read_bad)begin
      read_bad<=1;
      if(rlast)begin read_errors<=read_errors+1'b1;state<=IDLE;end
+    end else if(!pass)begin
+     prev_beat[beat]<=rdata;
+     if(beat==23)begin
+      pass<=1;beat<=0;column<=0;byte_count<=0;reservoir<=0;previous_pixel<=0;
+      araddr<=(pair==2 ? 32'h03a00000 : pair==1 ? 32'h03600000 : 32'h03400000)+
+              ({25'd0,row}<<8)+({25'd0,row}<<7);
+      state<=ADDR;
+     end else begin
+      beat<=beat+1'b1;araddr<=araddr+32'd16;state<=ADDR;
+     end
     end else begin
      case(byte_count)
-      0:reservoir<={16'd0,rdata};
-      1:reservoir<={8'd0,rdata,reservoir[7:0]};
-      2:reservoir<={rdata,reservoir[15:0]};
+      0:reservoir<={16'd0,beat_data};
+      1:reservoir<={8'd0,beat_data,reservoir[7:0]};
+      2:reservoir<={beat_data,reservoir[15:0]};
       default:reservoir<=0;
      endcase
      byte_count<=byte_count+5'd16;state<=UNPACK;
