@@ -1,6 +1,7 @@
 // Full 1920x1080 RGB -> model-native 128x128 INT8 NHWC, tightly packed C3.
 // In mode 2 (full style), sample 720p (1280x720) down to 128x128 (step_x=10, step_y=5.625).
-// In mode 0 (split screen), sample 720p-half (640x720) down to 128x128 (step_x=5, step_y=5.625).
+// In mode 0 (split screen), sample 1080p right half (960x1080) down to 128x128 (step_x=7.5, step_y=8.4375)
+// to achieve 100% 1:1 seamless geometric alignment with the native 1080p left half.
 module iris_tinyml_preprocess(
  input wire clk,rst_n,enable,i_vs,i_de,input wire [47:0] i_rgb,
  input wire [1:0] mode,
@@ -10,6 +11,7 @@ reg vs_d,de_d,active,line_done;
 reg [10:0] x,y,next_x,next_y;
 reg [6:0] sx,sy;
 reg [3:0] phase_y;
+reg phase_x;
 reg [1:0] bytes_held;
 reg [23:0] held;
 reg first_word;
@@ -21,26 +23,34 @@ wire [23:0] rgb_bytes={rgb[7:0]^8'h80,rgb[15:8]^8'h80,rgb[23:16]^8'h80};
 wire [55:0] joined={32'd0,held} | ({32'd0,rgb_bytes} << (bytes_held*8));
 
 wire [10:0] init_next_x = (mode == 2'd2) ? 11'd320 : 11'd960;
-wire [10:0] step_x      = (mode == 2'd2) ? 11'd10  : 11'd5;
+wire [10:0] init_next_y = (mode == 2'd2) ? 11'd180 : 11'd0;
+
+wire [10:0] cur_step_x  = (mode == 2'd2) ? 11'd10 : (phase_x ? 11'd8 : 11'd7);
+
+wire [10:0] cur_step_y  = (mode == 2'd2) ? ((phase_y >= 4'd6) ? 11'd6 : 11'd5)
+                                         : ((phase_y >= 4'd9) ? 11'd9 : 11'd8);
+
+wire [3:0]  next_phase_y = (mode == 2'd2) ? ((phase_y >= 4'd6) ? (phase_y - 4'd6) : (phase_y + 4'd10))
+                                          : ((phase_y >= 4'd9) ? (phase_y - 4'd9) : (phase_y + 4'd7));
 
 always @(posedge clk or negedge rst_n)begin
  if(!rst_n)begin
-  vs_d<=0;de_d<=0;active<=0;line_done<=0;x<=0;y<=0;next_x<=0;next_y<=0;sx<=0;sy<=0;phase_y<=0;
+  vs_d<=0;de_d<=0;active<=0;line_done<=0;x<=0;y<=0;next_x<=0;next_y<=0;sx<=0;sy<=0;phase_y<=0;phase_x<=0;
   bytes_held<=0;held<=0;first_word<=1;o_valid<=0;o_sof<=0;o_eof<=0;o_word<=0;
  end else begin
   vs_d<=i_vs;de_d<=i_de;o_valid<=0;o_sof<=0;o_eof<=0;
   if(frame_start || !enable)begin
    active<=frame_start && enable;line_done<=0;x<=0;y<=0;
-   next_x<=init_next_x;next_y<=11'd180;
-   sx<=0;sy<=0;phase_y<=0;
+   next_x<=init_next_x;next_y<=init_next_y;
+   phase_x<=0;phase_y<=0;sx<=0;sy<=0;
    bytes_held<=0;held<=0;first_word<=1;
   end else begin
    if(i_de)x<=x+2'd2;
    else if(de_d)begin
-    x<=0;y<=y+1'b1;next_x<=init_next_x;sx<=0;line_done<=0;
+    x<=0;y<=y+1'b1;next_x<=init_next_x;phase_x<=0;sx<=0;line_done<=0;
     if(y==next_y)begin
-     next_y<=next_y+(phase_y>=6 ? 11'd6 : 11'd5);
-     phase_y<=phase_y>=6 ? (phase_y-4'd6) : (phase_y+4'd10);
+     next_y<=next_y+cur_step_y;
+     phase_y<=next_phase_y;
      if(sy<127)sy<=sy+1'b1;
     end
    end
@@ -55,7 +65,8 @@ always @(posedge clk or negedge rst_n)begin
      if(sy==127)active<=0;
     end else begin
      sx<=sx+1'b1;
-     next_x<=next_x+step_x;
+     phase_x<=~phase_x;
+     next_x<=next_x+cur_step_x;
     end
    end
   end
@@ -73,6 +84,7 @@ module iris_tinyml_panels #(
  input wire clk,video_clk,rst_n,commit_toggle,input wire [1:0] commit_pair,
  input wire [25:0] scale_q24,
  input wire signed [8:0] zero_point,
+ input wire interp_enable,
  output reg interp_step_toggle,
  input wire [1:0] blend_mode,
  input wire [1:0] display_mode,
@@ -183,19 +195,56 @@ function [23:0] blend_pixel_interp;
   end
 endfunction
 
-wire [1:0] step0 = (phase_x < 4'd4)  ? 2'd0 :
-                   (phase_x < 4'd8)  ? 2'd1 :
-                   (phase_x < 4'd12) ? 2'd2 : 2'd3;
+function [7:0] blend_u8;
+  input [7:0] a;
+  input [7:0] b;
+  input [1:0] step;
+  reg [9:0] sum;
+  begin
+    case(step)
+      2'd0: blend_u8 = a;
+      2'd1: begin
+        sum = {1'b0, a, 1'b0} + {2'b0, a} + {2'b0, b} + 10'd2;
+        blend_u8 = sum[9:2];
+      end
+      2'd2: begin
+        sum = {1'b0, a} + {1'b0, b} + 10'd1;
+        blend_u8 = sum[8:1];
+      end
+      default: begin
+        sum = {2'b0, a} + {1'b0, b, 1'b0} + {2'b0, b} + 10'd2;
+        blend_u8 = sum[9:2];
+      end
+    endcase
+  end
+endfunction
 
-wire [1:0] step1 = (phase_x < 4'd3)  ? 2'd0 :
-                   (phase_x < 4'd7)  ? 2'd1 :
-                   (phase_x < 4'd11) ? 2'd2 : 2'd3;
+function [23:0] blend_edge_rgb;
+  input [23:0] s;
+  input [23:0] k;
+  input [1:0] w;
+  begin
+    blend_edge_rgb = {
+      blend_u8(s[23:16], k[23:16], w),
+      blend_u8(s[15:8],  k[15:8],  w),
+      blend_u8(s[7:0],   k[7:0],   w)
+    };
+  end
+endfunction
+
+wire [1:0] split_step0 = (phase_x == 4'd0) ? 2'd0 : (phase_x == 4'd1) ? 2'd1 : (phase_x == 4'd2) ? 2'd2 : 2'd3;
+wire [1:0] split_step1 = (phase_x == 4'd0) ? 2'd1 : (phase_x == 4'd1) ? 2'd2 : 2'd3;
+
+wire [1:0] full_step0 = (phase_x < 4'd2) ? 2'd0 : (phase_x < 4'd4) ? 2'd1 : (phase_x < 4'd6) ? 2'd2 : 2'd3;
+wire [1:0] full_step1 = (phase_x < 4'd1) ? 2'd0 : (phase_x < 4'd3) ? 2'd1 : (phase_x < 4'd5) ? 2'd2 : 2'd3;
+
+wire [1:0] step0 = (display_mode == 2'd0) ? split_step0 : full_step0;
+wire [1:0] step1 = (display_mode == 2'd0) ? split_step1 : full_step1;
 
 wire [23:0] in_px0 = (blend_mode == 2'd0) ? pixels[23:0] :
                      blend_rgb_step(pixels[23:0], pixels[47:24], step0);
 
 wire [23:0] in_px1 = (blend_mode == 2'd0) ? (second_q ? pixels[47:24] : pixels[23:0]) :
-                     (phase_x == 4'd14)   ? pixels[47:24] :
                      blend_rgb_step(pixels[23:0], pixels[47:24], step1);
 
 wire [23:0] styled0,styled1;
@@ -206,13 +255,24 @@ iris_style_dequant u_dequant1(
 reg [2:0] hs_pipe,vs_pipe,de_pipe,good_pipe,right_pipe,have_pipe;
 reg [47:0] camera0,camera1,camera2;
 
+wire [6:0] c_dist = (display_mode == 2'd0) ? (7'd123 - model_column) :
+                    ((model_column < 7'd64) ? (model_column - 7'd4) : (7'd123 - model_column));
+wire [6:0] r_dist = (model_row < 7'd64) ? (model_row - 7'd4) : (7'd123 - model_row);
+wire [6:0] min_dist = (c_dist < r_dist) ? c_dist : r_dist;
+wire [1:0] cur_edge_weight = (min_dist == 7'd0) ? 2'd2 :
+                             (min_dist == 7'd1) ? 2'd1 : 2'd0;
+reg [1:0] edge_pipe0, edge_pipe1, edge_pipe2;
+
 wire show_style = (display_mode == 2'd2) ? have_pipe[2] :
                   (display_mode == 2'd0) ? (have_pipe[2] && right_pipe[2]) :
                   1'b0;
 
+wire [23:0] final_px0 = blend_edge_rgb(styled0, camera2[47:24], edge_pipe2);
+wire [23:0] final_px1 = blend_edge_rgb(styled1, camera2[23:0],  edge_pipe2);
+
 assign o_hs=hs_pipe[2];assign o_vs=vs_pipe[2];assign o_de=de_pipe[2];
 assign o_rgb=!show_style ? camera2 :
-             good_pipe[2] ? {styled0,styled1} : 48'd0;
+             good_pipe[2] ? {final_px0,final_px1} : 48'd0;
 
 always @(posedge video_clk)begin
  pixel0<=line0[model_column];pixel1<=line1[model_column];
@@ -224,7 +284,7 @@ wire [1:0] next_prev_pair = new_commit ? (have_frame ? active_pair : commit_pair
 wire [2:0] next_tick = new_commit ? 3'd0 : (display_tick < 3'd7 ? display_tick + 1'b1 : 3'd7);
 wire [2:0] cur_period = new_commit ? ((display_tick > 0 && display_tick < 7) ? display_tick : 3'd3) : measured_period;
 
-wire [1:0] video_weight =
+wire [1:0] video_weight = !interp_enable ? 2'd0 :
   (!have_frame || next_prev_pair == next_pair || cur_period <= 3'd1) ? 2'd0 :
   (cur_period == 3'd2) ? (next_tick == 3'd0 ? 2'd2 : 2'd0) :
   (cur_period == 3'd3) ? (next_tick == 3'd0 ? 2'd1 : next_tick == 3'd1 ? 2'd2 : 2'd0) :
@@ -234,10 +294,11 @@ always @(posedge video_clk or negedge rst_n)begin
  if(!rst_n)begin
   commit_sync<=0;commit_ack<=0;have_frame<=0;active_pair<=0;prev_pair<=0;
   interp_step_toggle<=0;display_tick<=0;measured_period<=3'd3;
-  vs_d<=0;de_d<=0;x<=0;model_row<=0;model_column<=0;phase_x<=0;phase_y<=0;last_requested<=127;
-  request_toggle<=0;request_row<=0;request_pair<=0;request_prev_pair<=0;request_weight<=0;
+  vs_d<=0;de_d<=0;x<=0;model_row<=7'd4;model_column<=7'd4;phase_x<=0;phase_y<=0;last_requested<=127;
+  request_toggle<=0;request_row<=7'd4;request_pair<=0;request_prev_pair<=0;request_weight<=0;
   ready0_sync<=0;ready1_sync<=0;video_tag0<=0;video_tag1<=0;bank_q<=0;second_q<=0;
   hs_pipe<=0;vs_pipe<=0;de_pipe<=0;good_pipe<=0;right_pipe<=0;have_pipe<=0;
+  edge_pipe0<=0;edge_pipe1<=0;edge_pipe2<=0;
   camera0<=0;camera1<=0;camera2<=0;video_underflows<=0;
  end else begin
   commit_sync<={commit_sync[1:0],commit_toggle};vs_d<=i_vs;de_d<=i_de;
@@ -246,7 +307,7 @@ always @(posedge video_clk or negedge rst_n)begin
   if(ready0_sync[2]!=ready0_sync[1])video_tag0<=tag0;
   if(ready1_sync[2]!=ready1_sync[1])video_tag1<=tag1;
   if(frame_start)begin
-   x<=0;model_row<=0;model_column<=0;phase_x<=0;phase_y<=0;last_requested<=127;
+   x<=0;model_row<=7'd4;model_column<=7'd4;phase_x<=0;phase_y<=0;last_requested<=127;
    if(new_commit)begin
     prev_pair<=have_frame ? active_pair : commit_pair;
     active_pair<=commit_pair;have_frame<=1;commit_ack<=commit_sync[2];
@@ -254,10 +315,10 @@ always @(posedge video_clk or negedge rst_n)begin
     display_tick<=3'd0;
    end else if(have_frame)begin
     if(display_tick<3'd7)display_tick<=display_tick+1'b1;
-    interp_step_toggle<=~interp_step_toggle;
+    if(interp_enable) interp_step_toggle<=~interp_step_toggle;
    end
    if(have_frame || new_commit)begin
-    request_row<=0;
+    request_row<=7'd4;
     request_pair<=next_pair;
     request_prev_pair<=next_prev_pair;
     request_weight<=video_weight;
@@ -266,20 +327,20 @@ always @(posedge video_clk or negedge rst_n)begin
   end else if(i_de)begin
    x<=x+1'b1;
    if(display_mode == 2'd2) begin
-    // Full screen style: 128 columns across 960 clocks (add 2 each clock, modulo 15)
-    if(phase_x>=13)begin phase_x<=phase_x-4'd13;if(model_column<127)model_column<=model_column+1'b1;end
-    else phase_x<=phase_x+4'd2;
+    // Full screen style: 120 columns across 960 clocks (8 clocks per column)
+    if(phase_x == 4'd7) begin phase_x <= 4'd0; if(model_column < 7'd123) model_column <= model_column + 1'b1; end
+    else phase_x <= phase_x + 1'b1;
    end else if(display_mode == 2'd0 && x>=480) begin
-    // Split screen: 128 columns across right 480 clocks (add 4 each clock, modulo 15)
-    if(phase_x>=11)begin phase_x<=phase_x-4'd11;if(model_column<127)model_column<=model_column+1'b1;end
-    else phase_x<=phase_x+4'd4;
+    // Split screen: 120 columns across right 480 clocks (4 clocks per column)
+    if(phase_x == 4'd3) begin phase_x <= 4'd0; if(model_column < 7'd123) model_column <= model_column + 1'b1; end
+    else phase_x <= phase_x + 1'b1;
    end
    if(display_mode != 2'd1 && x==480 && have_frame && !row_good)video_underflows<=video_underflows+1'b1;
   end else if(de_d)begin
-   x<=0;model_column<=0;phase_x<=0;
-   if(phase_y>=119)begin phase_y<=phase_y-8'd119;model_row<=model_row+1'b1;end
-   else phase_y<=phase_y+8'd16;
-   if(have_frame && model_row<127 && last_requested!=model_row)begin
+   x<=0;model_column<=7'd4;phase_x<=0;
+   if(phase_y == 4'd8) begin phase_y <= 4'd0; if(model_row < 7'd123) model_row <= model_row + 1'b1; end
+   else phase_y <= phase_y + 1'b1;
+   if(have_frame && model_row < 7'd123 && last_requested != model_row)begin
     request_row<=model_row+1'b1;
     request_pair<=active_pair;
     request_prev_pair<=prev_pair;
@@ -288,9 +349,10 @@ always @(posedge video_clk or negedge rst_n)begin
     last_requested<=model_row;
    end
   end
-  bank_q<=model_row[0];second_q<=phase_x==14;
+  bank_q<=model_row[0];second_q<=(display_mode == 2'd0) ? (phase_x >= 4'd2) : (phase_x >= 4'd4);
   hs_pipe<={hs_pipe[1:0],i_hs};vs_pipe<={vs_pipe[1:0],i_vs};de_pipe<={de_pipe[1:0],i_de};
   good_pipe<={good_pipe[1:0],row_good};right_pipe<={right_pipe[1:0],x>=480};have_pipe<={have_pipe[1:0],have_frame};
+  edge_pipe0<=cur_edge_weight;edge_pipe1<=edge_pipe0;edge_pipe2<=edge_pipe1;
   camera0<=i_rgb;camera1<=camera0;camera2<=camera1;
  end
 end
