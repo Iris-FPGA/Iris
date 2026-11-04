@@ -189,7 +189,7 @@ def create_report():
         "主要特性包括：（1）多风格在线切换：片上集成动漫线稿（Anime Sketch）与莫奈油画（Monet）两套网络权重，支持按键 SW0 在 60 ms 内免重启无损切换，不丢帧、不黑屏；（2）三种显示模式：支持 SW1 循环切换左右分屏对比、全屏原画与全屏风格画；（3）帧间线性插值开关：支持 SW2 在 30 FPS 原生直出与 60 FPS 线性过渡输出间切换；（4）脱机自启动：位流与双模型固件固化于 8 MB SPI Flash，单线供电即可独立运行。"
     )
     add_body(feat_text)
-    add_image_if_exists('/tmp/report_media/image2.png', "图1-1  Iris 实时风格化视频渲染系统总体框图")
+    add_image_if_exists('report_media/image2.png', "图1-1  Iris 实时风格化视频渲染系统总体框图")
 
     add_heading2("1.2 应用领域")
     app_text = (
@@ -200,7 +200,7 @@ def create_report():
         "（4）嵌入式异构计算教学示范：完整涵盖 MIPI D-PHY 采集、DDR3 多端口仲裁、RISC-V 软核驱动、INT8 卷积加速及 Flash 引导，适合作为高校 FPGA 与边缘 AI 软硬件协同教学案例。"
     )
     add_body(app_text)
-    add_image_if_exists('/tmp/report_media/image11.jpg', "图1-2  手持终端实屏分屏风格化渲染效果")
+    add_image_if_exists('report_media/fig_style_overview.png', "图1-2  双艺术风格（动漫白描与莫奈油画）实时视频风格化与 1:1 分屏对比展示", width=Inches(6.0))
 
     add_heading2("1.3 主要技术特点")
     tech_text = (
@@ -261,7 +261,7 @@ def create_report():
         "（1）模型蒸馏与量化：以 Fast Neural Style 为教师网络，经通道裁剪与知识蒸馏将模型压缩至 500 KB 内，完成 BN 折叠与 INT8 定点量化；（2）定点对齐仿真：对比 Python/TFLite 整数参考与 RTL 逐层输出；（3）硬件逻辑开发：实现 MIPI 采集、DDA 采样、8×8 脉动阵列、帧间线性插值与 HDMI OSD；（4）时序收敛与板级固化：完成多时钟域 SDC 约束、长测验证与 SPI Flash 脱机启动。"
     )
     add_body(flow_text)
-    add_image_if_exists('/tmp/report_media/image5.png', "图1-3  模型部署与软硬件协同验证流程")
+    add_image_if_exists('report_media/image5.png', "图1-3  模型部署与软硬件协同验证流程")
 
     # 第二部分 系统组成及功能说明
     add_heading1("第二部分  系统组成及功能说明")
@@ -272,7 +272,7 @@ def create_report():
         "各子系统之间通过三组独立缓冲区与状态握手解耦运行：（1）视频数据由 SC431HAI 摄像头经四通道 MIPI CSI-2 输入，在 FPGA 内部经 D-PHY 硬核与 CSI-2 RX 解包后写入原生帧缓存，再经去马赛克、滤波及白平衡校正生成 1080p RGB 视频流；（2）RGB 视频流分为两路：一路直接送往显示端作为原图画面源；另一路经张量预处理模块按视域等比下采样并量化写入 DDR3 输入三缓冲区；（3）RISC-V 软核调度硬件加速器通过 AXI4 总线读取输入张量，由 8×8 脉动阵列与行流水单元完成多层卷积计算并写回输出三缓冲区；（4）显示流水线依据当前视图模式读取输出缓冲区，经硬件反量化、可选帧间线性插值及水平线性放大后与原图画面合成 1080p @ 60 Hz 信号输出至 HDMI 显示器。"
     )
     add_body(arch_text)
-    add_image_if_exists('/tmp/report_media/image2.png', "图2-1  Iris 系统组成与数据流框图")
+    add_image_if_exists('report_media/image2.png', "图2-1  Iris 系统组成与数据流框图")
 
     add_heading2("2.2 硬件系统介绍")
     add_heading3("2.2.1 硬件整体介绍")
@@ -286,14 +286,14 @@ def create_report():
         "为便于现场交互展示与手持拍摄，系统设计了模块化 3D 打印一体式结构件，包含显示屏防护边框、中央握持连接手柄以及主板与摄像头防护盒三部分（见图 2-2）。主板与 SC431HAI 摄像头模组通过螺柱稳固安装于右侧防护盒内，按键、Type-C 接口与 HDMI 接口均留有开孔；中央手柄将处理盒与左侧便携 HDMI 显示屏刚性连接，减小手持移动时对 MIPI 排线的拉扯干扰。"
     )
     add_body(mech_text)
-    add_image_if_exists('/tmp/report_media/image8.jpg', "图2-2  系统整体装配结构示意图")
+    add_image_if_exists('report_media/image8.jpg', "图2-2  系统整体装配结构示意图")
 
     add_heading3("2.2.3 电路各模块介绍")
     circ_text = (
         "硬件电路主要由四部分外围接口组成：（1）MIPI CSI-2 采集接口（J4）：包含 4 对差分数据线（DATA0±~DATA3±）与 1 对差分时钟线（CLK±），Bank 电压 1.2 V，配合 3.3 V I2C（SCL/SDA）与复位引脚（XSHUTDN）完成传感器初始化与自动曝光配置；（2）DDR3 存储接口：1.5 V SSTL 电平，16 位数据总线挂载于共享 AXI4 仲裁器，供原图帧缓存、CPU 与 AI 加速器分时复用；（3）HDMI TMDS 输出接口：1.8 V 差分电平，在 148.75 MHz 像素时钟与 74.375 MHz 双像素时钟驱动下编码输出 1080p@60Hz 视频；（4）USB-JTAG/UART 与 SPI Flash 接口：板载 FT4232HL 提供单线供电、JTAG 下载与 115200 波特率串口日志通路，SPI 引脚支持软核上电后读取 Flash 中的模型固件。"
     )
     add_body(circ_text)
-    add_image_if_exists('/tmp/report_media/image3.png', "图2-3  硬件外设接口与时钟域连接示意图")
+    add_image_if_exists('report_media/image3.png', "图2-3  硬件外设接口与时钟域连接示意图")
 
     add_heading2("2.3 软件系统介绍")
     add_heading3("2.3.1 软件整体介绍")
@@ -301,7 +301,7 @@ def create_report():
         "片上软件运行于 100 MHz 的 32 位 Sapphire RISC-V 软核处理器（RV32IM 指令集）。固件采用精简裸机 C/C++ 架构编写，编译后包含两套完整 INT8 风格网络参数的总镜像体积约 623 KB。RISC-V 不参与逐像素计算，专门负责 Flash 启动搬移校验、双模型静态张量内存池（`tensor_arena[2]`）初始化、三级帧缓冲区租约流转、硬件卷积任务派发以及按键状态轮询。"
     )
     add_body(sw_text)
-    add_image_if_exists('/tmp/report_media/image6.png', "图2-4  主固件控制流与三缓冲状态推进")
+    add_image_if_exists('report_media/image6.png', "图2-4  主固件控制流与三缓冲状态推进")
 
     add_heading3("2.3.2 软件各模块介绍")
     sw_mod_text = (
@@ -323,9 +323,9 @@ def create_report():
         "在共享 DDR3 控制器前端设置三端口 AXI4 仲裁器与三组物理输入/输出缓冲区，配合 APB 状态寄存器与 VSync 边界切换握手机制，使摄像头采集、CNN 推理与 HDMI 显示并行推进互不阻塞。"
     )
     add_body(opt1_text)
-    add_image_if_exists("/tmp/report_media/image4.png", "图2-5  行流水卷积网络结构与数据流示意")
+    add_image_if_exists("report_media/image4.png", "图2-5  行流水卷积网络结构与数据流示意")
 
-    add_heading2("2.5 关键设计二：基于 VSync 同步的硬件帧间线性插值与平滑缩放")
+    add_heading2("2.5 关键设计二：基于硬件 VSync 锁相的低开销帧间线性插值与平滑缩放")
     opt2_text = (
         "HDMI 显示链路工作在标准 1080p @ 60 Hz（场周期 16.67 ms），而后端神经网络产生新风格帧的速率为 30.05 FPS（约每两个显示场周期提交一帧）。在默认不插帧时，同一帧风格画面会在连续两个 60 Hz 场周期内重复扫描输出；当镜头平移或人物移动时，30 FPS 的阶梯式更新在 60 Hz 屏幕上会产生一定的帧间跳变感。在不引入高昂光流计算开销的前提下，我们在显示模块（`iris_tinyml_video`）中设计了低开销的硬件帧间线性插值与行内平滑放大管线：\n\n"
         "1. VSync 周期自适应计数与帧间线性混合：\n"
@@ -338,7 +338,7 @@ def create_report():
         "帧间线性插值使能信号经双触发器跨时钟域同步后接入显示通路，用户可通过板载按键 `SW2` 在运行过程中随时切换「30 FPS 原生直出」与「60 FPS 帧间线性插值」两种显示状态，切换在 VSync 边界生效，无闪屏或时序中断，便于现场直观对比平滑效果。"
     )
     add_body(opt2_text)
-    add_image_if_exists("/tmp/report_media/image12.png", "图2-6  采集输入、原始网络输出与显示后处理效果对比")
+    add_image_if_exists("report_media/fig_interpolation_pipeline.png", "图2-6  硬件 VSync 锁相帧间线性插值原理与空间平滑缩放效果对比", width=Inches(6.0))
 
     # 第三部分 完成情况及性能参数（完整恢复模板要求的 3.1、3.2、3.3 结构）
     add_heading1("第三部分  完成情况及性能参数")
@@ -348,7 +348,7 @@ def create_report():
         "系统已完成从传感器采集、FPGA 硬件加速推理、多风格动态切换、HDMI 分屏/全屏显示到 SPI Flash 脱机自启动的全流程开发与实板联调。整机由便携式 HDMI 显示终端、握持连接支架及 Ti60F225 采集处理盒组成，整体实物正面与斜 45° 全局照片如图 3-1 所示。"
     )
     add_body(sec3_intro)
-    add_side_by_side_images('/tmp/report_media/image8.jpg', '/tmp/report_media/image9.jpg', "图3-1  系统整机实物正面（左）与斜 45°（右）全局照片")
+    add_side_by_side_images('report_media/image8.jpg', 'report_media/image9.jpg', "图3-1  系统整机实物正面（左）与斜 45°（右）全局照片")
 
     add_heading2("3.2 工程成果")
     add_heading3("3.2.1 机械成果")
@@ -359,8 +359,8 @@ def create_report():
 
     add_heading3("3.2.3 软件成果")
     add_body("软件与算法侧完成了轻量化风格迁移网络蒸馏训练、INT8 量化参数导出工具、RISC-V 双模型调度固件及 Flash 引导程序开发。实机运行界面左上角通过硬件字符 OSD 实时叠加传感器采集帧率（CAM 1920x1080 60 FPS）、HDMI 输出帧率及 AI 推理/显示帧率，支持原图与风格画实时同屏对照及一键全屏切换，实屏拍摄与同帧导出结果如图 3-2、图 3-3 所示。")
-    add_side_by_side_images('/tmp/report_media/image10.jpg', '/tmp/report_media/image11.jpg', "图3-2  实屏分屏对比显示与硬件 OSD 帧率叠加效果")
-    add_image_if_exists('/tmp/report_media/image13.png', "图3-3  板端导出的同帧输入张量、风格推理输出与分屏合成参考")
+    add_image_if_exists('report_media/fig_real_screen_osd.png', "图3-2  实机 1080p HDMI 分屏显示与硬件字符 OSD 状态叠加效果（左：动漫白描，右：莫奈油画）", width=Inches(6.0))
+    add_image_if_exists('report_media/fig_dual_style_triplets.png', "图3-3  板端同帧导出的输入张量、双风格推理输出与 1:1 分屏对齐效果", width=Inches(6.0))
 
     add_heading2("3.3 特性成果与量化测试")
     quant_text = (
