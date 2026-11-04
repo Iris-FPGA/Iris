@@ -260,6 +260,9 @@ extern "C" int main() {
   //   Mode 2: Full Screen Style
   uint32_t active_display_mode = 0;
   demo[24] = active_display_mode;
+  // SW2 (KEY2, bit 2): Frame interpolation toggle (30 FPS -> 60 FPS), enabled by default
+  uint32_t interp_enabled = 1;
+  demo[27] = interp_enabled;
   const char* mode_names[3] = {
       "Split Screen (Left 1080p Original | Right Style)",
       "Full Screen 1080p Original",
@@ -300,6 +303,16 @@ extern "C" int main() {
       MicroPrintf("\n\r====================================================\n\r");
       MicroPrintf(">>> [SW1 PRESSED] Display Mode [%u]: %s <<<\n\r",
                   active_display_mode, mode_names[active_display_mode]);
+      MicroPrintf("====================================================\n\r");
+    }
+
+    // SW2 (KEY2, bit 2): Frame interpolation toggle (30 FPS native <-> 60 FPS interpolated)
+    if (keys_pressed & 4u) {
+      interp_enabled = 1u - interp_enabled;
+      demo[27] = interp_enabled;
+      MicroPrintf("\n\r====================================================\n\r");
+      MicroPrintf(">>> [SW2 PRESSED] Frame Interpolation: %s <<<\n\r",
+                  interp_enabled ? "ENABLED (60 FPS Interpolation)" : "DISABLED (30 FPS Native)");
       MicroPrintf("====================================================\n\r");
     }
     last_keys = keys_cur;

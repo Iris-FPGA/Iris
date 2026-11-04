@@ -348,7 +348,7 @@ module tinyml_subsystem #(parameter ENABLE_STYLE_DEMO=0,ENABLE_STREAM_CNN=0,STRE
         .system_spi_0_io_data_0_read       (1'b0),
         .system_spi_0_io_data_1_write      (),
         .system_spi_0_io_data_1_writeEnable(),
-        .system_spi_0_io_data_1_read       (ENABLE_STYLE_SWITCH ? boot_spi_miso_delay[2] : 1'b0),
+        .system_spi_0_io_data_1_read       (boot_spi_miso_delay[2]),
         .system_spi_0_io_data_2_write      (),
         .system_spi_0_io_data_2_writeEnable(),
         .system_spi_0_io_data_2_read       (1'b0),

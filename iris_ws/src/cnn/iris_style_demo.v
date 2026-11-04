@@ -39,6 +39,8 @@ reg [25:0] dequant_scale;
 reg signed [8:0] dequant_zp;
 reg [25:0] dequant_scale_sync1, dequant_scale_sync2;
 reg signed [8:0] dequant_zp_sync1, dequant_zp_sync2;
+reg interp_enable;
+reg interp_enable_sync1, interp_enable_sync2;
 reg [2:0] ack_sync,step_sync,have_sync;
 reg [1:0] pair_sync1,pair_sync2;
 reg ack_previous,step_previous,done_previous;
@@ -46,7 +48,7 @@ reg [31:0] displayed_count,captured_count,rejected_count;
 reg [31:0] rate_age;
 wire pending_commit=commit_toggle!=ack_sync[2];
 // Each VS-confirmed bank change or 60 Hz interpolated->true sub-frame step pulses OSD FPS.
-assign frame_commit_pulse=(ack_sync[2]^ack_previous) | (step_sync[2]^step_previous);
+assign frame_commit_pulse=(ack_sync[2]^ack_previous) | (interp_enable ? (step_sync[2]^step_previous) : 1'b0);
 wire write_reg=psel && penable && pwrite;
 wire [31:0] underflows,read_errors;
 wire valid,dual,sof,eol,eof;wire [31:0] rgba,rgba_b;
@@ -81,6 +83,7 @@ iris_tinyml_panels u_panels(
  .clk(clk),.video_clk(video_clk),.rst_n(rst_n),
  .commit_toggle(commit_toggle),.commit_pair(commit_pair),.commit_ack(commit_ack),
  .scale_q24(dequant_scale_sync2),.zero_point(dequant_zp_sync2),
+ .interp_enable(interp_enable_sync2),
  .interp_step_toggle(interp_step_toggle),
  .blend_mode(visibility_mode),
  .display_mode(display_mode_sync2),
@@ -147,6 +150,7 @@ always @*begin
   24:prdata={30'd0, display_mode};
   25:prdata={6'd0, dequant_scale};
   26:prdata={23'd0, dequant_zp};
+  27:prdata={31'd0, interp_enable};
   default:prdata=0;
  endcase
 end
@@ -158,6 +162,8 @@ always @(posedge video_clk or negedge rst_n)begin
   dequant_scale_sync2<=26'd31075312;
   dequant_zp_sync1<=-9'sd128;
   dequant_zp_sync2<=-9'sd128;
+  interp_enable_sync1<=1'b1;
+  interp_enable_sync2<=1'b1;
  end else begin
   display_mode_sync1<=display_mode;
   display_mode_sync2<=display_mode_sync1;
@@ -165,6 +171,8 @@ always @(posedge video_clk or negedge rst_n)begin
   dequant_scale_sync2<=dequant_scale_sync1;
   dequant_zp_sync1<=dequant_zp;
   dequant_zp_sync2<=dequant_zp_sync1;
+  interp_enable_sync1<=interp_enable;
+  interp_enable_sync2<=interp_enable_sync1;
  end
 end
 always @(posedge clk or negedge rst_n)begin
@@ -173,6 +181,7 @@ always @(posedge clk or negedge rst_n)begin
   display_mode<=2'd0;
   dequant_scale<=26'd31075312;
   dequant_zp<=-9'sd128;
+  interp_enable<=1'b1;
   pair_cfg<=0;capture_pair<=0;commit_pair<=0;inference_pair<=0;
   capture_request<=0;commit_toggle<=0;inference_busy<=0;captured_valid<=0;
   ack_sync<=0;step_sync<=0;pair_sync1<=0;pair_sync2<=0;have_sync<=0;ack_previous<=0;step_previous<=0;done_previous<=0;
@@ -206,6 +215,7 @@ always @(posedge clk or negedge rst_n)begin
    if(paddr[7:2]==24)display_mode<=pwdata[1:0];
    if(paddr[7:2]==25)dequant_scale<=pwdata[25:0];
    if(paddr[7:2]==26)dequant_zp<=pwdata[8:0];
+   if(paddr[7:2]==27)interp_enable<=pwdata[0];
    if(paddr[7:2]==1)begin
     if(pwdata<3)pair_cfg<=pwdata[1:0];
     else rejected_count<=rejected_count+1'b1;

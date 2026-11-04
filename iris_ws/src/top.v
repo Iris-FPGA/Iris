@@ -945,9 +945,9 @@ key_pulse u_key1 (
 wire [31:0] style_switch_status;
 wire style_switch_request;
 wire boot_spi_sclk, boot_spi_cs_n, boot_spi_mosi;
-assign flash_sclk = ENABLE_STYLE_SWITCH && ENABLE_TINYML_RGB ? boot_spi_sclk : 1'b0;
-assign flash_cs_n = ENABLE_STYLE_SWITCH && ENABLE_TINYML_RGB ? boot_spi_cs_n : 1'b1;
-assign flash_mosi = ENABLE_STYLE_SWITCH && ENABLE_TINYML_RGB ? boot_spi_mosi : 1'b0;
+assign flash_sclk = boot_spi_sclk;
+assign flash_cs_n = boot_spi_cs_n;
+assign flash_mosi = boot_spi_mosi;
 generate if (ENABLE_STYLE_SWITCH) begin : g_style_switch
     iris_style_switch #(.CURRENT_IMAGE(ENABLE_TINYML_RGB ? 1 : 0)) u_switch (
         .clk(gpio_clk_27m), .rst_n(core_pll_locked), .key_n(key_i[3]),
